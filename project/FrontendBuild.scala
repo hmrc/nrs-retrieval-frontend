@@ -14,7 +14,6 @@ object FrontendBuild extends Build with MicroService {
   val compile = Seq(
     "uk.gov.hmrc" %% "govuk-template" % "5.19.0",
     "uk.gov.hmrc" %% "play-ui" % "7.13.0",
-
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % "1.3.0"
   )
@@ -24,7 +23,8 @@ object FrontendBuild extends Build with MicroService {
     "org.scalatest" %% "scalatest" % "2.2.6" % scope,
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
+    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+    "org.mockito" % "mockito-all" % "2.0.2-beta" % scope
   )
 
 }

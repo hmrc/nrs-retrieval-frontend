@@ -1,0 +1,22 @@
+lbl.service.name=Non-Repudiation Store
+
+################################## Start Page ####################################################
+start.page.header.lbl=Non-Repudiation Store
+start.text.one.lbl=This service provides original submissions made to HMRC using digital channels.
+start.text.two.lbl=Using this service, you can:
+start.text.two.option.one.lbl=search for a submission, such as a VAT return
+start.text.two.option.two.lbl=retrieve and download a copy of the submission
+start.text.three.lbl=Submissions are held in encrypted long term storage, retrieval may take up to 5 minutes.
+start.button.start.lbl=Start now
+start.service.scope.summary.lbl=Check storage dates, submission types and how you search for them
+start.service.scope.summary.tax.service.lbl=Tax service
+start.service.scope.summary.submission.type.lbl=Submission type
+start.service.scope.summary.search.by.lbl=Search by
+start.service.scope.summary.stored.from.lbl=Stored from
+start.service.scope.summary.stored.until.lbl=Stored to
+start.service.scope.footer.lbl=More services will be added in the future.
+
+################################## Search Page ###################################################
+search.page.header.lbl=Search for digital submissions
+enter-vrn.lbl=Enter a VAT Registration Number (VRN)
+search.button.search.lbl=Search

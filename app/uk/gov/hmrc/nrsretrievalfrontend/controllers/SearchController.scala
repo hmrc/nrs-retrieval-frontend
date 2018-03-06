@@ -18,22 +18,33 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.data.Form
+import play.api.data.Forms.{mapping, text}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.nrsretrievalfrontend.model.SearchQuery
+import uk.gov.hmrc.nrsretrievalfrontend.views
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
-import uk.gov.hmrc.nrsretrievalfrontend.views
 
 @Singleton
-class HelloWorld @Inject()(val messagesApi: MessagesApi,
-                           val connector: NrsRetrievalConnector,
-                           implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class SearchController @Inject()(val messagesApi: MessagesApi,
+                                 implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  val helloWorld = Action.async { implicit request =>
-    connector.getHelloWorld().map(t => Ok(views.html.hello_world(t.body)))
+  val showSearchPage: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(views.html.search(selectTaxYearForm)))
+  }
+
+  val submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(views.html.search(selectTaxYearForm)))
+  }
+
+  val selectTaxYearForm: Form[SearchQuery] = {
+    Form(mapping(
+      "searchText" -> text
+    )(SearchQuery.apply)(SearchQuery.unapply))
   }
 
 }

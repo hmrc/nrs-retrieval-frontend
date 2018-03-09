@@ -20,9 +20,6 @@
 @import uk.gov.hmrc.play.views.html.helpers.{form, input}
 @(searchForm: Form[SearchQuery])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = s"Search", bodyClasses = None) {
-    <h1>@Messages("search.page.header.lbl")</h1>
-
     @form(
         action = routes.SearchController.submitSearchPage,
         'class -> "form js-form") {
@@ -38,4 +35,3 @@
 
         <button id="searchButton" type="submit" class="button">@Messages("search.button.search.lbl")</button>
     }
-}

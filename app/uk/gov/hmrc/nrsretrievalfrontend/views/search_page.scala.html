@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.nrsretrievalfrontend.model
+@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchQuery
+@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResult
+@(searchForm: Form[SearchQuery], searchResults: Option[Seq[SearchResult]] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-case class SearchQuery(searchText: String)
+@main_template(title = s"Search", bodyClasses = None) {
+    <h1>@Messages("search.page.header.lbl")</h1>
+
+    @search_query(searchForm)
+
+    @{searchResults map (sR => search_results(sR))}
+}
 

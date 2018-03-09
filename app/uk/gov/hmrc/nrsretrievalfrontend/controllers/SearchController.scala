@@ -23,7 +23,8 @@ import play.api.data.Forms.{mapping, text}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-import uk.gov.hmrc.nrsretrievalfrontend.model.SearchQuery
+import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
+import uk.gov.hmrc.nrsretrievalfrontend.model.{SearchQuery, SearchResult}
 import uk.gov.hmrc.nrsretrievalfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -31,17 +32,28 @@ import scala.concurrent.Future
 
 @Singleton
 class SearchController @Inject()(val messagesApi: MessagesApi,
+                                 val nrsRetrievalConnector: NrsRetrievalConnector,
                                  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  val showSearchPage: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(views.html.search(selectTaxYearForm)))
+  def showSearchPage: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(views.html.search_page(searchForm)))
   }
 
-  val submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(views.html.search(selectTaxYearForm)))
+  def submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
+    searchForm.bindFromRequest.fold(
+      formWithErrors => {
+        Future.successful(BadRequest(formWithErrors.errors.toString()))
+      },
+      searchQuery => {
+        nrsRetrievalConnector.search(searchQuery.searchText).map { nSRs =>
+          Ok(views.html.search_page(searchForm.bindFromRequest,
+            Some(nSRs.map(nSR => SearchResult.fromNrsSearchResult(nSR)))))
+        }
+      }
+    )
   }
 
-  val selectTaxYearForm: Form[SearchQuery] = {
+  private val searchForm: Form[SearchQuery] = {
     Form(mapping(
       "searchText" -> text
     )(SearchQuery.apply)(SearchQuery.unapply))

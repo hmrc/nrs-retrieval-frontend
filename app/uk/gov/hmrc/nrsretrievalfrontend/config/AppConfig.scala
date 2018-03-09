@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
 import play.api.{Configuration, Environment}
 import play.api.Mode.Mode
+import uk.gov.hmrc.nrsretrievalfrontend.model.{Service, ServiceScope, SubmissionType}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 @Singleton
@@ -38,4 +40,11 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
   lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   lazy val nrsRetrievalUrl = s"${baseUrl("nrs-retrieval")}/nrs-retrieval"
+
+  private val vatService = Service("Value Added Tax (VAT)", Seq(
+    SubmissionType("Returns", "VRN", LocalDate.of(2018, 4, 1), 20),
+    SubmissionType("Registrations", "VRN", LocalDate.of(2018, 6, 1), 20)))
+
+  val serviceScope = ServiceScope(Seq(vatService))
+
 }

@@ -17,15 +17,44 @@
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
 import org.scalatest.mockito.MockitoSugar
+import org.mockito.Matchers._
+import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
+import uk.gov.hmrc.nrsretrievalfrontend.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+import scala.concurrent.Future
+
+class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture {
+
+  "GET /" should {
+    "return 200" in {
+      val result = controller.showSearchPage(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
+
+  "submitSearchPage" should {
+    "return 200" in {
+      when(mockNRC.search(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsSearchResult)))
+      val result = controller.submitSearchPage(fakeRequest.withJsonBody(searchFormJson))
+      status(result) shouldBe Status.OK
+    }
+
+    "return 400 BadRequest" in {
+      val result = controller.submitSearchPage(fakeRequest)
+      status(result) shouldBe Status.BAD_REQUEST
+    }
+  }
+
+  // todo : add a test for the form
+
   private val fakeRequest = FakeRequest("GET", "/")
 
   private val env = Environment.simple()
@@ -33,20 +62,9 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
 
   private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
   private val appConfig = new AppConfig(configuration, env)
+  private val mockNRC = mock[NrsRetrievalConnector]
+  private val controller = new SearchController(messageApi, mockNRC, appConfig)
 
-  private val controller = new SearchController(messageApi, appConfig)
-
-  "GET /" should {
-    "return 200" in {
-      val result = controller.search(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "return HTML" in {
-      val result = controller.search(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-  }
 }
+
+

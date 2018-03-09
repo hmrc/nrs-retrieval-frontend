@@ -20,12 +20,19 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class StartControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+
+  "GET /" should {
+    "return 200" in {
+      val result = controller.showStartPage(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
+
   private val fakeRequest = FakeRequest("GET", "/")
 
   private val env = Environment.simple()
@@ -35,18 +42,4 @@ class StartControllerControllerSpec extends UnitSpec with WithFakeApplication wi
   private val appConfig = new AppConfig(configuration, env)
 
   private val controller = new StartController(messageApi, appConfig)
-
-  "GET /" should {
-    "return 200" in {
-      val result = controller.start(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "return HTML" in {
-      val result = controller.start(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-  }
 }

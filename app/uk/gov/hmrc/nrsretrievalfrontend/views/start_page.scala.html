@@ -19,14 +19,14 @@
 @import uk.gov.hmrc.play.views.html.helpers.form
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = s"Start", bodyClasses = None) {
+@main_template(title = s"Start") {
 
     @form(action = routes.SearchController.showSearchPage()) {
 
         <h1>@Messages("start.page.header.lbl")</h1>
         <p>@Messages("start.text.one.lbl")</p>
         <p>@Messages("start.text.two.lbl")</p>
-        <ul style="list-style-type: disc">
+        <ul class="list list-bullet">
             <li>@Messages("start.text.two.option.one.lbl")</li>
             <li>@Messages("start.text.two.option.two.lbl")</li>
         </ul>

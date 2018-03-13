@@ -42,8 +42,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
   lazy val nrsRetrievalUrl = s"${baseUrl("nrs-retrieval")}/nrs-retrieval"
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
-    SubmissionType("Returns", "VRN", LocalDate.of(2018, 4, 1), 20),
-    SubmissionType("Registrations", "VRN", LocalDate.of(2018, 6, 1), 20)))
+    SubmissionType("Returns", "VRN", LocalDate.of(2018, 4, 1), 20)))
 
   val serviceScope = ServiceScope(Seq(vatService))
 

@@ -25,12 +25,10 @@
         'class -> "form js-form") {
 
         <div class="form-group">
-        @input(
-            searchForm("searchText"),
-            '_label -> Messages("enter-vrn.lbl"),
-            '_labelTextClass -> "h2-heading",
-            '_labelClass -> "soft--ends"
-        )
+            <label>@Messages("enter-vrn.lbl")
+                @input(searchForm("searchText"))
+            </label>
+
         </div>
 
         <button id="searchButton" type="submit" class="button">@Messages("search.button.search.lbl")</button>

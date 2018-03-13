@@ -34,7 +34,6 @@
     @uiLayouts.head(
       linkElem = None,
       headScripts = None)
-    <meta name="format-detection" content="telephone=no" />
 }
 
 @headerNavLinks = {}
@@ -68,11 +67,7 @@
       serviceInfoContent = Some(serviceInfoContent))
 }
 
-@mainContentHeader = {
-    @if(contentHeader.isDefined) {
-        @uiLayouts.main_content_header(contentHeader = contentHeader.get)
-    }
-}
+@mainContentHeader = {}
 
 @getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
 

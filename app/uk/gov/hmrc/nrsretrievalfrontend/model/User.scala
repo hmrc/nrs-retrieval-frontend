@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nrsretrievalfrontend.fixtures
+package uk.gov.hmrc.nrsretrievalfrontend.model
 
-import play.api.libs.json.Json
+case class User (username: String)
 
-trait SearchFixture {
-
-  val searchFormJson = Json.parse("""{"searchText":"aVal"}""")
-
+object User {
+  val user = User("TestUser")
 }

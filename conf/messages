@@ -28,3 +28,4 @@ search.button.search.lbl=Search
 
 ################################## Search Results ################################################
 search.result.notfound.lbl=No results found
+search.result.check.lbl=Check which submission types are stored

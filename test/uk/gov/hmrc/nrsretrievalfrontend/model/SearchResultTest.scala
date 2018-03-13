@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResult
-@(searchResults: Seq[SearchResult])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+package uk.gov.hmrc.nrsretrievalfrontend.model
 
-<br>
-<div class="divider--top"></div>
-@if(searchResults.isEmpty) {
-    <h2 class="heading-medium">@Messages("search.result.notfound.lbl")</h2>
-    <p>@Messages("search.result.check.lbl")</p>
-    @service_scope()
-} else {
-    <p>Undefined behaviour</p>
- <p>@searchResults</p>
+import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
+import uk.gov.hmrc.play.test.UnitSpec
+
+class SearchResultTest extends UnitSpec with SearchFixture with NrsSearchFixture {
+
+  "fromNrsSearchResult" should {
+    "create a SearchResult from an NrsSearchResult" in {
+      SearchResult.fromNrsSearchResult(nrsSearchResult) shouldBe searchResult
+    }
+  }
 }

@@ -20,7 +20,6 @@ import java.time.{LocalDate, ZonedDateTime}
 
 import play.api.libs.json._
 
-
 case class SearchKeys(vrn: String, taxPeriodEndDate: LocalDate)
 
 object SearchKeys {

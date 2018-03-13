@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nrsretrievalfrontend.fixtures
+package uk.gov.hmrc.nrsretrievalfrontend.support.fixtures
 
 import java.time.{LocalDate, ZonedDateTime}
 

@@ -53,7 +53,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private val searchForm: Form[SearchQuery] = {
+  val searchForm: Form[SearchQuery] = {
     Form(mapping(
       "searchText" -> text
     )(SearchQuery.apply)(SearchQuery.unapply))

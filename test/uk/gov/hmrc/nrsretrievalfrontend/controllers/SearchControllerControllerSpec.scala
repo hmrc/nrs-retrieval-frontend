@@ -19,14 +19,16 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import play.api.data.FormError
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
-import uk.gov.hmrc.nrsretrievalfrontend.fixtures.{NrsSearchFixture, SearchFixture}
+import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -53,7 +55,18 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
     }
   }
 
-  // todo : add a test for the form
+  "searchForm" should {
+    "return no errors for valid data" in {
+      val postData = Json.obj("searchText" -> "someSearchText")
+      val validatedForm = controller.searchForm.bind(postData)
+      validatedForm.errors shouldBe empty
+    }
+    "return errors for missing data" in {
+      val postData = Json.obj()
+      val validatedForm = controller.searchForm.bind(postData)
+      validatedForm.errors shouldBe List(FormError("searchText",List("error.required")))
+    }
+  }
 
   private val fakeRequest = FakeRequest("GET", "/")
 

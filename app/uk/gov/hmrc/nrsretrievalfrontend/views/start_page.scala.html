@@ -23,24 +23,22 @@
 
     @form(action = routes.SearchController.showSearchPage()) {
 
-        <h1>@Messages("start.page.header.lbl")</h1>
-        <p>@Messages("start.text.one.lbl")</p>
+        <h1 class="heading-large">@Messages("start.page.header.lbl")</h1>
+        <p class="lede">@Messages("start.text.one.lbl")</p>
         <p>@Messages("start.text.two.lbl")</p>
         <ul class="list list-bullet">
             <li>@Messages("start.text.two.option.one.lbl")</li>
             <li>@Messages("start.text.two.option.two.lbl")</li>
         </ul>
         <p>@Messages("start.text.three.lbl")</p>
-
         <details>
             <summary>
                 <span class="summary">@Messages("service.scope.summary.lbl")</span>
             </summary>
             <div class="panel-border-narrow panel" id="details-content-0">
-                @service_scope()
+            @service_scope()
             </div>
         </details>
-
 
         <button id="continueButton" type="submit" class="button">@Messages("start.button.start.lbl")</button>
     }

@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 @(title: String,
+  userName: Option[Html] = None,
   sidebarLinks: Option[Html] = None,
   contentHeader: Option[Html] = None,
   bodyClasses: Option[String] = None,
@@ -38,6 +39,7 @@
                title = title,
                mainClass = mainClass,
                bodyClasses = bodyClasses,
+               userName = userName,
                sidebar = sidebar,
                contentHeader = contentHeader,
                mainContent = layouts.article(mainContent),

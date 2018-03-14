@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.{Environment, Logger}
 import play.api.Mode.Mode
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, WSHttpT}
 import uk.gov.hmrc.nrsretrievalfrontend.model.NrsSearchResult
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -36,7 +36,16 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
   def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     Logger.info(s"Execute search for $vrn")
-    httpGet.GET[Seq[NrsSearchResult]](s"${appConfig.nrsRetrievalUrl}/search?vrn=$vrn")
+    val v = httpGet.GET[HttpResponse](s"${appConfig.nrsRetrievalUrl}/search?vrn=$vrn")
+
+    v.map(t => println(s">>>>>>>>>>>>>>>>>> $t"))
+
+    Future(Seq.empty[NrsSearchResult])
   }
+
+//  def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
+//    Logger.info(s"Execute search for $vrn")
+//    httpGet.GET[Seq[NrsSearchResult]](s"${appConfig.nrsRetrievalUrl}/search?vrn=$vrn")
+//  }
 
 }

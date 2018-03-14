@@ -26,27 +26,28 @@ object SearchKeys {
   implicit val searchKeysFormat: OFormat[SearchKeys] = Json.format[SearchKeys]
 }
 
-case class HeaderData (govClientPublicIP: String, govClientPublicPort: String)
+case class HeaderData(govClientPublicIP: String, govClientPublicPort: String)
 
 object HeaderData {
   implicit val headerDataFormat: OFormat[HeaderData] = Json.format[HeaderData]
 }
 
-case class IdentityData (internalId: String, someId: String, externalId: String, agentCode: String)
+case class IdentityData(internalId: String, someId: String, externalId: String, agentCode: String)
 
 object IdentityData {
   implicit val identityDataFormat: OFormat[IdentityData] = Json.format[IdentityData]
 }
 
-case class NrsSearchResult (businessId: String,
-                            notableEvent: String,
-                            payloadContentType: String,
-                            userSubmissionTimestamp: ZonedDateTime,
-                            identityData: IdentityData,
-                            userAuthToken: String,
-                            headerData: HeaderData,
-                            searchKeys: SearchKeys,
-                            archiveId: String)
+case class NrsSearchResult(
+  businessId: String,
+  notableEvent: String,
+  payloadContentType: String,
+  userSubmissionTimestamp: ZonedDateTime,
+  identityData: IdentityData,
+  userAuthToken: String,
+  headerData: HeaderData,
+  searchKeys: SearchKeys,
+  archiveId: String)
 
 object NrsSearchResult {
   implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]

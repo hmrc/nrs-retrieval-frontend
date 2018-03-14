@@ -15,8 +15,16 @@
  *@
 
 @import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-@(displayText: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResult
+@(searchResults: Seq[SearchResult])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = s"Hello world", bodyClasses = None) {
-    <h1>@displayText</h1>
+<br>
+<div class="divider--top"></div>
+@if(searchResults.isEmpty) {
+    <h2 class="heading-medium">@Messages("search.result.notfound.lbl")</h2>
+    <p>@Messages("search.result.check.lbl")</p>
+    @service_scope()
+} else {
+    <p>Undefined behaviour</p>
+ <p>@searchResults</p>
 }

@@ -1,3 +1,5 @@
 # microservice specific routes
 
-GET        /hello-world             @uk.gov.hmrc.nrsretrievalfrontend.controllers.HelloWorld.helloWorld
+GET        /start                   @uk.gov.hmrc.nrsretrievalfrontend.controllers.StartController.showStartPage
+GET        /search                  @uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.showSearchPage
+POST       /search                  @uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.submitSearchPage

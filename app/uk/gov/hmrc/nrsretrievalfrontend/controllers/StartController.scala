@@ -18,22 +18,20 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.nrsretrievalfrontend.views
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
-import uk.gov.hmrc.nrsretrievalfrontend.views
 
 @Singleton
-class HelloWorld @Inject()(val messagesApi: MessagesApi,
-                           val connector: NrsRetrievalConnector,
-                           implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class StartController @Inject()(val messagesApi: MessagesApi,
+                                implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  val helloWorld = Action.async { implicit request =>
-    connector.getHelloWorld().map(t => Ok(views.html.hello_world(t.body)))
+  def showStartPage: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(views.html.start_page()))
   }
 
 }

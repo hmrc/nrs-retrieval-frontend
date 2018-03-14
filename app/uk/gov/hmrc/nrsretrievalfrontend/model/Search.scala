@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.model
 
+import java.time.{LocalDate, ZonedDateTime}
+
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchQuery(searchText: String)
@@ -24,11 +26,39 @@ object SearchQuery {
   implicit val formats: OFormat[SearchQuery] = Json.format[SearchQuery]
 }
 
-case class SearchResult (resultValue: String)
+// todo : where does the entity name come from?
+// todo : the search term(s) probably come from the search query
 
+case class SearchResult(
+  retrievalLink: RetrievalLink,
+  fileName: String,
+  submissionDate: ZonedDateTime) // returned in whatever format we need and presented in UTC
+
+// todo : where do the file details come from
 object SearchResult {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
-    SearchResult(nrsSearchResult.archiveId)
+    SearchResult(
+      RetrievalLink(
+        nrsSearchResult.notableEvent,
+        nrsSearchResult.searchKeys.taxPeriodEndDate,
+        "ZIP",
+        10000
+      ),
+      "filename",
+      nrsSearchResult.userSubmissionTimestamp
+    )
 
   implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
+}
+
+case class RetrievalLink(
+  notableEventType: String,
+  taxPeriodEndDate: LocalDate,
+  fileType: String,
+  fileSizeInBytes: Int) {
+  val linkText: String = s"$notableEventType $taxPeriodEndDate $fileType $fileSizeInBytes"
+}
+
+object RetrievalLink {
+  implicit val formats: OFormat[RetrievalLink] = Json.format[RetrievalLink]
 }

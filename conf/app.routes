@@ -1,5 +1,7 @@
-# microservice specific routes
+# route to serve up local assets
+GET         /assets/*file             controllers.Assets.at(path="/public", file)
 
+# microservice specific routes
 GET        /start                   @uk.gov.hmrc.nrsretrievalfrontend.controllers.StartController.showStartPage
 GET        /search                  @uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.showSearchPage
 POST       /search                  @uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.submitSearchPage

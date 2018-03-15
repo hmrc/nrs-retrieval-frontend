@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nrsretrievalfrontend.support.fixtures
+package uk.gov.hmrc.nrsretrievalfrontend.views.helpers
 
-import java.time.{LocalDate, ZonedDateTime}
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.nrsretrievalfrontend.model.{NrsSearchResult, RetrievalLink, SearchResult}
+import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResult
 
-trait SearchFixture {
+// todo : find a better name than utils
+object Utils {
 
-  val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
-
-  val fileSize = 123456
-  val retrievalLink = RetrievalLink("notableEvent", Some(LocalDate.parse("2015-11-01")), "ZIP", fileSize)
-  val searchResult = SearchResult(Some("companyName"), retrievalLink, "fileName", ZonedDateTime.parse("2018-03-15T11:56:13.625Z"))
-
-
+  // todo : should this go in the model?
+  def formatDisplayDate (dateTime: ZonedDateTime): String = {
+    val formatter = DateTimeFormatter.ofPattern("d MMM YYYY")
+    dateTime.format(formatter)
+  }
 }

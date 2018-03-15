@@ -20,7 +20,6 @@
 @import uk.gov.hmrc.play.views.html.helpers.{form, input}
 @(searchForm: Form[SearchQuery])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-
     @form(
         action = routes.SearchController.submitSearchPage,
         'class -> "form js-form") {

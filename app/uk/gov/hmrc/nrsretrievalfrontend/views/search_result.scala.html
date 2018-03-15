@@ -15,17 +15,14 @@
  *@
 
 @import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchQuery
-@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResults
-@import uk.gov.hmrc.nrsretrievalfrontend.model.User
-@(searchForm: Form[SearchQuery], searchResults: Option[SearchResults] = None, user: Option[User] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResult
+@import uk.gov.hmrc.nrsretrievalfrontend.views.helpers.Utils._
+@(searchResult: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@userName = @{user.map(u => Html(u.userName))}
-
-@main_template(title = s"Search", userName, bodyClasses = None) {
- <h1>@Messages("search.page.header.lbl")</h1>
-
- @search_query(searchForm)
-
- @{searchResults map (sR => search_results(sR, searchForm("searchText").value.getOrElse("missing")))}
-}
+<div class="panel result-retrieve toggle1 show">
+    <p class="event-record lede">
+        <a id="retrieve1" href="#">@searchResult.retrievalLink.linkText</a>
+    </p>
+    <p class="filename">@searchResult.fileName</p>
+    <p class="font-xsmall">@Messages("search.results.submitted.lbl") @formatDisplayDate(searchResult.submissionDate)</p>
+</div>

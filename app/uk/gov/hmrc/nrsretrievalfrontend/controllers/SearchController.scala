@@ -24,7 +24,8 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
-import uk.gov.hmrc.nrsretrievalfrontend.model.{SearchQuery, SearchResult}
+import uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController._
+import uk.gov.hmrc.nrsretrievalfrontend.model.{SearchQuery, SearchResult, SearchResults, User}
 import uk.gov.hmrc.nrsretrievalfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -47,16 +48,18 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
       searchQuery => {
         nrsRetrievalConnector.search(searchQuery.searchText).map { nSRs =>
           Ok(views.html.search_page(searchForm.bindFromRequest,
-            Some(nSRs.map(nSR => SearchResult.fromNrsSearchResult(nSR)))))
+            Some(SearchResults(nSRs.map(nSR => SearchResult.fromNrsSearchResult(nSR)))),
+            Some(User("Susan Smith"))))
         }
       }
     )
   }
+}
 
+object SearchController {
   val searchForm: Form[SearchQuery] = {
     Form(mapping(
       "searchText" -> text
     )(SearchQuery.apply)(SearchQuery.unapply))
   }
-
 }

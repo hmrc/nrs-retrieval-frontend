@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
-import play.api.i18n.{Messages, MessagesApi}
+//import config.{ConfigDecorator, FrontendAuthConnector}
+import play.api.i18n.MessagesApi
+import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
 import play.filters.csrf.CSRF.Token
 import play.filters.csrf.{CSRFConfigProvider, CSRFFilter}
-import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 
 class GuiceAppSpec extends BaseSpec {
 
@@ -34,14 +35,15 @@ class GuiceAppSpec extends BaseSpec {
 
   implicit override lazy val app: Application = new GuiceApplicationBuilder().configure(additionalConfig)
     .bindings(bindModules:_*).in(Mode.Test)
+//    .overrides(bind[FrontendAuthConnector].toInstance( mock[FrontendAuthConnector]))
+//    .overrides(bind[ConfigDecorator].toInstance(mock[ConfigDecorator]))
     .build()
 
-  implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-  implicit val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(FakeRequest())
+  implicit val messagesApi = app.injector.instanceOf[MessagesApi]
+  implicit val messages = messagesApi.preferred(FakeRequest())
 
 
-  def addToken[T](fakeRequest: FakeRequest[T]): FakeRequest[T] = {
+  def addToken[T](fakeRequest: FakeRequest[T]) = {
     val csrfConfig     = app.injector.instanceOf[CSRFConfigProvider].get
     val csrfFilter     = app.injector.instanceOf[CSRFFilter]
     val token          = csrfFilter.tokenProvider.generateToken

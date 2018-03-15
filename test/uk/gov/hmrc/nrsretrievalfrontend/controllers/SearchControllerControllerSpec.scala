@@ -58,12 +58,12 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   "searchForm" should {
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText")
-      val validatedForm = controller.searchForm.bind(postData)
+      val validatedForm = SearchController.searchForm.bind(postData)
       validatedForm.errors shouldBe empty
     }
     "return errors for missing data" in {
       val postData = Json.obj()
-      val validatedForm = controller.searchForm.bind(postData)
+      val validatedForm = SearchController.searchForm.bind(postData)
       validatedForm.errors shouldBe List(FormError("searchText",List("error.required")))
     }
   }

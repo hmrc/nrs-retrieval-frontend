@@ -15,16 +15,35 @@
  *@
 
 @import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResult
-@(searchResults: Seq[SearchResult])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@import uk.gov.hmrc.nrsretrievalfrontend.model.SearchResults
+@(searchResults: SearchResults, vrnSearchTerm: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 <br>
 <div class="divider--top"></div>
-@if(searchResults.isEmpty) {
-    <h2 class="heading-medium">@Messages("search.result.notfound.lbl")</h2>
-    <p>@Messages("search.result.check.lbl")</p>
+@if(searchResults.results.isEmpty) {
+    <h2 class="heading-medium">@Messages("search.results.notfound.lbl")</h2>
+    <p>@Messages("search.results.check.lbl")</p>
     @service_scope()
 } else {
-    <p>Undefined behaviour</p>
- <p>@searchResults</p>
+    <br>
+    <p>@searchResults.results.size @Messages("search.results.results.lbl")</p>
+    <div class="column-full">
+        <div class="results" style="position: relative;">
+            <div class="notable-event">
+
+                @if(searchResults.companyName.isDefined){
+                    <p><span class="heading-medium">@searchResults.companyName.get</span>, VRN: @vrnSearchTerm </p>
+                } else {
+                    <p>VRN: @vrnSearchTerm </p>
+                }
+
+                @searchResults.results.map{ sR =>
+                    @search_result(sR)
+                }
+                <hr>
+                <p>@Messages("search.results.vat.stoed.since.lbl")</p>
+            </div>
+        </div>
+    </div>
+
 }

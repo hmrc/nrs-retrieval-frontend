@@ -19,8 +19,9 @@ package uk.gov.hmrc.nrsretrievalfrontend.model
 import java.time.{LocalDate, ZonedDateTime}
 
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
-case class SearchKeys(vrn: String, taxPeriodEndDate: LocalDate)
+case class SearchKeys(vrn: String, taxPeriodEndDate: Option[LocalDate], companyName: Option[String])
 
 object SearchKeys {
   implicit val searchKeysFormat: OFormat[SearchKeys] = Json.format[SearchKeys]
@@ -29,13 +30,43 @@ object SearchKeys {
 case class HeaderData(govClientPublicIP: String, govClientPublicPort: String)
 
 object HeaderData {
-  implicit val headerDataFormat: OFormat[HeaderData] = Json.format[HeaderData]
+  val headerDataReads: Reads[HeaderData] = (
+    (JsPath \ "Gov-Client-Public-IP").read[String] and
+      (JsPath \ "Gov-Client-Public-Port").read[String]
+    )(HeaderData.apply _)
+
+  val headerDataWrites: Writes[HeaderData] = (
+    (JsPath \ "Gov-Client-Public-IP").write[String] and
+      (JsPath \ "Gov-Client-Public-Port").write[String]
+    )(unlift(HeaderData.unapply))
+
+  implicit val headerDataFormat: Format[HeaderData] =
+    Format(headerDataReads, headerDataWrites)
 }
 
-case class IdentityData(internalId: String, someId: String, externalId: String, agentCode: String)
+case class IdentityData(internalId: String, externalId: String, agentCode: String)
 
 object IdentityData {
   implicit val identityDataFormat: OFormat[IdentityData] = Json.format[IdentityData]
+}
+
+case class Glacier (
+  vaultId: String,
+  archiveId: String
+)
+
+object Glacier {
+  implicit val formats: OFormat[Glacier] = Json.format[Glacier]
+}
+
+case class Bundle (
+  fileType: String,
+  fileSize: String,
+  expiryDate: ZonedDateTime
+)
+
+object Bundle {
+  implicit val formats: OFormat[Bundle] = Json.format[Bundle]
 }
 
 case class NrsSearchResult(
@@ -47,7 +78,9 @@ case class NrsSearchResult(
   userAuthToken: String,
   headerData: HeaderData,
   searchKeys: SearchKeys,
-  archiveId: String)
+  nrSubmissionId: String,
+  bundle: Bundle,
+  glacier: Glacier)
 
 object NrsSearchResult {
   implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]

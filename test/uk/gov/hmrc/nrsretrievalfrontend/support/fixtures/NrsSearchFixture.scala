@@ -22,12 +22,13 @@ import uk.gov.hmrc.nrsretrievalfrontend.model.{HeaderData, IdentityData, NrsSear
 
 trait NrsSearchFixture {
 
-  val nrsSearchResult = NrsSearchResult("businessId", "notableEvent", "payloadContentType", ZonedDateTime.now(), identityData,
-    "userAuthToken", headerData, searchKeys, "archiveId")
-
   val searchKeys = SearchKeys("vrn", LocalDate.parse("2015-11-01"))
 
   val headerData = HeaderData("govClientPublicIP", "govClientPublicPort")
 
-  val identityData = IdentityData("internalId", "someId", "externalId", "egentCode")
+  val identityData = IdentityData("internalId", "externalId", "egentCode")
+
+  val nrsSearchResult = NrsSearchResult("businessId", "notableEvent", "payloadContentType",
+    ZonedDateTime.parse("2018-03-15T11:56:13.625Z"), identityData, "userAuthToken", headerData, searchKeys, "archiveId")
+
 }

@@ -17,8 +17,8 @@
 package uk.gov.hmrc.nrsretrievalfrontend.model
 
 import java.time.{LocalDate, ZonedDateTime}
-
 import play.api.libs.json.{Json, OFormat}
+import org.apache.commons.io.FileUtils.byteCountToDisplaySize
 
 case class SearchQuery(searchText: String)
 
@@ -26,25 +26,23 @@ object SearchQuery {
   implicit val formats: OFormat[SearchQuery] = Json.format[SearchQuery]
 }
 
-// todo : where does the entity name come from?
-// todo : the search term(s) probably come from the search query
-
 case class SearchResult(
+  companyName: Option[String],
   retrievalLink: RetrievalLink,
   fileName: String,
   submissionDate: ZonedDateTime) // returned in whatever format we need and presented in UTC
 
-// todo : where do the file details come from
 object SearchResult {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
+      nrsSearchResult.searchKeys.companyName,
       RetrievalLink(
         nrsSearchResult.notableEvent,
         nrsSearchResult.searchKeys.taxPeriodEndDate,
-        "ZIP",
-        10000
+        nrsSearchResult.bundle.fileType,
+        nrsSearchResult.bundle.fileSize.toInt // todo : handle the potential error here if ile size is not an int
       ),
-      "filename",
+      s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
       nrsSearchResult.userSubmissionTimestamp
     )
 
@@ -53,12 +51,22 @@ object SearchResult {
 
 case class RetrievalLink(
   notableEventType: String,
-  taxPeriodEndDate: LocalDate,
+  taxPeriodEndDate: Option[LocalDate],
   fileType: String,
-  fileSizeInBytes: Int) {
-  val linkText: String = s"$notableEventType $taxPeriodEndDate $fileType $fileSizeInBytes"
+  fileSizeInBytes: Long) {
+
+  val linkText: String =
+    if (taxPeriodEndDate.isDefined) {
+      s"Retrieve $notableEventType ${taxPeriodEndDate.get} .$fileType, ${byteCountToDisplaySize(fileSizeInBytes)}"
+    } else {
+      s"Retrieve $notableEventType .$fileType, ${byteCountToDisplaySize(fileSizeInBytes)}"
+    }
 }
 
 object RetrievalLink {
   implicit val formats: OFormat[RetrievalLink] = Json.format[RetrievalLink]
+}
+
+case class SearchResults (results: Seq[SearchResult]) {
+  def companyName: Option[String] = results flatMap (_.companyName) headOption
 }

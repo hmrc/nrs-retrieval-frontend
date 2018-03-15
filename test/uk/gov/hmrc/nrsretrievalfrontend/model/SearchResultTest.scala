@@ -23,7 +23,7 @@ class SearchResultTest extends UnitSpec with SearchFixture with NrsSearchFixture
 
   "fromNrsSearchResult" should {
     "create a SearchResult from an NrsSearchResult" in {
-      SearchResult.fromNrsSearchResult(nrsSearchResult) shouldBe searchResult
+      SearchResult.fromNrsSearchResult(nrsSearchResult) shouldBe(searchResult)
     }
   }
 }

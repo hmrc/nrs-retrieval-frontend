@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.model
 
-case class User (username: String)
+case class User (userName: String)
 
 object User {
-  val user = User("TestUser")
+  val user = User("Susan Smith")
 }

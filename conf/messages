@@ -2,9 +2,12 @@ service.name.lbl=Non-Repudiation Store
 
 ################################## General #######################################################
 years.lbl=years
+page.previous.lbl=Previous page
+page.next.lbl=Next page
 
 ################################## Start Page ####################################################
 start.page.header.lbl=Non-Repudiation Store
+start.page.title.lbl=Start
 start.text.one.lbl=This service provides original submissions made to HMRC using digital channels.
 start.text.two.lbl=Using this service, you can:
 start.text.two.option.one.lbl=search for a submission, such as a VAT return
@@ -23,9 +26,13 @@ service.scope.footer.lbl=More services will be added in the future.
 
 ################################## Search Page ###################################################
 search.page.header.lbl=Search for digital submissions
+search.page.title.lbl=Search
 enter-vrn.lbl=Enter a VAT Registration Number (VRN)
 search.button.search.lbl=Search
 
 ################################## Search Results ################################################
-search.result.notfound.lbl=No results found
-search.result.check.lbl=Check which submission types are stored
+search.results.notfound.lbl=No results found
+search.results.check.lbl=Check which submission types are stored
+search.results.vat.stoed.since.lbl=VAT returns have been stored here from 1 April 2014.
+search.results.submitted.lbl=Submitted on
+search.results.results.lbl=results

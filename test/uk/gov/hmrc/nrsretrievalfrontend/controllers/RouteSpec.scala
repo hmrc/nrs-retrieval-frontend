@@ -29,13 +29,13 @@ class routeSpec extends UnitSpec with WithFakeApplication {
       response.header.status shouldBe Status.NOT_FOUND
     }
 
-    "return 200 Ok for GET /nrs-retrieval-frontend/search should" in {
-      val response = await(route(fakeApplication, FakeRequest(GET, "/nrs-retrieval-frontend/search")).get)
+    "return 200 Ok for GET /nrs-retrieval/search should" in {
+      val response = await(route(fakeApplication, FakeRequest(GET, "/nrs-retrieval/search")).get)
       response.header.status shouldBe Status.OK
     }
 
-    "return 200 Ok for GET /nrs-retrieval-frontend/start" in {
-      val response = await(route(fakeApplication, FakeRequest(GET, "/nrs-retrieval-frontend/start")).get)
+    "return 200 Ok for GET /nrs-retrieval/start" in {
+      val response = await(route(fakeApplication, FakeRequest(GET, "/nrs-retrieval/start")).get)
       response.header.status shouldBe Status.OK
     }
   }

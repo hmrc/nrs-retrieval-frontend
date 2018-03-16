@@ -18,6 +18,7 @@ package uk.gov.hmrc.nrs.retrieval.frontend.support.fixtures
 
 import java.time.{LocalDate, ZonedDateTime}
 
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.nrs.retrieval.frontend.model._
 
 trait NrsSearchFixture {
@@ -26,14 +27,12 @@ trait NrsSearchFixture {
 
   val headerData = HeaderData("govClientPublicIP", "govClientPublicPort")
 
-  val identityData = IdentityData("internalId", "externalId", "egentCode")
-
-  val bundle = Bundle("zip", "123456", ZonedDateTime.parse("2018-03-15T11:56:13.625Z"))
+  val bundle = Bundle("zip", "123456")
 
   val glacier = Glacier("12345", "1234567890")
 
   val nrsSearchResult = NrsSearchResult("businessId", "notableEvent", "payloadContentType",
-    ZonedDateTime.parse("2018-03-15T11:56:13.625Z"), identityData, "userAuthToken", headerData, searchKeys,
-    "1234567890abcd", bundle, glacier)
+    ZonedDateTime.parse("2018-03-15T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
+    "1234567890abcd", bundle, LocalDate.parse("2018-03-15"), glacier)
 
 }

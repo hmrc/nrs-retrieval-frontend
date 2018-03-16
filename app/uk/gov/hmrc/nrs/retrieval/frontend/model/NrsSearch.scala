@@ -44,12 +44,6 @@ object HeaderData {
     Format(headerDataReads, headerDataWrites)
 }
 
-case class IdentityData(internalId: String, externalId: String, agentCode: String)
-
-object IdentityData {
-  implicit val identityDataFormat: OFormat[IdentityData] = Json.format[IdentityData]
-}
-
 case class Glacier (
   vaultId: String,
   archiveId: String
@@ -61,8 +55,7 @@ object Glacier {
 
 case class Bundle (
   fileType: String,
-  fileSize: String,
-  expiryDate: ZonedDateTime
+  fileSize: String
 )
 
 object Bundle {
@@ -74,12 +67,13 @@ case class NrsSearchResult(
   notableEvent: String,
   payloadContentType: String,
   userSubmissionTimestamp: ZonedDateTime,
-  identityData: IdentityData,
+  identityData: JsValue,
   userAuthToken: String,
   headerData: HeaderData,
   searchKeys: SearchKeys,
   nrSubmissionId: String,
   bundle: Bundle,
+  expiryDate: LocalDate,
   glacier: Glacier)
 
 object NrsSearchResult {

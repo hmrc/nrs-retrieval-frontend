@@ -23,7 +23,7 @@
 @userName = @{user.map(u => Html(u.userName))}
 
 @main_template(title = s"Search", userName, bodyClasses = None) {
- <h1>@Messages("search.page.header.lbl")</h1>
+ <h1 id="pageHeader">@Messages("search.page.header.lbl")</h1>
 
  @search_query(searchForm)
 

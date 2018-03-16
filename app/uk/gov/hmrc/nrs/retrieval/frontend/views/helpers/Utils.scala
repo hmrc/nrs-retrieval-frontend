@@ -24,7 +24,6 @@ import uk.gov.hmrc.nrs.retrieval.frontend.model.SearchResult
 // todo : find a better name than utils
 object Utils {
 
-  // todo : should this go in the model?
   def formatDisplayDate (dateTime: ZonedDateTime): String = {
     val formatter = DateTimeFormatter.ofPattern("d MMM YYYY")
     dateTime.format(formatter)

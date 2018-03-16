@@ -18,6 +18,7 @@ package uk.gov.hmrc.nrs.retrieval.frontend.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.nrs.retrieval.frontend.config.AppConfig
@@ -30,7 +31,10 @@ import scala.concurrent.Future
 class StartController @Inject()(val messagesApi: MessagesApi,
                                 implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
+  val logger: Logger = Logger(this.getClass)
+
   def showStartPage: Action[AnyContent] = Action.async { implicit request =>
+    logger.info("Show the start page")
     Future.successful(Ok(views.html.start_page()))
   }
 

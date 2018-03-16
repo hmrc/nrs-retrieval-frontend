@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.nrs.retrieval.frontend.support
 
-//import config.{ConfigDecorator, FrontendAuthConnector}
 import play.api.i18n.MessagesApi
-import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
@@ -35,8 +33,6 @@ class GuiceAppSpec extends BaseSpec {
 
   implicit override lazy val app: Application = new GuiceApplicationBuilder().configure(additionalConfig)
     .bindings(bindModules:_*).in(Mode.Test)
-//    .overrides(bind[FrontendAuthConnector].toInstance( mock[FrontendAuthConnector]))
-//    .overrides(bind[ConfigDecorator].toInstance(mock[ConfigDecorator]))
     .build()
 
   implicit val messagesApi = app.injector.instanceOf[MessagesApi]

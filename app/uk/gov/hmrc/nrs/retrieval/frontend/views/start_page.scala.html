@@ -22,8 +22,7 @@
 @main_template(title = Messages("start.page.title.lbl")) {
 
     @form(action = routes.SearchController.showSearchPage()) {
-
-        <h1 class="heading-large">@Messages("start.page.header.lbl")</h1>
+        <h1 class="heading-large" id="pageHeader">@Messages("start.page.header.lbl")</h1>
         <p class="lede">@Messages("start.text.one.lbl")</p>
         <p>@Messages("start.text.two.lbl")</p>
         <ul class="list list-bullet">
@@ -35,7 +34,7 @@
             <summary>
                 <span class="summary">@Messages("service.scope.summary.lbl")</span>
             </summary>
-            <div class="panel-border-narrow panel" id="details-content-0">
+            <div>
             @service_scope()
             </div>
         </details>

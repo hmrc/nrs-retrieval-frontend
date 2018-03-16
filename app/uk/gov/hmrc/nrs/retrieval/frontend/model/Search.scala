@@ -30,7 +30,7 @@ case class SearchResult(
   companyName: Option[String],
   retrievalLink: RetrievalLink,
   fileName: String,
-  submissionDate: ZonedDateTime) // returned in whatever format we need and presented in UTC
+  submissionDate: ZonedDateTime)
 
 object SearchResult {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
@@ -40,11 +40,19 @@ object SearchResult {
         nrsSearchResult.notableEvent,
         nrsSearchResult.searchKeys.taxPeriodEndDate,
         nrsSearchResult.bundle.fileType,
-        nrsSearchResult.bundle.fileSize.toInt // todo : handle the potential error here if ile size is not an int
+        fileSize(nrsSearchResult.bundle.fileSize)
       ),
       s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
       nrsSearchResult.userSubmissionTimestamp
     )
+
+  def fileSize(fileSizeInBytes: String): Option[Long] = {
+    try {
+      Some(fileSizeInBytes.toLong)
+    } catch {
+      case e: Exception => None
+    }
+  }
 
   implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
 }
@@ -53,20 +61,23 @@ case class RetrievalLink(
   notableEventType: String,
   taxPeriodEndDate: Option[LocalDate],
   fileType: String,
-  fileSizeInBytes: Long) {
+  fileSizeInBytes: Option[Long]) {
 
-  val linkText: String =
-    if (taxPeriodEndDate.isDefined) {
-      s"Retrieve $notableEventType ${taxPeriodEndDate.get} .$fileType, ${byteCountToDisplaySize(fileSizeInBytes)}"
-    } else {
-      s"Retrieve $notableEventType .$fileType, ${byteCountToDisplaySize(fileSizeInBytes)}"
-    }
+  def linkText: String = {
+    Seq(Some("Retrieve"),
+      Some(notableEventType),
+      taxPeriodEndDate,
+      Some(s".$fileType,"),
+      fileSizeInBytes map (byteCountToDisplaySize(_))
+    ).flatten.mkString(" ")
+  }
+
 }
 
 object RetrievalLink {
   implicit val formats: OFormat[RetrievalLink] = Json.format[RetrievalLink]
 }
 
-case class SearchResults (results: Seq[SearchResult]) {
+case class SearchResults(results: Seq[SearchResult]) {
   def companyName: Option[String] = results flatMap (_.companyName) headOption
 }

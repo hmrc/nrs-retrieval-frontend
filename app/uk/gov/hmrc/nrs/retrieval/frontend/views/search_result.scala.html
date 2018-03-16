@@ -19,10 +19,27 @@
 @import uk.gov.hmrc.nrs.retrieval.frontend.views.helpers.Utils._
 @(searchResult: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-<div class="panel result-retrieve toggle1 show">
-    <p class="event-record lede">
-        <a id="retrieve1" href="#">@searchResult.retrievalLink.linkText</a>
-    </p>
-    <p class="filename">@searchResult.fileName</p>
-    <p class="font-xsmall">@Messages("search.results.submitted.lbl") @formatDisplayDate(searchResult.submissionDate)</p>
+<div class="result-retrieve toggle1 show">
+
+    <table class="table--borderless">
+        <tr>
+            <td class="table-cell--light">
+                <p class="event-record lede">
+                    <a id="retrieve1" href="#">@searchResult.retrievalLink.linkText</a>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-cell--light">
+                <p>@searchResult.fileName</p>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-cell--light">
+                <p class="font-xsmall">@Messages("search.results.submitted.lbl") @formatDisplayDate(searchResult.submissionDate)</p>
+            </td>
+        </tr>
+    </table>
+    <br>
+
 </div>

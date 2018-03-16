@@ -21,23 +21,23 @@
 <br>
 <div class="divider--top"></div>
 @if(searchResults.results.isEmpty) {
-    <h2 class="heading-medium">@Messages("search.results.notfound.lbl")</h2>
+    <h2 class="heading-medium" id="notFound">@Messages("search.results.notfound.lbl")</h2>
     <p>@Messages("search.results.check.lbl")</p>
     @service_scope()
 } else {
-    <br>
-    <p>@searchResults.results.size @Messages("search.results.results.lbl")</p>
-    <div class="column-full">
+    <div class="column-full" id="resultsFound">
+        <br>
+        <p>@searchResults.results.size @Messages("search.results.results.lbl")</p>
         <div class="results" style="position: relative;">
             <div class="notable-event">
 
-                @if(searchResults.companyName.isDefined){
+                @if(searchResults.companyName.isDefined) {
                     <p><span class="heading-medium">@searchResults.companyName.get</span>, VRN: @vrnSearchTerm </p>
                 } else {
                     <p>VRN: @vrnSearchTerm </p>
                 }
 
-                @searchResults.results.map{ sR =>
+                @searchResults.results.map { sR =>
                     @search_result(sR)
                 }
                 <hr>

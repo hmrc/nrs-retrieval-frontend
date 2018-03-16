@@ -19,11 +19,23 @@ package uk.gov.hmrc.nrs.retrieval.frontend.model
 import uk.gov.hmrc.nrs.retrieval.frontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class SearchResultTest extends UnitSpec with SearchFixture with NrsSearchFixture {
+class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
 
   "fromNrsSearchResult" should {
     "create a SearchResult from an NrsSearchResult" in {
       SearchResult.fromNrsSearchResult(nrsSearchResult) shouldBe(searchResult)
     }
   }
+
+  "RetrievalLink.linktext" should {
+    "create link text when all values are provide" in {
+      retrievalLink.linkText shouldBe "Retrieve notableEvent 2015-11-01 .zip, 120 KB"
+    }
+
+    "create link text when only mandatory values are provide" in {
+      val retrievalLink = RetrievalLink("notableEvent", None, "zip", None)
+      retrievalLink.linkText shouldBe "Retrieve notableEvent .zip,"
+    }
+  }
+
 }

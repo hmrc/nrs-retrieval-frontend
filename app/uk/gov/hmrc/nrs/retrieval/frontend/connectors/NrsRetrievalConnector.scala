@@ -32,10 +32,12 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
                                       val httpGet: WSHttpT,
                                       implicit val appConfig: AppConfig) {
 
+  val logger: Logger = Logger(this.getClass)
+
   protected def mode: Mode = environment.mode
 
   def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
-    Logger.info(s"Execute search for $vrn")
+    logger.info(s"Search for VRN $vrn")
     httpGet.GET[Seq[NrsSearchResult]](s"${appConfig.nrsRetrievalUrl}/submission-metadata?vrn=$vrn")
   }
 

@@ -26,7 +26,7 @@ trait SearchFixture {
   val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
 
   val fileSize = 123456
-  val retrievalLink = RetrievalLink("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", fileSize)
+  val retrievalLink = RetrievalLink("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", Some(fileSize))
   val searchResult = SearchResult(Some("companyName"), retrievalLink, "1234567890abcd.zip", ZonedDateTime.parse("2018-03-15T11:56:13.625Z"))
 
 

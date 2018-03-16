@@ -33,33 +33,41 @@ package uk.gov.hmrc.nrs.retrieval.frontend.views
  */
 
 import play.api.i18n.Messages
-import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrs.retrieval.frontend.config.AppConfig
 import uk.gov.hmrc.nrs.retrieval.frontend.support.GuiceAppSpec
 import uk.gov.hmrc.nrs.retrieval.frontend.support.fixtures.ViewFixture
 import uk.gov.hmrc.nrs.retrieval.frontend.views.html.start_page
 
-//class start_pageSpec extends GuiceAppSpec with TestUtil with TestAppConfig {
 class start_pageSpec extends GuiceAppSpec {
 
-  trait StartPageViewFixture extends ViewFixture {
-    implicit val requestWithToken = addToken(request)
-//    lazy val nino = randomNino.toString()
-//    val postData = Json.obj("clientId" -> nino)
-//    val validForm = selectClientForm.bind(postData)
-//    val invalidFormTooShort = selectClientForm.bind(Json.obj("clientId" -> "123456"))
-//    val invalidFormWrongFormat = selectClientForm.bind(Json.obj("clientId" -> "123456#$&"))
-  }
-
-  implicit val appConfig = app.injector.instanceOf[AppConfig]
-
-  "select_client view" should {
-
+  "start page" should {
     "have the correct title and GA page view event" in new StartPageViewFixture {
       val view: HtmlFormat.Appendable = start_page()
       doc.title mustBe Messages("start.page.title.lbl")
     }
- }
+
+    "have the correct page header" in new StartPageViewFixture {
+      val view: HtmlFormat.Appendable = start_page()
+      doc.getElementById("pageHeader").text() mustBe Messages("start.page.header.lbl")
+    }
+
+    "include the service scope table" in new StartPageViewFixture {
+      val view: HtmlFormat.Appendable = start_page()
+      doc.getElementById("serviceScope").hasText mustBe true
+    }
+
+    "have the correct continue button" in new StartPageViewFixture {
+      val view: HtmlFormat.Appendable = start_page()
+      doc.getElementById("continueButton").text() mustBe Messages("start.button.start.lbl")
+    }
+  }
+
+  trait StartPageViewFixture extends ViewFixture {
+    implicit val requestWithToken = addToken(request)
+  }
+
+  implicit val appConfig = app.injector.instanceOf[AppConfig]
+
 
 }

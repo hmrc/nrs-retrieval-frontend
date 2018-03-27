@@ -1,0 +1,43 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import models.SearchResult
+@import views.helpers.Utils._
+@(searchResult: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+    <div class="result-retrieve toggle1 show">
+        <table class="table--borderless">
+            <tr>
+                <td class="table-cell--light">
+                    <p class="event-record lede">
+                        <button type="submit" name="action" class="button button--link" value="retrieve_@{searchResult.vaultId}_@{searchResult.archiveId}">@Messages("search.results.retrieve.lbl") @searchResult.retrievalLink</button>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="table-cell--light">
+                    <p class="input--left-padding">@searchResult.fileName</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="table-cell--light">
+                    <p class="input--left-padding">@Messages("search.results.submitted.lbl") @formatDisplayDate(searchResult.submissionDateEpochMilli)</p>
+                </td>
+            </tr>
+        </table>
+        <br>
+    </div>

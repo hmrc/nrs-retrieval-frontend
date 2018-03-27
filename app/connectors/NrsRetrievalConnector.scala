@@ -46,9 +46,13 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     http.doPostString(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId/retrieval-requests", "", Seq.empty)
   }
 
-  // todo : this should be a HEAD call
   def statusSubmissionBundle(vaultId: Long, archiveId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     logger.info(s"Get submission bundle status for vault: $vaultId, archive: $archiveId")
+    http.doHead(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
+  }
+
+  def getSubmissionBundle(vaultId: Long, archiveId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    logger.info(s"Get submission bundle for vault: $vaultId, archive: $archiveId")
     http.doGet(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
   }
 

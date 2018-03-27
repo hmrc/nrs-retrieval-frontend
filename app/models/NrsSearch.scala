@@ -16,12 +16,13 @@
 
 package models
 
-import java.time.{LocalDate, ZonedDateTime}
+import java.time.ZonedDateTime
 
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-case class SearchKeys(vrn: String, taxPeriodEndDate: Option[LocalDate], companyName: Option[String])
+case class SearchKeys(vrn: String, taxPeriodEndDate: Option[LocalDate])
 
 object SearchKeys {
   implicit val searchKeysFormat: OFormat[SearchKeys] = Json.format[SearchKeys]

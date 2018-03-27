@@ -17,20 +17,17 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(sR: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@if(sR.retrievalInProgress) {
-    @search_result_retrieval_in_progress(sR)
-} else {
-    @if(sR.retrievalSucceeded) {
-        @search_result_retrieval_complete(sR)
-    } else {
-        @if(sR.retrievalFailed) {
-            @search_result_retrieval_failed(sR)
-        } else {
-            @search_result_show(sR)
-        }
-    }
-}
-
-
+<div class="flash error-summary error-summary--show text--black"
+id="error-summary-display"
+role="alert"
+aria-labelledby="error-summary-heading"
+tabindex="-1">
+    <h2 id="error-summary-heading" class="h3-heading">@Messages("search.results.error.summary.lbl")</h2>
+    <ul>
+        <li class="event-record lede">@Messages("search.results.cannot.retrieve.lbl") @searchResult.retrievalLink</li>
+        <li>@searchResult.fileName</li>
+        <li>@Messages("search.results.error.action.message.lbl")</li>
+    </ul>
+</div>

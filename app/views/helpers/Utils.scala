@@ -16,14 +16,12 @@
 
 package views.helpers
 
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import org.joda.time.format.DateTimeFormat
 
 // todo : find a better name than utils
 object Utils {
 
-  def formatDisplayDate (dateTime: ZonedDateTime): String = {
-    val formatter = DateTimeFormatter.ofPattern("d MMM YYYY")
-    dateTime.format(formatter)
-  }
+  def formatDisplayDate (submissionDateEpochMilli: Long): String =
+    DateTimeFormat.forPattern("d MMM yyyy").print(submissionDateEpochMilli)
+
 }

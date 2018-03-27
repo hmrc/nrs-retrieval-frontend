@@ -16,7 +16,7 @@
 
 package models
 
-import java.time.LocalDate
+import org.joda.time.LocalDate
 
 case class ServiceScope (services: Seq[Service])
 

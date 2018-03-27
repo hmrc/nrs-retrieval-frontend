@@ -16,23 +16,24 @@
 
 package models
 
-import java.time.{LocalDate, ZonedDateTime}
 
 import org.apache.commons.io.FileUtils.byteCountToDisplaySize
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchResult(
-  companyName: Option[String],
   retrievalLink: String,
   fileName: String,
   vaultId: Long,
   archiveId: Long,
-  submissionDate: ZonedDateTime)
+  submissionDateEpochMilli: Long,
+  retrievalInProgress: Boolean = false,
+  retrievalSucceeded: Boolean = false,
+  retrievalFailed: Boolean = false)
 
 object SearchResult {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
-      nrsSearchResult.searchKeys.companyName,
       retrievalLinkText(
         nrsSearchResult.notableEvent,
         nrsSearchResult.searchKeys.taxPeriodEndDate,
@@ -42,7 +43,7 @@ object SearchResult {
       s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
       nrsSearchResult.glacier.vaultId.toLong,
       nrsSearchResult.glacier.archiveId.toLong,
-      nrsSearchResult.userSubmissionTimestamp
+      nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
 
   def fileSize(fileSizeInBytes: String): Option[Long] = {
@@ -55,8 +56,7 @@ object SearchResult {
 
   def retrievalLinkText(notableEventType: String, taxPeriodEndDate: Option[LocalDate], fileType: String,
     fileSizeInBytes: Option[Long]): String = {
-    Seq(Some("Retrieve"),
-      Some(notableEventType),
+    Seq(Some(notableEventType),
       taxPeriodEndDate,
       Some(s".$fileType,"),
       fileSizeInBytes map (byteCountToDisplaySize(_))

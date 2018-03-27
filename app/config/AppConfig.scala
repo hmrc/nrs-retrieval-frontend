@@ -16,13 +16,18 @@
 
 package config
 
-import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 
+import akka.util.Timeout
 import models.{Service, ServiceScope, SubmissionType}
+import org.joda.time.LocalDate
 import play.api.{Configuration, Environment}
 import play.api.Mode.Mode
 import uk.gov.hmrc.play.config.ServicesConfig
+
+import scala.concurrent._
+import scala.concurrent.duration.FiniteDuration
 
 @Singleton
 class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
@@ -44,7 +49,9 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
   val userName = "Susan Smith"
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
-    SubmissionType("Returns", "VRN", LocalDate.of(2018, 4, 1), 20)))
+    SubmissionType("Returns", "VRN", LocalDate.parse("2018-04-01"), 20)))
+
+  val futureTimeoutSeconds = 10
 
   val serviceScope = ServiceScope(Seq(vatService))
 

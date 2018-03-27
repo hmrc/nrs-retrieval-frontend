@@ -16,10 +16,9 @@
 
 package support.fixtures
 
-import java.time.{LocalDate, ZonedDateTime}
-
-import play.api.libs.json.{JsValue, Json}
-import model._
+import play.api.libs.json.Json
+import models._
+import org.joda.time.{DateTime, LocalDate}
 
 trait NrsSearchFixture {
 
@@ -32,7 +31,7 @@ trait NrsSearchFixture {
   val glacier = Glacier("12345", "1234567890")
 
   val nrsSearchResult = NrsSearchResult("businessId", "notableEvent", "payloadContentType",
-    ZonedDateTime.parse("2018-03-15T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
+    DateTime.parse("2018-03-15T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
     "1234567890abcd", bundle, LocalDate.parse("2018-03-15"), glacier)
 
 }

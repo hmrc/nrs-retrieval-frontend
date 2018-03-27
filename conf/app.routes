@@ -6,7 +6,3 @@ GET        /assets/*file                            controllers.Assets.versioned
 GET        /start                                   @controllers.StartController.showStartPage
 GET        /search                                  @controllers.SearchController.showSearchPage()
 POST       /search                                  @controllers.SearchController.submitSearchPage
-
-GET        /requestRetrieval/:vaultId/:archiveId    @controllers.SearchController.submitRetrievalRequest(vaultId: Long, archiveId: Long)
-
-GET        /poll/:vaultId/:archiveId    @controllers.SearchController.poll(vaultId: Long, archiveId: Long)

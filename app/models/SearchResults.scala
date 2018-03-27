@@ -16,8 +16,16 @@
 
 package models
 
-case class SearchResults(results: Seq[SearchResult]) {
-  def companyName: Option[String] = results flatMap (_.companyName) headOption
+import play.api.libs.json.{Json, OFormat}
+
+case class SearchResults(results: Seq[SearchResult], resultCount: Int)
+
+object SearchResults {
+  implicit val formats: OFormat[SearchResults] = Json.format[SearchResults]
 }
 
-case class Search(query: Option[SearchQuery], results: Option[SearchResults])
+case class Search(query: SearchQuery, results: Option[SearchResults])
+
+object Search {
+  implicit val formats: OFormat[Search] = Json.format[Search]
+}

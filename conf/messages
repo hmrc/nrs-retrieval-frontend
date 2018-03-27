@@ -29,6 +29,7 @@ search.page.header.lbl=Search for digital submissions
 search.page.title.lbl=Search
 enter-vrn.lbl=Enter a VAT Registration Number (VRN)
 search.button.search.lbl=Search
+search.button.refresh.lbl=Refresh
 
 ################################## Search Results ################################################
 search.results.notfound.lbl=No results found
@@ -36,3 +37,10 @@ search.results.check.lbl=Check which submission types are stored
 search.results.vat.stoed.since.lbl=VAT returns have been stored here from 1 April 2014.
 search.results.submitted.lbl=Submitted on
 search.results.results.lbl=results
+search.results.retrieve.lbl=Retrieve
+search.results.download.lbl=Download
+search.results.cannot.retrieve.lbl=We can not retrieve
+search.results.retrieval.message.lbl=Retrieval may take up to 5 minutes
+search.results.error.summary.lbl=There's a problem
+search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact xxxxxxxxxx
+

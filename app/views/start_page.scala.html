@@ -19,11 +19,7 @@
 @import uk.gov.hmrc.play.views.html.helpers.form
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@metaRefresh = {
-    @*<meta http-equiv="refresh" content="3; url=@routes.SearchController.poll(1, 2)"/>*@
-}
-
-@main_template(title = Messages("start.page.title.lbl"), headScripts = Some(metaRefresh)) {
+@main_template(title = Messages("start.page.title.lbl")) {
 
     @form(action = routes.SearchController.showSearchPage()) {
         <h1 class="heading-large" id="pageHeader">@Messages("start.page.header.lbl")</h1>
@@ -43,6 +39,6 @@
             </div>
         </details>
 
-        <button id="continueButton" type="submit" class="button">@Messages("start.button.start.lbl")</button>
+        <button id="continueButton" type="submit" class="button button--get-started">@Messages("start.button.start.lbl")</button>
     }
 }

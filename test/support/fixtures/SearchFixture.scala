@@ -16,18 +16,17 @@
 
 package support.fixtures
 
-import java.time.{LocalDate, ZonedDateTime}
-
+import models.SearchResult
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{JsValue, Json}
-import model.{NrsSearchResult, RetrievalLink, SearchResult}
 
 trait SearchFixture {
 
   val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
 
   val fileSize = 123456
-  val retrievalLink = RetrievalLink("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", Some(fileSize))
-  val searchResult = SearchResult(Some("companyName"), retrievalLink, "1234567890abcd.zip", ZonedDateTime.parse("2018-03-15T11:56:13.625Z"))
+  val retrievalLink = SearchResult.retrievalLinkText("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", Some(fileSize))
+  val searchResult = SearchResult(Some("companyName"), retrievalLink, "1234567890abcd.zip", 1, 1, DateTime.parse("2018-03-15T11:56:13.625Z"))
 
 
 }

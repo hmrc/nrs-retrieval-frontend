@@ -16,12 +16,14 @@
 
 package controllers
 
+import akka.actor.ActorSystem
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
 import config.AppConfig
+import org.mockito.Mock
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class StartControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -40,6 +42,8 @@ class StartControllerControllerSpec extends UnitSpec with WithFakeApplication wi
 
   private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
   private val appConfig = new AppConfig(configuration, env)
+  private val mockActorSystem = mock[ActorSystem]
 
-  private val controller = new StartController(messageApi, appConfig)
+
+  private val controller = new StartController(messageApi, mockActorSystem, appConfig)
 }

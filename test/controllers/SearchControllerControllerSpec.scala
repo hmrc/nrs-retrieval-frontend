@@ -16,6 +16,8 @@
 
 package controllers
 
+import akka.actor.{ActorRef, ActorSystem}
+import akka.stream.Materializer
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -48,11 +50,6 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
       val result = controller.submitSearchPage(fakeRequest.withJsonBody(searchFormJson))
       status(result) shouldBe Status.OK
     }
-
-    "return 400 BadRequest" in {
-      val result = controller.submitSearchPage(fakeRequest)
-      status(result) shouldBe Status.BAD_REQUEST
-    }
   }
 
   "searchForm" should {
@@ -60,11 +57,6 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
       val postData = Json.obj("searchText" -> "someSearchText")
       val validatedForm = SearchController.searchForm.bind(postData)
       validatedForm.errors shouldBe empty
-    }
-    "return errors for missing data" in {
-      val postData = Json.obj()
-      val validatedForm = SearchController.searchForm.bind(postData)
-      validatedForm.errors shouldBe List(FormError("searchText",List("error.required")))
     }
   }
 
@@ -75,8 +67,12 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
 
   private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
   private val appConfig = new AppConfig(configuration, env)
+  private val mockAcotRef = mock[ActorRef]
   private val mockNRC = mock[NrsRetrievalConnector]
-  private val controller = new SearchController(messageApi, mockNRC, appConfig)
+  implicit val mockSystem = mock[ActorSystem]
+  implicit val mockMaterializer = mock[Materializer]
+  private val controller = new SearchController(messageApi, mockAcotRef, mockNRC, appConfig, mockSystem, mockMaterializer)
+
 
 }
 

@@ -35,8 +35,8 @@
 
                 <p>VRN: @searchForm.get.query.searchText.getOrElse("") </p>
 
-                @searchForm.get.results.get.results.map { sR =>
-                    @search_result(sR)
+                @searchForm.get.results.get.results.zipWithIndex.map { sR =>
+                    @search_result(sR._1, sR._2)
                 }
                 <hr>
                 <p>@Messages("search.results.vat.stoed.since.lbl")</p>

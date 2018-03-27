@@ -24,8 +24,8 @@ import play.api.Environment
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import config.{AppConfig, WSHttpT}
+import models.NrsSearchResult
 import support.fixtures.NrsSearchFixture
-import model.NrsSearchResult
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future

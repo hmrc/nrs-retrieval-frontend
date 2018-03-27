@@ -17,7 +17,7 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(searchResult: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 <div class="flash error-summary error-summary--show text--black"
 id="error-summary-display"
@@ -26,7 +26,7 @@ aria-labelledby="error-summary-heading"
 tabindex="-1">
     <h2 id="error-summary-heading" class="h3-heading">@Messages("search.results.error.summary.lbl")</h2>
     <ul>
-        <li class="event-record lede">@Messages("search.results.cannot.retrieve.lbl") @searchResult.retrievalLink</li>
+        <li class="event-record lede" id="retrievalFailed@index">@Messages("search.results.cannot.retrieve.lbl") @searchResult.retrievalLink</li>
         <li>@searchResult.fileName</li>
         <li>@Messages("search.results.error.action.message.lbl")</li>
     </ul>

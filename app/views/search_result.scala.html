@@ -17,18 +17,18 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(sR: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(sR: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @if(sR.retrievalInProgress) {
-    @search_result_retrieval_in_progress(sR)
+    @search_result_retrieval_in_progress(sR, index)
 } else {
     @if(sR.retrievalSucceeded) {
-        @search_result_retrieval_complete(sR)
+        @search_result_retrieval_complete(sR, index)
     } else {
         @if(sR.retrievalFailed) {
-            @search_result_retrieval_failed(sR)
+            @search_result_retrieval_failed(sR, index)
         } else {
-            @search_result_show(sR)
+            @search_result_show(sR, index)
         }
     }
 }

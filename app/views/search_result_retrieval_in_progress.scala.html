@@ -17,13 +17,13 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(searchResult: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
     <div class="result-retrieve toggle1 show">
         <table class="table--borderless text--grey">
             <tr>
                 <td class="table-cell--light">
-                    <p class="event-record lede">@Messages("search.results.retrieval.message.lbl")</p>
+                    <p class="event-record lede" id="retrievalInProgress@index">@Messages("search.results.retrieval.message.lbl")</p>
                 </td>
             </tr>
             <tr>

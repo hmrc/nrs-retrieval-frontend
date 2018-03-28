@@ -107,8 +107,11 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
 
   private def doRefresh(search: Search) = {
     search.query.searchText.map { query =>
-      nrsRetrievalConnector.search(query)
-        .map(fNSR => fNSR.map(nSR => setRetrievalStatus(SearchResult.fromNrsSearchResult(nSR))))
+      nrsRetrievalConnector.search(query).map { fNSR =>
+            fNSR.map { nSR =>
+              setRetrievalStatus(SearchResult.fromNrsSearchResult(nSR))
+            }
+        }
     }.getOrElse(Future(Seq.empty)).map { sRs =>
       searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(sRs, sRs.size)))))
     }
@@ -119,7 +122,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   private def doRetrieve(search: Search, vaultId: Long, archiveId: Long) = {
-    retrievalActor ? SubmitMessage(vaultId, archiveId)
+    ask(retrievalActor, SubmitMessage(vaultId, archiveId)).mapTo[Future[ActorMessage]]
     doRefresh(search)
   }
 
@@ -131,15 +134,21 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     doRefresh(search)
   }
 
-  private def setRetrievalStatus (searchResult: SearchResult): SearchResult =
-    Await.result(retrievalActor ? StatusMessage(searchResult.vaultId, searchResult.archiveId),
-      appConfig.futureTimeoutSeconds seconds)
-      .asInstanceOf[ActorMessage] match {
-        case PollingMessage => searchResult.copy(retrievalInProgress = true, retrievalSucceeded = false, retrievalFailed = false)
-        case CompleteMessage => searchResult.copy(retrievalInProgress = false, retrievalSucceeded = true, retrievalFailed = false)
-        case FailedMessage(payload) => searchResult.copy(retrievalInProgress = false, retrievalSucceeded = false, retrievalFailed = true)
-        case _ => searchResult
+  private def setRetrievalStatus (searchResult: SearchResult): SearchResult = {
+
+    val s = for {
+      fAM <- ask(retrievalActor, StatusMessage(searchResult.vaultId, searchResult.archiveId))
+        .mapTo[Future[ActorMessage]]
+      aM <- fAM
+    } yield aM
+
+    Await.result(s, appConfig.futureTimeoutSeconds seconds) match {
+      case PollingMessage => searchResult.copy(retrievalInProgress = true, retrievalSucceeded = false, retrievalFailed = false)
+      case CompleteMessage => searchResult.copy(retrievalInProgress = false, retrievalSucceeded = true, retrievalFailed = false)
+      case FailedMessage(payload) => searchResult.copy(retrievalInProgress = false, retrievalSucceeded = false, retrievalFailed = true)
+      case _ => searchResult
     }
+  }
 
   private def getFirstAction(request: Request[AnyContent]): SearchPageAction = {
     request.body.asFormUrlEncoded.getOrElse(Map.empty).get("action").flatMap(_.headOption) match {
@@ -154,6 +163,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
       case _ => UnknownAction
     }
   }
+
 
 }
 

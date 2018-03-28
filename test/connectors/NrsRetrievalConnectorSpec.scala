@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class NrsRetrievalConnectorTest extends UnitSpec with MockitoSugar with NrsSearchFixture {
+class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture {
 
   "Search" should {
     "make a call to /search" in {

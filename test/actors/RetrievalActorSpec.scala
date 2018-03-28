@@ -102,28 +102,6 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
           , 5 seconds)
         , 5 seconds) should be(StartedMessage)
     }
-
-    "send a PollingMessage when a polling actor exists and polling is not complete" in {
-//      val mockPollingActor = mock[ActorRef]
-//      when(mockPollingActor.)
-//
-//      val mockPollingActorService = mock[PollingActorService]
-//      when(mockPollingActorService.maybePollingActor(any(), any())(any(), any())).thenReturn(Some(mockPollingActor))
-//
-//      val mockRetrievalRequestHttpResponse = mock[HttpResponse]
-//      when(mockRetrievalRequestHttpResponse.status).thenReturn(Status.OK)
-//
-//      when(mockNrsRetrievalConnector.submitRetrievalRequest(any(), any())(any()))
-//        .thenReturn(Future.successful(mockRetrievalRequestHttpResponse))
-//
-//      val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
-//
-//      Await.result(
-//        Await.result(
-//          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
-//          , 5 seconds)
-//        , 5 seconds) should be(PollingMessage)
-    }
   }
 
   "A retrieval actor in response to a StatusMessage" must {
@@ -139,11 +117,6 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
           , 5 seconds)
         , 5 seconds) should be(UnknownMessage)
 
-    }
-
-    "send a StatusMessage when a polling actor exists and polling is not complete" in {
-        // need to mock the behaviour of the pollig actor provided
-       // look at test probe?
     }
   }
 

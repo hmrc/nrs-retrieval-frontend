@@ -39,7 +39,7 @@ class PollingActor(vaultId: Long, archiveId: Long)(implicit val nrsRetrievalConn
   private val logger = Logger(this.getClass)
 
   val cancellable: Cancellable = context.system.scheduler.schedule(initialDelay, interval) {
-    val checkStatusActor = context.actorOf(Props(new CheckStatusActor()))
+    val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path)))
     if (Instant.now().isBefore(stopTime)) {
       checkStatusActor ! StatusMessage(vaultId, archiveId)
     } else {

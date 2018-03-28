@@ -18,7 +18,7 @@ package actors
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorPath, ActorRef, ActorSystem, Props}
 
 import scala.concurrent.duration._
 import akka.util.Timeout
@@ -30,7 +30,7 @@ import connectors.NrsRetrievalConnector
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 
-class CheckStatusActor(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+class CheckStatusActor(pollingActorPath: ActorPath)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   implicit val timeout = Timeout(FiniteDuration(30, TimeUnit.SECONDS))
 
@@ -47,7 +47,7 @@ class CheckStatusActor(implicit val nrsRetrievalConnector: NrsRetrievalConnector
             pollingActor(vaultId, archiveId) ! CompleteMessage
           }
           case NOT_FOUND => logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
-          case UNAUTHORIZED => pollingActor(vaultId, archiveId) ! FailedMessage(UNAUTHORIZED.toString)
+          case _ => pollingActor(vaultId, archiveId) ! FailedMessage(response.status.toString)
         }
       }
     }
@@ -56,7 +56,7 @@ class CheckStatusActor(implicit val nrsRetrievalConnector: NrsRetrievalConnector
 
   private def pollingActor(vaultId: Long, archiveId: Long)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = {
     try {
-      Await.result(system.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_${vaultId}_$archiveId").resolveOne(), 5 seconds)
+      Await.result(system.actorSelection(pollingActorPath).resolveOne(), 5 seconds)
     } catch {
       case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId)), s"pollingActor_${vaultId}_$archiveId")
     }

@@ -34,7 +34,6 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "Search" should {
     "make a call to /search" in {
-      // todo : parse this from the source object rather than hard-coding the json
       val bodyJson = Json.parse("""[{"businessId":"businessId","notableEvent":"notableEvent","payloadContentType":"payloadContentType","userSubmissionTimestamp":"2018-03-13T09:52:01.749Z[Europe/London]","identityData":{"internalId":"internalId","someId":"someId","externalId":"externalId","agentCode":"egentCode"},"userAuthToken":"userAuthToken","headerData":{"govClientPublicIP":"govClientPublicIP","govClientPublicPort":"govClientPublicPort"},"searchKeys":{"vrn":"vrn","taxPeriodEndDate":"2015-11-01"},"archiveId":"archiveId"}]""")
 
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(

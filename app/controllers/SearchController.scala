@@ -69,7 +69,6 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  // get and display results
   def submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
     logger.debug("Submit the search page")
     searchForm.bindFromRequest.fold(
@@ -129,13 +128,11 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   private def doDownload(search: Search, vaultId: Long, archiveId: Long) = {
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId) map {response =>
       response.body.getBytes()
-
     }
     doRefresh(search)
   }
 
   private def setRetrievalStatus (searchResult: SearchResult): SearchResult = {
-
     val s = for {
       fAM <- ask(retrievalActor, StatusMessage(searchResult.vaultId, searchResult.archiveId))
         .mapTo[Future[ActorMessage]]

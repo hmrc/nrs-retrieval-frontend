@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture {
 
-  "GET /" should {
+  "showSearchPage" should {
     "return 200" in {
       val result = controller.showSearchPage(fakeRequest)
       status(result) shouldBe Status.OK

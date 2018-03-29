@@ -17,28 +17,31 @@
 package actors
 
 import java.util.concurrent.TimeUnit
+
 import akka.actor.{Actor, Cancellable, Props}
+
 import scala.concurrent.duration._
 import akka.util.Timeout
+import com.google.inject.Inject
+import config.AppConfig
 import play.api.Logger
 import connectors.NrsRetrievalConnector
 import org.joda.time.Instant
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PollingActor(vaultId: Long, archiveId: Long)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+class PollingActor @Inject() (vaultId: Long, archiveId: Long)
+  (val appConfig: AppConfig, implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   def receive = poll
 
-  implicit val timeout = Timeout(FiniteDuration(3, TimeUnit.SECONDS))
-
+  implicit val timeout: Timeout = Timeout(FiniteDuration(3, TimeUnit.SECONDS))
   private val initialDelay = 0.millis
-  private val interval = 3000.millis
-  private val runTimeMillis = 60000
-  var stopTime = Instant.now().plus(runTimeMillis) // todo : VAR VAR VAR VAR VAR!
+  private var stopTime = Instant.now().plus(appConfig.runTimeMillis)
+
   private val logger = Logger(this.getClass)
 
-  val cancellable: Cancellable = context.system.scheduler.schedule(initialDelay, interval) {
+  val cancellable: Cancellable = context.system.scheduler.schedule(initialDelay, appConfig.interval) {
     val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path)))
     if (Instant.now().isBefore(stopTime)) {
       checkStatusActor ! StatusMessage(vaultId, archiveId)

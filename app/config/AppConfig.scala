@@ -16,18 +16,15 @@
 
 package config
 
-import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 
-import akka.util.Timeout
 import models.{Service, ServiceScope, SubmissionType}
 import org.joda.time.LocalDate
 import play.api.{Configuration, Environment}
 import play.api.Mode.Mode
 import uk.gov.hmrc.play.config.ServicesConfig
+import scala.concurrent.duration._
 
-import scala.concurrent._
-import scala.concurrent.duration.FiniteDuration
 
 @Singleton
 class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
@@ -45,6 +42,9 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
   lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   lazy val nrsRetrievalUrl = s"${baseUrl("nrs-retrieval")}/nrs-retrieval"
+
+  lazy val interval: FiniteDuration = loadConfig(s"polling.interval").toLong.millis
+  lazy val runTimeMillis: Long = loadConfig(s"polling.duration").toLong
 
   val userName = "Susan Smith"
 

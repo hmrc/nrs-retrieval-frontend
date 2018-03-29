@@ -18,9 +18,9 @@ package actors
 
 trait ActorMessage
 
-case class SubmitMessage(vaultId: Long, archiveId: Long) extends ActorMessage
+case class SubmitMessage(vaultId: String, archiveId: String) extends ActorMessage
 
-case class StatusMessage(vaultId: Long, archiveId: Long) extends ActorMessage
+case class StatusMessage(vaultId: String, archiveId: String) extends ActorMessage
 
 case object IncompleteMessage extends ActorMessage
 

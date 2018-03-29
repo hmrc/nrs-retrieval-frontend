@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.{ActorContext, ActorRef, ActorSystem, Props}
 import akka.util.Timeout
+import com.google.inject.Inject
+import config.AppConfig
 import connectors.NrsRetrievalConnector
 
 import scala.concurrent.Await
@@ -27,20 +29,21 @@ import scala.concurrent.duration._
 
 trait PollingActorService {
 
-  def startPollingActor(vaultId: Long, archiveId: Long)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
+  def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
 
-  def maybePollingActor(vaultId: Long, archiveId: Long)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = ???
+  def maybePollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = ???
  }
 
-class PollingActorServiceImpl extends PollingActorService {
+class PollingActorServiceImpl @Inject()(appConfig: AppConfig) extends PollingActorService {
 
   implicit val timeout = Timeout(FiniteDuration(5, TimeUnit.SECONDS))
 
-  override def startPollingActor(vaultId: Long, archiveId: Long)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
-    context.actorOf(Props(new PollingActor(vaultId, archiveId)), s"pollingActor_${vaultId}_$archiveId")
+  override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
+    context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_${vaultId}_$archiveId")
 
-  override def maybePollingActor(vaultId: Long, archiveId: Long)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
+  override def maybePollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
       try {
+        // todo : consider a non-blocking strategy to get the polling actor ref from the path
         Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_${vaultId}_$archiveId").resolveOne(), 5 seconds))
       } catch {
         case e: Throwable => None

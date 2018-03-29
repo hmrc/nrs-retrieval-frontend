@@ -59,7 +59,7 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     "send a PollingMessage in response a StatusMessage for the incorrect vault and archive" in {
       pollingActor ! RestartMessage
       Await.result(
-        ask(pollingActor, StatusMessage(2, 3)).mapTo[ActorMessage]
+        ask(pollingActor, StatusMessage("2", "3")).mapTo[ActorMessage]
         , 5 seconds) should be(UnknownMessage)
     }
     "change to complete mode in response to a CompleteMessage" in {
@@ -105,7 +105,7 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
       Await.result(
-        ask(pollingActor, StatusMessage(2, 3)).mapTo[ActorMessage]
+        ask(pollingActor, StatusMessage("2", "3")).mapTo[ActorMessage]
         , 5 seconds) should be(UnknownMessage)
     }
     "change to poll mode in response to a RestartMessage" in {
@@ -137,7 +137,7 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
       pollingActor ! RestartMessage
       pollingActor ! FailedMessage("broken")
       Await.result(
-        ask(pollingActor, StatusMessage(2, 3)).mapTo[ActorMessage]
+        ask(pollingActor, StatusMessage("2", "3")).mapTo[ActorMessage]
         , 5 seconds) should be(UnknownMessage)
     }
     "change to poll mode in response to a RestartMessage" in {
@@ -150,8 +150,8 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     }
   }
 
-  val testVaultId: Long = 1
-  val testArchiveId: Long = 1
-  val pollingActor: ActorRef = system.actorOf(Props(new PollingActor(testVaultId, testArchiveId)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
+  val testVaultId: String = "1"
+  val testArchiveId: String = "1"
+  val pollingActor: ActorRef = system.actorOf(Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
 
 }

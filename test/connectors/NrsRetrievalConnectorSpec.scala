@@ -42,21 +42,21 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
   "submitRetrievalRequest" should {
     "make a post call to /retrieval-requests" in {
       when(mockWsHttp.doPostString(any(), any(), any())(any())).thenReturn(Future.successful(mockHttpResponse))
-      await(connector.submitRetrievalRequest(1, 2)).body should be("Some Text")
+      await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).body should be("Some Text")
     }
   }
 
   "statusSubmissionBundle" should {
     "make a head call to /submission-bundles" in {
       when(mockWsHttp.doHead(any())(any())).thenReturn(Future.successful(mockHttpResponse))
-      await(connector.submitRetrievalRequest(1, 2)).body should be ("Some Text")
+      await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).body should be ("Some Text")
     }
   }
 
   "getSubmissionBundle" should {
     "make a get call to /submission-bundles" in {
       when(mockWsHttp.doGet(any())(any())).thenReturn(Future.successful(mockHttpResponse))
-      await(connector.submitRetrievalRequest(1, 2)).body should be ("Some Text")
+      await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).body should be ("Some Text")
     }
   }
 
@@ -79,5 +79,8 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   private val injector: Injector = Guice.createInjector(testModule)
   private val connector = injector.getInstance(classOf[NrsRetrievalConnector])
+
+  private val testAuditId = "1"
+  private val testArchiveId = "2"
 
 }

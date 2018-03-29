@@ -22,7 +22,6 @@ import akka.actor.{Actor, Cancellable, Props}
 
 import scala.concurrent.duration._
 import akka.util.Timeout
-import com.google.inject.Inject
 import config.AppConfig
 import play.api.Logger
 import connectors.NrsRetrievalConnector
@@ -30,8 +29,8 @@ import org.joda.time.Instant
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PollingActor @Inject() (vaultId: Long, archiveId: Long)
-  (val appConfig: AppConfig, implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
+  (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   def receive = poll
 
@@ -42,7 +41,7 @@ class PollingActor @Inject() (vaultId: Long, archiveId: Long)
   private val logger = Logger(this.getClass)
 
   val cancellable: Cancellable = context.system.scheduler.schedule(initialDelay, appConfig.interval) {
-    val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path)))
+    val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path, appConfig)))
     if (Instant.now().isBefore(stopTime)) {
       checkStatusActor ! StatusMessage(vaultId, archiveId)
     } else {
@@ -79,7 +78,7 @@ class PollingActor @Inject() (vaultId: Long, archiveId: Long)
       logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")
       sender ! UnknownMessage
     case RestartMessage =>
-      stopTime = Instant.now().plus(runTimeMillis)
+      stopTime = Instant.now().plus(appConfig.runTimeMillis)
       context.become(poll)
     case _ =>
       logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
@@ -93,7 +92,7 @@ class PollingActor @Inject() (vaultId: Long, archiveId: Long)
       logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")
       sender ! UnknownMessage
     case RestartMessage =>
-      stopTime = Instant.now().plus(runTimeMillis)
+      stopTime = Instant.now().plus(appConfig.runTimeMillis)
       context.become(poll)
     case _ =>
       logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")

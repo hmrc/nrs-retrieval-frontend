@@ -26,6 +26,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.{Configuration, Environment}
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import uk.gov.hmrc.http.HeaderCarrier
+import scala.concurrent.duration._
 
 trait Infrastructure extends AnyRef with MockitoSugar {
 
@@ -49,6 +50,9 @@ trait Infrastructure extends AnyRef with MockitoSugar {
 
   val mockAppConfig: AppConfig = mock[AppConfig]
   when(mockAppConfig.futureTimeoutSeconds).thenReturn(30)
+  val duration: FiniteDuration = 3000.millis
+  when(mockAppConfig.interval).thenReturn(duration)
+  when(mockAppConfig.runTimeMillis).thenReturn(3000)
 
   // built from mocks
   val searchController: SearchController = new SearchController(messageApi, mockActorRef, mockNrsRetrievalConnector, appConfig, mockActorSystem, mockMaterializer)

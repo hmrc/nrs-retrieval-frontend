@@ -26,7 +26,7 @@ trait SearchFixture {
 
   val fileSize = 123456
   val retrievalLink = SearchResult.retrievalLinkText("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", Some(fileSize))
-  val searchResult = SearchResult(retrievalLink, "1234567890abcd.zip", 12345, 1234567890, 1521114973625L)
+  val searchResult = SearchResult(retrievalLink, "1234567890abcd.zip", "12345", "1234567890", 1521114973625L)
 
 
 }

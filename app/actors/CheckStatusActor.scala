@@ -22,6 +22,7 @@ import akka.actor.{Actor, ActorPath, ActorRef, ActorSystem, Props}
 
 import scala.concurrent.duration._
 import akka.util.Timeout
+import config.AppConfig
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,7 +31,7 @@ import connectors.NrsRetrievalConnector
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 
-class CheckStatusActor(pollingActorPath: ActorPath)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   implicit val timeout = Timeout(FiniteDuration(30, TimeUnit.SECONDS))
 
@@ -54,11 +55,12 @@ class CheckStatusActor(pollingActorPath: ActorPath)(implicit val nrsRetrievalCon
     case _ => UnknownMessage
   }
 
-  private def pollingActor(vaultId: Long, archiveId: Long)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = {
+  private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = {
     try {
+      // todo : consider a non-blocking strategy to get the polling actor ref from the path
       Await.result(system.actorSelection(pollingActorPath).resolveOne(), 5 seconds)
     } catch {
-      case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId)), s"pollingActor_${vaultId}_$archiveId")
+      case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_${vaultId}_$archiveId")
     }
   }
 }

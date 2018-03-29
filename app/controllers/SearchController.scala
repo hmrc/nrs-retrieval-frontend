@@ -120,12 +120,12 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     Future(searchForm.bind(Json.toJson(Search(search.query, search.results))))
   }
 
-  private def doRetrieve(search: Search, vaultId: Long, archiveId: Long) = {
+  private def doRetrieve(search: Search, vaultId: String, archiveId: String) = {
     ask(retrievalActor, SubmitMessage(vaultId, archiveId)).mapTo[Future[ActorMessage]]
     doRefresh(search)
   }
 
-  private def doDownload(search: Search, vaultId: Long, archiveId: Long) = {
+  private def doDownload(search: Search, vaultId: String, archiveId: String) = {
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId) map {response =>
       response.body.getBytes()
     }
@@ -153,10 +153,10 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
       case Some(action) if action == "refresh" => RefreshAction
       case Some(action) if action startsWith "retrieve" =>
         val actionParts: Array[String] = action.split("_")
-        RetrieveAction(actionParts(1).toLong, actionParts(2).toLong)
+        RetrieveAction(actionParts(1), actionParts(2))
       case Some(action) if action startsWith "download" =>
         val actionParts: Array[String] = action.split("_")
-        DownloadAction(actionParts(1).toLong, actionParts(2).toLong)
+        DownloadAction(actionParts(1), actionParts(2))
       case _ => UnknownAction
     }
   }
@@ -168,8 +168,8 @@ trait SearchPageAction
 case object UnknownAction extends SearchPageAction
 case object SearchAction extends SearchPageAction
 case object RefreshAction extends SearchPageAction
-case class DownloadAction (vaultId: Long, archiveId: Long) extends SearchPageAction
-case class RetrieveAction (vaultId: Long, archiveId: Long) extends SearchPageAction
+case class DownloadAction (vaultId: String, archiveId: String) extends SearchPageAction
+case class RetrieveAction (vaultId: String, archiveId: String) extends SearchPageAction
 
 object SearchController {
   private val searchQueryMapping = mapping(
@@ -179,8 +179,8 @@ object SearchController {
   private val searchResultMapping = mapping(
     "retrievalLink" -> text,
     "fileName" -> text,
-    "vaultId" -> longNumber,
-    "archiveId" -> longNumber,
+    "vaultId" -> text,
+    "archiveId" -> text,
     "submissionDateEpochMilli" -> longNumber,
     "retrievalInProgress" -> boolean,
     "retrievalSucceeded" -> boolean,

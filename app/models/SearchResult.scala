@@ -24,8 +24,8 @@ import play.api.libs.json.{Json, OFormat}
 case class SearchResult(
   retrievalLink: String,
   fileName: String,
-  vaultId: Long,
-  archiveId: Long,
+  vaultId: String,
+  archiveId: String,
   submissionDateEpochMilli: Long,
   retrievalInProgress: Boolean = false,
   retrievalSucceeded: Boolean = false,
@@ -41,8 +41,8 @@ object SearchResult {
         fileSize(nrsSearchResult.bundle.fileSize)
       ),
       s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
-      nrsSearchResult.glacier.vaultId.toLong,
-      nrsSearchResult.glacier.archiveId.toLong,
+      nrsSearchResult.glacier.vaultId,
+      nrsSearchResult.glacier.archiveId,
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
 

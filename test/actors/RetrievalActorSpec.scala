@@ -120,7 +120,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
     }
   }
 
-  val testVaultId: Long = 1
-  val testArchiveId: Long = 1
+  val testVaultId: String = "1"
+  val testArchiveId: String = "1"
 
 }

@@ -46,7 +46,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
 
   "A retrieval actor in response to an UnknownMessage" must {
     "send an UnknownMessage response" in {
-      val mockPollingActorService = mock[PollingActorService]
+      val mockPollingActorService = mock[ActorService]
       val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
 
       Await.result(
@@ -62,7 +62,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
     "send a FailedToStartMessage when no polling actor exists and gets BAD_REQUEST from the connector" in {
       val mockPollingActor = mock[ActorRef]
 
-      val mockPollingActorService = mock[PollingActorService]
+      val mockPollingActorService = mock[ActorService]
       when(mockPollingActorService.maybePollingActor(any(), any())(any(), any())).thenReturn(None)
       when(mockPollingActorService.startPollingActor(any(), any())(any(), any())).thenReturn(mockPollingActor)
 
@@ -84,7 +84,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
     "send a FailedToStartMessage when no polling actor exists and gets OK from the connector" in {
       val mockPollingActor = mock[ActorRef]
 
-      val mockPollingActorService = mock[PollingActorService]
+      val mockPollingActorService = mock[ActorService]
       when(mockPollingActorService.maybePollingActor(any(), any())(any(), any())).thenReturn(None)
       when(mockPollingActorService.startPollingActor(any(), any())(any(), any())).thenReturn(mockPollingActor)
 
@@ -106,7 +106,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
 
   "A retrieval actor in response to a StatusMessage" must {
     "send an UnknownMessage response when no polling actor exists" in {
-      val mockPollingActorService = mock[PollingActorService]
+      val mockPollingActorService = mock[ActorService]
       when(mockPollingActorService.maybePollingActor(any(), any())(any(), any())).thenReturn(None)
 
       val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))

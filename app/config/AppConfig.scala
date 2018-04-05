@@ -32,6 +32,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
+  private def loadConfigWithDefault(key: String, default: String) = runModeConfiguration.getString(key).getOrElse(default)
+
   private val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
@@ -40,19 +42,19 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
   lazy val analyticsHost: String = loadConfig(s"google-analytics.host")
   lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-
   lazy val nrsRetrievalUrl = s"${baseUrl("nrs-retrieval")}/nrs-retrieval"
+  lazy val xApiKey: String = loadConfigWithDefault(s"microservice.services.nrs-retrieval.xApiKey", "missingKey")
 
   lazy val interval: FiniteDuration = loadConfig(s"polling.interval").toLong.millis
   lazy val runTimeMillis: Long = loadConfig(s"polling.duration").toLong
-
-  val userName = "Susan Smith"
+  lazy val futureTimeoutSeconds = 10
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
     SubmissionType("Returns", "VRN", LocalDate.parse("2018-04-01"), 20)))
 
-  val futureTimeoutSeconds = 10
-
   val serviceScope = ServiceScope(Seq(vatService))
+
+  // todo : this to be replaced on integration with STRIDE
+  val userName = "Susan Smith"
 
 }

@@ -36,7 +36,6 @@ class StartController @Inject()(val messagesApi: MessagesApi,
 
   def showStartPage: Action[AnyContent] = Action.async { implicit request =>
     logger.info("Show the start page")
-
     Future.successful(Ok(views.html.start_page()))
   }
 

@@ -52,12 +52,13 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
         }
       }
     }
-    case _ => UnknownMessage
+    case _ =>
+      logger.warn(s"An unexpected message has been received")
+      sender ! UnknownMessage
   }
 
   private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = {
     try {
-      // todo : consider a non-blocking strategy to get the polling actor ref from the path
       Await.result(system.actorSelection(pollingActorPath).resolveOne(), 5 seconds)
     } catch {
       case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_${vaultId}_$archiveId")

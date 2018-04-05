@@ -26,6 +26,7 @@ import config.AppConfig
 import play.api.Logger
 import connectors.NrsRetrievalConnector
 import org.joda.time.Instant
+import play.api.inject.Injector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

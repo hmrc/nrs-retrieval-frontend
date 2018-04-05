@@ -17,12 +17,12 @@
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
-import actors.{PollingActorService, PollingActorServiceImpl, RetrievalActor}
+import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
   def configure() = {
-    bind(classOf[PollingActorService]).to(classOf[PollingActorServiceImpl])
+    bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
     bindActor[RetrievalActor]("retrieval-actor")
   }
 }

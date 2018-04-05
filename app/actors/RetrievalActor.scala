@@ -34,7 +34,7 @@ import org.joda.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
-class RetrievalActor @Inject()(appConfig: AppConfig, pas: PollingActorService)
+class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
   (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   val logger = Logger(this.getClass)

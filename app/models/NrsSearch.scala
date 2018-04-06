@@ -46,7 +46,7 @@ object HeaderData {
 }
 
 case class Glacier (
-  vaultId: String,
+  vaultName: String,
   archiveId: String
 )
 
@@ -56,7 +56,7 @@ object Glacier {
 
 case class Bundle (
   fileType: String,
-  fileSize: String
+  fileSize: Long
 )
 
 object Bundle {

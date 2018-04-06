@@ -38,28 +38,20 @@ object SearchResult {
         nrsSearchResult.notableEvent,
         nrsSearchResult.searchKeys.taxPeriodEndDate,
         nrsSearchResult.bundle.fileType,
-        fileSize(nrsSearchResult.bundle.fileSize)
+        nrsSearchResult.bundle.fileSize
       ),
       s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
-      nrsSearchResult.glacier.vaultId,
+      nrsSearchResult.glacier.vaultName,
       nrsSearchResult.glacier.archiveId,
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
 
-  def fileSize(fileSizeInBytes: String): Option[Long] = {
-    try {
-      Some(fileSizeInBytes.toLong)
-    } catch {
-      case e: Exception => None
-    }
-  }
-
   def retrievalLinkText(notableEventType: String, taxPeriodEndDate: Option[LocalDate], fileType: String,
-    fileSizeInBytes: Option[Long]): String = {
+    fileSizeInBytes: Long): String = {
     Seq(Some(notableEventType),
       taxPeriodEndDate,
       Some(s".$fileType,"),
-      fileSizeInBytes map (byteCountToDisplaySize(_))
+      Some(byteCountToDisplaySize(fileSizeInBytes))
     ).flatten.mkString(" ")
   }
 

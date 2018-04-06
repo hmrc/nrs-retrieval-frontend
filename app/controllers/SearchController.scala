@@ -35,7 +35,7 @@ import connectors.NrsRetrievalConnector
 import controllers.SearchController._
 import models._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.duration._
@@ -52,7 +52,9 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
                                  implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
   val logger: Logger = Logger(this.getClass)
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
+
   implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def showSearchPage: Action[AnyContent] = Action.async { implicit request =>

@@ -16,6 +16,7 @@
 
 package controllers
 
+import actors.{ActorMessage, SubmitMessage}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import org.scalatest.mockito.MockitoSugar
@@ -30,10 +31,13 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
 import connectors.NrsRetrievalConnector
+import org.mockito.ArgumentCaptor
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture {
 
@@ -58,6 +62,9 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
       val validatedForm = SearchController.searchForm.bind(postData)
       validatedForm.errors shouldBe empty
     }
+    "create a header carrier with X-API-Key when one exists in config" in {
+      controller.hc.headers should contain ("X-API-Key" -> appConfig.xApiKey)
+    }
   }
 
   private val fakeRequest = FakeRequest("GET", "/")
@@ -67,11 +74,11 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
 
   private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
   private val appConfig = new AppConfig(configuration, env)
-  private val mockAcotRef = mock[ActorRef]
+  private val mockAcorRef = mock[ActorRef]
   private val mockNRC = mock[NrsRetrievalConnector]
-  implicit val mockSystem = mock[ActorSystem]
-  implicit val mockMaterializer = mock[Materializer]
-  private val controller = new SearchController(messageApi, mockAcotRef, mockNRC, appConfig, mockSystem, mockMaterializer)
+  implicit val mockSystem: ActorSystem = mock[ActorSystem]
+  implicit val mockMaterializer: Materializer = mock[Materializer]
+  private val controller = new SearchController(messageApi, mockAcorRef, mockNRC, appConfig, mockSystem, mockMaterializer)
 
 
 }

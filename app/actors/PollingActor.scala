@@ -27,6 +27,7 @@ import play.api.Logger
 import connectors.NrsRetrievalConnector
 import org.joda.time.Instant
 import play.api.inject.Injector
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -34,6 +35,8 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
   (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   def receive = poll
+
+  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(3, TimeUnit.SECONDS))
   private val initialDelay = 0.millis

@@ -35,7 +35,8 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
 
   implicit val timeout = Timeout(FiniteDuration(30, TimeUnit.SECONDS))
 
-  implicit val hc = new HeaderCarrier()
+  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
+
   implicit val system = context.system
   val logger = Logger(this.getClass)
 

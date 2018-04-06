@@ -34,8 +34,8 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
     }
 
     "create link text when only mandatory values are provide" in {
-      val retrievalLink = SearchResult.retrievalLinkText("notableEvent", None, "zip", None)
-      retrievalLink shouldBe "notableEvent .zip,"
+      val retrievalLink = SearchResult.retrievalLinkText("notableEvent", None, "zip", fileSize)
+      retrievalLink shouldBe "notableEvent .zip, 120 KB"
     }
   }
 

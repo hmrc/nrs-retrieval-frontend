@@ -27,7 +27,7 @@ trait NrsSearchFixture {
 
   val headerData = HeaderData("govClientPublicIP", "govClientPublicPort")
 
-  val bundle = Bundle("zip", "123456")
+  val bundle = Bundle("zip", 123456)
 
   val glacier = Glacier("12345", "1234567890")
 

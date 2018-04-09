@@ -41,7 +41,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "submitRetrievalRequest" should {
     "make a post call to /retrieval-requests" in {
-      when(mockWsHttp.doPostString(any(), any(), any())(any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockWsHttp.POST[Any, Any](any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
       await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).body should be("Some Text")
     }
   }

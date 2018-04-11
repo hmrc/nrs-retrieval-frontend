@@ -17,8 +17,8 @@
 package controllers
 
 import java.util.concurrent.TimeUnit
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
@@ -35,7 +35,7 @@ import connectors.NrsRetrievalConnector
 import controllers.SearchController._
 import models._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.duration._
@@ -85,6 +85,10 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         }
       }
     )
+  }
+
+  def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map(response => rewriteResponseBytes(response))
   }
 
   private def getFormData(request: Request[AnyContent], search: Search) = {
@@ -163,6 +167,26 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
+  private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
+    sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
+
+  private def rewriteResponse (response: HttpResponse) = {
+    val headers: Seq[(String, String)] = mapToSeq(response.allHeaders)
+    response.status match {
+      case 200 => Ok(response.body).withHeaders(headers:_*)
+      case 404 => NotFound(response.body)
+      case _ => Ok(response.body)
+    }
+  }
+
+  private def rewriteResponseBytes (response: HttpResponse) = {
+    val headers: Seq[(String, String)] = mapToSeq(response.allHeaders)
+    response.status match {
+      case 200 => Ok(response.body.getBytes).withHeaders(headers:_*)
+      case 404 => NotFound(response.body.getBytes)
+      case _ => Ok(response.body.getBytes)
+    }
+  }
 
 }
 

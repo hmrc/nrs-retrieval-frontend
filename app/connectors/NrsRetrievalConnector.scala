@@ -41,19 +41,19 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     http.GET[Seq[NrsSearchResult]](s"${appConfig.nrsRetrievalUrl}/submission-metadata?vrn=$vrn")
   }
 
+  def getSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    logger.info(s"Get submission bundle for vault: $vaultId, archive: $archiveId")
+    http.GET(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
+  }
+
   def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     logger.info(s"Submit a retrieval request for vault: $vaultId, archive: $archiveId")
-    http.doPostString(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId/retrieval-requests", "", Seq.empty)
+    http.POST(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId/retrieval-requests", "", Seq.empty)
   }
 
   def statusSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     logger.info(s"Get submission bundle status for vault: $vaultId, archive: $archiveId")
-    http.doHead(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
-  }
-
-  def getSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Get submission bundle for vault: $vaultId, archive: $archiveId")
-    http.doGet(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
+    http.HEAD(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
   }
 
 }

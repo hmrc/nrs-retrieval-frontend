@@ -6,3 +6,5 @@ GET        /assets/*file                            controllers.Assets.versioned
 GET        /start                                   @controllers.StartController.showStartPage
 GET        /search                                  @controllers.SearchController.showSearchPage()
 POST       /search                                  @controllers.SearchController.submitSearchPage
+
+GET        /download/:vaultId/:archiveId            @controllers.SearchController.download(vaultId, archiveId)

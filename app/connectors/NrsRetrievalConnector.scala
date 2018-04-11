@@ -43,7 +43,7 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
   def getSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     logger.info(s"Get submission bundle for vault: $vaultId, archive: $archiveId")
-    http.doGet(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
+    http.GET(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
   }
 
   def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {

@@ -55,6 +55,6 @@ trait Infrastructure extends AnyRef with MockitoSugar {
   when(mockAppConfig.runTimeMillis).thenReturn(3000)
 
   // implicits
-  implicit val hc = mock[HeaderCarrier]
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
 }

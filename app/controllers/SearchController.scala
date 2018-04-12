@@ -19,6 +19,8 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
+
+import javax.inject.{Inject, Singleton}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
@@ -34,6 +36,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -56,7 +59,8 @@ class SearchController @Inject()(
   val logger: Logger = Logger(this.getClass)
   val strideRole = appConfig.nrsStrideRole
 
-  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
+  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
+    .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
@@ -93,7 +97,11 @@ class SearchController @Inject()(
     })
   }
 
-  private def getFormData(request: Request[AnyContent], search: Search) = {
+  def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map(response => rewriteResponseBytes(response))
+  }
+
+  private def getFormData(request: Request[AnyContent], search: Search)(implicit hc: HeaderCarrier) = {
     getFirstAction(request) match {
       case RefreshAction => doRefresh(search)
       case RetrieveAction(vaultId, archiveId) => doRetrieve(search, vaultId, archiveId)
@@ -103,7 +111,7 @@ class SearchController @Inject()(
     }
   }
 
-  private def doSearch(search: Search) = {
+  private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
     search.query.searchText.map { query =>
       nrsRetrievalConnector.search(query)
         .map(fNSR => fNSR.map(nSR => SearchResult.fromNrsSearchResult(nSR)))
@@ -112,7 +120,7 @@ class SearchController @Inject()(
     }
   }
 
-  private def doRefresh(search: Search) = {
+  private def doRefresh(search: Search)(implicit hc: HeaderCarrier) = {
     search.query.searchText.map { query =>
       nrsRetrievalConnector.search(query).map { fNSR =>
             fNSR.map { nSR =>
@@ -128,12 +136,12 @@ class SearchController @Inject()(
     Future(searchForm.bind(Json.toJson(Search(search.query, search.results))))
   }
 
-  private def doRetrieve(search: Search, vaultId: String, archiveId: String) = {
+  private def doRetrieve(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
     ask(retrievalActor, SubmitMessage(vaultId, archiveId)).mapTo[Future[ActorMessage]]
     doRefresh(search)
   }
 
-  private def doDownload(search: Search, vaultId: String, archiveId: String) = {
+  private def doDownload(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId) map {response =>
       response.body.getBytes()
     }
@@ -166,6 +174,27 @@ class SearchController @Inject()(
         val actionParts: Array[String] = action.split("_")
         DownloadAction(actionParts(1), actionParts(2))
       case _ => UnknownAction
+    }
+  }
+
+  private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
+    sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
+
+  private def rewriteResponse (response: HttpResponse) = {
+    val headers: Seq[(String, String)] = mapToSeq(response.allHeaders)
+    response.status match {
+      case 200 => Ok(response.body).withHeaders(headers:_*)
+      case 404 => NotFound(response.body)
+      case _ => Ok(response.body)
+    }
+  }
+
+  private def rewriteResponseBytes (response: HttpResponse) = {
+    val headers: Seq[(String, String)] = mapToSeq(response.allHeaders)
+    response.status match {
+      case 200 => Ok(response.body.getBytes).withHeaders(headers:_*)
+      case 404 => NotFound(response.body.getBytes)
+      case _ => Ok(response.body.getBytes)
     }
   }
 

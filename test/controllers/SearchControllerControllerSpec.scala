@@ -30,13 +30,18 @@ import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
 import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
 import uk.gov.hmrc.http.HeaderCarrier
+import config.AppConfig
+import connectors.NrsRetrievalConnector
+import play.api.mvc.AnyContentAsEmpty
+import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
+import scala.concurrent.Future
 import scala.concurrent.Future
 
 class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture with StrideFixture {
 
-  private val fakeRequest = FakeRequest("GET", "/")
+  private implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
 
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
@@ -47,16 +52,16 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   private val mockNRC = mock[NrsRetrievalConnector]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
   implicit val mockMaterializer: Materializer = mock[Materializer]
-
+  
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
     extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
-    
+
   }
 
   private val controller = new TestControllerAuthSearch(authResultOk)
-  
+
 
   "showSearchPage" should {
     "return 200" in {

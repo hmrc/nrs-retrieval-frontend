@@ -56,5 +56,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
 
   // todo : this to be replaced on integration with STRIDE
   val userName = "Susan Smith"
+  
+  lazy val nrsStrideRole = loadConfig("stride.role.name")
 
 }

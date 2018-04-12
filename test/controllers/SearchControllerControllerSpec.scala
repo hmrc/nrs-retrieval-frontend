@@ -16,30 +16,47 @@
 
 package controllers
 
-import actors.{ActorMessage, SubmitMessage}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
-import org.scalatest.mockito.MockitoSugar
+import config.AppConfig
+import connectors.NrsRetrievalConnector
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import play.api.data.FormError
+import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
+import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
 import uk.gov.hmrc.http.HeaderCarrier
-import config.AppConfig
-import connectors.NrsRetrievalConnector
-import org.mockito.ArgumentCaptor
-import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture {
+class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture with StrideFixture {
+
+  private val fakeRequest = FakeRequest("GET", "/")
+
+  private val env = Environment.simple()
+  private val configuration = Configuration.load(env)
+
+  private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
+  private val appConfig = new AppConfig(configuration, env)
+  private val mockAcorRef = mock[ActorRef]
+  private val mockNRC = mock[NrsRetrievalConnector]
+  implicit val mockSystem: ActorSystem = mock[ActorSystem]
+  implicit val mockMaterializer: Materializer = mock[Materializer]
+
+  private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
+    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
+
+    override val authConnector = authConnOk(stubbedRetrievalResult)
+    
+  }
+
+  private val controller = new TestControllerAuthSearch(authResultOk)
+  
 
   "showSearchPage" should {
     "return 200" in {
@@ -66,20 +83,6 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
       controller.hc.headers should contain ("X-API-Key" -> appConfig.xApiKey)
     }
   }
-
-  private val fakeRequest = FakeRequest("GET", "/")
-
-  private val env = Environment.simple()
-  private val configuration = Configuration.load(env)
-
-  private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
-  private val appConfig = new AppConfig(configuration, env)
-  private val mockAcorRef = mock[ActorRef]
-  private val mockNRC = mock[NrsRetrievalConnector]
-  implicit val mockSystem: ActorSystem = mock[ActorSystem]
-  implicit val mockMaterializer: Materializer = mock[Materializer]
-  private val controller = new SearchController(messageApi, mockAcorRef, mockNRC, appConfig, mockSystem, mockMaterializer)
-
 
 }
 

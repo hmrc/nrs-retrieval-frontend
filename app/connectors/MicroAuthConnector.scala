@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package models
+package connectors
 
-case class User (userName: String)
+import java.net.URL
 
-object User {
-  val user = User("Susan Smith")
+import javax.inject.{Inject, Named, Singleton}
+import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.http.{HttpGet, HttpPost}
+
+@Singleton
+class MicroAuthConnector @Inject()(@Named("auth-baseUrl") baseUrl: URL, val http: HttpGet with HttpPost) extends PlayAuthConnector {
+  val serviceUrl = baseUrl.toString
 }

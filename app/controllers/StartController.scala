@@ -17,26 +17,36 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import akka.actor.ActorSystem
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import config.AppConfig
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class StartController @Inject()(val messagesApi: MessagesApi,
-                                val system: ActorSystem,
-                                implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class StartController @Inject()(
+  val messagesApi: MessagesApi,
+  val system: ActorSystem,
+  implicit val appConfig: AppConfig,
+  val authConn: AuthConnector
+) extends FrontendController with I18nSupport with Stride {
 
   val logger: Logger = Logger(this.getClass)
+  override val strideRole: String = appConfig.nrsStrideRole
+
+  override def authConnector: AuthConnector = authConn
 
   def showStartPage: Action[AnyContent] = Action.async { implicit request =>
-    logger.info("Show the start page")
-    Future.successful(Ok(views.html.start_page()))
+    authWithStride("Show the start page", {
+      Future.successful(
+        Ok(views.html.start_page())
+      )
+    })
+
   }
 
 }

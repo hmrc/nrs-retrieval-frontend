@@ -17,74 +17,80 @@
 package controllers
 
 import java.util.concurrent.TimeUnit
-import javax.inject.{Inject, Singleton}
 
+import actors._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
+import akka.util.Timeout
 import com.google.inject.name.Named
+import config.AppConfig
+import connectors.NrsRetrievalConnector
+import controllers.SearchController._
+import javax.inject.{Inject, Singleton}
+import models._
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc._
-import actors._
-import akka.util.Timeout
-import config.AppConfig
-import connectors.NrsRetrievalConnector
-import controllers.SearchController._
-import models._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier}
+import play.api.mvc._
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.FiniteDuration
 
 @Singleton
-class SearchController @Inject()(val messagesApi: MessagesApi,
-                                 @Named("retrieval-actor") retrievalActor: ActorRef,
-                                 implicit val nrsRetrievalConnector: NrsRetrievalConnector,
-                                 implicit val appConfig: AppConfig,
-                                 implicit val system: ActorSystem,
-                                 implicit val mat: Materializer) extends FrontendController with I18nSupport {
+class SearchController @Inject()(
+  val messagesApi: MessagesApi,
+  @Named("retrieval-actor") retrievalActor: ActorRef,
+  implicit val appConfig: AppConfig,
+  val authConn: AuthConnector,
+  implicit val nrsRetrievalConnector: NrsRetrievalConnector,
+  implicit val system: ActorSystem,
+  implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
 
   val logger: Logger = Logger(this.getClass)
+  val strideRole = appConfig.nrsStrideRole
 
   implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
   implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
+  override def authConnector: AuthConnector = authConn
+
   def showSearchPage: Action[AnyContent] = Action.async { implicit request =>
-    logger.info("Show the search page")
-    searchForm.bindFromRequest.fold(
-      formWithErrors => {
-        logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-        Future.successful(BadRequest(formWithErrors.errors.toString()))
-      },
-      search => {
-        Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(User(appConfig.userName))))
-        )
-      }
-    )
+    authWithStride("Show the search page", {
+      searchForm.bindFromRequest.fold(
+        formWithErrors => {
+          logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
+          Future.successful(BadRequest(formWithErrors.errors.toString()))
+        },
+        search => {
+          val out = Ok(views.html.search_page(searchForm.bindFromRequest, Some(NRUser(appConfig.userName))))
+          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(NRUser(appConfig.userName)))))
+        }
+      )
+    })
   }
 
   def submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
-    logger.debug("Submit the search page")
-    searchForm.bindFromRequest.fold(
-      formWithErrors => {
-        logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-        Future.successful(BadRequest(formWithErrors.errors.toString()))
-      },
-      search => {
-        getFormData(request, search).map{form =>
-          Ok(views.html.search_page(form, Some(User(appConfig.userName)))
-          )
+    authWithStride("Submit the search page", {
+      searchForm.bindFromRequest.fold(
+        formWithErrors => {
+          logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
+          Future.successful(BadRequest(formWithErrors.errors.toString()))
+        },
+        search => {
+          getFormData(request, search).map { form =>
+            Ok(views.html.search_page(form, Some(NRUser(appConfig.userName))))
+          }
         }
-      }
-    )
+      )
+    })
   }
 
   private def getFormData(request: Request[AnyContent], search: Search) = {
@@ -162,7 +168,6 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
       case _ => UnknownAction
     }
   }
-
 
 }
 

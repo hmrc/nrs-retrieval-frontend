@@ -17,8 +17,8 @@
 package controllers
 
 import java.util.concurrent.TimeUnit
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
@@ -30,12 +30,12 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import actors._
 import akka.util.Timeout
-import config.AppConfig
+import config.{AppConfig, Auditable}
 import connectors.NrsRetrievalConnector
 import controllers.SearchController._
 import models._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.duration._

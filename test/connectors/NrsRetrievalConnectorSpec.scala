@@ -16,17 +16,21 @@
 
 package connectors
 
+import com.google.inject.name.Names
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
 import com.google.inject.{AbstractModule, Guice, Injector}
 import org.mockito.Matchers.any
 import play.api.Environment
 import uk.gov.hmrc.http.HeaderCarrier
-import config.{AppConfig, WSHttpT}
+import config.{AppConfig, MicroserviceAudit, WSHttpT}
+import javax.inject.Provider
 import models.NrsSearchResult
 import support.fixtures.NrsSearchFixture
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.Audit
 
 import scala.concurrent.Future
 
@@ -60,11 +64,11 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
     }
   }
 
-
   private val mockWsHttp = mock[WSHttpT]
   private val mockEnvironemnt = mock[Environment]
   private val mockAppConfig = mock[AppConfig]
   private val mockHttpResponse = mock[HttpResponse]
+  private val mockAuditConnector = mock[AuditConnector]
   when(mockHttpResponse.body).thenReturn("Some Text")
 
   implicit val mockHeaderCarrier: HeaderCarrier = mock[HeaderCarrier]
@@ -74,6 +78,13 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
       bind(classOf[WSHttpT]).toInstance(mockWsHttp)
       bind(classOf[Environment]).toInstance(mockEnvironemnt)
       bind(classOf[AppConfig]).toInstance(mockAppConfig)
+      bind(classOf[AuditConnector]).toInstance(mockAuditConnector)
+      bind(classOf[Audit]).to(classOf[MicroserviceAudit])
+      bind(classOf[String]).annotatedWith(Names.named("appName")).toProvider(AppNameProvider)
+    }
+
+    private object AppNameProvider extends Provider[String] {
+      def get(): String = "nrs-retrieval"
     }
   }
 

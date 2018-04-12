@@ -21,21 +21,30 @@ import org.mockito.Mockito._
 import com.google.inject.{AbstractModule, Guice, Injector}
 import org.mockito.Matchers.any
 import play.api.Environment
-import uk.gov.hmrc.http.HeaderCarrier
 import config.{AppConfig, WSHttpT}
 import models.NrsSearchResult
-import support.fixtures.NrsSearchFixture
+import support.fixtures.{Infrastructure, NrsSearchFixture}
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
-class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture {
+class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure {
 
   "search" should {
-    "make a get call to /submission-metadata" in {
+    "make a get call to /submission-metadata returning data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.successful(Seq(nrsSearchResult)))
       await(connector.search("someValue")).size shouldBe 1
+    }
+
+    "make a get call to /submission-metadata with parameters returning no data" in {
+      when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.failed(new Throwable("404")))
+      await(connector.search("someValue")).size shouldBe 0
+    }
+
+    "make a get call to /submission-metadata with parameters resulting in a failure" in {
+      when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.failed(new Throwable("401")))
+      a[Throwable] should be thrownBy await(connector.search("someValue"))
     }
   }
 
@@ -63,11 +72,8 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   private val mockWsHttp = mock[WSHttpT]
   private val mockEnvironemnt = mock[Environment]
-  private val mockAppConfig = mock[AppConfig]
   private val mockHttpResponse = mock[HttpResponse]
   when(mockHttpResponse.body).thenReturn("Some Text")
-
-  implicit val mockHeaderCarrier: HeaderCarrier = mock[HeaderCarrier]
 
   private val testModule = new AbstractModule {
     override def configure(): Unit = {

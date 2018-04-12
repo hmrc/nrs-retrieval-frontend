@@ -53,7 +53,8 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
 
   val logger: Logger = Logger(this.getClass)
 
-  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
+  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
+    .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
@@ -91,7 +92,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map(response => rewriteResponseBytes(response))
   }
 
-  private def getFormData(request: Request[AnyContent], search: Search) = {
+  private def getFormData(request: Request[AnyContent], search: Search)(implicit hc: HeaderCarrier) = {
     getFirstAction(request) match {
       case RefreshAction => doRefresh(search)
       case RetrieveAction(vaultId, archiveId) => doRetrieve(search, vaultId, archiveId)
@@ -101,7 +102,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  private def doSearch(search: Search) = {
+  private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
     search.query.searchText.map { query =>
       nrsRetrievalConnector.search(query)
         .map(fNSR => fNSR.map(nSR => SearchResult.fromNrsSearchResult(nSR)))
@@ -110,7 +111,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  private def doRefresh(search: Search) = {
+  private def doRefresh(search: Search)(implicit hc: HeaderCarrier) = {
     search.query.searchText.map { query =>
       nrsRetrievalConnector.search(query).map { fNSR =>
             fNSR.map { nSR =>
@@ -126,12 +127,12 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     Future(searchForm.bind(Json.toJson(Search(search.query, search.results))))
   }
 
-  private def doRetrieve(search: Search, vaultId: String, archiveId: String) = {
+  private def doRetrieve(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
     ask(retrievalActor, SubmitMessage(vaultId, archiveId)).mapTo[Future[ActorMessage]]
     doRefresh(search)
   }
 
-  private def doDownload(search: Search, vaultId: String, archiveId: String) = {
+  private def doDownload(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId) map {response =>
       response.body.getBytes()
     }

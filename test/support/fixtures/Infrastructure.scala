@@ -58,6 +58,6 @@ trait Infrastructure extends AnyRef with MockitoSugar {
   val searchController: SearchController = new SearchController(messageApi, mockActorRef, mockNrsRetrievalConnector, appConfig, mockActorSystem, mockMaterializer)
 
   // implicits
-  implicit val hc = mock[HeaderCarrier]
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
 }

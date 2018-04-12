@@ -17,15 +17,15 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.{Environment, Logger}
 import play.api.Mode.Mode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import config.{AppConfig, WSHttpT}
 import models.NrsSearchResult
+
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NrsRetrievalConnector @Inject()(val environment: Environment,
@@ -39,6 +39,8 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
   def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for VRN $vrn")
     http.GET[Seq[NrsSearchResult]](s"${appConfig.nrsRetrievalUrl}/submission-metadata?vrn=$vrn")
+      .map {r => r}
+      .recover {case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]}
   }
 
   def getSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {

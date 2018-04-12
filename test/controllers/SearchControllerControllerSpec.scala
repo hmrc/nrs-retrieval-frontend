@@ -16,13 +16,11 @@
 
 package controllers
 
-import actors.{ActorMessage, SubmitMessage}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import play.api.data.FormError
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
@@ -31,13 +29,11 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
 import connectors.NrsRetrievalConnector
-import org.mockito.ArgumentCaptor
+import play.api.mvc.AnyContentAsEmpty
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture {
 
@@ -67,7 +63,7 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
     }
   }
 
-  private val fakeRequest = FakeRequest("GET", "/")
+  private implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
 
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)

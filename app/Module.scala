@@ -15,14 +15,26 @@
  */
 
 import com.google.inject.AbstractModule
+import com.google.inject.name.Names
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
 import actors.{ActorService, ActorServiceImpl, RetrievalActor}
+import config.MicroserviceAudit
+import javax.inject.Provider
+import uk.gov.hmrc.play.audit.model.Audit
+import uk.gov.hmrc.play.config.AppName
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
   def configure() = {
     bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
     bindActor[RetrievalActor]("retrieval-actor")
+    bind(classOf[Audit]).to(classOf[MicroserviceAudit])
+    bind(classOf[String]).annotatedWith(Names.named("appName")).toProvider(AppNameProvider)
   }
+
+  private object AppNameProvider extends Provider[String] {
+    def get(): String = AppName(configuration).appName
+  }
+
 }

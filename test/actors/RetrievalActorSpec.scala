@@ -76,7 +76,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
 
       Await.result(
         Await.result(
-          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
+          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId, hc)).mapTo[Future[ActorMessage]]
           , 5 seconds)
         , 5 seconds) should be(FailedToStartMessage)
     }
@@ -98,7 +98,7 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
 
       Await.result(
         Await.result(
-          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
+          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId, hc)).mapTo[Future[ActorMessage]]
           , 5 seconds)
         , 5 seconds) should be(StartedMessage)
     }

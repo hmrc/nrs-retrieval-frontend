@@ -30,7 +30,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import actors._
 import akka.util.Timeout
-import config.AppConfig
+import config.{AppConfig, Auditable}
 import connectors.NrsRetrievalConnector
 import controllers.SearchController._
 import models._
@@ -128,7 +128,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   private def doRetrieve(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
-    ask(retrievalActor, SubmitMessage(vaultId, archiveId)).mapTo[Future[ActorMessage]]
+    ask(retrievalActor, SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
     doRefresh(search)
   }
 

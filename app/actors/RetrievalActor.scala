@@ -39,15 +39,16 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
 
   val logger = Logger(this.getClass)
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
+
   implicit val system: ActorContext = context
 
   // get the polling actor for this submission, or create one.
   def receive = {
-    case SubmitMessage(vaultId, archiveId) =>
+    case SubmitMessage(vaultId, archiveId, headerCarrier) =>
       sender ! (pas.maybePollingActor(vaultId, archiveId) match {
         case Some(aR) => ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
         case _ =>
+          implicit val hc = headerCarrier
           nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId) map { response =>
             response.status match {
               case OK =>

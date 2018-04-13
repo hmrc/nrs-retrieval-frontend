@@ -32,15 +32,21 @@ package config
  * limitations under the License.
  */
 
-import javax.inject.{Inject, Singleton}
-
+import javax.inject.{Inject, Named, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.hooks.HttpHooks
+import uk.gov.hmrc.play.audit.http.HttpAuditing
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.http.ws._
-import scala.concurrent.{ExecutionContext, Future}
+
+trait Hooks extends HttpHooks with HttpAuditing {
+  val hooks = Seq(AuditingHook)
+}
 
 @ImplementedBy(classOf[WSHttp])
 trait WSHttpT extends HttpGet with WSGet
@@ -56,3 +62,6 @@ class WSHttp @Inject() (val environment: Environment, val runModeConfiguration: 
   val mode: Mode = environment.mode
   override val hooks = NoneRequired
 }
+
+class MicroserviceAudit @Inject()(@Named("appName") val applicationName: String,
+                                  val auditConnector: AuditConnector) extends Audit(applicationName, auditConnector)

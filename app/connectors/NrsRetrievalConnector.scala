@@ -20,16 +20,17 @@ import javax.inject.{Inject, Singleton}
 import play.api.{Environment, Logger}
 import play.api.Mode.Mode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import config.{AppConfig, WSHttpT}
+import config.{AppConfig, Auditable, WSHttpT}
 import models.NrsSearchResult
-
+import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class NrsRetrievalConnector @Inject()(val environment: Environment,
                                       val http: WSHttpT,
+                                      val auditable: Auditable,
                                       implicit val appConfig: AppConfig) {
 
   val logger: Logger = Logger(this.getClass)
@@ -38,24 +39,51 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
   def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for VRN $vrn")
-    http.GET[Seq[NrsSearchResult]](s"${appConfig.nrsRetrievalUrl}/submission-metadata?vrn=$vrn")
+
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?vrn=$vrn"
+
+    // todo : these values need to come from stride-auth
+    val authProviderId = "authProviderIdValue"
+    val name = "nameValue"
+
+    auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, path))
+
+    http.GET[Seq[NrsSearchResult]](path)
       .map {r => r}
       .recover {case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]}
   }
 
-  def getSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Get submission bundle for vault: $vaultId, archive: $archiveId")
-    http.GET(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
+  def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    logger.info(s"Submit a retrieval request for vault: $vaultName, archive: $archiveId")
+
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"
+
+    // todo : these values to come from stride-auth
+    val authProviderId = "authProviderIdValue"
+    val name = "nameValue"
+
+    auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, path))
+
+    http.POST(path, "", Seq.empty)
   }
 
-  def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Submit a retrieval request for vault: $vaultId, archive: $archiveId")
-    http.POST(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId/retrieval-requests", "", Seq.empty)
+  def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId")
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
+    http.HEAD(path)
   }
 
-  def statusSubmissionBundle(vaultId: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Get submission bundle status for vault: $vaultId, archive: $archiveId")
-    http.HEAD(s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultId/$archiveId")
+  def getSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId")
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
+
+    // todo : these values to come from stride-auth
+    val authProviderId = "authProviderIdValue"
+    val name = "nameValue"
+
+    auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, path))
+
+    http.GET(path)
   }
 
 }

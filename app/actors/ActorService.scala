@@ -46,13 +46,13 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
   implicit val timeout = Timeout(FiniteDuration(5, TimeUnit.SECONDS))
 
   override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
-    context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_${vaultId}_$archiveId")
+    context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
 
   override def maybePollingActor(vaultId: String, archiveId: String)
     (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
       try {
         // todo : consider a non-blocking strategy to get the polling actor ref from the path
-        Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_${vaultId}_$archiveId").resolveOne(), 5 seconds))
+        Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne(), 5 seconds))
       } catch {
         case e: Throwable => None
       }
@@ -63,7 +63,7 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
     val p = Promise[ActorRef]()
     system.actorSelection(actorPath).resolveOne().onComplete {
       case Success(actorRef) => p.success(actorRef)
-      case _ => p.success(system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_${vaultId}_$archiveId"))
+      case _ => p.success(system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId"))
     }
     p.future
   }

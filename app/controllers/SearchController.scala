@@ -159,10 +159,10 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
       case Some(action) if action == "search" => SearchAction
       case Some(action) if action == "refresh" => RefreshAction
       case Some(action) if action startsWith "retrieve" =>
-        val actionParts: Array[String] = action.split("_")
+        val actionParts: Array[String] = action.split("_key_")
         RetrieveAction(actionParts(1), actionParts(2))
       case Some(action) if action startsWith "download" =>
-        val actionParts: Array[String] = action.split("_")
+        val actionParts: Array[String] = action.split("_key_")
         DownloadAction(actionParts(1), actionParts(2))
       case _ => UnknownAction
     }

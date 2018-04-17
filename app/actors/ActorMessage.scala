@@ -34,8 +34,6 @@ case object UnknownMessage extends ActorMessage
 
 case object PollingMessage extends ActorMessage
 
-case object FailedToStartMessage extends ActorMessage
-
 case object StartedMessage extends ActorMessage
 
 case object RestartMessage extends ActorMessage

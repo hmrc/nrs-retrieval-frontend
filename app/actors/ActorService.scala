@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{ActorContext, ActorNotFound, ActorRef, Props}
 import akka.util.Timeout
 import com.google.inject.Inject
-import com.oracle.tools.packager.Log.Logger
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import play.api.Logger

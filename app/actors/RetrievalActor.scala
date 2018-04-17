@@ -57,7 +57,7 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
     logger.info(s"Submit retrieval request for vault: $vaultId, archive: $archiveId.")
     nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId)
       .map(response =>
-        if (response.status != OK) {
+        if (response.status != OK && response.status != ACCEPTED) {
           logger.info(s"Retrieval request submission for vault: $vaultId, archive: $archiveId failed with ${response.status}.")
         } else {
           sender ! pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))

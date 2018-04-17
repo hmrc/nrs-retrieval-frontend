@@ -14,15 +14,60 @@
  * limitations under the License.
  */
 
+import java.net.URL
+
+import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import com.google.inject.AbstractModule
+import com.google.inject.name.{Named, Names}
+import connectors.MicroAuthConnector
+import javax.inject.{Inject, Provider, Singleton}
+import play.api.Mode.Mode
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
-import actors.{ActorService, ActorServiceImpl, RetrievalActor}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.audit.http.HttpAuditing
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.ws.WSHttp
 
-class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport with ServicesConfig {
 
   def configure() = {
     bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
     bindActor[RetrievalActor]("retrieval-actor")
+
+    bindConfigProperty("appName")
+
+    bind(classOf[HttpGet]).to(classOf[HttpVerbs])
+    bind(classOf[HttpPost]).to(classOf[HttpVerbs])
+    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
+    bindBaseUrl("auth")
   }
+
+  override protected def mode: Mode = environment.mode
+
+  override protected def runModeConfiguration: Configuration = configuration
+
+  private class PropertyProvider(confKey: String) extends Provider[String] {
+    override lazy val get = configuration.getString(confKey)
+      .getOrElse(throw new IllegalStateException(s"No value found for configuration property $confKey"))
+  }
+
+  private class BaseUrlProvider(serviceName: String) extends Provider[URL] {
+    override lazy val get = new URL(baseUrl(serviceName))
+  }
+
+  private def bindConfigProperty(propertyName: String) =
+    bind(classOf[String]).annotatedWith(Names.named(propertyName)).toProvider(new PropertyProvider(propertyName))
+
+  private def bindBaseUrl(serviceName: String) =
+    bind(classOf[URL]).annotatedWith(Names.named(s"$serviceName-baseUrl")).toProvider(new BaseUrlProvider(serviceName))
+
+}
+
+@Singleton
+class HttpVerbs @Inject() (val auditConnector: AuditConnector, @Named("appName") val appName: String)
+  extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
+  override val hooks = Seq(AuditingHook)
 }

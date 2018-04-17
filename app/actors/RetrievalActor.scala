@@ -45,41 +45,23 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
 
   def receive = {
     case SubmitMessage(vaultId, archiveId, headerCarrier) =>
-      handleSubmitMessage(vaultId, archiveId, headerCarrier)
+      submitRetrievalRequest(vaultId, archiveId)(headerCarrier)
     case StatusMessage(vaultId, archiveId) =>
-      handleStatusMessage(vaultId, archiveId)
+      sender ! pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
     case _ =>
       logger.warn(s"An unexpected message has been received")
       sender ! Future(UnknownMessage)
   }
 
-  private def handleStatusMessage(vaultId: String, archiveId: String) = {
-    sender ! (pas.maybePollingActor(vaultId, archiveId) match {
-      case Some(aR) =>
-        ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
-      case _ =>
-        pas.startPollingActor(vaultId, archiveId)
-        StartedMessage
-    })
-  }
-
-  private def handleSubmitMessage(vaultId: String, archiveId: String, headerCarrier: HeaderCarrier) = {
-    sender ! (pas.maybePollingActor(vaultId, archiveId) match {
-      case Some(aR) =>
-        ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
-      case _ =>
-        implicit val hc = headerCarrier
-        nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId) map { response =>
-          response.status match {
-            case OK =>
-              logger.info("Retrieval request accepted")
-              pas.startPollingActor(vaultId, archiveId)
-              StartedMessage
-            case _ =>
-              logger.info("Retrieval request failed")
-              FailedToStartMessage
-          }
+  private def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit headerCarrier: HeaderCarrier) = {
+    logger.info(s"Submit retrieval request for vault: $vaultId, archive: $archiveId.")
+    nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId)
+      .map(response =>
+        if (response.status != OK) {
+          logger.info(s"Retrieval request submission for vault: $vaultId, archive: $archiveId failed with ${response.status}.")
+        } else {
+          sender ! pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
         }
-    })
+      )
   }
 }

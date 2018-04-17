@@ -133,7 +133,16 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   private def doRetrieve(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
-    ask(retrievalActor, SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
+
+    println(s">>>>>>>>>>>>>>. $retrievalActor")
+    val v = retrievalActor ? SubmitMessage(vaultId, archiveId, hc)
+    println(s">>>>>>>>>>>>>>. $retrievalActor")
+
+    v.mapTo[Future[ActorMessage]]
+    println(s">>>>>>>>>>>>>>. $retrievalActor")
+
+     ask(retrievalActor, SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
+
     doRefresh(search)
   }
 

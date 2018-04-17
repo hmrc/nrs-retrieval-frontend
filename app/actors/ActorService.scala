@@ -50,10 +50,10 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
   override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
     context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
 
+  // this is only used in testing, remove it when possible
   override def maybePollingActor(vaultId: String, archiveId: String)
                                 (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
     try {
-      // todo : consider a non-blocking strategy to get the polling actor ref from the path
       Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne(), 5 seconds))
     } catch {
       case e: Throwable => None

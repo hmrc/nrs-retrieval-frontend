@@ -56,7 +56,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
-  implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def showSearchPage: Action[AnyContent] = Action.async { implicit request =>
     logger.info("Show the search page")
@@ -90,6 +90,11 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
 
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map(response => rewriteResponseBytes(response))
+  }
+
+  def reset(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    retrievalActor ! RestartMessage
+    Future(Accepted(""))
   }
 
   private def getFormData(request: Request[AnyContent], search: Search)(implicit hc: HeaderCarrier) = {

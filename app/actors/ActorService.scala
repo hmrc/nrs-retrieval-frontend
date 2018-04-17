@@ -18,18 +18,21 @@ package actors
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{ActorContext, ActorPath, ActorRef, ActorSystem, Props}
+import akka.actor.{ActorContext, ActorNotFound, ActorRef, Props}
 import akka.util.Timeout
 import com.google.inject.Inject
+import com.oracle.tools.packager.Log.Logger
 import config.AppConfig
 import connectors.NrsRetrievalConnector
+import play.api.Logger
 
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
 
 trait ActorService {
+
+  val logger = Logger(this.getClass)
 
   def startPollingActor(vaultId: String, archiveId: String)
     (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
@@ -37,9 +40,9 @@ trait ActorService {
   def maybePollingActor(vaultId: String, archiveId: String)
     (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = ???
 
-  def pollingActor(actorPath: ActorPath, vaultId: String, archiveId: String)(
-    implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = ???
- }
+  def pollingActor(vaultId: String, archiveId: String)
+                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
+}
 
 class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
 
@@ -49,23 +52,18 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
     context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
 
   override def maybePollingActor(vaultId: String, archiveId: String)
-    (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
-      try {
-        // todo : consider a non-blocking strategy to get the polling actor ref from the path
-        Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne(), 5 seconds))
-      } catch {
-        case e: Throwable => None
-      }
+                                (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
+    try {
+      // todo : consider a non-blocking strategy to get the polling actor ref from the path
+      Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne(), 5 seconds))
+    } catch {
+      case e: Throwable => None
     }
-
-  private def pollingActor(actorPath: ActorPath, vaultId: String, archiveId: String)
-    (implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = {
-    val p = Promise[ActorRef]()
-    system.actorSelection(actorPath).resolveOne().onComplete {
-      case Success(actorRef) => p.success(actorRef)
-      case _ => p.success(system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId"))
-    }
-    p.future
   }
+
+  override def pollingActor(vaultId: String, archiveId: String)
+                           (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
+      context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne()
+        .recover {case _: ActorNotFound => startPollingActor(vaultId, archiveId)}
 
 }

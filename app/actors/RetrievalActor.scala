@@ -38,39 +38,48 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
   (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   val logger = Logger(this.getClass)
+
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   implicit val system: ActorContext = context
 
-  // get the polling actor for this submission, or create one.
   def receive = {
     case SubmitMessage(vaultId, archiveId, headerCarrier) =>
-      sender ! (pas.maybePollingActor(vaultId, archiveId) match {
-        case Some(aR) => ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
-        case _ =>
-          implicit val hc = headerCarrier
-          nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId) map { response =>
-            response.status match {
-              case OK =>
-                logger.info("Retrieval request accepted")
-                pas.startPollingActor(vaultId, archiveId)
-                StartedMessage
-              case _ =>
-                logger.info("Retrieval request failed")
-                FailedToStartMessage
-            }
-          }
-      })
+      handleSubmitMessage(vaultId, archiveId, headerCarrier)
     case StatusMessage(vaultId, archiveId) =>
-      sender ! (pas.maybePollingActor(vaultId, archiveId) match {
-        case Some(aR) =>
-          ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
-        case _ =>
-          logger.warn(s"An unexpected message has been received")
-          Future(UnknownMessage)
-      })
+      handleStatusMessage(vaultId, archiveId)
     case _ =>
       logger.warn(s"An unexpected message has been received")
       sender ! Future(UnknownMessage)
+  }
+
+  private def handleStatusMessage(vaultId: String, archiveId: String) = {
+    sender ! (pas.maybePollingActor(vaultId, archiveId) match {
+      case Some(aR) =>
+        ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
+      case _ =>
+        pas.startPollingActor(vaultId, archiveId)
+        StartedMessage
+    })
+  }
+
+  private def handleSubmitMessage(vaultId: String, archiveId: String, headerCarrier: HeaderCarrier) = {
+    sender ! (pas.maybePollingActor(vaultId, archiveId) match {
+      case Some(aR) =>
+        ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
+      case _ =>
+        implicit val hc = headerCarrier
+        nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId) map { response =>
+          response.status match {
+            case OK =>
+              logger.info("Retrieval request accepted")
+              pas.startPollingActor(vaultId, archiveId)
+              StartedMessage
+            case _ =>
+              logger.info("Retrieval request failed")
+              FailedToStartMessage
+          }
+        }
+    })
   }
 }

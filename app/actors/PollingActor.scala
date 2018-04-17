@@ -38,7 +38,8 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
 
   implicit def hc:  HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
-  implicit val timeout: Timeout = Timeout(FiniteDuration(3, TimeUnit.SECONDS))
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+
   private val initialDelay = 0.millis
   private var stopTime = Instant.now().plus(appConfig.runTimeMillis)
 

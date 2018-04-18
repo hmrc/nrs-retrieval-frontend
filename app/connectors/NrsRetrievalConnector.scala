@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import config.{AppConfig, Auditable, WSHttpT}
 import models.NrsSearchResult
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -31,6 +32,7 @@ import scala.concurrent.Future
 class NrsRetrievalConnector @Inject()(val environment: Environment,
                                       val http: WSHttpT,
                                       val auditable: Auditable,
+                                      ws: WSClient,
                                       implicit val appConfig: AppConfig) {
 
   val logger: Logger = Logger(this.getClass)
@@ -73,7 +75,7 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     http.HEAD(path)
   }
 
-  def getSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def getSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[WSResponse] = {
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
@@ -83,7 +85,7 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
     auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, path))
 
-    http.GET(path)
+    ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
   }
 
 }

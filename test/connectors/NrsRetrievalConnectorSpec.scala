@@ -27,6 +27,8 @@ import javax.inject.Provider
 import models.NrsSearchResult
 import models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import org.scalatest.BeforeAndAfterEach
+import play.api.libs.iteratee.Iteratee
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import support.fixtures.{Infrastructure, NrsSearchFixture}
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
@@ -81,8 +83,18 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
   "getSubmissionBundle" should {
     "make a get call to /submission-bundles" in {
       when(mockWsHttp.GET[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
+
+      val mockWSRequest2 = mock[WSRequest]
+      when(mockWSRequest2.get(any())(any())).thenReturn(Future.failed(new Throwable))
+
+      val mockWSRequest1 = mock[WSRequest]
+      when(mockWSRequest1.withHeaders(any())).thenReturn(mockWSRequest2)
+
+      when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
+
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.getSubmissionBundle(testAuditId, testArchiveId)).body should be ("Some Text")
+
+      connector.getSubmissionBundle(testAuditId, testArchiveId)
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
     }
   }
@@ -95,8 +107,10 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
   private val mockWsHttp = mock[WSHttpT]
   private val mockEnvironemnt = mock[Environment]
   private val mockHttpResponse = mock[HttpResponse]
+  private val mockWSResponse = mock[WSResponse]
   private val mockAuditConnector = mock[AuditConnector]
   private val mockAuditable = mock[Auditable]
+  private val mockWSClient = mock[WSClient]
   when(mockHttpResponse.body).thenReturn("Some Text")
 
   private val testModule = new AbstractModule {
@@ -106,6 +120,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
       bind(classOf[AppConfig]).toInstance(mockAppConfig)
       bind(classOf[Auditable]).toInstance(mockAuditable)
       bind(classOf[AuditConnector]).toInstance(mockAuditConnector)
+      bind(classOf[WSClient]).toInstance(mockWSClient)
       bind(classOf[Audit]).to(classOf[MicroserviceAudit])
       bind(classOf[String]).annotatedWith(Names.named("appName")).toProvider(AppNameProvider)
     }

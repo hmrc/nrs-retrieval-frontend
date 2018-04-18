@@ -89,7 +89,9 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map(response => rewriteResponseBytes(response))
+    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
+      Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders):_*)
+    }
   }
 
   def reset(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>

@@ -55,8 +55,8 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
     }
   }
 
-  "A retrieval actor in response to a StatusMessage" must {
-    "send an UnknownMessage response when no polling actor exists" in {
+  "A retrieval actor" must {
+    "send an UnknownMessage response when no polling actor exists and an UnknownMessage is received" in {
       val mockPollingActorService = mock[ActorService]
       when(mockPollingActorService.pollingActor(any(), any())(any(), any())).thenReturn(Future.failed(new Throwable))
 
@@ -65,6 +65,20 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
       Await.result(
         Await.result(
           ask(retrievalActor, UnknownMessage).mapTo[Future[ActorMessage]]
+          , 5 seconds)
+        , 5 seconds) should be(UnknownMessage)
+
+    }
+
+    "send an UnknownMessage response when no polling actor exists and a StatusMessage is received" in {
+      val mockPollingActorService = mock[ActorService]
+      when(mockPollingActorService.eventualPollingActor(any(), any())(any(), any())).thenReturn(Future.failed(new Throwable))
+
+      val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
+
+      Await.result(
+        Await.result(
+          ask(retrievalActor, StatusMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
           , 5 seconds)
         , 5 seconds) should be(UnknownMessage)
 

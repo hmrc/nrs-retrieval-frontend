@@ -56,7 +56,7 @@ trait Stride extends AuthorisedFunctions with Controller with I18nSupport {
         Ok(error_template("Not authorised", "Not authorised", ex.msg))
       case ex =>
         logger.warn(s"$actionName - error, other error", ex)
-        Ok(error_template("Not authorised", "Not authorised", "-"))
+        Ok(error_template("Not authorised", "Not authorised", "Sorry, not authorised"))
     }
 
   }

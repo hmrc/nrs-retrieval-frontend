@@ -23,7 +23,7 @@ import connectors.MicroAuthConnector
 import javax.inject.{Inject, Provider, Singleton}
 import play.api.Mode.Mode
 import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.HttpAuditing
@@ -32,6 +32,9 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport with ServicesConfig {
+
+  val log: Logger = Logger(this.getClass)
+  log.info(s"Starting service env: ${environment.mode}")
 
   def configure() = {
     bind(classOf[ActorService]).to(classOf[ActorServiceImpl])

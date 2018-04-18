@@ -64,9 +64,10 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, path))
-
-    http.POST(path, "", Seq.empty)
+    for {
+      post <- http.POST(path, "", Seq.empty)
+      _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, post.header("nr-submission-id").getOrElse("(Empty)"), path))
+    } yield post
   }
 
   def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -83,9 +84,10 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, path))
-
-    ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+    for {
+      get <- ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      _ <- auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
+    } yield get
   }
 
 }

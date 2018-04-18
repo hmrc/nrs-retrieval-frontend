@@ -36,8 +36,8 @@ trait ActorService {
   def startPollingActor(vaultId: String, archiveId: String)
     (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
 
-  def maybePollingActor(vaultId: String, archiveId: String)
-    (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = ???
+  def eventualPollingActor(vaultId: String, archiveId: String)
+                          (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
 
   def pollingActor(vaultId: String, archiveId: String)
                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
@@ -50,19 +50,12 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
   override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
     context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
 
-  // this is only used in testing, remove it when possible
-  override def maybePollingActor(vaultId: String, archiveId: String)
-                                (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Option[ActorRef] = {
-    try {
-      Some(Await.result(context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne(), 5 seconds))
-    } catch {
-      case e: Throwable => None
-    }
-  }
+  override def eventualPollingActor(vaultId: String, archiveId: String)
+                                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
+      context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne()
 
   override def pollingActor(vaultId: String, archiveId: String)
                            (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
-      context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne()
-        .recover {case _: ActorNotFound => startPollingActor(vaultId, archiveId)}
+    eventualPollingActor(vaultId, archiveId).recover {case _: ActorNotFound => startPollingActor(vaultId, archiveId)}
 
 }

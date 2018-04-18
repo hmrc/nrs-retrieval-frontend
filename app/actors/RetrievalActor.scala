@@ -17,9 +17,9 @@
 package actors
 
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Cancellable, Props}
+import javax.inject.Inject
+import akka.actor.{Actor, ActorContext, ActorNotFound, ActorRef, ActorSystem, Cancellable, Props}
 import akka.pattern.ask
 
 import scala.concurrent.duration._
@@ -47,7 +47,10 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
     case SubmitMessage(vaultId, archiveId, headerCarrier) =>
       submitRetrievalRequest(vaultId, archiveId)(headerCarrier)
     case StatusMessage(vaultId, archiveId) =>
-      sender ! pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
+      sender ! pas.eventualPollingActor(vaultId, archiveId)
+        .map(aR => aR ? StatusMessage(vaultId, archiveId))
+        .recover {case _ => UnknownMessage}
+
     case _ =>
       logger.warn(s"An unexpected message has been received")
       sender ! Future(UnknownMessage)

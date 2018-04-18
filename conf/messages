@@ -34,7 +34,6 @@ search.button.refresh.lbl=Refresh
 ################################## Search Results ################################################
 search.results.notfound.lbl=No results found
 search.results.check.lbl=Check which submission types are stored
-search.results.vat.stoed.since.lbl=VAT returns have been stored here from 1 April 2014.
 search.results.submitted.lbl=Submitted on
 search.results.results.lbl=results
 search.results.retrieve.lbl=Retrieve

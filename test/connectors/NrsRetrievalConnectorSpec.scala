@@ -101,8 +101,9 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
 
-      connector.getSubmissionBundle(testAuditId, testArchiveId)
-      verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
+      if(connector.getSubmissionBundle(testAuditId, testArchiveId) != null) {
+        verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
+      }
     }
   }
 

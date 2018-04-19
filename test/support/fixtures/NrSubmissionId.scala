@@ -16,17 +16,8 @@
 
 package support.fixtures
 
-import models.SearchResult
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json.{JsValue, Json}
+import java.util.UUID
 
-trait SearchFixture extends NrSubmissionId {
-
-  val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
-
-  val fileSize = 123456L
-  val retrievalLink: String = SearchResult.retrievalLinkText("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", fileSize)
-  val searchResult = SearchResult(retrievalLink, s"$nrSubmissionId.zip", "12345", "1234567890", 1521114973625L)
-
-
+trait NrSubmissionId {
+  lazy val nrSubmissionId = UUID.randomUUID().toString
 }

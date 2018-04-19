@@ -65,7 +65,7 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
     for {
       post <- http.POST(path, "", Seq.empty)
-      _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, post.header("nr-submission-id").getOrElse("(Empty)"), path))
+      _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, headerUtil(post,"nr-submission-id").head, path))
     } yield post
   }
 
@@ -90,5 +90,10 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
   }
 
   protected def mode: Mode = environment.mode
+
+  private def headerUtil(response: HttpResponse, header: String): Seq[String] = response.allHeaders match {
+    case m: Map[String,Seq[String]] => m(header)
+    case _ => Seq("(Empty)")
+  }
 
 }

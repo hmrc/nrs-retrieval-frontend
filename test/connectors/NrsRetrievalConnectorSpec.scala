@@ -60,6 +60,13 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
       a[Throwable] should be thrownBy await(connector.search("someValue"))
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
+
+//    "make a get call to /submission-metadata and retrieve nr-submission-id from header" in {
+//      when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.successful(Seq(nrsSearchResult)))
+//      when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
+//      a[Throwable] should be thrownBy await(connector.search("someValue"))
+//      verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
+//    }
  }
 
   "submitRetrievalRequest" should {

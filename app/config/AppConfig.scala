@@ -58,5 +58,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, environment: 
   val userName = "Susan Smith"
   
   lazy val nrsStrideRole = loadConfig("stride.role.name")
+  lazy val strideAuth = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
 
 }

@@ -32,6 +32,7 @@ trait Stride extends AuthorisedFunctions with Controller with I18nSupport {
 
   val strideRole: String
   val logger: Logger
+  val appConfig: AppConfig
 
   private def strideAuthorised[B](f: (~[Credentials, Enrolments]) => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
     authorised(
@@ -46,17 +47,22 @@ trait Stride extends AuthorisedFunctions with Controller with I18nSupport {
   def authWithStride(actionName: String, f: => Future[Result])(
     implicit req: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
 
-    strideAuthorised {
-      case ~(credentials, enrolments) =>
-        logger.debug(s"$actionName - authorised")
-        f
-    }.recover {
-      case ex@InsufficientEnrolments(`strideRole`) =>
-        logger.info(s"$actionName - error, not authorised", ex)
-        Ok(error_template("Not authorised", "Not authorised", ex.msg))
-      case ex =>
-        logger.warn(s"$actionName - error, other error", ex)
-        Ok(error_template("Not authorised", "Not authorised", "Sorry, not authorised"))
+    if (appConfig.strideAuth) {
+      strideAuthorised {
+        case ~(credentials, enrolments) =>
+          logger.debug(s"$actionName - authorised")
+          f
+      }.recover {
+        case ex@InsufficientEnrolments(`strideRole`) =>
+          logger.info(s"$actionName - error, not authorised", ex)
+          Ok(error_template("Not authorised", "Not authorised", ex.msg))
+        case ex =>
+          logger.warn(s"$actionName - error, other error", ex)
+          Ok(error_template("Not authorised", "Not authorised", "Sorry, not authorised"))
+      }
+    } else {
+      logger.debug(s"$actionName - auth switched off")
+      f
     }
 
   }

@@ -62,7 +62,7 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
     try {
       Await.result(system.actorSelection(pollingActorPath).resolveOne(), 5 seconds)
     } catch {
-      case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_${vaultId}_$archiveId")
+      case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
     }
   }
 }

@@ -33,8 +33,16 @@ import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
 import play.api.data.Form
+import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc._
+import actors._
+import akka.util.Timeout
+import config.{AppConfig, Auditable}
+import connectors.NrsRetrievalConnector
+import controllers.SearchController._
+import models._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import play.api.mvc._
@@ -62,7 +70,7 @@ class SearchController @Inject()(
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
-  implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   override def authConnector: AuthConnector = authConn
 
@@ -98,7 +106,14 @@ class SearchController @Inject()(
   }
 
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map(response => rewriteResponseBytes(response))
+    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
+      Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders):_*)
+    }
+  }
+
+  def reset(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    retrievalActor ! RestartMessage
+    Future(Accepted(""))
   }
 
   private def getFormData(request: Request[AnyContent], search: Search)(implicit hc: HeaderCarrier) = {
@@ -137,7 +152,8 @@ class SearchController @Inject()(
   }
 
   private def doRetrieve(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
-    ask(retrievalActor, SubmitMessage(vaultId, archiveId)).mapTo[Future[ActorMessage]]
+    (retrievalActor ? SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
+
     doRefresh(search)
   }
 
@@ -168,10 +184,10 @@ class SearchController @Inject()(
       case Some(action) if action == "search" => SearchAction
       case Some(action) if action == "refresh" => RefreshAction
       case Some(action) if action startsWith "retrieve" =>
-        val actionParts: Array[String] = action.split("_")
+        val actionParts: Array[String] = action.split("_key_")
         RetrieveAction(actionParts(1), actionParts(2))
       case Some(action) if action startsWith "download" =>
-        val actionParts: Array[String] = action.split("_")
+        val actionParts: Array[String] = action.split("_key_")
         DownloadAction(actionParts(1), actionParts(2))
       case _ => UnknownAction
     }

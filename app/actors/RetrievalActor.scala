@@ -17,9 +17,9 @@
 package actors
 
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Cancellable, Props}
+import javax.inject.Inject
+import akka.actor.{Actor, ActorContext, ActorNotFound, ActorRef, ActorSystem, Cancellable, Props}
 import akka.pattern.ask
 
 import scala.concurrent.duration._
@@ -38,38 +38,33 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
   (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   val logger = Logger(this.getClass)
+
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
+
   implicit val system: ActorContext = context
 
-  // get the polling actor for this submission, or create one.
   def receive = {
-    case SubmitMessage(vaultId, archiveId) =>
-      sender ! (pas.maybePollingActor(vaultId, archiveId) match {
-        case Some(aR) => ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
-        case _ =>
-          nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId) map { response =>
-            response.status match {
-              case OK =>
-                logger.info("Retrieval request accepted")
-                pas.startPollingActor(vaultId, archiveId)
-                StartedMessage
-              case _ =>
-                logger.info("Retrieval request failed")
-                FailedToStartMessage
-            }
-          }
-      })
+    case SubmitMessage(vaultId, archiveId, headerCarrier) =>
+      submitRetrievalRequest(vaultId, archiveId)(headerCarrier)
     case StatusMessage(vaultId, archiveId) =>
-      sender ! (pas.maybePollingActor(vaultId, archiveId) match {
-        case Some(aR) =>
-          ask(aR, StatusMessage(vaultId, archiveId)).mapTo[ActorMessage]
-        case _ =>
-          logger.warn(s"An unexpected message has been received")
-          Future(UnknownMessage)
-      })
+      sender ! pas.eventualPollingActor(vaultId, archiveId)
+        .flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
+        .recover {case _ => UnknownMessage}
+
     case _ =>
       logger.warn(s"An unexpected message has been received")
       sender ! Future(UnknownMessage)
+  }
+
+  private def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit headerCarrier: HeaderCarrier) = {
+    logger.info(s"Submit retrieval request for vault: $vaultId, archive: $archiveId.")
+    nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId)
+      .map(response =>
+        if (response.status != OK && response.status != ACCEPTED) {
+          logger.info(s"Retrieval request submission for vault: $vaultId, archive: $archiveId failed with ${response.status}.")
+        } else {
+          sender ! pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
+        }
+      )
   }
 }

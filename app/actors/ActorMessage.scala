@@ -16,9 +16,11 @@
 
 package actors
 
+import uk.gov.hmrc.http.HeaderCarrier
+
 trait ActorMessage
 
-case class SubmitMessage(vaultId: String, archiveId: String) extends ActorMessage
+case class SubmitMessage(vaultId: String, archiveId: String, headerCarrier: HeaderCarrier) extends ActorMessage
 
 case class StatusMessage(vaultId: String, archiveId: String) extends ActorMessage
 
@@ -31,8 +33,6 @@ case class FailedMessage(payload: String) extends ActorMessage
 case object UnknownMessage extends ActorMessage
 
 case object PollingMessage extends ActorMessage
-
-case object FailedToStartMessage extends ActorMessage
 
 case object StartedMessage extends ActorMessage
 

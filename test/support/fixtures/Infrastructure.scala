@@ -20,12 +20,12 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import config.AppConfig
 import connectors.NrsRetrievalConnector
-import controllers.SearchController
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import play.api.{Configuration, Environment}
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.duration._
 
 trait Infrastructure extends AnyRef with MockitoSugar {
@@ -53,9 +53,6 @@ trait Infrastructure extends AnyRef with MockitoSugar {
   val duration: FiniteDuration = 3000.millis
   when(mockAppConfig.interval).thenReturn(duration)
   when(mockAppConfig.runTimeMillis).thenReturn(3000)
-
-  // built from mocks
-  val searchController: SearchController = new SearchController(messageApi, mockActorRef, mockNrsRetrievalConnector, appConfig, mockActorSystem, mockMaterializer)
 
   // implicits
   implicit val hc: HeaderCarrier = HeaderCarrier()

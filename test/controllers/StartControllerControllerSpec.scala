@@ -17,23 +17,17 @@
 package controllers
 
 import akka.actor.ActorSystem
-import org.scalatest.mockito.MockitoSugar
+import config.AppConfig
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
-import config.AppConfig
-import org.mockito.Mock
+import support.fixtures.StrideFixture
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class StartControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+import scala.concurrent.Future
 
-  "GET /" should {
-    "return 200" in {
-      val result = controller.showStartPage(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-  }
+class StartControllerControllerSpec extends UnitSpec with WithFakeApplication with StrideFixture {
 
   private val fakeRequest = FakeRequest("GET", "/")
 
@@ -44,6 +38,21 @@ class StartControllerControllerSpec extends UnitSpec with WithFakeApplication wi
   private val appConfig = new AppConfig(configuration, env)
   private val mockActorSystem = mock[ActorSystem]
 
+  private class StartControllerWithAuth(stubbedRetrievalResult: Future[_])
+    extends StartController(messageApi, mockActorSystem, appConfig, mockAuthConn) {
 
-  private val controller = new StartController(messageApi, mockActorSystem, appConfig)
+    override val authConnector = authConnOk(stubbedRetrievalResult)
+
+  }
+
+  private val controller = new StartControllerWithAuth(authResultOk)
+
+  "GET /" should {
+    "return 200" in {
+      val result = controller.showStartPage(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
+
+
 }

@@ -37,8 +37,6 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
   val logger: Logger = Logger(this.getClass)
 
-  protected def mode: Mode = environment.mode
-
   def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for VRN $vrn")
 
@@ -51,8 +49,8 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, path))
 
     http.GET[Seq[NrsSearchResult]](path)
-      .map {r => r}
-      .recover {case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]}
+      .map { r => r }
+      .recover { case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult] }
   }
 
   def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -89,5 +87,7 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
       _ <- auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield get
   }
+
+  protected def mode: Mode = environment.mode
 
 }

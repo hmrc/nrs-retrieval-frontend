@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import config.{AppConfig, Auditable, WSHttpT}
 import models.NrsSearchResult
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -46,11 +46,12 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, path))
-
-    http.GET[Seq[NrsSearchResult]](path)
-      .map { r => r }
-      .recover { case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult] }
+    for{
+      get <- http.GET[Seq[NrsSearchResult]](path)
+        .map { r => r }
+        .recover { case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult] }
+      _ <- auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+    } yield get
   }
 
   def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {

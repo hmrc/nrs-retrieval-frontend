@@ -19,6 +19,7 @@ package config
 import com.google.inject.Inject
 import javax.inject.Named
 import models.audit.DataEventAuditType
+import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
@@ -28,19 +29,19 @@ import scala.concurrent.Future
 
 class Auditable @Inject()(@Named("appName") val applicationName: String, val audit: Audit){
 
+  private val logger = Logger(this.getClass)
+
   // This only has side-effects, making a fire and forget call to an external system
   def sendDataEvent(dataEventAuditType: DataEventAuditType)(implicit hc: HeaderCarrier): Future[Unit] = {
-    Future(
-      audit.sendDataEvent(
-        DataEvent(
-          dataEventAuditType.auditSource,
-          dataEventAuditType.auditType,
-          tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(dataEventAuditType.transactionName, dataEventAuditType.path)
-            ++ dataEventAuditType.tags.tags,
-          detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(dataEventAuditType.details.details.toSeq: _*)
-        )
-      )
+    val event = DataEvent(
+      dataEventAuditType.auditSource,
+      dataEventAuditType.auditType,
+      tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(dataEventAuditType.transactionName, dataEventAuditType.path)
+        ++ dataEventAuditType.tags.tags,
+      detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(dataEventAuditType.details.details.toSeq: _*)
     )
+    logger.debug(s"Audit event: ${event.toString}")
+    Future(audit.sendDataEvent(event))
   }
 
 }

@@ -48,7 +48,7 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
       submitRetrievalRequest(vaultId, archiveId)(headerCarrier)
     case StatusMessage(vaultId, archiveId) =>
       sender ! pas.eventualPollingActor(vaultId, archiveId)
-        .map(aR => aR ? StatusMessage(vaultId, archiveId))
+        .flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
         .recover {case _ => UnknownMessage}
 
     case _ =>

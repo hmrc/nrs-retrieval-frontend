@@ -1,4 +1,4 @@
-service.name.lbl=Non-Repudiation Store
+service.name.lbl=Search the Non-Repudiation Store
 
 ################################## General #######################################################
 years.lbl=years
@@ -6,7 +6,7 @@ page.previous.lbl=Previous page
 page.next.lbl=Next page
 
 ################################## Start Page ####################################################
-start.page.header.lbl=Non-Repudiation Store
+start.page.header.lbl=Search the Non-Repudiation Store
 start.page.title.lbl=Start
 start.text.one.lbl=This service provides original submissions made to HMRC using digital channels.
 start.text.two.lbl=Using this service, you can:

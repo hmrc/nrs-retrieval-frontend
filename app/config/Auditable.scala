@@ -40,7 +40,7 @@ class Auditable @Inject()(@Named("appName") val applicationName: String, val aud
         ++ dataEventAuditType.tags.tags,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(dataEventAuditType.details.details.toSeq: _*)
     )
-    logger.warn(s"Audit event: ${event.toString}")
+    logger.debug(s"Audit event: ${event.toString}")
     Future(audit.sendDataEvent(event))
   }
 

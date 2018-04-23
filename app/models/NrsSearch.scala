@@ -30,21 +30,6 @@ object SearchKeys {
 
 case class HeaderData(govClientPublicIP: String, govClientPublicPort: String)
 
-object HeaderData {
-  val headerDataReads: Reads[HeaderData] = (
-    (JsPath \ "Gov-Client-Public-IP").read[String] and
-      (JsPath \ "Gov-Client-Public-Port").read[String]
-    )(HeaderData.apply _)
-
-  val headerDataWrites: Writes[HeaderData] = (
-    (JsPath \ "Gov-Client-Public-IP").write[String] and
-      (JsPath \ "Gov-Client-Public-Port").write[String]
-    )(unlift(HeaderData.unapply))
-
-  implicit val headerDataFormat: Format[HeaderData] =
-    Format(headerDataReads, headerDataWrites)
-}
-
 case class Glacier (
   vaultName: String,
   archiveId: String
@@ -70,7 +55,7 @@ case class NrsSearchResult(
   userSubmissionTimestamp: ZonedDateTime,
   identityData: JsValue,
   userAuthToken: String,
-  headerData: HeaderData,
+  headerData: JsValue,
   searchKeys: SearchKeys,
   nrSubmissionId: String,
   bundle: Bundle,

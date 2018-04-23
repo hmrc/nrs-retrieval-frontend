@@ -16,7 +16,7 @@
 
 package support.fixtures
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import models._
 import org.joda.time.LocalDate
 import java.time.ZonedDateTime
@@ -25,7 +25,7 @@ trait NrsSearchFixture {
 
   val searchKeys = SearchKeys("vrn", Some(LocalDate.parse("2015-11-01")))
 
-  val headerData = HeaderData("govClientPublicIP", "govClientPublicPort")
+  val headerData: JsValue = Json.parse("""{"SomeAttribute":"SomeValue"}""")
 
   val bundle = Bundle("zip", 123456)
 

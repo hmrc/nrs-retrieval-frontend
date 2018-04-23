@@ -90,17 +90,11 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    val result = ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
-    if(result != null) {
-      result.foreach { get =>
-        auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
-      }
-    }
-//    for{
-//      get <- ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
-//      _ <- auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
-//    }yield get
-    result
+    for{
+      get <- ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      _ <- auditable.sendDataEvent(
+        NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
+    }yield get
   }
 
   protected def mode: Mode = environment.mode

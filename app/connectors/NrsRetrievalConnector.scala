@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import config.{AppConfig, Auditable, WSHttpT}
 import models.NrsSearchResult
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -37,8 +37,6 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
 
   val logger: Logger = Logger(this.getClass)
 
-  protected def mode: Mode = environment.mode
-
   def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for VRN $vrn")
 
@@ -48,11 +46,18 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, path))
-
-    http.GET[Seq[NrsSearchResult]](path)
-      .map {r => r}
-      .recover {case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]}
+    for{
+      get <- http.GET[Seq[NrsSearchResult]](path)
+        .map { r => r }
+        .recover{
+          case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
+          case e if e.getMessage.contains("401") => {
+            auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, "Unauthorized", path))
+            throw e
+          }
+        }
+      _ <- auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+    } yield get
   }
 
   def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -64,9 +69,11 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, path))
-
-    http.POST(path, "", Seq.empty)
+    for {
+      post <- http.POST(path, "", Seq.empty)
+      _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId,
+        if(post.allHeaders == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
+    } yield post
   }
 
   def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -83,9 +90,13 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
     val authProviderId = "authProviderIdValue"
     val name = "nameValue"
 
-    auditable.sendDataEvent(NonRepudiationStoreDownload(authProviderId, name, vaultName, archiveId, path))
-
-    ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+    for{
+      get <- ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      _ <- auditable.sendDataEvent(
+        NonRepudiationStoreRetrieve(authProviderId, name, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
+    }yield get
   }
+
+  protected def mode: Mode = environment.mode
 
 }

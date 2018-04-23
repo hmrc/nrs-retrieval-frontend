@@ -29,7 +29,7 @@ class AuditableSpec extends UnitSpec with MockitoSugar with Infrastructure {
 
   "sendDataEvent" should {
     "send a NonRepudiationStoreSearch audit event" in {
-      val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", "name", "vatReturnVRN", "path")
+      val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", "name", "vatReturnVRN", "nrSubmissionId", "path")
 
       val func: (DataEvent) => Unit = mock[(DataEvent) => Unit]
       when(func.apply(any())).thenReturn(())

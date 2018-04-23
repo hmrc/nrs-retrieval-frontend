@@ -19,7 +19,6 @@ package models.audit
 trait DataEventAuditType {
   val auditSource = "nrs-retrieval"
   val submissionType = "vat-return"
-  val submissionId = "beb6f5b8-f2c3-4d5a-8c72-0888fc1bbbfd"
   val auditType: String
   val transactionName: String
   val path: String
@@ -36,6 +35,7 @@ trait DataEventAuditType {
 case class NonRepudiationStoreSearch(authProviderId: String,
                                      name: String,
                                      VRN: String,
+                                     nrSubmissionId: String,
                                      override val path: String) extends DataEventAuditType {
 
   override val auditType: String = "nonRepudiationStoreSearch"
@@ -46,17 +46,17 @@ case class NonRepudiationStoreSearch(authProviderId: String,
       "authProviderId" -> authProviderId,
       "name" -> name,
       "submissionType" -> submissionType,
-      "nrSubmissionId" -> submissionId,
+      "nrSubmissionId" -> nrSubmissionId,
       "VRN" -> VRN
     ))
   }
 }
 
-
 case class NonRepudiationStoreRetrieve(authProviderId: String,
                                        name: String,
                                        vaultName: String,
                                        archiveId: String,
+                                       nrSubmissionId: String,
                                        override val path: String) extends DataEventAuditType {
 
   override val auditType: String = "nonRepudiationStoreRetrieve"
@@ -67,7 +67,7 @@ case class NonRepudiationStoreRetrieve(authProviderId: String,
       "authProviderId" -> authProviderId,
       "name" -> name,
       "submissionType" -> submissionType,
-      "nrSubmissionId" -> submissionId,
+      "nrSubmissionId" -> nrSubmissionId,
       "vaultName" -> vaultName,
       "archiveId" -> archiveId
     ))
@@ -78,6 +78,7 @@ case class NonRepudiationStoreDownload(authProviderId: String,
                                        name: String,
                                        vaultName: String,
                                        archiveId: String,
+                                       nrSubmissionId: String,
                                        override val path: String) extends DataEventAuditType {
 
   override val auditType: String = "nonRepudiationStoreDownload"
@@ -88,7 +89,7 @@ case class NonRepudiationStoreDownload(authProviderId: String,
       "authProviderId" -> authProviderId,
       "name" -> name,
       "submissionType" -> submissionType,
-      "nrSubmissionId" -> submissionId,
+      "nrSubmissionId" -> nrSubmissionId,
       "vaultName" -> vaultName,
       "archiveId" -> archiveId
     ))

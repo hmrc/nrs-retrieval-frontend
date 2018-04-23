@@ -36,6 +36,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
   val appConfig: AppConfig
   val config = appConfig.runModeConfiguration
   val env = appConfig.environment
+  val authConnector: AuthConnector = null // TODO stride mtdp
 
   private def strideAuthorised[B](f: (~[Credentials, Enrolments]) => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
     authorised(

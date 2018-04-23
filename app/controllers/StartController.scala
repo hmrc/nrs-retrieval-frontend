@@ -31,14 +31,14 @@ import scala.concurrent.Future
 class StartController @Inject()(
   val messagesApi: MessagesApi,
   val system: ActorSystem,
-  implicit val appConfig: AppConfig,
-  val authConn: AuthConnector
+  implicit val appConfig: AppConfig
+//  val authConn: AuthConnector  // TODO stride mdtp
 ) extends FrontendController with I18nSupport with Stride {
 
   val logger: Logger = Logger(this.getClass)
   override val strideRole: String = appConfig.nrsStrideRole
 
-  override def authConnector: AuthConnector = authConn
+  // override def authConnector: AuthConnector = authConn   // TODO stride mdtp
 
   def showStartPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the start page", {

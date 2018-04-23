@@ -44,7 +44,7 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
-    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
+    // bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector]) // TODO stride mdtp config
     bindBaseUrl("auth")
 
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])

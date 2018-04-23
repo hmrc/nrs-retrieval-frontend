@@ -39,7 +39,8 @@ class StartControllerControllerSpec extends UnitSpec with WithFakeApplication wi
   private val mockActorSystem = mock[ActorSystem]
 
   private class StartControllerWithAuth(stubbedRetrievalResult: Future[_])
-    extends StartController(messageApi, mockActorSystem, appConfig, mockAuthConn) {
+//    extends StartController(messageApi, mockActorSystem, appConfig, mockAuthConn) {
+    extends StartController(messageApi, mockActorSystem, appConfig) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

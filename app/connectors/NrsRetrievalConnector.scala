@@ -52,7 +52,7 @@ class NrsRetrievalConnector @Inject()(val environment: Environment,
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
           case e if e.getMessage.contains("401") => {
-            auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, "Unauthorized",path))
+            auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, "Unauthorized", path))
             throw e
           }
         }

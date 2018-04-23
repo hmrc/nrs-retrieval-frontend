@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmrc/nrs-retrieval-frontend.svg)](https://travis-ci.org/hmrc/nrs-retrieval-frontend) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nrs-retrieval-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/nrs-retrieval-frontend/_latestVersion)
 
-This is an initial implementation to confirm connectivity between the deployed nbackend and frontend services.
+This is service provides an interface to the nonrep retrieval backend.
 
 ### License
 

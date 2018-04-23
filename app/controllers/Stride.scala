@@ -17,22 +17,26 @@
 package controllers
 
 import config.AppConfig
-import play.api.Logger
+import play.api.{Logger, Mode}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Controller, Request, Result}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import views.html.error_template
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait Stride extends AuthorisedFunctions with Controller with I18nSupport {
+trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with I18nSupport {
 
   val strideRole: String
   val logger: Logger
   val appConfig: AppConfig
+  val config = appConfig.runModeConfiguration
+  val env = appConfig.environment
+  val authConnector: AuthConnector = null // TODO stride mtdp
 
   private def strideAuthorised[B](f: (~[Credentials, Enrolments]) => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
     authorised(
@@ -45,7 +49,7 @@ trait Stride extends AuthorisedFunctions with Controller with I18nSupport {
   }
 
   def authWithStride(actionName: String, f: => Future[Result])(
-    implicit req: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
+    implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
 
     if (appConfig.strideAuth) {
       strideAuthorised {
@@ -53,6 +57,15 @@ trait Stride extends AuthorisedFunctions with Controller with I18nSupport {
           logger.debug(s"$actionName - authorised")
           f
       }.recover {
+        case _: NoActiveSession =>
+          logger.debug(s"$actionName - NoActiveSession")
+          toStrideLogin(
+            if (env.mode == Mode.Dev) {
+              s"http://${request.host}${request.uri}"
+            }
+            else {
+              s"${request.uri}"
+            })
         case ex@InsufficientEnrolments(`strideRole`) =>
           logger.info(s"$actionName - error, not authorised", ex)
           Ok(error_template("Not authorised", "Not authorised", ex.msg))

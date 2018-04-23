@@ -54,7 +54,8 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   implicit val mockMaterializer: Materializer = mock[Materializer]
   
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
+    // extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
+    extends SearchController(messageApi, mockAcorRef, appConfig, mockNRC, mockSystem, mockMaterializer) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

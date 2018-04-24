@@ -59,20 +59,18 @@ class SearchController @Inject()(
   val messagesApi: MessagesApi,
   @Named("retrieval-actor") retrievalActor: ActorRef,
   implicit val appConfig: AppConfig,
-  // val authConn: AuthConnector, // TODO stride mdtp
+  val authConnector: AuthConnector,
   implicit val nrsRetrievalConnector: NrsRetrievalConnector,
   implicit val system: ActorSystem,
   implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
 
-  val logger: Logger = Logger(this.getClass)
+  override val logger: Logger = Logger(this.getClass)
   val strideRole = appConfig.nrsStrideRole
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-
-  // override def authConnector: AuthConnector = authConn // TODO stride mdtp
 
   def showSearchPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the search page", {

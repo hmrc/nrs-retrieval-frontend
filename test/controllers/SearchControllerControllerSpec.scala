@@ -27,7 +27,7 @@ import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
 import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
@@ -54,8 +54,7 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   implicit val mockMaterializer: Materializer = mock[Materializer]
   
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    // extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
-    extends SearchController(messageApi, mockAcorRef, appConfig, mockNRC, mockSystem, mockMaterializer) {
+    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

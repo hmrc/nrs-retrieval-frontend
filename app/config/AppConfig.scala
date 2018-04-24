@@ -59,5 +59,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   
   lazy val nrsStrideRole = loadConfig("stride.role.name")
   lazy val strideAuth = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
+  lazy val strideHost = runModeConfiguration.getString(s"$env.microservice.services.stride-auth.host").getOrElse("none")
 
 }

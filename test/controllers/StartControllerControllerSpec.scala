@@ -21,7 +21,7 @@ import config.AppConfig
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.test.FakeRequest
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import support.fixtures.StrideFixture
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -39,8 +39,7 @@ class StartControllerControllerSpec extends UnitSpec with WithFakeApplication wi
   private val mockActorSystem = mock[ActorSystem]
 
   private class StartControllerWithAuth(stubbedRetrievalResult: Future[_])
-//    extends StartController(messageApi, mockActorSystem, appConfig, mockAuthConn) {
-    extends StartController(messageApi, mockActorSystem, appConfig) {
+    extends StartController(messageApi, mockActorSystem, appConfig, mockAuthConn) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

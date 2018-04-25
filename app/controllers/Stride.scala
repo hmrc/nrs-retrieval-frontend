@@ -68,7 +68,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
             })
         case ex@InsufficientEnrolments(`strideRole`) =>
           logger.info(s"$actionName - error, not authorised", ex)
-          Ok(error_template("Not authorised", "Not authorised", ex.msg))
+          Ok(error_template("Not authorised", "Not authorised", s"Insufficient enrolments - ${ex.msg}"))
         case ex =>
           logger.warn(s"$actionName - error, other error", ex)
           Ok(error_template("Not authorised", "Not authorised", "Sorry, not authorised"))

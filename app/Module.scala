@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport with ServicesConfig {
 
   val log: Logger = Logger(this.getClass)
-  log.info(s"Starting service env: ${environment.mode}")
+  log.info(s"appConfig: Starting service env: ${environment.mode}")
 
   def configure() = {
     bind(classOf[ActorService]).to(classOf[ActorServiceImpl])

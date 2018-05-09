@@ -38,8 +38,9 @@ class StartController @Inject()(
   override val logger: Logger = Logger(this.getClass)
   override val strideRole: String = appConfig.nrsStrideRole
 
-  logger.info(s"appConfig: strideRole: $strideRole")
-  logger.info(s"appConfig: strideHost: ${appConfig.authHost}:${appConfig.authPort}")
+  logger.info(s"appConfig: stride.enabled: ${appConfig.strideAuth}")
+  logger.info(s"appConfig: stride.role.name: $strideRole")
+  logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
   def showStartPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the start page", {

@@ -17,12 +17,13 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(searchResult: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 <div class="flash error-summary error-summary--show text--black"
-id="error-summary-display"
+id="search-result-failed-@index"
+style="display:none"
 role="alert"
-aria-labelledby="error-summary-heading"
+aria-labelledby="search-result-failed"
 tabindex="-1">
     <h2 id="error-summary-heading" class="h3-heading">@Messages("search.results.error.summary.lbl")</h2>
     <ul>

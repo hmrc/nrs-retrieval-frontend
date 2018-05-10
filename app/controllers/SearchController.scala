@@ -19,32 +19,22 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
-
-import javax.inject.{Inject, Singleton}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
-import akka.util.Timeout
 import com.google.inject.name.Named
-import config.AppConfig
-import connectors.NrsRetrievalConnector
-import controllers.SearchController._
 import javax.inject.{Inject, Singleton}
-import models._
 import play.api.Logger
-import play.api.data.Form
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc._
-import actors._
 import akka.util.Timeout
-import config.{AppConfig, Auditable}
+import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.SearchController._
 import models._
+import org.joda.time.DateTime
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -79,8 +69,7 @@ class SearchController @Inject()(
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
-        search => {
-          val out = Ok(views.html.search_page(searchForm.bindFromRequest, Some(NRUser(appConfig.userName))))
+        _ => {
           Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(NRUser(appConfig.userName)))))
         }
       )
@@ -95,7 +84,8 @@ class SearchController @Inject()(
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          getFormData(request, search).map { form =>
+          val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
+          getFormData(request, search, sRs).map { form =>
             Ok(views.html.search_page(form, Some(NRUser(appConfig.userName))))
           }
         }
@@ -103,76 +93,67 @@ class SearchController @Inject()(
     })
   }
 
+  // todo : poll the status check actor for thirty seconds?
+  def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+    ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
+      case CompleteMessage => Ok("Complete")
+      case FailedMessage(_) => Ok("Failed")
+      case _ => Accepted("Running")
+    }
+ }
+
+
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders):_*)
     }
   }
 
-  def reset(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    retrievalActor ! RestartMessage
-    Future(Accepted(""))
-  }
-
-  private def getFormData(request: Request[AnyContent], search: Search)(implicit hc: HeaderCarrier) = {
-    getFirstAction(request) match {
-      case RefreshAction => doRefresh(search)
-      case RetrieveAction(vaultId, archiveId) => doRetrieve(search, vaultId, archiveId)
-      case DownloadAction(vaultId, archiveId) => doDownload(search, vaultId, archiveId)
+  private def getFormData(request: Request[AnyContent], search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {
+    (getFirstAction(request) match {
+      case RetrieveAction(vaultId, archiveId) => doRetrieve(searchResults, vaultId, archiveId)
       case SearchAction => doSearch(search)
-      case _ => doShow(search)
-    }
+      case _ => Future(searchResults)
+    }).map(sRs => sRs.map (sR => setCompletionStatus(sR)))
+      .map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
   }
 
   private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
     search.query.searchText.map { query =>
       nrsRetrievalConnector.search(query)
         .map(fNSR => fNSR.map(nSR => SearchResult.fromNrsSearchResult(nSR)))
-    }.getOrElse(Future(Seq.empty)).map { sRs =>
-      searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(sRs, sRs.size)))))
-    }
+    }.getOrElse(Future(Seq.empty))
   }
 
-  private def doRefresh(search: Search)(implicit hc: HeaderCarrier) = {
-    search.query.searchText.map { query =>
-      nrsRetrievalConnector.search(query).map { fNSR =>
-            fNSR.map { nSR =>
-              setRetrievalStatus(SearchResult.fromNrsSearchResult(nSR))
-            }
+  private def doRetrieve(searchResults: Seq[SearchResult], vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
+    (for {
+      fAM <- ask(retrievalActor, SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
+      aM <- fAM
+    } yield aM) map {
+        case PollingMessage => searchResults map {sR =>
+          if (sR.vaultId == vaultId && sR.archiveId == archiveId) {
+            sR.copy(retrievalStatus = Some(""))
+          } else {
+            sR
+          }
         }
-    }.getOrElse(Future(Seq.empty)).map { sRs =>
-      searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(sRs, sRs.size)))))
-    }
+        case _ => searchResults
+      }
   }
 
-  private def doShow(search: Search) = {
-    Future(searchForm.bind(Json.toJson(Search(search.query, search.results))))
-  }
-
-  private def doRetrieve(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
-    (retrievalActor ? SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
-
-    doRefresh(search)
-  }
-
-  private def doDownload(search: Search, vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
-    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId) map {response =>
-      response.body.getBytes()
-    }
-    doRefresh(search)
-  }
-
-  private def setRetrievalStatus (searchResult: SearchResult): SearchResult = {
+  private def setCompletionStatus (searchResult: SearchResult): SearchResult = {
     val s = for {
       fAM <- ask(retrievalActor, StatusMessage(searchResult.vaultId, searchResult.archiveId))
         .mapTo[Future[ActorMessage]]
       aM <- fAM
     } yield aM
 
+    // todo : remove this blocking call
     Await.result(s, appConfig.futureTimeoutSeconds seconds) match {
-      case PollingMessage => searchResult.copy(retrievalInProgress = true, retrievalSucceeded = false, retrievalFailed = false)
-      case CompleteMessage => searchResult.copy(retrievalInProgress = false, retrievalSucceeded = true, retrievalFailed = false)
-      case FailedMessage(payload) => searchResult.copy(retrievalInProgress = false, retrievalSucceeded = false, retrievalFailed = true)
+      case CompleteMessage => searchResult.copy(retrievalStatus = Some("Complete"))
+      case FailedMessage(payload) => searchResult.copy(retrievalStatus = Some("Failed"))
+      case PollingMessage => searchResult.copy(retrievalStatus = Some("Running"))
       case _ => searchResult
     }
   }
@@ -194,24 +175,6 @@ class SearchController @Inject()(
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
 
-  private def rewriteResponse (response: HttpResponse) = {
-    val headers: Seq[(String, String)] = mapToSeq(response.allHeaders)
-    response.status match {
-      case 200 => Ok(response.body).withHeaders(headers:_*)
-      case 404 => NotFound(response.body)
-      case _ => Ok(response.body)
-    }
-  }
-
-  private def rewriteResponseBytes (response: HttpResponse) = {
-    val headers: Seq[(String, String)] = mapToSeq(response.allHeaders)
-    response.status match {
-      case 200 => Ok(response.body.getBytes).withHeaders(headers:_*)
-      case 404 => NotFound(response.body.getBytes)
-      case _ => Ok(response.body.getBytes)
-    }
-  }
-
 }
 
 trait SearchPageAction
@@ -232,9 +195,7 @@ object SearchController {
     "vaultId" -> text,
     "archiveId" -> text,
     "submissionDateEpochMilli" -> longNumber,
-    "retrievalInProgress" -> boolean,
-    "retrievalSucceeded" -> boolean,
-    "retrievalFailed" -> boolean
+    "retrievalStatus" -> optional(text)
   )(SearchResult.apply)(SearchResult.unapply)
 
   private val searchResultsMapping = mapping(

@@ -72,12 +72,14 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     case RestartMessage =>
       sender ! PollingMessage
     case _ =>
+      // deliberately log and swallow unknown messages
       logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
   }
 
   def complete: Receive = {
     case StatusMessage(v, a) if v == vaultId && a == archiveId =>
+      sender ! CompleteMessage
+    case IsCompleteMessage(v, a) if v == vaultId && a == archiveId =>
       sender ! CompleteMessage
     case StatusMessage(v, a) =>
       logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")
@@ -92,6 +94,8 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
 
   def failed(payload: String): Receive = {
     case StatusMessage(v, a) if v == vaultId && a == archiveId =>
+      sender ! FailedMessage(payload)
+    case IsCompleteMessage(v, a) if v == vaultId && a == archiveId =>
       sender ! FailedMessage(payload)
     case StatusMessage(v, a) =>
       logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")

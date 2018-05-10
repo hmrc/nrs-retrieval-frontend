@@ -17,10 +17,12 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(searchResult: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-<div class="result-retrieve toggle1 show">
-    <table class="table--borderless">
+<script language="JavaScript" type="application/javascript" src=@routes.Assets.versioned("javascripts/download.js")></script>
+
+<div class="result-retrieve toggle1 show" style="display:none" id="search-result-success-@index">
+    <table                                                                                                                                                                                                                                                                                  class="table--borderless">
         <tr>
             <td class="table-cell--green">
                 <a class="button" id="retrievalComplete@index" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileName">@Messages("search.results.download.lbl") @searchResult.retrievalLink</a>

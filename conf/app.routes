@@ -8,3 +8,5 @@ GET        /search                                  @controllers.SearchControlle
 POST       /search                                  @controllers.SearchController.submitSearchPage
 
 GET        /download/:vaultId/:archiveId            @controllers.SearchController.download(vaultId, archiveId)
+
+GET        /status/:vaultId/:archiveId              @controllers.SearchController.refresh(vaultId, archiveId)

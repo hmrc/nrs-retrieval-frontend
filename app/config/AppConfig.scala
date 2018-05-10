@@ -47,7 +47,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   lazy val interval: FiniteDuration = loadConfig(s"polling.interval").toLong.millis
   lazy val runTimeMillis: Long = loadConfig(s"polling.duration").toLong
-  lazy val futureTimeoutSeconds = 10
+  lazy val futureTimeoutSeconds = 30
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
     SubmissionType("Returns", "VRN", LocalDate.parse("2018-04-01"), 20)))

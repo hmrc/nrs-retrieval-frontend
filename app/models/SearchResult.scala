@@ -27,9 +27,7 @@ case class SearchResult(
   vaultId: String,
   archiveId: String,
   submissionDateEpochMilli: Long,
-  retrievalInProgress: Boolean = false,
-  retrievalSucceeded: Boolean = false,
-  retrievalFailed: Boolean = false)
+  retrievalStatus: Option[String] = None)
 
 object SearchResult {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =

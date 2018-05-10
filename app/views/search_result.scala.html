@@ -17,20 +17,19 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(sR: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(sR: SearchResult)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@if(sR.retrievalInProgress) {
-    @search_result_retrieval_in_progress(sR, index)
-} else {
-    @if(sR.retrievalSucceeded) {
-        @search_result_retrieval_complete(sR, index)
+<div id="retrieve@{sR.vaultId}_@{sR.archiveId}">
+
+    @if(sR.retrievalStatus.isDefined) {
+        @search_result_retrieval_in_progress(sR, s"_key_${sR.vaultId}_key_${sR.archiveId}")
+        @search_result_retrieval_complete(sR, s"_key_${sR.vaultId}_key_${sR.archiveId}")
+        @search_result_retrieval_failed(sR, s"_key_${sR.vaultId}_key_${sR.archiveId}")
     } else {
-        @if(sR.retrievalFailed) {
-            @search_result_retrieval_failed(sR, index)
-        } else {
-            @search_result_show(sR, index)
-        }
+        @search_result_show(sR, s"_key_${sR.vaultId}_key_${sR.archiveId}")
     }
-}
+
+</div>
+
 
 

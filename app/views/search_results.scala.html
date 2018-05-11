@@ -31,17 +31,16 @@
 } else {
     <div class="column-full" id="resultsFound">
 
-@input(searchForm("results.resultCount"))
+    <div style="display: none;">
+    @input(searchForm("results.resultCount"))
     @repeat(searchForm("results.results"), min = 0) {results =>
     @input(results("retrievalLink"))
     @input(results("fileName"))
     @input(results("vaultId"))
     @input(results("archiveId"))
     @input(results("submissionDateEpochMilli"))
-    @input(results("retrievalInProgress"))
-    @input(results("retrievalSucceeded"))
-    @input(results("retrievalFailed"))
-}
+    @input(results("retrievalStatus"))}
+    </div>
 
         <br>
         <p>@searchForm.get.results.get.results.size @Messages("search.results.results.lbl")</p>

@@ -19,7 +19,7 @@ package actors
 import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
-import akka.actor.{Actor, ActorContext}
+import akka.actor.{Actor, ActorContext, ActorRef}
 import akka.pattern.ask
 
 import scala.concurrent.duration._
@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
-  (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+                              (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   val logger = Logger(this.getClass)
 
@@ -48,7 +48,7 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
     case StatusMessage(vaultId, archiveId) =>
       sender ! pas.eventualPollingActor(vaultId, archiveId)
         .flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
-        .recover {case _ => UnknownMessage}
+        .recover { case _ => UnknownMessage }
     case IsCompleteMessage(vaultId, archiveId) =>
       sender ! pas.eventualPollingActor(vaultId, archiveId)
         .flatMap(aR => aR ? IsCompleteMessage(vaultId, archiveId))
@@ -57,17 +57,33 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
       sender ! Future(UnknownMessage)
   }
 
+
   private def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit headerCarrier: HeaderCarrier) = {
     logger.info(s"Submit retrieval request for vault: $vaultId, archive: $archiveId.")
     nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId)
-      .flatMap{response =>
+      .flatMap { response =>
         if (response.status == ACCEPTED) {
-          pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
-          Future(PollingMessage)
+          pas.pollingActorExists(vaultId, archiveId).flatMap {
+            case true => resetPollingActor(vaultId, archiveId)
+              Future(PollingMessage)
+            case _ => pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
+          }
         } else {
           logger.info(s"Retrieval request submission for vault: $vaultId, archive: $archiveId failed with ${response.status}.")
           Future(UnknownMessage)
         }
-    }
+      }
   }
+
+  // reset the polling actor if it complete or has failed
+  private def resetPollingActor(vaultId: String, archiveId: String) = {
+    pas.pollingActor(vaultId, archiveId)
+      .flatMap { pA =>
+        (pA ? StatusMessage(vaultId, archiveId)).mapTo[ActorMessage].map {
+          case CompleteMessage => pA ! RestartMessage
+          case FailedMessage(_) => pA ! RestartMessage
+        }
+      }
+  }
+
 }

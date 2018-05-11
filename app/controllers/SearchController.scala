@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 import actors._
 import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
+import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
 import com.google.inject.name.Named
 import javax.inject.{Inject, Singleton}
@@ -33,7 +33,6 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.SearchController._
 import models._
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
@@ -46,13 +45,13 @@ import scala.concurrent.{Await, Future}
 
 @Singleton
 class SearchController @Inject()(
-  val messagesApi: MessagesApi,
-  @Named("retrieval-actor") retrievalActor: ActorRef,
-  implicit val appConfig: AppConfig,
-  val authConnector: AuthConnector,
-  implicit val nrsRetrievalConnector: NrsRetrievalConnector,
-  implicit val system: ActorSystem,
-  implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
+                                  val messagesApi: MessagesApi,
+                                  @Named("retrieval-actor") retrievalActor: ActorRef,
+                                  implicit val appConfig: AppConfig,
+                                  val authConnector: AuthConnector,
+                                  implicit val nrsRetrievalConnector: NrsRetrievalConnector,
+                                  implicit val system: ActorSystem,
+                                  implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
   val strideRole = appConfig.nrsStrideRole
@@ -93,30 +92,36 @@ class SearchController @Inject()(
     })
   }
 
-  // todo : poll the status check actor for thirty seconds?
+  // Relies on an asynch ask timeout to trigger a response
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+
     ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
       case CompleteMessage => Ok("Complete")
       case FailedMessage(_) => Ok("Failed")
-      case _ => Accepted("Running")
+    } recoverWith {
+      case e: AskTimeoutException => Future(Accepted("Incomplete"))
     }
- }
-
+  }
 
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
-      Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders):_*)
+      Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
     }
   }
 
   private def getFormData(request: Request[AnyContent], search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {
     (getFirstAction(request) match {
-      case RetrieveAction(vaultId, archiveId) => doRetrieve(searchResults, vaultId, archiveId)
+      case RetrieveAction(vaultId, archiveId) =>
+        doRetrieve(searchResults, vaultId, archiveId)
+          .map(sRs => Future.sequence(sRs
+            .map { sR =>
+              if (sR.vaultId == vaultId && sR.archiveId == archiveId) setCompletionStatus(sR) else Future(sR)
+            })).flatMap(identity(_))
       case SearchAction => doSearch(search)
-      case _ => Future(searchResults)
-    }).map(sRs => sRs.map (sR => setCompletionStatus(sR)))
-      .map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
+      // todo : do we need to trap a specific case here?
+      case _ => Future.sequence(searchResults.map(sR => setCompletionStatus(sR)))
+    }).map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
   }
 
   private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
@@ -131,26 +136,23 @@ class SearchController @Inject()(
       fAM <- ask(retrievalActor, SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
       aM <- fAM
     } yield aM) map {
-        case PollingMessage => searchResults map {sR =>
-          if (sR.vaultId == vaultId && sR.archiveId == archiveId) {
-            sR.copy(retrievalStatus = Some(""))
-          } else {
-            sR
-          }
+      case PollingMessage => searchResults map { sR =>
+        if (sR.vaultId == vaultId && sR.archiveId == archiveId) {
+          sR.copy(retrievalStatus = Some(""))
+        } else {
+          sR
         }
-        case _ => searchResults
       }
+      case _ => searchResults
+    }
   }
 
-  private def setCompletionStatus (searchResult: SearchResult): SearchResult = {
-    val s = for {
+  private def setCompletionStatus(searchResult: SearchResult): Future[SearchResult] = {
+    (for {
       fAM <- ask(retrievalActor, StatusMessage(searchResult.vaultId, searchResult.archiveId))
         .mapTo[Future[ActorMessage]]
       aM <- fAM
-    } yield aM
-
-    // todo : remove this blocking call
-    Await.result(s, appConfig.futureTimeoutSeconds seconds) match {
+    } yield aM) map {
       case CompleteMessage => searchResult.copy(retrievalStatus = Some("Complete"))
       case FailedMessage(payload) => searchResult.copy(retrievalStatus = Some("Failed"))
       case PollingMessage => searchResult.copy(retrievalStatus = Some("Running"))
@@ -176,13 +178,6 @@ class SearchController @Inject()(
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
 
 }
-
-trait SearchPageAction
-case object UnknownAction extends SearchPageAction
-case object SearchAction extends SearchPageAction
-case object RefreshAction extends SearchPageAction
-case class DownloadAction (vaultId: String, archiveId: String) extends SearchPageAction
-case class RetrieveAction (vaultId: String, archiveId: String) extends SearchPageAction
 
 object SearchController {
   private val searchQueryMapping = mapping(

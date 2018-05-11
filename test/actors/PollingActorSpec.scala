@@ -44,12 +44,6 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
   }
 
   "A polling actor in poll mode" must {
-    "send a UnknownMessage response in response to an UnknownMessage" in {
-      pollingActor ! RestartMessage
-      Await.result(
-        ask(pollingActor, UnknownMessage).mapTo[ActorMessage]
-        , 5 seconds) should be(UnknownMessage)
-    }
     "send a PollingMessage in response to a StatusMessage for the correct vault and archive" in {
       pollingActor ! RestartMessage
       Await.result(

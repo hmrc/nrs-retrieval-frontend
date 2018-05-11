@@ -41,6 +41,9 @@ trait ActorService {
 
   def pollingActor(vaultId: String, archiveId: String)
                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
+
+  def pollingActorExists(vaultId: String, archiveId: String)
+                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean] = ???
 }
 
 class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
@@ -57,5 +60,9 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
   override def pollingActor(vaultId: String, archiveId: String)
                            (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
     eventualPollingActor(vaultId, archiveId).recover {case _: ActorNotFound => startPollingActor(vaultId, archiveId)}
+
+  override def pollingActorExists(vaultId: String, archiveId: String)
+                           (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean] =
+    eventualPollingActor(vaultId, archiveId).map(_ => true).recover{case _: ActorNotFound => false}
 
 }

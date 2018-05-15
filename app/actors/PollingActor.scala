@@ -50,57 +50,43 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     if (Instant.now().isBefore(stopTime)) {
       checkStatusActor ! StatusMessage(vaultId, archiveId)
     } else {
-      self ! FailedMessage("Timeout")
+      self ! FailedMessage
     }
   }
 
+  // do not respond to an IsCompleteMessage
   def poll: Receive = {
-    case StatusMessage(v, a) if v == vaultId && a == archiveId =>
+    case StatusMessage(_, _) =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId is in progress.")
       sender ! PollingMessage
-    case StatusMessage(v, a) =>
-      logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
     case CompleteMessage =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has successfully completed.")
       cancellable.cancel()
       context.become(complete)
-    case FailedMessage(payload) =>
+    case FailedMessage =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has failed.")
       cancellable.cancel()
-      context.become(failed(payload))
+      context.become(failed)
     case RestartMessage =>
       sender ! PollingMessage
-    case _ =>
-      logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
+    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
   def complete: Receive = {
-    case StatusMessage(v, a) if v == vaultId && a == archiveId =>
-      sender ! CompleteMessage
-    case StatusMessage(v, a) =>
-      logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
+    case StatusMessage(_, _) => sender ! CompleteMessage
+    case IsCompleteMessage(_, _) => sender ! CompleteMessage
     case RestartMessage =>
       stopTime = Instant.now().plus(appConfig.runTimeMillis)
       context.become(poll)
-    case _ =>
-      logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
+    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
-  def failed(payload: String): Receive = {
-    case StatusMessage(v, a) if v == vaultId && a == archiveId =>
-      sender ! FailedMessage(payload)
-    case StatusMessage(v, a) =>
-      logger.warn(s"Status message request for vault: $v, archive: $a has been sent to an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
+  def failed: Receive = {
+    case StatusMessage(_, _) => sender ! FailedMessage
+    case IsCompleteMessage(_, _) => sender ! FailedMessage
     case RestartMessage =>
       stopTime = Instant.now().plus(appConfig.runTimeMillis)
       context.become(poll)
-    case _ =>
-      logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
-      sender ! UnknownMessage
+    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 }

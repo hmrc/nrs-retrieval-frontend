@@ -17,14 +17,22 @@
 @import config.AppConfig
 @import models.SearchResult
 @import views.helpers.Utils._
-@(searchResult: SearchResult, index: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@import uk.gov.hmrc.play.views.html.helpers.input
+@(searchResult: SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-    <div class="result-retrieve toggle1 show">
+    <div class="result-retrieve toggle1 show" id="search-result-show-@index">
         <table class="table--borderless">
             <tr>
                 <td class="table-cell--light">
                     <p class="event-record lede">
-                        <button id="retrieve@index" type="submit" name="action" class="button button--link" value="retrieve_key_@{searchResult.vaultId}_key_@{searchResult.archiveId}">@Messages("search.results.retrieve.lbl") @searchResult.retrievalLink</button>
+                        <button
+                        id="retrieve@index"
+                        type="submit"
+                        name="action"
+                        class="button button--link"
+                        value="retrieve_key_@{searchResult.vaultId}_key_@{searchResult.archiveId}">
+                        @Messages("search.results.retrieve.lbl") @searchResult.retrievalLink
+                        </button>
                     </p>
                 </td>
             </tr>
@@ -40,4 +48,5 @@
             </tr>
         </table>
         <br>
+
     </div>

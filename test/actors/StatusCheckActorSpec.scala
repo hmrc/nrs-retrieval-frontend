@@ -77,7 +77,7 @@ class StatusCheckActorSpec() extends TestKit(ActorSystem("MySpec")) with Implici
 
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(FailedMessage(Status.BAD_REQUEST.toString))
+        , 5 seconds) should be(FailedMessage)
     }
   }
 

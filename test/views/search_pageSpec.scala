@@ -34,11 +34,11 @@ package views
 
 import play.api.data.Form
 import play.api.i18n.Messages
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.twirl.api.HtmlFormat
 import config.AppConfig
-import controllers.SearchController
-import models.{Search, SearchQuery, SearchResult, SearchResults}
+import controllers.FormMappings
+import models.{Search, SearchResult, SearchResults}
 import support.GuiceAppSpec
 import support.fixtures.{SearchFixture, ViewFixture}
 import views.html._
@@ -47,6 +47,8 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
 
 
   "search page with a valid form only" should {
+    val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [],"resultCount": 0}}""")
+    val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
     "have the correct title and GA page view event" in new SearchPageViewFixture {
       val view: HtmlFormat.Appendable = search_page(searchForm)
       doc.title mustBe Messages("search.page.title.lbl")
@@ -58,54 +60,56 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
     }
   }
 
-//  "search page with a valid form and no results" should {
-//    val searchResults: Option[SearchResults] = None
-//
-//    "not display the not found panel" in new SearchPageViewFixture {
-//      val view: HtmlFormat.Appendable = search_page(searchForm, searchResults)
-//      Option(doc.getElementById("notFound")).isDefined mustBe false
-//    }
-//
-//    "not display the results panel" in new SearchPageViewFixture {
-//      val view: HtmlFormat.Appendable = search_page(searchForm, searchResults)
-//      Option(doc.getElementById("resultsFound")).isDefined mustBe false
-//    }
-//  }
-//
-//  "search page with a valid form and an empty results" should {
-//    val searchResults: Option[SearchResults] = Some(models.SearchResults(Seq.empty[SearchResult], 1))
-//
-//    "display the not found panel" in new SearchPageViewFixture {
-//      val view: HtmlFormat.Appendable = search_page(searchForm, searchResults)
-//      Option(doc.getElementById("notFound")).isDefined mustBe true
-//    }
-//
-//    "not display the results panel" in new SearchPageViewFixture {
-//      val view: HtmlFormat.Appendable = search_page(searchForm, searchResults)
-//      Option(doc.getElementById("resultsFound")).isDefined mustBe false
-//    }
-//  }
-//
-//  "search page with a valid form and results" should {
-//    val searchResults: Option[SearchResults] = Some(SearchResults(Seq(searchResult, searchResult, searchResult)))
-//
-//    "not display the not found panel" in new SearchPageViewFixture {
-//      val view: HtmlFormat.Appendable = search_page(searchForm, searchResults)
-//      Option(doc.getElementById("notFound")).isDefined mustBe false
-//    }
-//
-//    "display the results panel" in new SearchPageViewFixture {
-//      val view: HtmlFormat.Appendable = search_page(searchForm, searchResults)
-//      Option(doc.getElementById("resultsFound")).isDefined mustBe true
-//    }
-//  }
+  "search page with a valid form and no results" should {
+    val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"}}""")
+    val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
+
+    "not display the not found panel" in new SearchPageViewFixture {
+      val view: HtmlFormat.Appendable = search_page(searchForm)
+      Option(doc.getElementById("notFound")).isDefined mustBe false
+    }
+
+    "not display the results panel" in new SearchPageViewFixture {
+      val view: HtmlFormat.Appendable = search_page(searchForm)
+      Option(doc.getElementById("resultsFound")).isDefined mustBe false
+    }
+  }
+
+  "search page with a valid form and an empty results" should {
+    val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [],"resultCount": 0}}""")
+    val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
+    val searchResults: Option[SearchResults] = Some(models.SearchResults(Seq.empty[SearchResult], 1))
+
+    "display the not found panel" in new SearchPageViewFixture {
+      val view: HtmlFormat.Appendable = search_page(searchForm)
+      Option(doc.getElementById("notFound")).isDefined mustBe true
+    }
+
+    "not display the results panel" in new SearchPageViewFixture {
+      val view: HtmlFormat.Appendable = search_page(searchForm)
+      Option(doc.getElementById("resultsFound")).isDefined mustBe false
+    }
+  }
+
+  "search page with a valid form and results" should {
+    val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [{"retrievalLink": "link", "fileName": "filename", "vaultId": "vaultId", "archiveId": "archiveId", "submissionDateEpochMilli": 1}],"resultCount": 0}}""")
+    val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
+
+    "not display the not found panel" in new SearchPageViewFixture {
+      val view: HtmlFormat.Appendable = search_page(searchForm, None)
+      Option(doc.getElementById("notFound")).isDefined mustBe false
+    }
+
+    "display the results panel" in new SearchPageViewFixture {
+      val view: HtmlFormat.Appendable = search_page(searchForm, None)
+      Option(doc.getElementById("resultsFound")).isDefined mustBe true
+    }
+  }
 
   trait SearchPageViewFixture extends ViewFixture {
     implicit val requestWithToken = addToken(request)
   }
 
   implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-
-  val searchForm: Form[Search] = SearchController.searchForm.bind(Json.obj("searchText" -> "someSearchText"))
 
 }

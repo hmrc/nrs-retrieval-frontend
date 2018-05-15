@@ -20,18 +20,20 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.{ActorNotFound, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
-import akka.testkit.{ImplicitSender, TestKit}
+import akka.testkit.{ImplicitSender, TestActors, TestKit}
 import akka.util.Timeout
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import play.api.http.Status._
 import support.fixtures.Infrastructure
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-// todo : use unit spec in line with our other tests
 class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
   with WordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
 
@@ -41,47 +43,41 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
     TestKit.shutdownActorSystem(system)
   }
 
-  "A retrieval actor in response to an UnknownMessage" must {
-    "send an UnknownMessage response" in {
-      val mockPollingActorService = mock[ActorService]
-      val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
-
-      Await.result(
-        Await.result(
-          ask(retrievalActor, UnknownMessage).mapTo[Future[ActorMessage]]
-          , 5 seconds)
-        , 5 seconds) should be(UnknownMessage)
-
-    }
-  }
-
   "A retrieval actor" must {
-    "send an UnknownMessage response when no polling actor exists and an UnknownMessage is received" in {
+
+    "submit a retrieval request on receiving a SubmitRequest message" in {
+      val echo = system.actorOf(TestActors.echoActorProps)
+
       val mockPollingActorService = mock[ActorService]
-      when(mockPollingActorService.pollingActor(any(), any())(any(), any())).thenReturn(Future.failed(new Throwable))
+      when(mockPollingActorService.pollingActorExists(any(), any())(any(), any())).thenReturn(Future(true))
+      when(mockPollingActorService.pollingActor(any(), any())(any(), any())).thenReturn(Future.successful(echo))
+
+      val mockHttpResponse = mock[HttpResponse]
+      when(mockNrsRetrievalConnector.submitRetrievalRequest(any(), any())(any())).thenReturn(Future(mockHttpResponse))
+      when(mockHttpResponse.status).thenReturn(ACCEPTED)
 
       val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
 
       Await.result(
         Await.result(
-          ask(retrievalActor, UnknownMessage).mapTo[Future[ActorMessage]]
+          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId, hc)).mapTo[Future[ActorMessage]]
           , 5 seconds)
-        , 5 seconds) should be(UnknownMessage)
-
+        , 5 seconds) should be(PollingMessage)
     }
 
-    "send an UnknownMessage response when no polling actor exists and a StatusMessage is received" in {
+    "respond to an IsComplete message with a CompleteMessage when polling has completed" in {
+      val echo = system.actorOf(TestActors.echoActorProps)
+
       val mockPollingActorService = mock[ActorService]
-      when(mockPollingActorService.eventualPollingActor(any(), any())(any(), any())).thenReturn(Future.failed(new Throwable))
+      when(mockPollingActorService.eventualPollingActor(any(), any())(any(), any())).thenReturn(Future.successful(echo))
 
       val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
 
       Await.result(
         Await.result(
-          ask(retrievalActor, StatusMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
+          ask(retrievalActor, IsCompleteMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
           , 5 seconds)
-        , 5 seconds) should be(UnknownMessage)
-
+        , 5 seconds) should be(IsCompleteMessage(testVaultId, testArchiveId))
     }
   }
 

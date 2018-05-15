@@ -25,6 +25,7 @@
 }
 
 @main_template(title = s"Search", userName) {
+
     <h1 id="pageHeader">@Messages("search.page.header.lbl")</h1>
     @form(
         action = routes.SearchController.submitSearchPage,

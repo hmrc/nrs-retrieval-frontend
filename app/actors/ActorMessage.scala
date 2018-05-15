@@ -24,11 +24,13 @@ case class SubmitMessage(vaultId: String, archiveId: String, headerCarrier: Head
 
 case class StatusMessage(vaultId: String, archiveId: String) extends ActorMessage
 
+case class IsCompleteMessage(vaultId: String, archiveId: String) extends ActorMessage
+
 case object IncompleteMessage extends ActorMessage
 
 case object CompleteMessage extends ActorMessage
 
-case class FailedMessage(payload: String) extends ActorMessage
+case object FailedMessage extends ActorMessage
 
 case object UnknownMessage extends ActorMessage
 

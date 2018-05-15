@@ -22,18 +22,13 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
-import org.mockito.Matchers.any
-import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
-import play.api.http.Status
 import support.fixtures.Infrastructure
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 
-// todo : use unit spec in line with our other tests
 class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
   with WordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
 
@@ -44,17 +39,11 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
   }
 
   "A polling actor in poll mode" must {
-    "send a PollingMessage in response to a StatusMessage for the correct vault and archive" in {
+    "send a PollingMessage in response to a StatusMessage" in {
       pollingActor ! RestartMessage
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
         , 5 seconds) should be(PollingMessage)
-    }
-    "send a PollingMessage in response a StatusMessage for the incorrect vault and archive" in {
-      pollingActor ! RestartMessage
-      Await.result(
-        ask(pollingActor, StatusMessage("2", "3")).mapTo[ActorMessage]
-        , 5 seconds) should be(UnknownMessage)
     }
     "change to complete mode in response to a CompleteMessage" in {
       pollingActor ! RestartMessage
@@ -66,11 +55,11 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     }
     "change to failed mode in response to a FailedMessage" in {
       pollingActor ! RestartMessage
-      pollingActor ! FailedMessage("broken")
+      pollingActor ! FailedMessage
 
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(FailedMessage("broken"))
+        , 5 seconds) should be(FailedMessage)
     }
     "send a PollingMessage in response to a RestartMessage" in {
       pollingActor ! RestartMessage
@@ -81,26 +70,12 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
   }
 
   "A polling actor in complete mode" must {
-    "send a UnknownMessage response in response to an UnknownMessage" in {
-      pollingActor ! RestartMessage
-      pollingActor ! CompleteMessage
-      Await.result(
-        ask(pollingActor, UnknownMessage).mapTo[ActorMessage]
-        , 5 seconds) should be(UnknownMessage)
-    }
-    "send a CompleteMessage in response to a StatusMessage for the correct vault and archive" in {
+    "send a CompleteMessage in response to a StatusMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
         , 5 seconds) should be(CompleteMessage)
-    }
-    "send a UnknownMessage in response a StatusMessage for the incorrect vault and archive" in {
-      pollingActor ! RestartMessage
-      pollingActor ! CompleteMessage
-      Await.result(
-        ask(pollingActor, StatusMessage("2", "3")).mapTo[ActorMessage]
-        , 5 seconds) should be(UnknownMessage)
     }
     "change to poll mode in response to a RestartMessage" in {
       pollingActor ! RestartMessage
@@ -113,30 +88,16 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
   }
 
   "A polling actor in failed mode" must {
-    "send a UnknownMessage response in response to an UnknownMessage" in {
+    "send a FailedMessage in response to a StatusMessage" in {
       pollingActor ! RestartMessage
-      pollingActor ! FailedMessage("broken")
-      Await.result(
-        ask(pollingActor, UnknownMessage).mapTo[ActorMessage]
-        , 5 seconds) should be(UnknownMessage)
-    }
-    "send a FailedMessage in response to a StatusMessage for the correct vault and archive" in {
-      pollingActor ! RestartMessage
-      pollingActor ! FailedMessage("broken")
+      pollingActor ! FailedMessage
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(FailedMessage("broken"))
-    }
-    "send a UnknownMessage in response a StatusMessage for the incorrect vault and archive" in {
-      pollingActor ! RestartMessage
-      pollingActor ! FailedMessage("broken")
-      Await.result(
-        ask(pollingActor, StatusMessage("2", "3")).mapTo[ActorMessage]
-        , 5 seconds) should be(UnknownMessage)
+        , 5 seconds) should be(FailedMessage)
     }
     "change to poll mode in response to a RestartMessage" in {
       pollingActor ! RestartMessage
-      pollingActor ! FailedMessage("broken")
+      pollingActor ! FailedMessage
       pollingActor ! RestartMessage
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]

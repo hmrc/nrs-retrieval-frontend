@@ -18,8 +18,6 @@ package controllers
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
-import config.AppConfig
-import connectors.NrsRetrievalConnector
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -27,8 +25,8 @@ import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.{Configuration, Environment, Logger}
-import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
+import play.api.{Configuration, Environment}
+import support.fixtures.StrideFixture
 import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
 import connectors.NrsRetrievalConnector
@@ -36,7 +34,6 @@ import play.api.mvc.AnyContentAsEmpty
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.Future
 import scala.concurrent.Future
 
 class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture with StrideFixture {
@@ -81,7 +78,7 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   "searchForm" should {
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText")
-      val validatedForm = SearchController.searchForm.bind(postData)
+      val validatedForm = FormMappings.searchForm.bind(postData)
       validatedForm.errors shouldBe empty
     }
     "create a header carrier with X-API-Key when one exists in config" in {

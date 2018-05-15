@@ -30,7 +30,7 @@ case object IncompleteMessage extends ActorMessage
 
 case object CompleteMessage extends ActorMessage
 
-case class FailedMessage(payload: String) extends ActorMessage
+case object FailedMessage extends ActorMessage
 
 case object UnknownMessage extends ActorMessage
 

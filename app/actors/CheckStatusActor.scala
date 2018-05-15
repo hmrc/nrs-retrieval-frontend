@@ -49,7 +49,7 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
             pollingActor(vaultId, archiveId) ! CompleteMessage
           }
           case NOT_FOUND => logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
-          case _ => pollingActor(vaultId, archiveId) ! FailedMessage(response.status.toString)
+          case _ => pollingActor(vaultId, archiveId) ! FailedMessage
         }
       }
     }

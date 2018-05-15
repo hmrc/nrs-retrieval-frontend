@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import config.AppConfig
-@import models.SearchResult
-@import views.helpers.Utils._
-@(sR: SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+package models
 
-<div id="retrieve@index">
-
-    @if(sR.retrievalStatus.isDefined) {
-        @search_result_retrieval_in_progress(sR, index)
-        @search_result_retrieval_complete(sR, index)
-        @search_result_retrieval_failed(sR, index)
-    } else {
-        @search_result_show(sR, index)
-    }
-
-</div>
-
-
-
+object CompletionStatus {
+  val complete = "Complete"
+  val failed = "Failed"
+  val incomplete = "Incomplete"
+}

@@ -19,19 +19,17 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
+import FormMappings._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
 import com.google.inject.name.Named
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import akka.util.Timeout
 import config.AppConfig
 import connectors.NrsRetrievalConnector
-import controllers.SearchController._
 import models._
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -41,20 +39,19 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 @Singleton
-class SearchController @Inject()(
-                                  val messagesApi: MessagesApi,
-                                  @Named("retrieval-actor") retrievalActor: ActorRef,
-                                  implicit val appConfig: AppConfig,
-                                  val authConnector: AuthConnector,
-                                  implicit val nrsRetrievalConnector: NrsRetrievalConnector,
-                                  implicit val system: ActorSystem,
-                                  implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
+class SearchController @Inject()(val messagesApi: MessagesApi,
+                                 @Named("retrieval-actor") retrievalActor: ActorRef,
+                                 implicit val appConfig: AppConfig,
+                                 val authConnector: AuthConnector,
+                                 implicit val nrsRetrievalConnector: NrsRetrievalConnector,
+                                 implicit val system: ActorSystem,
+                                 implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  val strideRole = appConfig.nrsStrideRole
+  val strideRole: String = appConfig.nrsStrideRole
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
@@ -92,15 +89,12 @@ class SearchController @Inject()(
     })
   }
 
-  // Relies on an asynch ask timeout to trigger a response
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-
     ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-      case CompleteMessage => Ok("Complete")
-      case FailedMessage(_) => Ok("Failed")
+      case CompleteMessage => Ok(CompletionStatus.complete)
+      case FailedMessage => Ok(CompletionStatus.failed)
     } recoverWith {
-      case e: AskTimeoutException => Future(Accepted("Incomplete"))
+      case e: AskTimeoutException => Future(Accepted(CompletionStatus.incomplete))
     }
   }
 
@@ -114,13 +108,11 @@ class SearchController @Inject()(
     (getFirstAction(request) match {
       case RetrieveAction(vaultId, archiveId) =>
         doRetrieve(searchResults, vaultId, archiveId)
-          .map(sRs => Future.sequence(sRs
+          .map(sRs => sRs
             .map { sR =>
-              if (sR.vaultId == vaultId && sR.archiveId == archiveId) setCompletionStatus(sR) else Future(sR)
-            })).flatMap(identity(_))
+              if (sR.vaultId == vaultId && sR.archiveId == archiveId) sR.copy(retrievalStatus = Some(CompletionStatus.incomplete)) else sR})
       case SearchAction => doSearch(search)
-      // todo : do we need to trap a specific case here?
-      case _ => Future.sequence(searchResults.map(sR => setCompletionStatus(sR)))
+      case _ => Future(searchResults)
     }).map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
   }
 
@@ -147,66 +139,17 @@ class SearchController @Inject()(
     }
   }
 
-  private def setCompletionStatus(searchResult: SearchResult): Future[SearchResult] = {
-    (for {
-      fAM <- ask(retrievalActor, StatusMessage(searchResult.vaultId, searchResult.archiveId))
-        .mapTo[Future[ActorMessage]]
-      aM <- fAM
-    } yield aM) map {
-      case CompleteMessage => searchResult.copy(retrievalStatus = Some("Complete"))
-      case FailedMessage(payload) => searchResult.copy(retrievalStatus = Some("Failed"))
-      case PollingMessage => searchResult.copy(retrievalStatus = Some("Running"))
-      case _ => searchResult
-    }
-  }
-
   private def getFirstAction(request: Request[AnyContent]): SearchPageAction = {
     request.body.asFormUrlEncoded.getOrElse(Map.empty).get("action").flatMap(_.headOption) match {
       case Some(action) if action == "search" => SearchAction
-      case Some(action) if action == "refresh" => RefreshAction
       case Some(action) if action startsWith "retrieve" =>
         val actionParts: Array[String] = action.split("_key_")
         RetrieveAction(actionParts(1), actionParts(2))
-      case Some(action) if action startsWith "download" =>
-        val actionParts: Array[String] = action.split("_key_")
-        DownloadAction(actionParts(1), actionParts(2))
       case _ => UnknownAction
     }
   }
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
-
-}
-
-object SearchController {
-  private val searchQueryMapping = mapping(
-    "searchText" -> optional(text)
-  )(SearchQuery.apply)(SearchQuery.unapply)
-
-  private val searchResultMapping = mapping(
-    "retrievalLink" -> text,
-    "fileName" -> text,
-    "vaultId" -> text,
-    "archiveId" -> text,
-    "submissionDateEpochMilli" -> longNumber,
-    "retrievalStatus" -> optional(text)
-  )(SearchResult.apply)(SearchResult.unapply)
-
-  private val searchResultsMapping = mapping(
-    "results" -> seq[SearchResult](searchResultMapping),
-    "resultCount" -> number
-  )(SearchResults.apply)(SearchResults.unapply)
-
-
-  val searchForm: Form[Search] = Form(
-    mapping("query" -> searchQueryMapping,
-      "results" -> optional(searchResultsMapping)
-    )
-    (Search.apply)(Search.unapply))
-
-  val searchQueryForm: Form[SearchQuery] = Form(searchQueryMapping)
-
-  val searchResultsForm: Form[SearchResults] = Form(searchResultsMapping)
 
 }

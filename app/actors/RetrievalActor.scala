@@ -19,7 +19,7 @@ package actors
 import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
-import akka.actor.{Actor, ActorContext, ActorRef}
+import akka.actor.{Actor, ActorContext}
 import akka.pattern.ask
 
 import scala.concurrent.duration._
@@ -45,18 +45,10 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
   def receive = {
     case SubmitMessage(vaultId, archiveId, headerCarrier) =>
       sender ! submitRetrievalRequest(vaultId, archiveId)(headerCarrier)
-    case StatusMessage(vaultId, archiveId) =>
-      sender ! pas.eventualPollingActor(vaultId, archiveId)
-        .flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
-        .recover { case _ => UnknownMessage }
     case IsCompleteMessage(vaultId, archiveId) =>
-      sender ! pas.eventualPollingActor(vaultId, archiveId)
-        .flatMap(aR => aR ? IsCompleteMessage(vaultId, archiveId))
-    case _ =>
-      logger.warn(s"An unexpected message has been received")
-      sender ! Future(UnknownMessage)
+      sender ! pas.eventualPollingActor(vaultId, archiveId).flatMap(aR => aR ? IsCompleteMessage(vaultId, archiveId))
+    case _ => logger.warn(s"An unexpected message has been received")
   }
-
 
   private def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit headerCarrier: HeaderCarrier) = {
     logger.info(s"Submit retrieval request for vault: $vaultId, archive: $archiveId.")
@@ -81,7 +73,7 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
       .flatMap { pA =>
         (pA ? StatusMessage(vaultId, archiveId)).mapTo[ActorMessage].map {
           case CompleteMessage => pA ! RestartMessage
-          case FailedMessage(_) => pA ! RestartMessage
+          case FailedMessage => pA ! RestartMessage
         }
       }
   }

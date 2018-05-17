@@ -17,12 +17,13 @@
 package controllers
 
 import config.AppConfig
+import models.NRUser
 import play.api.{Logger, Mode}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Controller, Request, Result}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import views.html.error_template
@@ -38,24 +39,24 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
   val env = appConfig.environment
   val authConnector: AuthConnector
 
-  private def strideAuthorised[B](f: (~[Credentials, Enrolments]) => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
+  private def strideAuthorised[B](f: Credentials ~ Enrolments ~ Name => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
     authorised(
-      Enrolment(strideRole) and AuthProviders(PrivilegedApplication)
+      Enrolment(strideRole).and(AuthProviders(PrivilegedApplication))
     ).retrieve(
-      Retrievals.credentials and Retrievals.authorisedEnrolments
+      Retrievals.credentials.and(Retrievals.authorisedEnrolments).and(Retrievals.name)
     ) {
       f
     }
   }
 
-  def authWithStride(actionName: String, f: => Future[Result])(
+  def authWithStride(actionName: String, f: NRUser => Future[Result])(
     implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
 
     if (appConfig.strideAuth) {
       strideAuthorised {
-        case ~(credentials, enrolments) =>
-          logger.debug(s"$actionName - authorised")
-          f
+        case credentials ~ enrolments ~ name =>
+          logger.debug(s"$actionName - authorised, enrolments=$enrolments")
+          f(NRUser((name.name.toList ++ name.lastName.toList).mkString(" ")))
       }.recover {
         case _: NoActiveSession =>
           logger.debug(s"$actionName - NoActiveSession")
@@ -75,7 +76,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
       }
     } else {
       logger.debug(s"$actionName - auth switched off")
-      f
+      f(NRUser(appConfig.userName))
     }
 
   }

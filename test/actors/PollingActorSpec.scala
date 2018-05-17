@@ -22,12 +22,17 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
+import org.mockito.Matchers.any
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import play.api.http.Status.OK
 import support.fixtures.Infrastructure
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.duration._
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
   with WordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
@@ -48,7 +53,6 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     "change to complete mode in response to a CompleteMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
-
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
         , 5 seconds) should be(CompleteMessage)
@@ -56,7 +60,6 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     "change to failed mode in response to a FailedMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! FailedMessage
-
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
         , 5 seconds) should be(FailedMessage)
@@ -81,9 +84,15 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
       pollingActor ! RestartMessage
+
+      val mockHttpResponse = mock[HttpResponse]
+      when(mockHttpResponse.status).thenReturn(OK)
+
+      when(mockNrsRetrievalConnector.statusSubmissionBundle(any(), any())(any())).thenReturn(Future(mockHttpResponse))
+
       Await.result(
         ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(PollingMessage)
+        , 30 seconds) should be(PollingMessage)
     }
   }
 

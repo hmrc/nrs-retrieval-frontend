@@ -78,7 +78,7 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
       context.become(failed)
     case RestartMessage =>
       sender ! PollingMessage
-    case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
+    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
   def complete: Receive = {

@@ -59,21 +59,21 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def showSearchPage: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride("Show the search page", {
+    authWithStride("Show the search page", { nrUser =>
       searchForm.bindFromRequest.fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         _ => {
-          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(NRUser(appConfig.userName)))))
+          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser))))
         }
       )
     })
   }
 
   def submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride("Submit the search page", {
+    authWithStride("Submit the search page", { nrUser =>
       searchForm.bindFromRequest.fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
@@ -82,7 +82,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         search => {
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
           getFormData(request, search, sRs).map { form =>
-            Ok(views.html.search_page(form, Some(NRUser(appConfig.userName))))
+            Ok(views.html.search_page(form, Some(nrUser)))
           }
         }
       )

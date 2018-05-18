@@ -41,18 +41,27 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   private val initialDelay = 0.millis
-  private var stopTime = Instant.now().plus(appConfig.runTimeMillis)
+
+  private var stopTime: Instant = Instant.now
 
   private val logger = Logger(this.getClass)
 
-  val cancellable: Cancellable = context.system.scheduler.schedule(initialDelay, appConfig.interval) {
-    val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path, appConfig)))
-    if (Instant.now().isBefore(stopTime)) {
-      checkStatusActor ! StatusMessage(vaultId, archiveId)
-    } else {
-      self ! FailedMessage
+  private var cancellable: Cancellable = startStatusCheck
+
+  private def startStatusCheck = {
+    stopTime = Instant.now().plus(appConfig.runTimeMillis)
+    context.system.scheduler.schedule(initialDelay, appConfig.interval) {
+      val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path, appConfig)))
+      if (Instant.now().isBefore(stopTime)) {
+        checkStatusActor ! StatusMessage(vaultId, archiveId)
+      } else {
+        self ! FailedMessage
+      }
     }
   }
+
+  private def stopStatusCheck =
+    if (!cancellable.isCancelled) cancellable.cancel()
 
   // do not respond to an IsCompleteMessage
   def poll: Receive = {
@@ -61,11 +70,11 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
       sender ! PollingMessage
     case CompleteMessage =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has successfully completed.")
-      cancellable.cancel()
+      stopStatusCheck
       context.become(complete)
     case FailedMessage =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has failed.")
-      cancellable.cancel()
+      stopStatusCheck
       context.become(failed)
     case RestartMessage =>
       sender ! PollingMessage
@@ -76,7 +85,7 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     case StatusMessage(_, _) => sender ! CompleteMessage
     case IsCompleteMessage(_, _) => sender ! CompleteMessage
     case RestartMessage =>
-      stopTime = Instant.now().plus(appConfig.runTimeMillis)
+      cancellable = startStatusCheck
       context.become(poll)
     case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
@@ -85,7 +94,7 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     case StatusMessage(_, _) => sender ! FailedMessage
     case IsCompleteMessage(_, _) => sender ! FailedMessage
     case RestartMessage =>
-      stopTime = Instant.now().plus(appConfig.runTimeMillis)
+      cancellable = startStatusCheck
       context.become(poll)
     case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }

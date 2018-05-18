@@ -49,8 +49,8 @@ trait Infrastructure extends AnyRef with MockitoSugar {
   val mockMaterializer: Materializer = mock[Materializer]
 
   val mockAppConfig: AppConfig = mock[AppConfig]
-  when(mockAppConfig.futureTimeoutSeconds).thenReturn(30)
-  val duration: FiniteDuration = 3000.millis
+  when(mockAppConfig.futureTimeoutSeconds).thenReturn(1)
+  val duration: FiniteDuration = 1000.millis
   when(mockAppConfig.interval).thenReturn(duration)
   when(mockAppConfig.runTimeMillis).thenReturn(3000)
 

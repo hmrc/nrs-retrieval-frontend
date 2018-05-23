@@ -20,7 +20,7 @@ import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import com.google.inject.AbstractModule
 import com.google.inject.name.{Named, Names}
 import config.MicroserviceAudit
-import connectors.MicroAuthConnector
+import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
 import javax.inject.{Inject, Provider, Singleton}
 import play.api.Mode.Mode
 import play.api.libs.concurrent.AkkaGuiceSupport
@@ -44,6 +44,7 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
+    bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
     bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
     bindBaseUrl("auth")
 

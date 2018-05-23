@@ -43,3 +43,12 @@ search.results.retrieval.message.lbl=Retrieval may take up to 5 minutes
 search.results.error.summary.lbl=There's a problem
 search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact xxxxxxxxxx
 
+################################## Error Page 500 ####################################################
+global.error.InternalServerError500.title=Service unavailable
+global.error.InternalServerError500.heading=Service unavailable
+global.error.InternalServerError500.message=You will be able to use the service later.
+
+################################## Error Page 400 ####################################################
+global.error.InternalServerError400.title=Service unavailable
+global.error.InternalServerError400.heading=Service unavailable
+global.error.InternalServerError400.message=You will be able to use the service later.

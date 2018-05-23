@@ -29,7 +29,7 @@ import play.api.{Configuration, Environment}
 import support.fixtures.StrideFixture
 import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
-import connectors.NrsRetrievalConnector
+import connectors.NrsRetrievalConnectorImpl
 import play.api.mvc.AnyContentAsEmpty
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -46,7 +46,7 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
   private val appConfig = new AppConfig(configuration, env)
   private val mockAcorRef = mock[ActorRef]
-  private val mockNRC = mock[NrsRetrievalConnector]
+  private val mockNRC = mock[NrsRetrievalConnectorImpl]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
   implicit val mockMaterializer: Materializer = mock[Materializer]
   

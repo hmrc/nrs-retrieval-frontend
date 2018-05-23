@@ -19,18 +19,18 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
-import FormMappings._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
-import com.google.inject.name.Named
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
 import akka.util.Timeout
+import com.google.inject.name.Named
 import config.AppConfig
 import connectors.NrsRetrievalConnector
+import controllers.FormMappings._
+import javax.inject.{Inject, Singleton}
 import models._
+import play.api.Logger
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
@@ -38,15 +38,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 @Singleton
 class SearchController @Inject()(val messagesApi: MessagesApi,
                                  @Named("retrieval-actor") retrievalActor: ActorRef,
                                  implicit val appConfig: AppConfig,
                                  val authConnector: AuthConnector,
-                                 implicit val nrsRetrievalConnector: NrsRetrievalConnector,
+                                 val nrsRetrievalConnector: NrsRetrievalConnector,
                                  implicit val system: ActorSystem,
                                  implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
 

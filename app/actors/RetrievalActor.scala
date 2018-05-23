@@ -28,17 +28,17 @@ import config.AppConfig
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
-import connectors.NrsRetrievalConnector
+import connectors.NrsRetrievalConnectorImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
-                              (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
-
-  val logger = Logger(this.getClass)
+                              (implicit nrsRetrievalConnector: NrsRetrievalConnectorImpl) extends Actor {
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+
+  val logger = Logger(this.getClass)
 
   implicit val system: ActorContext = context
 

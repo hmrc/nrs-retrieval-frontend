@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 
 import scala.concurrent.Future
 
-class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
+class NrsRetrievalConnectorImplSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
 
   "search" should {
     "make a get call to /submission-metadata returning data" in {
@@ -183,7 +183,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
   }
 
   private val injector: Injector = Guice.createInjector(testModule)
-  private val connector = injector.getInstance(classOf[NrsRetrievalConnector])
+  private val connector = injector.getInstance(classOf[NrsRetrievalConnectorImpl])
 
   private val testAuditId = "1"
   private val testArchiveId = "2"

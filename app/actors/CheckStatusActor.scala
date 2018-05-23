@@ -16,40 +16,40 @@
 
 package actors
 
+
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, ActorPath, ActorRef, ActorSystem, Props}
-
-import scala.concurrent.duration._
 import akka.util.Timeout
 import config.AppConfig
+import connectors.NrsRetrievalConnectorImpl
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
-import connectors.NrsRetrievalConnector
 
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
+import scala.concurrent.duration.FiniteDuration
 
-class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
-
-  implicit val timeout = Timeout(FiniteDuration(30, TimeUnit.SECONDS))
+class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnectorImpl) extends Actor {
 
   implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
-  implicit val system = context.system
-  val logger = Logger(this.getClass)
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  def receive = {
+  implicit val system: ActorSystem = context.system
+  private val logger = Logger(this.getClass)
+
+  def receive: PartialFunction[Any, Unit] = {
     case StatusMessage(vaultId, archiveId) => {
       nrsRetrievalConnector.statusSubmissionBundle(vaultId, archiveId).map { response =>
         response.status match {
           case OK => {
             logger.info(s"Retrieval request complete for vault $vaultId, archive $archiveId")
-            pollingActor(vaultId, archiveId) ! CompleteMessage
+            pollingActor(vaultId, archiveId).map (aR => aR ! CompleteMessage)
           }
           case NOT_FOUND => logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
-          case _ => pollingActor(vaultId, archiveId) ! FailedMessage
+          case _ => pollingActor(vaultId, archiveId).map(aR => aR ! FailedMessage)
         }
       }
     }
@@ -58,11 +58,11 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
       sender ! UnknownMessage
   }
 
-  private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = {
+  private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[ActorRef] = {
     try {
-      Await.result(system.actorSelection(pollingActorPath).resolveOne(), 5 seconds)
+      system.actorSelection(pollingActorPath).resolveOne()
     } catch {
-      case e: Throwable => system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
+      case e: Throwable => Future(system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId"))
     }
   }
 }

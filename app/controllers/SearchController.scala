@@ -48,7 +48,8 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
                                  val authConnector: AuthConnector,
                                  val nrsRetrievalConnector: NrsRetrievalConnector,
                                  implicit val system: ActorSystem,
-                                 implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
+                                 implicit val mat: Materializer,
+                                 val searchResultUtils: SearchResultUtils) extends FrontendController with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
   val strideRole: String = appConfig.nrsStrideRole
@@ -119,7 +120,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
     search.query.searchText.map { query =>
       nrsRetrievalConnector.search(query)
-        .map(fNSR => fNSR.map(nSR => SearchResult.fromNrsSearchResult(nSR)))
+        .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
     }.getOrElse(Future(Seq.empty))
   }
 

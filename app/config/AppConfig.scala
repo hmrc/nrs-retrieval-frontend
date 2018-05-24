@@ -17,11 +17,13 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-import models.{Service, ServiceScope, SubmissionType}
+import models.{NotableEvent, Service, ServiceScope, SubmissionType}
 import org.joda.time.LocalDate
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
+
+import scala.collection.JavaConversions._
 
 import scala.concurrent.duration._
 
@@ -31,6 +33,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   override protected def mode: Mode = environment.mode
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+
+  private def loadFromConfig(config: Configuration, key: String) = config.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   private def loadConfigWithDefault(key: String, default: String) = runModeConfiguration.getString(key).getOrElse(default)
 
@@ -54,6 +58,15 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
     SubmissionType("Returns", "VRN", LocalDate.parse("2018-04-01"), 20)))
 
   val serviceScope = ServiceScope(Seq(vatService))
+
+  val notableEvents: Map[String, NotableEvent] =
+    runModeConfiguration.getConfigList(s"notableEvents").getOrElse(throw new Exception(s"Missing configuration"))
+      .map { client =>
+          NotableEvent(
+            loadFromConfig(client, "notableEvent"),
+            loadFromConfig(client, "displayName")
+          )
+        }.map(nE => nE.name -> nE).toMap
 
   // todo : this to be replaced on integration with STRIDE
   val userName = "Susan Smith"

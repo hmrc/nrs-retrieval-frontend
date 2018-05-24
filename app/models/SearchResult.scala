@@ -17,8 +17,9 @@
 package models
 
 
-import org.apache.commons.io.FileUtils.byteCountToDisplaySize
-import org.joda.time.LocalDate
+import com.google.inject.Inject
+import config.AppConfig
+import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchResult(
@@ -30,13 +31,16 @@ case class SearchResult(
   retrievalStatus: Option[String] = None)
 
 object SearchResult {
+  implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
+}
+
+class SearchResultUtils @Inject()(appConfig: AppConfig) {
+
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
       retrievalLinkText(
-        nrsSearchResult.notableEvent,
-        nrsSearchResult.searchKeys.taxPeriodEndDate,
-        nrsSearchResult.bundle.fileType,
-        nrsSearchResult.bundle.fileSize
+        appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
+        nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
       ),
       s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
       nrsSearchResult.glacier.vaultName,
@@ -44,15 +48,7 @@ object SearchResult {
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
 
-  def retrievalLinkText(notableEventType: String, taxPeriodEndDate: Option[LocalDate], fileType: String,
-    fileSizeInBytes: Long): String = {
-    Seq(Some(notableEventType),
-      taxPeriodEndDate,
-      Some(s".$fileType,"),
-      Some(byteCountToDisplaySize(fileSizeInBytes))
-    ).flatten.mkString(" ")
-  }
+  def retrievalLinkText(notableEventType: String, submissionDateEpochMilli: Long): String =
+    s"Retrieve $notableEventType ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
 
-
-  implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
 }

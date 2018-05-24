@@ -20,7 +20,6 @@ import play.api.libs.json.{JsValue, Json}
 import models._
 import org.joda.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.UUID
 
 trait NrsSearchFixture extends NrSubmissionId {
 

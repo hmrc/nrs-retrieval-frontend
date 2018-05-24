@@ -92,7 +92,7 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
   }
 
   "search page with a valid form and results" should {
-    val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [{"retrievalLink": "link", "fileName": "filename", "vaultId": "vaultId", "archiveId": "archiveId", "submissionDateEpochMilli": 1}],"resultCount": 0}}""")
+    val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [{"notableEventDisplayName": "notableEvent", "fileDetails": "filename", "vaultId": "vaultId", "archiveId": "archiveId", "submissionDateEpochMilli": 1}],"resultCount": 0}}""")
     val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
 
     "not display the not found panel" in new SearchPageViewFixture {

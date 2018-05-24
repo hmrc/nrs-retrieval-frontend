@@ -26,12 +26,14 @@ trait SearchFixture extends NrSubmissionId {
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
   private val appConfig = new AppConfig(configuration, env)
-  private val searchResultUtils: SearchResultUtils = new SearchResultUtils(appConfig)
+
+  val searchResultUtils: SearchResultUtils = new SearchResultUtils(appConfig)
 
   val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
 
   val fileSize = 123456L
-  val searchResult = SearchResult("VAT return", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
+  val vatSearchResult = SearchResult("VAT return", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
+  val cdsSearchResult = SearchResult("CDS declaration", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
 
 }
 

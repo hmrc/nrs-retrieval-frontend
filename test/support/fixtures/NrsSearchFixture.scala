@@ -31,7 +31,11 @@ trait NrsSearchFixture extends NrSubmissionId {
 
   val glacier = Glacier("12345", "1234567890")
 
-  val nrsSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
+  val nrsVatSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
+    ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
+    nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
+
+  val nrsCdsSearchResult = NrsSearchResult("businessId", "cds-declaration", "payloadContentType",
     ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
     nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
 

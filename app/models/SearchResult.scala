@@ -23,12 +23,21 @@ import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchResult(
-  retrievalLink: String,
+  notableEventDisplayName: String,
   fileName: String,
   vaultId: String,
   archiveId: String,
   submissionDateEpochMilli: Long,
-  retrievalStatus: Option[String] = None)
+  retrievalStatus: Option[String] = None) {
+
+  private val linkText: String =
+    s"$notableEventDisplayName ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
+
+  val retrievalLink: String = s"Retrieve $linkText"
+
+  val downloadLink: String = s"Download $linkText"
+
+}
 
 object SearchResult {
   implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
@@ -38,17 +47,11 @@ class SearchResultUtils @Inject()(appConfig: AppConfig) {
 
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
-      retrievalLinkText(
-        appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
-        nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
-      ),
+      appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
       s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
       nrsSearchResult.glacier.vaultName,
       nrsSearchResult.glacier.archiveId,
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
-
-  def retrievalLinkText(notableEventType: String, submissionDateEpochMilli: Long): String =
-    s"Retrieve $notableEventType ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
 
 }

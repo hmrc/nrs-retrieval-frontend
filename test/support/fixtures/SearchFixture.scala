@@ -16,17 +16,22 @@
 
 package support.fixtures
 
-import models.SearchResult
-import org.joda.time.{DateTime, LocalDate}
+import config.AppConfig
+import models.{SearchResult, SearchResultUtils}
 import play.api.libs.json.{JsValue, Json}
+import play.api.{Configuration, Environment}
 
 trait SearchFixture extends NrSubmissionId {
+
+  private val env = Environment.simple()
+  private val configuration = Configuration.load(env)
+  private val appConfig = new AppConfig(configuration, env)
+  private val searchResultUtils: SearchResultUtils = new SearchResultUtils(appConfig)
 
   val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
 
   val fileSize = 123456L
-  val retrievalLink: String = SearchResult.retrievalLinkText("notableEvent", Some(LocalDate.parse("2015-11-01")), "zip", fileSize)
-  val searchResult = SearchResult(retrievalLink, s"$nrSubmissionId.zip", "12345", "1234567890", 1521114973625L, None)
-
+  val searchResult = SearchResult("VAT return", s"$nrSubmissionId.zip", "12345", "1234567890", 1511773625L, None)
 
 }
+

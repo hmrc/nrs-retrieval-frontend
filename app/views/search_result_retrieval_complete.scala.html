@@ -25,7 +25,7 @@
     <table                                                                                                                                                                                                                                                                                  class="table--borderless">
         <tr>
             <td class="table-cell--green">
-                <a class="button" id="retrievalComplete@index" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileName">@Messages("search.results.download.lbl") @searchResult.retrievalLink</a>
+                <a class="button" id="retrievalComplete@index" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileName">@searchResult.downloadLink</a>
             </td>
         </tr>
         <tr>

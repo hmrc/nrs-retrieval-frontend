@@ -30,6 +30,7 @@ import support.fixtures.StrideFixture
 import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
 import connectors.NrsRetrievalConnector
+import models.SearchResultUtils
 import play.api.mvc.AnyContentAsEmpty
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -45,13 +46,14 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
 
   private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
   private val appConfig = new AppConfig(configuration, env)
+  private val searchResultUtils: SearchResultUtils = new SearchResultUtils(appConfig)
   private val mockAcorRef = mock[ActorRef]
   private val mockNRC = mock[NrsRetrievalConnector]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
   implicit val mockMaterializer: Materializer = mock[Materializer]
-  
+
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
+    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer, searchResultUtils) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

@@ -19,23 +19,19 @@ package models
 
 import com.google.inject.Inject
 import config.AppConfig
+import org.apache.commons.io.FileUtils.byteCountToDisplaySize
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{Json, OFormat}
 
-case class SearchResult(
-  notableEventDisplayName: String,
-  fileName: String,
-  vaultId: String,
-  archiveId: String,
-  submissionDateEpochMilli: Long,
-  retrievalStatus: Option[String] = None) {
+case class SearchResult( notableEventDisplayName: String,
+                         fileDetails: String,
+                         vaultId: String,
+                         archiveId: String,
+                         submissionDateEpochMilli: Long,
+                         retrievalStatus: Option[String] = None) {
 
-  private val linkText: String =
+  val linkText: String =
     s"$notableEventDisplayName ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
-
-  val retrievalLink: String = s"Retrieve $linkText"
-
-  val downloadLink: String = s"Download $linkText"
 
 }
 
@@ -48,10 +44,13 @@ class SearchResultUtils @Inject()(appConfig: AppConfig) {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
       appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
-      s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
+      filename(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
       nrsSearchResult.glacier.vaultName,
       nrsSearchResult.glacier.archiveId,
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
+
+  private def filename (nrSubmissionId: String, fileType: String, fileSize: Long) =
+    s"$nrSubmissionId.$fileType (${byteCountToDisplaySize(fileSize)})"
 
 }

@@ -31,14 +31,14 @@
                         name="action"
                         class="button button--link"
                         value="retrieve_key_@{searchResult.vaultId}_key_@{searchResult.archiveId}">
-                        @searchResult.retrievalLink
+                            @Messages("search.results.retrieve.lbl") @searchResult.linkText
                         </button>
                     </p>
                 </td>
             </tr>
             <tr>
                 <td class="table-cell--light">
-                    <p class="input--left-padding">@searchResult.fileName</p>
+                    <p class="input--left-padding">@searchResult.fileDetails</p>
                 </td>
             </tr>
             <tr>

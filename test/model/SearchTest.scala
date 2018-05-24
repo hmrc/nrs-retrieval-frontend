@@ -47,4 +47,10 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
     }
   }
 
+  "FailedText.linktext" should {
+    "create download link text" in {
+      searchResult.failedText shouldBe "Download VAT return 18 January 1970"
+    }
+  }
+
 }

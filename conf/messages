@@ -34,8 +34,10 @@ search.button.refresh.lbl=Refresh
 ################################## Search Results ################################################
 search.results.notfound.lbl=No results found
 search.results.check.lbl=Check which submission types are stored
-search.results.submitted.lbl=Submitted on
+search.results.submitted.lbl=Received at
 search.results.results.lbl=results
+search.results.retrieve.lbl=Retrieve
+search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieval may take up to 5 minutes
 search.results.error.summary.lbl=There's a problem

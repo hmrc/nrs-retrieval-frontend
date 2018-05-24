@@ -27,8 +27,8 @@ object FormMappings {
   )(SearchQuery.apply)(SearchQuery.unapply)
 
   private val searchResultMapping = mapping(
-    "retrievalLink" -> text,
-    "fileName" -> text,
+    "notableEventDisplayName" -> text,
+    "fileDetails" -> text,
     "vaultId" -> text,
     "archiveId" -> text,
     "submissionDateEpochMilli" -> longNumber,

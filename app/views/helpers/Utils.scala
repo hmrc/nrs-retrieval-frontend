@@ -16,12 +16,13 @@
 
 package views.helpers
 
+import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
 
 // todo : find a better name than utils
 object Utils {
 
   def formatDisplayDate (submissionDateEpochMilli: Long): String =
-    DateTimeFormat.forPattern("d MMM yyyy").print(submissionDateEpochMilli)
+    s"${DateTimeFormat.forPattern("HH:mm:ss").withZone(DateTimeZone.UTC).print(submissionDateEpochMilli)} UTC"
 
 }

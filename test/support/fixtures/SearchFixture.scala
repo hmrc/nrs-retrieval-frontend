@@ -31,7 +31,7 @@ trait SearchFixture extends NrSubmissionId {
   val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
 
   val fileSize = 123456L
-  val searchResult = SearchResult("VAT return", s"$nrSubmissionId.zip", "12345", "1234567890", 1511773625L, None)
+  val searchResult = SearchResult("VAT return", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
 
 }
 

@@ -46,7 +46,6 @@ case class Bundle (
 object Bundle {
   implicit val formats: OFormat[Bundle] = Json.format[Bundle]
 }
-
 case class NrsSearchResult(
   businessId: String,
   notableEvent: String,
@@ -61,6 +60,12 @@ case class NrsSearchResult(
   expiryDate: LocalDate,
   glacier: Glacier)
 
+case class NotableEvent (
+  name: String,
+  displayName: String
+)
+
 object NrsSearchResult {
+  implicit val notableEventFormat: OFormat[NotableEvent] = Json.format[NotableEvent]
   implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]
 }

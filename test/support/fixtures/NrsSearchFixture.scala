@@ -20,7 +20,6 @@ import play.api.libs.json.{JsValue, Json}
 import models._
 import org.joda.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.UUID
 
 trait NrsSearchFixture extends NrSubmissionId {
 
@@ -32,8 +31,12 @@ trait NrsSearchFixture extends NrSubmissionId {
 
   val glacier = Glacier("12345", "1234567890")
 
-  val nrsSearchResult = NrsSearchResult("businessId", "notableEvent", "payloadContentType",
-    ZonedDateTime.parse("2018-03-15T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
-    nrSubmissionId, bundle, LocalDate.parse("2018-03-15"), glacier)
+  val nrsVatSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
+    ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
+    nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
+
+  val nrsCdsSearchResult = NrsSearchResult("businessId", "cds-declaration", "payloadContentType",
+    ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData, searchKeys,
+    nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
 
 }

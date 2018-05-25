@@ -18,20 +18,19 @@ package controllers
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
+import config.AppConfig
+import connectors.NrsRetrievalConnector
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
-import support.fixtures.StrideFixture
+import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
 import uk.gov.hmrc.http.HeaderCarrier
-import config.AppConfig
-import connectors.NrsRetrievalConnector
-import play.api.mvc.AnyContentAsEmpty
-import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -49,9 +48,9 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   private val mockNRC = mock[NrsRetrievalConnector]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
   implicit val mockMaterializer: Materializer = mock[Materializer]
-  
+
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer) {
+    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer, searchResultUtils) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 
@@ -69,7 +68,7 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
 
   "submitSearchPage" should {
     "return 200" in {
-      when(mockNRC.search(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsSearchResult)))
+      when(mockNRC.search(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
       val result = controller.submitSearchPage(fakeRequest.withJsonBody(searchFormJson))
       status(result) shouldBe Status.OK
     }

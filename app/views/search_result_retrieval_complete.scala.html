@@ -25,12 +25,12 @@
     <table                                                                                                                                                                                                                                                                                  class="table--borderless">
         <tr>
             <td class="table-cell--green">
-                <a class="button" id="retrievalComplete@index" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileName">@Messages("search.results.download.lbl") @searchResult.retrievalLink</a>
+                <a class="button" id="retrievalComplete@index" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText</a>
             </td>
         </tr>
         <tr>
             <td class="table-cell--green">
-                <p class="input--left-padding">@searchResult.fileName</p>
+                <p class="input--left-padding">@searchResult.fileDetails</p>
             </td>
         </tr>
         <tr>

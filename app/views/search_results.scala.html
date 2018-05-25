@@ -34,8 +34,8 @@
     <div style="display: none;">
     @input(searchForm("results.resultCount"))
     @repeat(searchForm("results.results"), min = 0) {results =>
-    @input(results("retrievalLink"))
-    @input(results("fileName"))
+    @input(results("notableEventDisplayName"))
+    @input(results("fileDetails"))
     @input(results("vaultId"))
     @input(results("archiveId"))
     @input(results("submissionDateEpochMilli"))

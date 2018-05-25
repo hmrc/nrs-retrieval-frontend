@@ -16,26 +16,21 @@
 
 package model
 
-import models.SearchResult
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
 
   "fromNrsSearchResult" should {
-    "create a SearchResult from an NrsSearchResult" in {
-      SearchResult.fromNrsSearchResult(nrsSearchResult) shouldBe(searchResult)
+    "create a SearchResult from an NrsSearchResult based on notable event config " in {
+      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe(vatSearchResult)
+      searchResultUtils.fromNrsSearchResult(nrsCdsSearchResult) shouldBe(cdsSearchResult)
     }
   }
 
-  "RetrievalLink.linktext" should {
-    "create link text when all values are provide" in {
-      retrievalLink shouldBe "notableEvent 2015-11-01 .zip, 120 KB"
-    }
-
-    "create link text when only mandatory values are provide" in {
-      val retrievalLink = SearchResult.retrievalLinkText("notableEvent", None, "zip", fileSize)
-      retrievalLink shouldBe "notableEvent .zip, 120 KB"
+  "searchResult" should {
+    "create link text" in {
+      vatSearchResult.linkText shouldBe "VAT return 18 January 1970"
     }
   }
 

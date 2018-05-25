@@ -74,7 +74,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
       }
 
       "the search returns results" in {
-        when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq(nrsSearchResult)))
+        when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
           ("action", "search"),

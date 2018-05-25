@@ -17,42 +17,40 @@
 package models
 
 
+import com.google.inject.Inject
+import config.AppConfig
 import org.apache.commons.io.FileUtils.byteCountToDisplaySize
-import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{Json, OFormat}
 
-case class SearchResult(
-  retrievalLink: String,
-  fileName: String,
-  vaultId: String,
-  archiveId: String,
-  submissionDateEpochMilli: Long,
-  retrievalStatus: Option[String] = None)
+case class SearchResult( notableEventDisplayName: String,
+                         fileDetails: String,
+                         vaultId: String,
+                         archiveId: String,
+                         submissionDateEpochMilli: Long,
+                         retrievalStatus: Option[String] = None) {
+
+  val linkText: String =
+    s"$notableEventDisplayName ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
+
+}
 
 object SearchResult {
+  implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
+}
+
+class SearchResultUtils @Inject()(appConfig: AppConfig) {
+
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
-      retrievalLinkText(
-        nrsSearchResult.notableEvent,
-        nrsSearchResult.searchKeys.taxPeriodEndDate,
-        nrsSearchResult.bundle.fileType,
-        nrsSearchResult.bundle.fileSize
-      ),
-      s"${nrsSearchResult.nrSubmissionId}.${nrsSearchResult.bundle.fileType}",
+      appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
+      filename(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
       nrsSearchResult.glacier.vaultName,
       nrsSearchResult.glacier.archiveId,
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
 
-  def retrievalLinkText(notableEventType: String, taxPeriodEndDate: Option[LocalDate], fileType: String,
-    fileSizeInBytes: Long): String = {
-    Seq(Some(notableEventType),
-      taxPeriodEndDate,
-      Some(s".$fileType,"),
-      Some(byteCountToDisplaySize(fileSizeInBytes))
-    ).flatten.mkString(" ")
-  }
+  private def filename (nrSubmissionId: String, fileType: String, fileSize: Long) =
+    s"$nrSubmissionId.$fileType (${byteCountToDisplaySize(fileSize)})"
 
-
-  implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
 }

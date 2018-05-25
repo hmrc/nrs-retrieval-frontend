@@ -55,7 +55,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   lazy val futureTimeoutSeconds = 30
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
-    SubmissionType("Returns", "VRN", LocalDate.parse("2018-04-01"), 20)))
+    SubmissionType("VAT Return", "VAT Registration Number (VRN)", LocalDate.parse("2018-04-01"), 20)))
 
   val serviceScope = ServiceScope(Seq(vatService))
 

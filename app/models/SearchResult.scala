@@ -18,7 +18,7 @@ package models
 
 
 import org.apache.commons.io.FileUtils.byteCountToDisplaySize
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchResult(

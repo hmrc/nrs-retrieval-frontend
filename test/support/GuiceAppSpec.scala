@@ -16,7 +16,9 @@
 
 package support
 
-import play.api.i18n.MessagesApi
+import connectors.NrsRetrievalConnector
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
@@ -30,13 +32,17 @@ class GuiceAppSpec extends BaseSpec {
     "google-analytics.host" -> "host",
     "google-analytics.token" -> "aToken")
 
+  val mockNrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 
-  implicit override lazy val app: Application = new GuiceApplicationBuilder().configure(additionalConfig)
-    .bindings(bindModules:_*).in(Mode.Test)
-    .build()
+  implicit override lazy val app: Application = {
+    new GuiceApplicationBuilder().configure(additionalConfig)
+      .bindings(bindModules:_*).in(Mode.Test)
+      .overrides(bind[NrsRetrievalConnector].toInstance(mockNrsRetrievalConnector))
+      .build()
+  }
 
-  implicit val messagesApi = app.injector.instanceOf[MessagesApi]
-  implicit val messages = messagesApi.preferred(FakeRequest())
+  implicit val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  implicit val messages: Messages = messagesApi.preferred(FakeRequest())
 
 
   def addToken[T](fakeRequest: FakeRequest[T]) = {

@@ -17,12 +17,12 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-
 import models.{Service, ServiceScope, SubmissionType}
 import org.joda.time.LocalDate
-import play.api.{Configuration, Environment}
 import play.api.Mode.Mode
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
+
 import scala.concurrent.duration._
 
 
@@ -47,6 +47,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   lazy val interval: FiniteDuration = loadConfig(s"polling.interval").toLong.millis
   lazy val runTimeMillis: Long = loadConfig(s"polling.duration").toLong
+
   lazy val futureTimeoutSeconds = 30
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
@@ -57,9 +58,9 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   // todo : this to be replaced on integration with STRIDE
   val userName = "Susan Smith"
   
-  lazy val nrsStrideRole = loadConfig("stride.role.name")
-  lazy val strideAuth = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
-  lazy val authHost = runModeConfiguration.getString(s"microservice.services.auth.host").getOrElse("none-authHost")
-  lazy val authPort = runModeConfiguration.getInt(s"microservice.services.auth.port").getOrElse(-1)
+  lazy val nrsStrideRole: String = loadConfig("stride.role.name")
+  lazy val strideAuth: Boolean = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
+  lazy val authHost: String = runModeConfiguration.getString(s"microservice.services.auth.host").getOrElse("none-authHost")
+  lazy val authPort: Int = runModeConfiguration.getInt(s"microservice.services.auth.port").getOrElse(-1)
 
 }

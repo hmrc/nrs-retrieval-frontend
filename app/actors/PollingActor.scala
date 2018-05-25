@@ -19,37 +19,32 @@ package actors
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, Cancellable, Props}
-
-import scala.concurrent.duration._
 import akka.util.Timeout
 import config.AppConfig
-import play.api.Logger
 import connectors.NrsRetrievalConnector
 import org.joda.time.Instant
-import play.api.inject.Injector
+import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
   (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   def receive = poll
 
-  implicit def hc:  HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
-
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  private val initialDelay = 0.millis
-
-  private var stopTime: Instant = Instant.now
+  implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
   private val logger = Logger(this.getClass)
 
   private var cancellable: Cancellable = startStatusCheck
 
   private def startStatusCheck = {
-    stopTime = Instant.now().plus(appConfig.runTimeMillis)
+    val initialDelay = 0.millis
+    val stopTime = Instant.now().plus(appConfig.runTimeMillis)
     context.system.scheduler.schedule(initialDelay, appConfig.interval) {
       val checkStatusActor = context.actorOf(Props(new CheckStatusActor(self.path, appConfig)))
       if (Instant.now().isBefore(stopTime)) {
@@ -60,8 +55,7 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     }
   }
 
-  private def stopStatusCheck =
-    if (!cancellable.isCancelled) cancellable.cancel()
+  private def stopStatusCheck = if (!cancellable.isCancelled) cancellable.cancel()
 
   // do not respond to an IsCompleteMessage
   def poll: Receive = {

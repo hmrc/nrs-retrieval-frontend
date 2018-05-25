@@ -19,18 +19,18 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
-import FormMappings._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
-import com.google.inject.name.Named
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
 import akka.util.Timeout
+import com.google.inject.name.Named
 import config.AppConfig
 import connectors.NrsRetrievalConnector
+import controllers.FormMappings._
+import javax.inject.{Inject, Singleton}
 import models._
+import play.api.Logger
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
@@ -38,15 +38,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 @Singleton
 class SearchController @Inject()(val messagesApi: MessagesApi,
                                  @Named("retrieval-actor") retrievalActor: ActorRef,
                                  implicit val appConfig: AppConfig,
                                  val authConnector: AuthConnector,
-                                 implicit val nrsRetrievalConnector: NrsRetrievalConnector,
+                                 val nrsRetrievalConnector: NrsRetrievalConnector,
                                  implicit val system: ActorSystem,
                                  implicit val mat: Materializer) extends FrontendController with I18nSupport with Stride {
 
@@ -83,7 +83,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
           getFormData(request, search, sRs).map { form =>
             Ok(views.html.search_page(form, Some(nrUser)))
-          }
+          }.recoverWith {case e => Future(Ok(views.html.error_template(Messages("error.page.title"), Messages("error.page.title"), Messages("error.page.title"))))}
         }
       )
     })
@@ -101,7 +101,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
-    }
+    }.recoverWith {case e => Future(Ok(views.html.error_template(Messages("error.page.title"), Messages("error.page.title"), Messages("error.page.title"))))}
   }
 
   private def getFormData(request: Request[AnyContent], search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {

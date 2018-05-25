@@ -17,25 +17,24 @@
 package connectors
 
 import com.google.inject.name.Names
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito._
 import com.google.inject.{AbstractModule, Guice, Injector}
-import org.mockito.Matchers.any
-import play.api.Environment
 import config.{AppConfig, Auditable, MicroserviceAudit, WSHttpT}
 import javax.inject.Provider
 import models.NrsSearchResult
 import models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
+import org.mockito.Matchers.any
+import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
-import play.api.libs.iteratee.Iteratee
+import org.scalatest.mockito.MockitoSugar
+import play.api.Environment
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import support.fixtures.{Infrastructure, NrsSearchFixture}
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
@@ -167,6 +166,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   private val testModule = new AbstractModule {
     override def configure(): Unit = {
+      bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
       bind(classOf[WSHttpT]).toInstance(mockWsHttp)
       bind(classOf[Environment]).toInstance(mockEnvironemnt)
       bind(classOf[AppConfig]).toInstance(mockAppConfig)

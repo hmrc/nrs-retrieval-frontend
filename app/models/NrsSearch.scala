@@ -18,9 +18,8 @@ package models
 
 import java.time.ZonedDateTime
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 case class SearchKeys(vrn: String, taxPeriodEndDate: Option[LocalDate])
 

@@ -16,12 +16,12 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
 import akka.actor.ActorSystem
+import config.AppConfig
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import config.AppConfig
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 

@@ -18,7 +18,7 @@ package controllers
 
 import models.{Search, SearchQuery, SearchResult, SearchResults}
 import play.api.data.Form
-import play.api.data.Forms.{mapping, optional, seq, text, number, longNumber}
+import play.api.data.Forms.{longNumber, mapping, number, optional, seq, text}
 
 object FormMappings {
 

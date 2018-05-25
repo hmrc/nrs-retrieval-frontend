@@ -25,9 +25,9 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import play.api.Logger
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 trait ActorService {
 
@@ -48,7 +48,7 @@ trait ActorService {
 
 class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
 
-  implicit val timeout = Timeout(FiniteDuration(5, TimeUnit.SECONDS))
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
     context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")

@@ -52,3 +52,9 @@ global.error.InternalServerError500.message=You will be able to use the service 
 global.error.InternalServerError400.title=Service unavailable
 global.error.InternalServerError400.heading=Service unavailable
 global.error.InternalServerError400.message=You will be able to use the service later.
+
+################################## Error Page ####################################################
+error.page.title=Service unavailable
+error.page.heading=Service unavailable
+error.page.message=You will be able to use the service later.
+

@@ -30,7 +30,7 @@ import controllers.FormMappings._
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
@@ -83,7 +83,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
           getFormData(request, search, sRs).map { form =>
             Ok(views.html.search_page(form, Some(nrUser)))
-          }
+          }.recoverWith {case e => Future(Ok(views.html.error_template(Messages("error.page.title"), Messages("error.page.title"), Messages("error.page.title"))))}
         }
       )
     })
@@ -101,7 +101,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
-    }
+    }.recoverWith {case e => Future(Ok(views.html.error_template(Messages("error.page.title"), Messages("error.page.title"), Messages("error.page.title"))))}
   }
 
   private def getFormData(request: Request[AnyContent], search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {

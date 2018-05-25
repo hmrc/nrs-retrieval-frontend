@@ -22,16 +22,16 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, ActorPath, ActorRef, ActorSystem, Props}
 import akka.util.Timeout
 import config.AppConfig
-import connectors.NrsRetrievalConnectorImpl
+import connectors.NrsRetrievalConnector
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
-class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnectorImpl) extends Actor {
+class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
@@ -58,7 +58,7 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
       sender ! UnknownMessage
   }
 
-  private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[ActorRef] = {
+  private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = {
     try {
       system.actorSelection(pollingActorPath).resolveOne()
     } catch {

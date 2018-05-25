@@ -18,23 +18,22 @@ package actors
 
 import java.util.concurrent.TimeUnit
 
-import javax.inject.Inject
 import akka.actor.{Actor, ActorContext}
 import akka.pattern.ask
-
-import scala.concurrent.duration._
 import akka.util.Timeout
 import config.AppConfig
+import connectors.NrsRetrievalConnector
+import javax.inject.Inject
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
-import connectors.NrsRetrievalConnectorImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
-                              (implicit nrsRetrievalConnector: NrsRetrievalConnectorImpl) extends Actor {
+                              (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 

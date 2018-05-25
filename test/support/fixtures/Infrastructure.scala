@@ -19,7 +19,7 @@ package support.fixtures
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import config.AppConfig
-import connectors.NrsRetrievalConnectorImpl
+import connectors.NrsRetrievalConnector
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
@@ -42,7 +42,7 @@ trait Infrastructure extends AnyRef with MockitoSugar {
   // mocks
   val mockActorRef: ActorRef = mock[ActorRef]
 
-  val mockNrsRetrievalConnector: NrsRetrievalConnectorImpl = mock[NrsRetrievalConnectorImpl]
+  val mockNrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 
   val mockActorSystem:ActorSystem = mock[ActorSystem]
 

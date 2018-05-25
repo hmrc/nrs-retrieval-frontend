@@ -22,7 +22,7 @@ import akka.actor.{ActorContext, ActorNotFound, ActorRef, Props}
 import akka.util.Timeout
 import com.google.inject.Inject
 import config.AppConfig
-import connectors.NrsRetrievalConnectorImpl
+import connectors.NrsRetrievalConnector
 import play.api.Logger
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,35 +34,35 @@ trait ActorService {
   val logger = Logger(this.getClass)
 
   def startPollingActor(vaultId: String, archiveId: String)
-    (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): ActorRef = ???
+    (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
 
   def eventualPollingActor(vaultId: String, archiveId: String)
-                          (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[ActorRef] = ???
+                          (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
 
   def pollingActor(vaultId: String, archiveId: String)
-                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[ActorRef] = ???
+                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
 
   def pollingActorExists(vaultId: String, archiveId: String)
-                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[Boolean] = ???
+                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean] = ???
 }
 
 class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): ActorRef =
+  override def startPollingActor(vaultId: String, archiveId: String)(implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef =
     context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
 
   override def eventualPollingActor(vaultId: String, archiveId: String)
-                                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[ActorRef] =
+                                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
       context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne()
 
   override def pollingActor(vaultId: String, archiveId: String)
-                           (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[ActorRef] =
+                           (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
     eventualPollingActor(vaultId, archiveId).recover {case _: ActorNotFound => startPollingActor(vaultId, archiveId)}
 
   override def pollingActorExists(vaultId: String, archiveId: String)
-                           (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnectorImpl): Future[Boolean] =
+                           (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean] =
     eventualPollingActor(vaultId, archiveId).map(_ => true).recover{case _: ActorNotFound => false}
 
 }

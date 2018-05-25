@@ -17,29 +17,28 @@
 package connectors
 
 import com.google.inject.name.Names
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito._
 import com.google.inject.{AbstractModule, Guice, Injector}
-import org.mockito.Matchers.any
-import play.api.Environment
 import config.{AppConfig, Auditable, MicroserviceAudit, WSHttpT}
 import javax.inject.Provider
 import models.NrsSearchResult
 import models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
+import org.mockito.Matchers.any
+import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
-import play.api.libs.iteratee.Iteratee
+import org.scalatest.mockito.MockitoSugar
+import play.api.Environment
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import support.fixtures.{Infrastructure, NrsSearchFixture}
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class NrsRetrievalConnectorImplSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
+class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
 
   "search" should {
     "make a get call to /submission-metadata returning data" in {
@@ -167,6 +166,7 @@ class NrsRetrievalConnectorImplSpec extends UnitSpec with MockitoSugar with NrsS
 
   private val testModule = new AbstractModule {
     override def configure(): Unit = {
+      bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
       bind(classOf[WSHttpT]).toInstance(mockWsHttp)
       bind(classOf[Environment]).toInstance(mockEnvironemnt)
       bind(classOf[AppConfig]).toInstance(mockAppConfig)
@@ -183,7 +183,7 @@ class NrsRetrievalConnectorImplSpec extends UnitSpec with MockitoSugar with NrsS
   }
 
   private val injector: Injector = Guice.createInjector(testModule)
-  private val connector = injector.getInstance(classOf[NrsRetrievalConnectorImpl])
+  private val connector = injector.getInstance(classOf[NrsRetrievalConnector])
 
   private val testAuditId = "1"
   private val testArchiveId = "2"

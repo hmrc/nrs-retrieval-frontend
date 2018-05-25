@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, Cancellable, Props}
 import akka.util.Timeout
 import config.AppConfig
-import connectors.NrsRetrievalConnectorImpl
+import connectors.NrsRetrievalConnector
 import org.joda.time.Instant
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
-  (implicit val nrsRetrievalConnector: NrsRetrievalConnectorImpl) extends Actor {
+  (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   def receive = poll
 

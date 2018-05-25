@@ -22,5 +22,4 @@ case class ServiceScope (services: Seq[Service])
 
 case class Service (taxService: String, submissionTypes: Seq[SubmissionType])
 
-// todo : verify what date type we want to store, specifically timezone requirements
 case class SubmissionType (description: String, searchBy: String, storedFrom: LocalDate, yearsStored: Int)

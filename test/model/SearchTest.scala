@@ -30,7 +30,7 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
 
   "searchResult" should {
     "create link text" in {
-      vatSearchResult.linkText shouldBe "VAT return 18 January 1970"
+      vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
     }
   }
 

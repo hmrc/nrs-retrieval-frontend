@@ -35,6 +35,7 @@ search.button.refresh.lbl=Refresh
 search.results.notfound.lbl=No results found
 search.results.check.lbl=Check which submission types are stored
 search.results.submitted.lbl=Received at
+search.results.filename.lbl=Filename
 search.results.results.lbl=results
 search.results.retrieve.lbl=Retrieve
 search.results.download.lbl=Download

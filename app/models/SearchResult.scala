@@ -31,7 +31,7 @@ case class SearchResult( notableEventDisplayName: String,
                          retrievalStatus: Option[String] = None) {
 
   val linkText: String =
-    s"$notableEventDisplayName ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
+    s"$notableEventDisplayName submitted ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
 
 }
 

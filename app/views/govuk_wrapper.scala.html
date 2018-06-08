@@ -84,9 +84,7 @@
       includeHMRCBranding = false)
 }
 
-@mainContentHeader = {@contentHeader}
-
-@getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
+@mainContentHeader = {}
 
 @content = {
     @uiLayouts.main_content(
@@ -95,7 +93,6 @@
       mainDataAttributes = mainDataAttributes,
       mainContentHeader = mainContentHeader,
       serviceInfo = serviceInfo,
-      getHelpForm = getHelpForm,
       sidebar = sidebar)
 }
 

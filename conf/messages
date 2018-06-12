@@ -8,10 +8,10 @@ page.next.lbl=Next page
 ################################## Start Page ####################################################
 start.page.header.lbl=Search the Non-Repudiation Store
 start.page.title.lbl=Start
-start.text.one.lbl=This service provides original submissions made to HMRC using digital channels.
+start.text.one.lbl=This service provides signed submissions made to HMRC.
 start.text.two.lbl=Using this service, you can:
-start.text.two.option.one.lbl=search for a submission, such as a VAT return
-start.text.two.option.two.lbl=retrieve and download a copy of the submission
+start.text.two.option.one.lbl=search for a submission, such as a VAT return or CDS declaration
+start.text.two.option.two.lbl=retrieve and download a signed copy of the submission
 start.text.three.lbl=Submissions are held in encrypted long term storage, retrieval may take up to 5 minutes.
 start.button.start.lbl=Start now
 

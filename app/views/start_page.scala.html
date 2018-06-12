@@ -19,26 +19,21 @@
 @import uk.gov.hmrc.play.views.html.helpers.form
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = Messages("start.page.title.lbl")) {
+@title = @{
+  Messages("start.page.header.lbl")
+}
+
+@main_template(title=title) {
 
     @form(action = routes.SearchController.showSearchPage()) {
-        <h1 class="heading-large" id="pageHeader">@Messages("start.page.header.lbl")</h1>
+        <h1 class="heading-large" id="pageHeader">@title</h1>
         <p class="lede">@Messages("start.text.one.lbl")</p>
         <p>@Messages("start.text.two.lbl")</p>
         <ul class="list list-bullet">
             <li>@Messages("start.text.two.option.one.lbl")</li>
             <li>@Messages("start.text.two.option.two.lbl")</li>
         </ul>
-        <p>@Messages("start.text.three.lbl")</p>
-        <details>
-            <summary>
-                <span class="summary">@Messages("service.scope.summary.lbl")</span>
-            </summary>
-            <div>
-            @service_scope()
-            </div>
-        </details>
-
+        <hr>
         <button id="continueButton" type="submit" class="button button--get-started">@Messages("start.button.start.lbl")</button>
     }
 }

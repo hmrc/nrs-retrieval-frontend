@@ -32,15 +32,22 @@
           }
 
           #logo {
-              color: #0b0c0c;
+              color: transparent;
               font-size: 18px;
               font-weight: normal;
               line-height: 32px;
+              background: url(/nrs-retrieval/assets/images/HMRC-logo-black-trans.png) no-repeat 0 0;
+              background-size: contain;
+              padding-left: 38px;
+              &:before {
+                content: "HM Revenue & Customs";
+                color: black;
+                font-size: 18px;
+                font-family: Helvetica, Arial;
+              }
 
               img {
-                top: 0;
-                height: 32px;
-                width: 32px;
+                display: none;
               }
             }
         }
@@ -69,7 +76,7 @@
 
           .header__menu__proposition-name {
             display: block;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             color: #0b0c0c;
             margin-top: .2em;

@@ -36,6 +36,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.error_template
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -84,7 +85,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
           getFormData(request, search, sRs).map { form =>
             Ok(views.html.search_page(form, Some(nrUser)))
-          }.recoverWith {case e => Future(Ok(views.html.error_template(Messages("error.page.title"), Messages("error.page.title"), Messages("error.page.title"))))}
+          }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
         }
       )
     })
@@ -99,10 +100,10 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
-    }.recoverWith {case e => Future(Ok(views.html.error_template(Messages("error.page.title"), Messages("error.page.title"), Messages("error.page.title"))))}
+    }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
   }
 
   private def getFormData(request: Request[AnyContent], search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {

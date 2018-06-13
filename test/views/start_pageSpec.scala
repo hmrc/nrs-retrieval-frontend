@@ -42,19 +42,14 @@ import views.html.start_page
 class start_pageSpec extends GuiceAppSpec {
 
   "start page" should {
-    "have the correct title and GA page view event" in new StartPageViewFixture {
+    "have a matching page title and h1 header" in new StartPageViewFixture {
       val view: HtmlFormat.Appendable = start_page()
-      doc.title mustBe Messages("start.page.title.lbl")
+      doc.title mustBe doc.getElementById("pageHeader").text()
     }
 
     "have the correct page header" in new StartPageViewFixture {
       val view: HtmlFormat.Appendable = start_page()
       doc.getElementById("pageHeader").text() mustBe Messages("start.page.header.lbl")
-    }
-
-    "include the service scope table" in new StartPageViewFixture {
-      val view: HtmlFormat.Appendable = start_page()
-      doc.getElementById("serviceScope").hasText mustBe true
     }
 
     "have the correct continue button" in new StartPageViewFixture {

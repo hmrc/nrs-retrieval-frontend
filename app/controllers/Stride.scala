@@ -18,9 +18,9 @@ package controllers
 
 import config.AppConfig
 import models.NRUser
+import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Controller, Request, Result}
-import play.api.{Logger, Mode}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrievals, ~}
@@ -61,12 +61,11 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
         case _: NoActiveSession =>
           logger.debug(s"$actionName - NoActiveSession")
           toStrideLogin(
-            if (env.mode == Mode.Dev) {
-              s"http://localhost:9390${request.uri}"
+            if (appConfig.isLocal) {
+              s"http://${request.host}${request.uri}"
             }
             else {
-              s"http://localhost:9390${request.uri}"
-//              s"${request.uri}"
+              s"${request.uri}"
             })
         case ex@InsufficientEnrolments(`strideRole`) =>
           logger.info(s"$actionName - error, not authorised", ex)

@@ -49,6 +49,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   lazy val nrsRetrievalUrl = s"${baseUrl("nrs-retrieval")}/nrs-retrieval"
   lazy val xApiKey: String = loadConfigWithDefault(s"microservice.services.nrs-retrieval.xApiKey", "missingKey")
 
+  lazy val isLocal: Boolean = loadConfigWithDefault(s"microservice.services.nrs-retrieval.isLocal", "false").toBoolean
+
   lazy val interval: FiniteDuration = loadConfig(s"polling.interval").toLong.millis
   lazy val runTimeMillis: Long = loadConfig(s"polling.duration").toLong
 

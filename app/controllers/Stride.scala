@@ -65,7 +65,8 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
               s"http://localhost:9390${request.uri}"
             }
             else {
-              s"${request.uri}"
+              s"http://localhost:9390${request.uri}"
+//              s"${request.uri}"
             })
         case ex@InsufficientEnrolments(`strideRole`) =>
           logger.info(s"$actionName - error, not authorised", ex)

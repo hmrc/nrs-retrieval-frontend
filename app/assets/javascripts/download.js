@@ -21,6 +21,12 @@
     checkStatus: function (index, vaultName, archiveId) {
       var xmlhttp = this.http(index, vaultName, archiveId);
       xmlhttp.open("GET", 'status/' + vaultName + '/' + archiveId);
+      xmlhttp.timeout = 5000;
+      xmlhttp.send();
+    },
+    doRetrieve: function (index, vaultName, archiveId) {
+      var xmlhttp = this.http(index, vaultName, archiveId);
+      xmlhttp.open("GET", 'retrieve/' + vaultName + '/' + archiveId);
       xmlhttp.timeout = 30000;
       xmlhttp.send();
     }
@@ -36,13 +42,13 @@
     var $target = $('#retrieve' + index).find('.result-retrieve')
     switch (status) {
       case 'Complete':
-        $target.addClass('retrieval-complete')
+        $target.toggleClass('retrieval-incomplete retrieval-complete')
         break;
       case 'Failed':
-        $target.addClass('retrieval-failed')
+        $target.toggleClass('retrieval-incomplete retrieval-failed')
         break;
       default:
-        $target.addClass('retrieval-in-progress')
+        $target.addClass('retrieval-incomplete')
     }
   }
 
@@ -53,8 +59,8 @@
     var vaultName = $link.attr("data-vault-id")
     var index = $link.attr("data-index")
     var archiveId = $link.attr("data-archive-id")
-    setStatus(index, 'retrieval-in-progress')
-    NrsAjax.checkStatus(index,  vaultName, archiveId)
+    setStatus(index, 'retrieval-incomplete')
+    NrsAjax.doRetrieve(index,  vaultName, archiveId)
   })
 
 })(jQuery, window);

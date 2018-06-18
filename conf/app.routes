@@ -10,3 +10,4 @@ POST       /search                                  @controllers.SearchControlle
 GET        /download/:vaultId/:archiveId            @controllers.SearchController.download(vaultId, archiveId)
 
 GET        /status/:vaultId/:archiveId              @controllers.SearchController.refresh(vaultId, archiveId)
+GET        /retrieve/:vaultId/:archiveId            @controllers.SearchController.doAjaxRetrieve(vaultId, archiveId)

@@ -14,17 +14,17 @@
   .start-retrieval {
     display: block;
   }
-  .retrieval-in-progress {
+  .retrieval-incomplete {
     display: none;
   }
   .retrieval-complete {
     display: none;
   }
-  &.retrieval-in-progress {
+  &.retrieval-incomplete {
     .start-retrieval {
       display: none;
     }
-    .retrieval-in-progress {
+    .retrieval-incomplete {
       display: block;
     }
     .retrieval-complete {
@@ -35,7 +35,7 @@
     .start-retrieval {
       display: none;
     }
-    .retrieval-in-progress {
+    .retrieval-incomplete {
       display: none;
     }
     .retrieval-complete {
@@ -46,7 +46,7 @@
     .start-retrieval {
       display: none;
     }
-    .retrieval-in-progress {
+    .retrieval-incomplete {
       display: none;
     }
     .retrieval-complete {

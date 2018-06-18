@@ -7,6 +7,8 @@
       xmlhttp.onload = function (e) {
         if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
           setStatus(index, this.response)
+        } else if (xmlhttp.status === 500) {
+          showServerError(index)
         } else {
           NrsAjax.checkStatus(index, vaultName, archiveId);
         }
@@ -23,6 +25,12 @@
       xmlhttp.send();
     }
   };
+
+  function showServerError (index) {
+    var $target = $('#retrieve' + index)
+    $target.find('.error-message').remove()
+    $target.prepend('<span class="error-message">Server is returning error HTTP 500</span>')
+  }
 
   function setStatus(index, status) {
     var $target = $('#retrieve' + index).find('.result-retrieve')

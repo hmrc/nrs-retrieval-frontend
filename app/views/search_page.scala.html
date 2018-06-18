@@ -20,11 +20,15 @@
 @import uk.gov.hmrc.play.views.html.helpers.{form, input}
 @(searchForm: Form[Search], user: Option[NRUser] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@pageScripts = {
+    <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/download.js")}"></script>
+}
+
 @userName = @{
     user.map(u => Html(u.userName))
 }
 
-@main_template(title = s"Search", userName) {
+@main_template(title = s"Search", userName, scriptElem = Some(pageScripts)) {
 
     <h1 id="pageHeader">@Messages("search.page.header.lbl")</h1>
     @form(

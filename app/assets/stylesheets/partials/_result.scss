@@ -9,3 +9,48 @@
 .text--black {
   color: black;
 }
+
+.result-retrieve {
+  .start-retrieval {
+    display: block;
+  }
+  .retrieval-in-progress {
+    display: none;
+  }
+  .retrieval-complete {
+    display: none;
+  }
+  &.retrieval-in-progress {
+    .start-retrieval {
+      display: none;
+    }
+    .retrieval-in-progress {
+      display: block;
+    }
+    .retrieval-complete {
+      display: none;
+    }
+  }
+  &.retrieval-complete {
+    .start-retrieval {
+      display: none;
+    }
+    .retrieval-in-progress {
+      display: none;
+    }
+    .retrieval-complete {
+      display: block;
+    }
+  }
+  &.retrieval-failed {
+    .start-retrieval {
+      display: none;
+    }
+    .retrieval-in-progress {
+      display: none;
+    }
+    .retrieval-complete {
+      display: none;
+    }
+  }
+}

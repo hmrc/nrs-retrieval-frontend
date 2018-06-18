@@ -19,8 +19,6 @@
 @import views.helpers.Utils._
 @(searchResult: SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-<script language="JavaScript" type="application/javascript" src=@routes.Assets.versioned("javascripts/download.js")></script>
-
 <div class="result-retrieve toggle1 show" style="display:none" id="search-result-success-@index">
     <table                                                                                                                                                                                                                                                                                  class="table--borderless">
         <tr>

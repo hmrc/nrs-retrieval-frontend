@@ -100,6 +100,14 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
+  def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc)).mapTo[Future[ActorMessage]].flatMap(identity).map {
+      case _ => Accepted(CompletionStatus.incomplete)
+    } recoverWith {
+      case e: AskTimeoutException => Future(Accepted(CompletionStatus.incomplete))
+    }
+  }
+
     def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)

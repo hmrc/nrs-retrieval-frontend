@@ -24,7 +24,7 @@
 
   <div class="result-retrieve @{searchResult.retrievalStatus}">
     <p class="event-record lede">
-      <span class="retrieval-in-progress">@Messages("search.results.retrieval.message.lbl")</span>
+      <span class="retrieval-incomplete">@Messages("search.results.retrieval.message.lbl")</span>
       <a class="button retrieval-complete" id="retrievalComplete@index" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText</a>
       <a class="start-retrieval" data-index="@{index}" data-vault-id="@{searchResult.vaultId}" data-archive-id="@{searchResult.archiveId}" href="#">@Messages("search.results.retrieve.lbl") @searchResult.linkText</a>
     </p>

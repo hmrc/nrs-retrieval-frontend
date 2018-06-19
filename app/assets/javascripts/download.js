@@ -33,7 +33,7 @@
     }
   };
 
-  function showServerError (index) {
+  function showServerError(index) {
     var $target = $('#retrieve' + index)
     $target.find('.error-message').remove()
     $target.prepend('<span class="error-message">Server is returning error HTTP 500</span>')
@@ -43,13 +43,30 @@
     var $target = $('#retrieve' + index).find('.result-retrieve')
     switch (status) {
       case 'Complete':
-        $target.toggleClass('retrieval-incomplete retrieval-complete')
+        $target
+          .attr('aria-busy', false)
+          .toggleClass('retrieval-incomplete retrieval-complete')
+          .find('.retrieval-complete')
+          .attr('aria-hidden', false)
+          .end()
+          .find('.retrieval-incomplete, .start-retrieval').attr('aria-hidden', true)
         break;
       case 'Failed':
-        $target.toggleClass('retrieval-incomplete retrieval-failed')
+        $target
+          .attr('aria-busy', false)
+          .toggleClass('retrieval-incomplete retrieval-failed')
+          .find('.retrieval-failed')
+          .attr('aria-hidden', false)
+          .end()
+          .find('.retrieval-incomplete, .start-retrieval').attr('aria-hidden', true)
         break;
       default:
-        $target.addClass('retrieval-incomplete')
+        $target
+          .attr('aria-busy', true)
+          .addClass('retrieval-incomplete')
+          .find('.retrieval-incomplete').attr('aria-hidden', false)
+          .end()
+          .find('.start-retrieval').attr('aria-hidden', true)
     }
   }
 

@@ -25,6 +25,7 @@
       xmlhttp.send();
     },
     doRetrieve: function (index, vaultName, archiveId) {
+      setStatus(index, 'retrieval-incomplete')
       var xmlhttp = this.http(index, vaultName, archiveId);
       xmlhttp.open("GET", 'retrieve/' + vaultName + '/' + archiveId);
       xmlhttp.timeout = 30000;
@@ -55,12 +56,8 @@
   // attach listeners to retrieval events
   $('a.start-retrieval').on('click', function (e) {
     e.preventDefault();
-    var $link = $(e.currentTarget)
-    var vaultName = $link.attr("data-vault-id")
-    var index = $link.attr("data-index")
-    var archiveId = $link.attr("data-archive-id")
-    setStatus(index, 'retrieval-incomplete')
-    NrsAjax.doRetrieve(index,  vaultName, archiveId)
+    var data = $(e.currentTarget).data()
+    NrsAjax.doRetrieve(data.index, data.vaultId, data.archiveId)
   })
 
 })(jQuery, window);

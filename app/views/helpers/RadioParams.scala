@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import config.AppConfig
-@(searchForm: Form[Search], notableEventType: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+package views.helpers
 
-<div class="form-group">
-   @views.html.helper.input(searchForm("query.searchText"), '_label -> Messages(s"enter-${notableEventType}.lbl")) { (id, name, value, args) =>
-    <input type="text" name="@name" id="@id" value="@searchForm("query.searchText").value">
-    <button id="searchButton" type="submit" name="action" value="search" class="button">@Messages("search.button.search.lbl")</button>
-   }
-</div>
+case class RadioParams(
+                        value: String,
+                        label: String,
+                        dataTarget: Option[String] = None
+                      )

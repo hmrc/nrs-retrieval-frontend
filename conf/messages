@@ -15,6 +15,11 @@ start.text.two.option.two.lbl=retrieve and download a signed copy of the submiss
 start.text.three.lbl=Submissions are held in encrypted long term storage, retrieval may take up to 5 minutes.
 start.button.start.lbl=Start now
 
+################################## Selector Page ####################################################
+selector.page.header.lbl=Choose a digital submission type
+selector.page.vrn.lbl=VAT return
+selector.page.error.required=Please select a type of digital submission to retrieve
+
 ################################## Service Scope Table ###########################################
 service.scope.summary.lbl=Check storage dates, submission types and how you search for them
 service.scope.summary.tax.service.lbl=Tax service

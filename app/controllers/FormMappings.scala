@@ -16,7 +16,7 @@
 
 package controllers
 
-import models.{Search, SearchQuery, SearchResult, SearchResults}
+import models.{Search, SearchQuery, SearchResult, SearchResults, Selector}
 import play.api.data.Form
 import play.api.data.Forms.{longNumber, mapping, number, optional, seq, text}
 
@@ -44,4 +44,9 @@ object FormMappings {
     mapping("query" -> searchQueryMapping,
       "results" -> optional(searchResultsMapping)
     )(Search.apply)(Search.unapply))
+
+  val selectorForm: Form[Selector] = Form(
+    mapping(
+      "notableEventType" -> text
+    )(Selector.apply)(Selector.unapply))
 }

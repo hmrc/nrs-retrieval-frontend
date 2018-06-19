@@ -4,6 +4,7 @@ GET        /assets/*file                            controllers.Assets.versioned
 
 # microservice specific routes
 GET        /start                                   @controllers.StartController.showStartPage
+GET        /select                                  @controllers.SelectorController.showSelectorPage
 GET        /search                                  @controllers.SearchController.showSearchPage()
 POST       /search                                  @controllers.SearchController.submitSearchPage
 

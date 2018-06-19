@@ -35,6 +35,7 @@
 @main_template(title = title, userName, scriptElem = Some(pageScripts)) {
 
     <h1 id="pageHeader">@title</h1>
+    <p>@Messages("search.page.stored.info", "23 April 2018", "20 years")</p>
     @form(
         action = routes.SearchController.submitSearchPage,
         'class -> "form js-form") {

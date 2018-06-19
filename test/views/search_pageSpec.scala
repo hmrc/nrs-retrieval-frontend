@@ -49,9 +49,9 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
   "search page with a valid form only" should {
     val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [],"resultCount": 0}}""")
     val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
-    "have the correct title and GA page view event" in new SearchPageViewFixture {
+    "have a matching page title and header" in new SearchPageViewFixture {
       val view: HtmlFormat.Appendable = search_page(searchForm)
-      doc.title mustBe Messages("search.page.title.lbl")
+      doc.title mustBe doc.getElementById("pageHeader").text()
     }
 
     "have the correct page header" in new SearchPageViewFixture {

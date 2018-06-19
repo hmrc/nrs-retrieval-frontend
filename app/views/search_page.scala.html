@@ -28,9 +28,13 @@
     user.map(u => Html(u.userName))
 }
 
-@main_template(title = s"Search", userName, scriptElem = Some(pageScripts)) {
+@title = @{
+  Messages("search.page.header.lbl")
+}
 
-    <h1 id="pageHeader">@Messages("search.page.header.lbl")</h1>
+@main_template(title = title, userName, scriptElem = Some(pageScripts)) {
+
+    <h1 id="pageHeader">@title</h1>
     @form(
         action = routes.SearchController.submitSearchPage,
         'class -> "form js-form") {

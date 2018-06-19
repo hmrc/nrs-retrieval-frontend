@@ -55,7 +55,7 @@
 
   // attach listeners to retrieval events
   $('a.start-retrieval').on('click', function (e) {
-    e.preventDefault();
+    e.preventDefault()
     var data = $(e.currentTarget).data()
     NrsAjax.doRetrieve(data.index, data.vaultId, data.archiveId)
   })

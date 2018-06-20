@@ -5,7 +5,8 @@ GET        /assets/*file                            controllers.Assets.versioned
 # microservice specific routes
 GET        /start                                   @controllers.StartController.showStartPage
 GET        /select                                  @controllers.SelectorController.showSelectorPage
-GET        /search                                  @controllers.SearchController.showSearchPage()
+POST       /select                                  @controllers.SelectorController.submitSelectorPage
+GET        /search                                  @controllers.SearchController.showSearchPage(notableEventType)
 POST       /search                                  @controllers.SearchController.submitSearchPage
 
 GET        /download/:vaultId/:archiveId            @controllers.SearchController.download(vaultId, archiveId)

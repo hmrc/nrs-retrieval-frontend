@@ -19,6 +19,7 @@ start.button.start.lbl=Start now
 ################################## Selector Page ####################################################
 selector.page.header.lbl=Choose a digital submission type
 selector.page.vat-return.lbl=VAT return
+selector.page.cds-declaration.lbl=Customs declaration
 selector.page.error.required=Please select a type of digital submission to retrieve
 
 ################################## Service Scope Table ###########################################
@@ -35,6 +36,7 @@ search.page.header.lbl=Search for digital submissions
 search.page.title.lbl=Search
 enter-vrn.lbl=Enter a VAT Registration Number (VRN)
 search.page.vat-return.lbl=Enter a VAT Registration Number (VRN)
+search.page.cds-declaration.lbl=Enter a Conversation ID
 search.page.hint=Retrieval from long term storage takes up to 5 minutes
 search.button.search.lbl=Search
 search.button.refresh.lbl=Refresh

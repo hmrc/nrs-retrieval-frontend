@@ -60,7 +60,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  def showSearchPage: Action[AnyContent] = Action.async { implicit request =>
+  def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the search page", { nrUser =>
       searchForm.bindFromRequest.fold(
         formWithErrors => {
@@ -68,7 +68,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         _ => {
-          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), "vat-return")))
+          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), notableEventType)))
         }
       )
     })

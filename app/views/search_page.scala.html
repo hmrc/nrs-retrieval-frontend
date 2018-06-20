@@ -32,16 +32,28 @@
   Messages("search.page.header.lbl")
 }
 
+@notableEvent = @{
+  appConfig.notableEvents.get(notableEventType)
+}
+
 @main_template(title = title, userName, scriptElem = Some(pageScripts)) {
 
-    <h1 id="pageHeader">@title</h1>
-    <p>@Messages("search.page.stored.info", "23 April 2018", "20 years")</p>
+    <h1 id="pageHeader">
+      @title
+    </h1>
+
+    <p>
+      @Messages("search.page.stored.info", notableEvent.get.storedFrom, notableEvent.get.storedFor)
+    </p>
+
     @form(
         action = routes.SearchController.submitSearchPage,
         'class -> "form js-form") {
 
-        @search_query(searchForm, notableEventType)
+      <input type="hidden" name="notableEventType" value="@{notableEventType}">
 
-        @searchForm.get.results.map(searchResultsForm => search_results(searchForm))
+      @search_query(searchForm, notableEventType)
+
+      @searchForm.get.results.map(searchResultsForm => search_results(searchForm))
     }
 }

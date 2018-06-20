@@ -52,7 +52,22 @@ class SelectorController @Inject()(
         Ok(views.html.selector_page(selectorForm.bindFromRequest, Some(nrUser)))
       )
     })
+  }
 
+  def submitSelectorPage: Action[AnyContent] = Action.async { implicit request =>
+    authWithStride("Submit the selector page", { nrUser =>
+      selectorForm.bindFromRequest.fold(
+        formWithErrors => {
+          logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
+          Future.successful(BadRequest(formWithErrors.errors.toString()))
+        },
+        v => {
+          Future.successful(
+            Redirect(routes.SearchController.showSearchPage(v.notableEventType))
+          )
+        }
+      )
+    })
   }
 
 }

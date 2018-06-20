@@ -4,6 +4,7 @@ service.name.lbl=Search the Non-Repudiation Store
 years.lbl=years
 page.previous.lbl=Previous page
 page.next.lbl=Next page
+button.continue.lbl=Continue
 
 ################################## Start Page ####################################################
 start.page.header.lbl=Search the Non-Repudiation Store
@@ -17,7 +18,7 @@ start.button.start.lbl=Start now
 
 ################################## Selector Page ####################################################
 selector.page.header.lbl=Choose a digital submission type
-selector.page.vrn.lbl=VAT return
+selector.page.vat-return.lbl=VAT return
 selector.page.error.required=Please select a type of digital submission to retrieve
 
 ################################## Service Scope Table ###########################################
@@ -33,6 +34,7 @@ service.scope.footer.lbl=More services will be added in the future.
 search.page.header.lbl=Search for digital submissions
 search.page.title.lbl=Search
 enter-vrn.lbl=Enter a VAT Registration Number (VRN)
+search.page.vat-return.lbl=Enter a VAT Registration Number (VRN)
 search.page.hint=Retrieval from long term storage takes up to 5 minutes
 search.button.search.lbl=Search
 search.button.refresh.lbl=Refresh

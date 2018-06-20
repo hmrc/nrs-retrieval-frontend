@@ -66,7 +66,9 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
       .map { client =>
           NotableEvent(
             loadFromConfig(client, "notableEvent"),
-            loadFromConfig(client, "displayName")
+            loadFromConfig(client, "displayName"),
+            loadFromConfig(client, "storedFrom"),
+            loadFromConfig(client, "storedFor")
           )
         }.map(nE => nE.name -> nE).toMap
 

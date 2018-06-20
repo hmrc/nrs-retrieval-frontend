@@ -62,7 +62,9 @@ case class NrsSearchResult(
 
 case class NotableEvent (
   name: String,
-  displayName: String
+  displayName: String,
+  storedFrom: String,
+  StoredFor: String
 )
 
 object NrsSearchResult {

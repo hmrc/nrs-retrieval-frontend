@@ -68,7 +68,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         _ => {
-          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), "vrn")))
+          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), "vat-return")))
         }
       )
     })
@@ -84,7 +84,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         search => {
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
           getFormData(request, search, sRs).map { form =>
-            Ok(views.html.search_page(form, Some(nrUser), "vrn"))
+            Ok(views.html.search_page(form, Some(nrUser), "vat-return"))
           }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
         }
       )

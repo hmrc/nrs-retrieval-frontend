@@ -30,6 +30,10 @@
   Messages("selector.page.header.lbl")
 }
 
+@radioOptions = @{
+  appConfig.notableEvents.keys.map(key => RadioParams(key, Messages(s"selector.page.$key.lbl"))).toList
+}
+
 @main_template(title = title, userName) {
 
   @form(
@@ -45,17 +49,12 @@
         required = true,
         error = Some(Messages("selector.page.error.required")),
         value = selectorForm("notableEventType").value,
-        radios = List(
-          RadioParams(
-            "vrn",
-            Messages("selector.page.vrn.lbl")
-          )
-        )
+        radios = radioOptions
       )
     )
     <hr>
     <div class="form-group">
-      <input type="submit" class="button" value="Continue">
+      <input type="submit" class="button" value="@Messages("button.continue.lbl")">
     </div>
 
   }

@@ -28,12 +28,12 @@
     user.map(u => Html(u.userName))
 }
 
-@title = @{
-  Messages("search.page.header.lbl")
-}
-
 @notableEvent = @{
   appConfig.notableEvents.get(notableEventType)
+}
+
+@title = @{
+  Messages(s"search.page.dynamic.header.lbl", notableEvent.get.displayName)
 }
 
 @main_template(title = title, userName, scriptElem = Some(pageScripts)) {

@@ -19,12 +19,16 @@
 @import views.html.helpers._
 @(searchForm: Form[Search], notableEventType: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+ @notableEvent = @{
+  appConfig.notableEvents.get(notableEventType)
+ }
+
 @TextInput(
  TextInputParams(
   value=searchForm("query.searchText").value,
   context=Some("query"),
   name="searchText",
-  label=Messages(s"search.page.$notableEventType.lbl"),
+  label=Messages(s"search.page.searchkey.lbl", notableEvent.get.searchKeyLabel),
   hintText=Some(Messages("search.page.hint")),
   error="Enter a search term",
   hasErrors=false

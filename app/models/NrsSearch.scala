@@ -64,7 +64,8 @@ case class NotableEvent (
   name: String,
   displayName: String,
   storedFrom: String,
-  storedFor: String
+  storedFor: String,
+  searchKeyLabel: String
 )
 
 object NrsSearchResult {

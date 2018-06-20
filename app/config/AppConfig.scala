@@ -68,7 +68,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
             loadFromConfig(client, "notableEvent"),
             loadFromConfig(client, "displayName"),
             loadFromConfig(client, "storedFrom"),
-            loadFromConfig(client, "storedFor")
+            loadFromConfig(client, "storedFor"),
+            loadFromConfig(client, "searchKeyLabel")
           )
         }.map(nE => nE.name -> nE).toMap
 

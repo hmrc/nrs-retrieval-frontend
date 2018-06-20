@@ -46,12 +46,13 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
   "GET /search" should {
     "show the search empty search page" in {
-      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search"))
+      val notableEventType: String = "vat-return"
+      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search?notableEventType=" + notableEventType))
 
       result.map(status(_)) shouldBe Some(OK)
 
       val text: String = result.map(contentAsString(_)).get
-      text should include(Messages("search.page.header.lbl"))
+      text should include(Messages(s"search.page.$notableEventType.header.lbl"))
       text should not include(Messages("search.results.notfound.lbl"))
       text should not include(Messages("search.results.results.lbl"))
     }
@@ -75,16 +76,17 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
       "the search returns results" in {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-
+        val notableEventType: String = "vat-return"
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
           ("action", "search"),
-          ("query.searchText", "results")
+          ("query.searchText", "results"),
+          ("notableEventType", notableEventType)
         )))
 
         result.map(status(_)) shouldBe Some(OK)
 
         val text: String = result.map(contentAsString(_)).get
-        text should include(Messages("search.page.header.lbl"))
+        text should include(Messages(s"search.page.$notableEventType.header.lbl"))
         text should not include (Messages("search.results.notfound.lbl"))
         text should include(Messages("search.results.results.lbl"))
       }

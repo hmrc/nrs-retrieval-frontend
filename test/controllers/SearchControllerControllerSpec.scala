@@ -61,7 +61,7 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
 
   "showSearchPage" should {
     "return 200" in {
-      val result = controller.showSearchPage(fakeRequest)
+      val result = controller.showSearchPage(notableEventType = "vat-return")(fakeRequest)
       status(result) shouldBe Status.OK
     }
   }

@@ -50,13 +50,14 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
     val jsonBody: JsValue = Json.parse("""{"query": {"searchQuery": "someValue"},"results":{"results": [],"resultCount": 0}}""")
     val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
     "have a matching page title and header" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm)
+      val view: HtmlFormat.Appendable = search_page(searchForm, notableEventType = "vat-return")
       doc.title mustBe doc.getElementById("pageHeader").text()
     }
 
     "have the correct page header" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm)
-      doc.getElementById("pageHeader").text() mustBe Messages("search.page.header.lbl")
+      val notableEventType: String = "vat-return"
+      val view: HtmlFormat.Appendable = search_page(searchForm, notableEventType = notableEventType)
+      doc.getElementById("pageHeader").text() mustBe Messages(s"search.page.$notableEventType.header.lbl")
     }
   }
 
@@ -65,12 +66,12 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
     val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
 
     "not display the not found panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm)
+      val view: HtmlFormat.Appendable = search_page(searchForm, notableEventType = "vat-return")
       Option(doc.getElementById("notFound")).isDefined mustBe false
     }
 
     "not display the results panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm)
+      val view: HtmlFormat.Appendable = search_page(searchForm, notableEventType = "vat-return")
       Option(doc.getElementById("resultsFound")).isDefined mustBe false
     }
   }
@@ -81,12 +82,12 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
     val searchResults: Option[SearchResults] = Some(models.SearchResults(Seq.empty[SearchResult], 1))
 
     "display the not found panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm)
+      val view: HtmlFormat.Appendable = search_page(searchForm, notableEventType = "vat-return")
       Option(doc.getElementById("notFound")).isDefined mustBe true
     }
 
     "not display the results panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm)
+      val view: HtmlFormat.Appendable = search_page(searchForm, notableEventType = "vat-return")
       Option(doc.getElementById("resultsFound")).isDefined mustBe false
     }
   }
@@ -96,12 +97,12 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
     val searchForm: Form[Search] = FormMappings.searchForm.bind(jsonBody)
 
     "not display the not found panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm, None)
+      val view: HtmlFormat.Appendable = search_page(searchForm, None, notableEventType = "vat-return")
       Option(doc.getElementById("notFound")).isDefined mustBe false
     }
 
     "display the results panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = search_page(searchForm, None)
+      val view: HtmlFormat.Appendable = search_page(searchForm, None, notableEventType = "vat-return")
       Option(doc.getElementById("resultsFound")).isDefined mustBe true
     }
   }

@@ -31,7 +31,7 @@
 }
 
 @radioOptions = @{
-  appConfig.notableEvents.keys.map(key => RadioParams(key, Messages(s"selector.page.$key.lbl"))).toList
+  appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents.get(key).get.displayName)).toList
 }
 
 @main_template(title = title, userName) {

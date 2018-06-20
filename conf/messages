@@ -33,8 +33,12 @@ service.scope.footer.lbl=More services will be added in the future.
 
 ################################## Search Page ###################################################
 search.page.header.lbl=Search for digital submissions
+search.page.dynamic.header.lbl=Search for {0}s
+search.page.vat-return.header.lbl=Search for VAT returns
+search.page.cds-declaration.header.lbl=Search for Customs declarations
 search.page.title.lbl=Search
 enter-vrn.lbl=Enter a VAT Registration Number (VRN)
+search.page.searchkey.lbl=Enter a {0}
 search.page.vat-return.lbl=Enter a VAT Registration Number (VRN)
 search.page.cds-declaration.lbl=Enter a Conversation ID
 search.page.hint=Retrieval from long term storage takes up to 5 minutes

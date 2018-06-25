@@ -60,14 +60,6 @@ case class NrsSearchResult(
   expiryDate: LocalDate,
   glacier: Glacier)
 
-case class NotableEvent (
-  name: String,
-  displayName: String,
-  storedFrom: String,
-  storedFor: String,
-  searchKeyLabel: String
-)
-
 object NrsSearchResult {
   implicit val notableEventFormat: OFormat[NotableEvent] = Json.format[NotableEvent]
   implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]

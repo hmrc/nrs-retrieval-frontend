@@ -5,3 +5,12 @@
 @import 'partials/_form-helpers';
 @import 'partials/_user-name';
 @import 'partials/_result';
+/*
+* Because this is an internal admin site
+* we do not need to show the cookie message
+* the seen_cookie_message will still be set
+*/
+#global-cookie-message {
+  position: absolute;
+  left: -9999em;
+}

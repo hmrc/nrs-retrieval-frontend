@@ -16,14 +16,20 @@
 
 package controllers
 
-import models.{Search, SearchQuery, SearchResult, SearchResults, Selector}
+import models._
 import play.api.data.Form
 import play.api.data.Forms.{longNumber, mapping, number, optional, seq, text}
 
 object FormMappings {
 
+  private val searchKeyMapping = mapping(
+    "name" -> text,
+    "value" -> optional(text)
+  )(SearchKeySubmission.apply)(SearchKeySubmission.unapply)
+
   private val searchQueryMapping = mapping(
-    "searchText" -> optional(text)
+    "searchKeys" -> seq[SearchKeySubmission](searchKeyMapping),
+    "notableEventType" -> text
   )(SearchQuery.apply)(SearchQuery.unapply)
 
   private val searchResultMapping = mapping(

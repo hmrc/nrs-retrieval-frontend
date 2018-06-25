@@ -21,7 +21,7 @@ import play.api.{Environment, Logger}
 import play.api.Mode.Mode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import config.{AppConfig, Auditable, WSHttpT}
-import models.NrsSearchResult
+import models.{NrsSearchResult, SearchQuery}
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -37,11 +37,11 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
 
   val logger: Logger = Logger(this.getClass)
 
-  override def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
-    logger.info(s"Search for VRN $vrn")
+  override def search(query: SearchQuery)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
+    logger.info(s"Search for ${query.searchText}")
 
     // todo : as part of the work to generalise the search keys, derive the notable event from the searchQuery object
-    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?vrn=$vrn&notableEvent=vat-return"
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
 
     // todo : these values need to come from stride-auth
     val authProviderId = "authProviderIdValue"
@@ -53,11 +53,11 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
           case e if e.getMessage.contains("401") => {
-            auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, "Unauthorized", path))
+            auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, query.searchText, "Unauthorized", path))
             throw e
           }
         }
-      _ <- auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, vrn, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+      _ <- auditable.sendDataEvent(NonRepudiationStoreSearch(authProviderId, name, query.searchText, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
     } yield get
   }
 

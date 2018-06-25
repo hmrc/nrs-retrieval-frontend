@@ -54,13 +54,11 @@ case class NrsSearchResult(
   identityData: JsValue,
   userAuthToken: String,
   headerData: JsValue,
-  searchKeys: SearchKeys,
   nrSubmissionId: String,
   bundle: Bundle,
   expiryDate: LocalDate,
   glacier: Glacier)
 
 object NrsSearchResult {
-  implicit val notableEventFormat: OFormat[NotableEvent] = Json.format[NotableEvent]
   implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]
 }

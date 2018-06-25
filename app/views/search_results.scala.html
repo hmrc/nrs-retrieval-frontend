@@ -33,8 +33,6 @@
         <div class="results" style="position: relative;">
             <div class="notable-event">
 
-                <p>VRN: @searchForm.get.query.searchText.getOrElse("") </p>
-
                 @searchForm.get.results.get.results.zipWithIndex.map { sR =>
                     @search_result(sR._1, sR._2.toString)
                 }

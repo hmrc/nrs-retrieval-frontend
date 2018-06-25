@@ -23,17 +23,20 @@
   appConfig.notableEvents.get(notableEventType)
  }
 
-@TextInput(
- TextInputParams(
-  value=searchForm("query.searchText").value,
-  context=Some("query"),
-  name="searchText",
-  label=Messages(s"search.page.searchkey.lbl", notableEvent.get.searchKeyLabel),
-  hintText=Some(Messages("search.page.hint")),
-  error="Enter a search term",
-  hasErrors=false
- )
-)
+ @for(searchKey <- notableEvent.get.searchKeys){
+  @TextInput(
+   TextInputParams(
+    value=None,
+    context=Some("query"),
+    name=searchKey.name,
+    label=Messages(s"search.page.searchkey.lbl", searchKey.label),
+    hintText=Some(Messages("search.page.hint")),
+    error="Enter a search term"
+   )
+  )
+ }
+
+
 
 <div class="form-group">
     <button id="searchButton" type="submit" name="action" value="search" class="button">@Messages("search.button.search.lbl")</button>

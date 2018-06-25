@@ -16,10 +16,20 @@
 
 package models
 
+case class SearchKeySubmission(
+                      name: String,
+                      value: Option[String]
+                    )
+
+case class SearchKey(
+                    name: String,
+                    label: String
+                    )
+
 case class NotableEvent(
                          name: String,
                          displayName: String,
                          storedFrom: String,
                          storedFor: String,
-                         searchKeyLabel: String
+                         searchKeys: Seq[SearchKey]
                        )

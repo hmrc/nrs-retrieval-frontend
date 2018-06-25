@@ -127,10 +127,9 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
-    search.query.searchText.map { query =>
-      nrsRetrievalConnector.search(query)
+      nrsRetrievalConnector.search(search.query)
         .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
-    }.getOrElse(Future(Seq.empty))
+
   }
 
   private def doRetrieve(searchResults: Seq[SearchResult], vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {

@@ -34,7 +34,7 @@ trait DataEventAuditType {
 
 case class NonRepudiationStoreSearch(authProviderId: String,
                                      name: String,
-                                     VRN: String,
+                                     searchText: String,
                                      nrSubmissionId: String,
                                      override val path: String) extends DataEventAuditType {
 
@@ -47,7 +47,7 @@ case class NonRepudiationStoreSearch(authProviderId: String,
       "name" -> name,
       "submissionType" -> submissionType,
       "nrSubmissionId" -> nrSubmissionId,
-      "VRN" -> VRN
+      "searchText" -> searchText
     ))
   }
 }

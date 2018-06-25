@@ -29,7 +29,7 @@ object FormMappings {
 
   private val searchQueryMapping = mapping(
     "searchKeys" -> seq[SearchKeySubmission](searchKeyMapping),
-    "notableEventType" -> text
+    "notableEventType" -> optional(text)
   )(SearchQuery.apply)(SearchQuery.unapply)
 
   private val searchResultMapping = mapping(

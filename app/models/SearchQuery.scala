@@ -19,7 +19,7 @@ package models
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchQuery(searchKeys: Seq[SearchKeySubmission], notableEventType: Option[String]) {
-  def searchText = s"?notableEvent=$notableEventType${searchKeys.map(k => s"&${k.name}=${k.value.getOrElse("")}")}"
+  def searchText = s"notableEvent=vat-return&vrn=valid"
 }
 
 object SearchQuery {

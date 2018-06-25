@@ -84,7 +84,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         search => {
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
           getFormData(request, search, sRs).map { form =>
-            Ok(views.html.search_page(form, Some(nrUser), "vat-return"))
+            Ok(views.html.search_page(form, Some(nrUser), search.query.notableEventType.getOrElse("missing")))
           }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
         }
       )

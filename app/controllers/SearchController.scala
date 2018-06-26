@@ -69,7 +69,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          Future(Ok(views.html.search_page(searchForm.bindFromRequest(), Some(nrUser), Seq.empty[SearchResult])))
+          Future(Ok(views.html.search_page(searchForm.bindFromRequest(), Some(nrUser), None)))
         }
       )
     })
@@ -85,7 +85,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         search => {
           doSearch(search).map { results =>
             logger.info(s"Form $results")
-            Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), results))
+            Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), Some(results)))
           }.recoverWith {case e =>
             logger.info(s"SubmitSearchPage $e")
             Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}

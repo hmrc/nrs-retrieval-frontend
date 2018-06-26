@@ -27,7 +27,7 @@
   <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
   @TextInput(
    TextInputParams(
-    value=None,
+    value=searchForm.get.searchKeyValue_0,
     name={s"searchKeyValue_$index"},
     label=Messages(s"search.page.searchkey.lbl", searchKey.label),
     hintText=Some(Messages("search.page.hint")),

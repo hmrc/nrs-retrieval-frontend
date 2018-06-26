@@ -17,8 +17,8 @@
 package models
 
 case class SearchKeySubmission(
-                      name: String,
-                      value: Option[String]
+                      searchKeyName: String,
+                      searchKeyValue: Option[String]
                     )
 
 case class SearchKey(

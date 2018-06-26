@@ -23,8 +23,8 @@ import play.api.data.Forms.{longNumber, mapping, number, optional, seq, text}
 object FormMappings {
 
   private val searchKeyMapping = mapping(
-    "name" -> text,
-    "value" -> optional(text)
+    "searchKeyName" -> text,
+    "searchKeyValue" -> optional(text)
   )(SearchKeySubmission.apply)(SearchKeySubmission.unapply)
 
   private val searchQueryMapping = mapping(

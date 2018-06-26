@@ -83,8 +83,8 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         },
         search => {
           val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
-          getFormData(request, search, sRs).map { form =>
-            Ok(views.html.search_page(form, Some(nrUser), search.query.notableEventType.getOrElse("missing")))
+          doSearch(search, sRs).map { form =>
+            Ok(views.html.search_page(form, Some(nrUser), search.query.notableEventType.getOrElse("vat-return")))
           }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
         }
       )
@@ -114,22 +114,10 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
   }
 
-  private def getFormData(request: Request[AnyContent], search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {
-    (getFirstAction(request) match {
-      case RetrieveAction(vaultId, archiveId) =>
-        doRetrieve(searchResults, vaultId, archiveId)
-          .map(sRs => sRs
-            .map { sR =>
-              if (sR.vaultId == vaultId && sR.archiveId == archiveId) sR.copy(retrievalStatus = Some(CompletionStatus.incomplete)) else sR})
-      case SearchAction => doSearch(search)
-      case _ => Future(searchResults)
-    }).map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
-  }
-
-  private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
-      nrsRetrievalConnector.search(search.query)
-        .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
-
+  private def doSearch(search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {
+    nrsRetrievalConnector.search(search.query)
+      .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
+    .map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
   }
 
   private def doRetrieve(searchResults: Seq[SearchResult], vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {

@@ -24,10 +24,12 @@
  }
 
  @for(searchKey <- notableEvent.get.searchKeys){
+  <input type="hidden" name="@{s"${searchKey.name}.searchKeyName"}" value="@{searchKey.name}">
   @TextInput(
    TextInputParams(
     value=None,
-    name=searchKey.name,
+    context=Some(searchKey.name),
+    name="searchKeyValue",
     label=Messages(s"search.page.searchkey.lbl", searchKey.label),
     hintText=Some(Messages("search.page.hint")),
     error="Enter a search term"

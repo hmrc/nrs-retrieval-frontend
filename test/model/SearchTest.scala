@@ -24,7 +24,6 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
   "fromNrsSearchResult" should {
     "create a SearchResult from an NrsSearchResult based on notable event config " in {
       searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe(vatSearchResult)
-      searchResultUtils.fromNrsSearchResult(nrsCdsSearchResult) shouldBe(cdsSearchResult)
     }
   }
 

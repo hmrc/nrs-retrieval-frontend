@@ -44,21 +44,21 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
     "make a get call to /submission-metadata returning data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.search("someValue")).size shouldBe 1
+      await(connector.search(searchQuery)).size shouldBe 1
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
     "make a get call to /submission-metadata with parameters returning no data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.failed(new Throwable("404")))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.search("someValue")).size shouldBe 0
+      await(connector.search(searchQuery)).size shouldBe 0
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
     "make a get call to /submission-metadata with parameters resulting in a failure" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.failed(new Throwable("401")))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      a[Throwable] should be thrownBy await(connector.search("someValue"))
+      a[Throwable] should be thrownBy await(connector.search(searchQuery))
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
@@ -73,7 +73,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
           }
         }
       })
-      await(connector.search("someValue")).head.nrSubmissionId shouldBe nrSubmissionId
+      await(connector.search(searchQuery)).head.nrSubmissionId shouldBe nrSubmissionId
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
  }

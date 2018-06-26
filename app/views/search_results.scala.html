@@ -29,10 +29,14 @@
 } else {
     <div id="resultsFound">
         <br>
+
         <p>@searchForm.get.results.get.results.size @Messages("search.results.results.lbl")</p>
+
         <div class="results" style="position: relative;">
             <div class="notable-event">
+                <!-- not working yet
                 <p>@searchForm.get.query.searchKeyName_0.getOrElse(""):  @searchForm.get.query.searchKeyValue_0.getOrElse("")</p>
+                -->
                 @searchForm.get.results.get.results.zipWithIndex.map { sR =>
                     @search_result(sR._1, sR._2.toString)
                 }

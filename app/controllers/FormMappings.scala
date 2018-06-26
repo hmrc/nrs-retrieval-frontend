@@ -42,10 +42,12 @@ object FormMappings {
     "resultCount" -> number
   )(SearchResults.apply)(SearchResults.unapply)
 
-  val searchForm: Form[Search] = Form(
-    mapping("" -> searchQueryMapping,
-      "results" -> optional(searchResultsMapping)
-    )(Search.apply)(Search.unapply))
+  val searchForm: Form[SearchQuery] = Form(
+    mapping(
+      "searchKeyName_0" -> optional(text),
+      "searchKeyValue_0" -> optional(text),
+      "notableEventType" -> optional(text)
+    )(SearchQuery.apply)(SearchQuery.unapply))
 
   val selectorForm: Form[Selector] = Form(
     mapping(

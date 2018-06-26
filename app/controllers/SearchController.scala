@@ -69,8 +69,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          val v: Form[Search] = searchForm.bind(Json.toJson(search.copy(SearchQuery(None, None, Some(notableEventType)))))
-          Future(Ok(views.html.search_page(v.bindFromRequest(), Some(nrUser))))
+          Future(Ok(views.html.search_page(searchForm.bindFromRequest(), Some(nrUser), Seq.empty[SearchResult])))
         }
       )
     })
@@ -84,9 +83,9 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          doSearch(search).map { form =>
-            logger.info(s"Form $form")
-            Ok(views.html.search_page(form, Some(nrUser)))
+          doSearch(search).map { results =>
+            logger.info(s"Form $results")
+            Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), results))
           }.recoverWith {case e =>
             logger.info(s"SubmitSearchPage $e")
             Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
@@ -95,10 +94,9 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     })
   }
 
-  private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
-    nrsRetrievalConnector.search(search.query)
+  private def doSearch(search: SearchQuery)(implicit hc: HeaderCarrier) = {
+    nrsRetrievalConnector.search(search)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
-      .map(sR => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(sR, sR.size))))))
   }
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>

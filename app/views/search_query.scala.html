@@ -23,13 +23,12 @@
   appConfig.notableEvents.get(notableEventType)
  }
 
- @for(searchKey <- notableEvent.get.searchKeys){
-  <input type="hidden" name="@{s"${searchKey.name}.searchKeyName"}" value="@{searchKey.name}">
+ @for((searchKey, index) <- notableEvent.get.searchKeys.zipWithIndex){
+  <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
   @TextInput(
    TextInputParams(
     value=None,
-    context=Some(searchKey.name),
-    name="searchKeyValue",
+    name={s"searchKeyValue_$index"},
     label=Messages(s"search.page.searchkey.lbl", searchKey.label),
     hintText=Some(Messages("search.page.hint")),
     error="Enter a search term"

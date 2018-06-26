@@ -43,7 +43,7 @@ object FormMappings {
   )(SearchResults.apply)(SearchResults.unapply)
 
   val searchForm: Form[Search] = Form(
-    mapping("query" -> searchQueryMapping,
+    mapping("" -> searchQueryMapping,
       "results" -> optional(searchResultsMapping)
     )(Search.apply)(Search.unapply))
 

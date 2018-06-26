@@ -45,6 +45,7 @@ search.page.hint=Retrieval from long term storage takes up to 5 minutes
 search.button.search.lbl=Search
 search.button.refresh.lbl=Refresh
 search.page.stored.info=You can search for records stored from {0} onwards. The records are stored for {1}.
+search.page.results.info=We found {0} results for {1}: {2}
 
 ################################## Search Results ################################################
 search.results.notfound.lbl=No results found

@@ -18,7 +18,7 @@
 @import models.NRUser
 @import models.Search
 @import uk.gov.hmrc.play.views.html.helpers.{form, input}
-@(searchForm: Form[Search], user: Option[NRUser] = None, notableEventType: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchForm: Form[Search], user: Option[NRUser] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @pageScripts = {
     <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/download.js")}"></script>
@@ -27,6 +27,8 @@
 @userName = @{
     user.map(u => Html(u.userName))
 }
+
+@notableEventType = @{searchForm.get.query.notableEventType.getOrElse("")}
 
 @notableEvent = @{
   appConfig.notableEvents.get(notableEventType)

@@ -30,6 +30,7 @@ import controllers.FormMappings._
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -67,8 +68,9 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
-        _ => {
-          Future(Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), notableEventType)))
+        search => {
+          val v: Form[Search] = searchForm.bind(Json.toJson(search.copy(SearchQuery(None, None, Some(notableEventType)))))
+          Future(Ok(views.html.search_page(v.bindFromRequest(), Some(nrUser))))
         }
       )
     })
@@ -82,13 +84,21 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          val sRs: Seq[SearchResult] = search.results.getOrElse(SearchResults(Seq.empty, 0)).results
-          doSearch(search, sRs).map { form =>
-            Ok(views.html.search_page(form, Some(nrUser), search.query.notableEventType.getOrElse("")))
-          }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
+          doSearch(search).map { form =>
+            logger.info(s"Form $form")
+            Ok(views.html.search_page(form, Some(nrUser)))
+          }.recoverWith {case e =>
+            logger.info(s"SubmitSearchPage $e")
+            Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
         }
       )
     })
+  }
+
+  private def doSearch(search: Search)(implicit hc: HeaderCarrier) = {
+    nrsRetrievalConnector.search(search.query)
+      .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
+      .map(sR => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(sR, sR.size))))))
   }
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
@@ -112,28 +122,6 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
     }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
-  }
-
-  private def doSearch(search: Search, searchResults: Seq[SearchResult])(implicit hc: HeaderCarrier) = {
-    nrsRetrievalConnector.search(search.query)
-      .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
-    .map(s => searchForm.bind(Json.toJson(Search(search.query, Some(SearchResults(s, s.size))))))
-  }
-
-  private def doRetrieve(searchResults: Seq[SearchResult], vaultId: String, archiveId: String)(implicit hc: HeaderCarrier) = {
-    (for {
-      fAM <- ask(retrievalActor, SubmitMessage(vaultId, archiveId, hc)).mapTo[Future[ActorMessage]]
-      aM <- fAM
-    } yield aM) map {
-      case PollingMessage => searchResults map { sR =>
-        if (sR.vaultId == vaultId && sR.archiveId == archiveId) {
-          sR.copy(retrievalStatus = Some(""))
-        } else {
-          sR
-        }
-      }
-      case _ => searchResults
-    }
   }
 
   private def getFirstAction(request: Request[AnyContent]): SearchPageAction = {

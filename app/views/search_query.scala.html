@@ -27,7 +27,7 @@
   <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
   @TextInput(
    TextInputParams(
-    value=searchForm.get.searchKeyValue_0,
+    value=searchForm(s"searchKeyValue_$index").value,
     name={s"searchKeyValue_$index"},
     label=Messages(s"search.page.searchkey.lbl", searchKey.label),
     hintText=Some(Messages("search.page.hint")),
@@ -35,8 +35,6 @@
    )
   )
  }
-
-
 
 <div class="form-group">
     <button id="searchButton" type="submit" name="action" value="search" class="button">@Messages("search.button.search.lbl")</button>

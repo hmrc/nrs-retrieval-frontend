@@ -1,8 +1,7 @@
-(function ($, window) {
+(function ($) {
 
   var NrsAjax = {
     http: function (index, vaultName, archiveId) {
-      console.log('NrsAjax.http(' + index + ', ' + vaultName + ', ' + archiveId + ')')
       var xmlhttp = new XMLHttpRequest();
       xmlhttp.onload = function (e) {
         if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
@@ -47,26 +46,30 @@
           .attr('aria-busy', false)
           .toggleClass('retrieval-incomplete retrieval-complete')
           .find('.retrieval-complete')
-          .attr('aria-hidden', false)
-          .end()
-          .find('.retrieval-incomplete, .start-retrieval').attr('aria-hidden', true)
+            .attr('aria-hidden', false)
+            .end()
+          .find('.retrieval-incomplete, .start-retrieval')
+            .attr('aria-hidden', true)
         break;
       case 'Failed':
         $target
           .attr('aria-busy', false)
           .toggleClass('retrieval-incomplete retrieval-failed')
           .find('.retrieval-failed')
-          .attr('aria-hidden', false)
-          .end()
-          .find('.retrieval-incomplete, .start-retrieval').attr('aria-hidden', true)
+            .attr('aria-hidden', false)
+            .end()
+          .find('.retrieval-incomplete, .start-retrieval')
+            .attr('aria-hidden', true)
         break;
       default:
         $target
           .attr('aria-busy', true)
           .addClass('retrieval-incomplete')
-          .find('.retrieval-incomplete').attr('aria-hidden', false)
-          .end()
-          .find('.start-retrieval').attr('aria-hidden', true)
+          .find('.retrieval-incomplete')
+            .attr('aria-hidden', false)
+            .end()
+          .find('.start-retrieval')
+            .attr('aria-hidden', true)
     }
   }
 
@@ -77,4 +80,4 @@
     NrsAjax.doRetrieve(data.index, data.vaultId, data.archiveId)
   })
 
-})(jQuery, window);
+})(jQuery);

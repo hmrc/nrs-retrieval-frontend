@@ -58,7 +58,7 @@ search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieval may take up to 5 minutes
 search.results.error.summary.lbl=There's a problem
-search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact xxxxxxxxxx
+search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact <a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.
 
 ################################## Error Page 500 ####################################################
 global.error.InternalServerError500.title=Service unavailable

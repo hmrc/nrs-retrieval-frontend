@@ -31,10 +31,11 @@
 } else {
     <div id="resultsFound">
         <br>
-
-        <p>
-          @Messages("search.page.results.info", results.size, notableEvent.get.searchKeys.find(_.name == searchForm.get.searchKeyName_0.getOrElse("")).get.label, searchForm.get.searchKeyValue_0.getOrElse(""))
-        </p>
+        @for((searchKey, index) <- notableEvent.get.searchKeys.zipWithIndex){
+          <p>
+            @Messages("search.page.results.info", results.size, searchKey.label, searchForm(s"searchKeyValue_$index").value.getOrElse(""))
+          </p>
+        }
 
         <div class="results" style="position: relative;">
             <div class="notable-event">

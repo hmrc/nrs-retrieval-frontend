@@ -20,10 +20,10 @@
 @(searchForm: Form[SearchQuery], notableEventType: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
  @notableEvent = @{
-  appConfig.notableEvents.get(notableEventType)
+  appConfig.notableEvents(notableEventType)
  }
 
- @for((searchKey, index) <- notableEvent.get.searchKeys.zipWithIndex){
+ @for((searchKey, index) <- notableEvent.searchKeys.zipWithIndex){
   <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
   @TextInput(
    TextInputParams(

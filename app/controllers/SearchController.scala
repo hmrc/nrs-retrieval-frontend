@@ -30,9 +30,7 @@ import controllers.FormMappings._
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
-import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -120,16 +118,6 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
     nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
       Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
     }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
-  }
-
-  private def getFirstAction(request: Request[AnyContent]): SearchPageAction = {
-    request.body.asFormUrlEncoded.getOrElse(Map.empty).get("action").flatMap(_.headOption) match {
-      case Some(action) if action == "search" => SearchAction
-      case Some(action) if action startsWith "retrieve" =>
-        val actionParts: Array[String] = action.split("_key_")
-        RetrieveAction(actionParts(1), actionParts(2))
-      case _ => UnknownAction
-    }
   }
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =

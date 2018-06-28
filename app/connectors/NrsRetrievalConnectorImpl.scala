@@ -40,7 +40,6 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
   override def search(query: SearchQuery)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for ${query.searchText}")
 
-    // todo : as part of the work to generalise the search keys, derive the notable event from the searchQuery object
     val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
 
     // todo : these values need to come from stride-auth

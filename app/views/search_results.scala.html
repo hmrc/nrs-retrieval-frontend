@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.play.views.html.helpers.{form, input}
 @(searchForm: Form[SearchQuery], results: Seq[SearchResult])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 @notableEvent = @{
-  appConfig.notableEvents.get(searchForm.get.notableEventType.getOrElse(""))
+  appConfig.notableEvents(searchForm.get.notableEventType)
 }
 <br>
 <div class="divider--top"></div>
@@ -31,7 +31,7 @@
 } else {
     <div id="resultsFound">
         <br>
-        @for((searchKey, index) <- notableEvent.get.searchKeys.zipWithIndex){
+        @for((searchKey, index) <- notableEvent.searchKeys.zipWithIndex){
           <p>
             @Messages("search.page.results.info", results.size, searchKey.label, searchForm(s"searchKeyValue_$index").value.getOrElse(""))
           </p>

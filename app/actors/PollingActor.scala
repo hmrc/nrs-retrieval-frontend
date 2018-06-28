@@ -32,7 +32,7 @@ import scala.concurrent.duration._
 class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
   (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
-  def receive = poll
+  def receive: Receive = poll
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
@@ -57,7 +57,6 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
 
   private def stopStatusCheck = if (!cancellable.isCancelled) cancellable.cancel()
 
-  // do not respond to an IsCompleteMessage
   def poll: Receive = {
     case StatusMessage(_, _) =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId is in progress.")
@@ -72,7 +71,8 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
       context.become(failed)
     case RestartMessage =>
       sender ! PollingMessage
-    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
+    case IsCompleteMessage(_, _) => // consume the message a do not respond
+    case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
   def complete: Receive = {
@@ -81,7 +81,7 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     case RestartMessage =>
       cancellable = startStatusCheck
       context.become(poll)
-    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
+    case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
   def failed: Receive = {
@@ -90,6 +90,6 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
     case RestartMessage =>
       cancellable = startStatusCheck
       context.become(poll)
-    case _ => logger.warn(s"An unexpected message has been received by an actor handling vault: $vaultId, archive: $archiveId")
+    case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 }

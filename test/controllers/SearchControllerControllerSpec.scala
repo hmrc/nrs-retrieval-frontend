@@ -20,9 +20,6 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import config.AppConfig
 import connectors.NrsRetrievalConnector
-import models.SearchQuery
-import org.mockito.Matchers._
-import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
@@ -31,7 +28,6 @@ import play.api.mvc.AnyContentAsJson
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
 import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -68,17 +64,10 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
     }
   }
 
-  "submitSearchPage" should {
-    "return 200" in {
-      when(mockNRC.search(any[SearchQuery])(any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-      val result = controller.submitSearchPage(fakeRequest.withJsonBody(searchFormJson))
-      status(result) shouldBe Status.OK
-    }
-  }
-
   "searchForm" should {
     "return no errors for valid data" in {
-      val postData = Json.obj("searchText" -> "someSearchText")
+      val postData = Json.obj("searchText" -> "someSearchText",
+      "notableEventType" -> "vat-return")
       val validatedForm = FormMappings.searchForm.bind(postData)
       validatedForm.errors shouldBe empty
     }

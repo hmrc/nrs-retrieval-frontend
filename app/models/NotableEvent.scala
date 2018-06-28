@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package model
+package models
 
-import support.fixtures.{NrsSearchFixture, SearchFixture}
-import uk.gov.hmrc.play.test.UnitSpec
+case class SearchKeySubmission(
+                      searchKeyName: String,
+                      searchKeyValue: Option[String]
+                    )
 
-class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
+case class SearchKey(
+                    name: String,
+                    label: String
+                    )
 
-  "fromNrsSearchResult" should {
-    "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe(vatSearchResult)
-    }
-  }
-
-  "searchResult" should {
-    "create link text" in {
-      vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
-    }
-  }
-
-}
+case class NotableEvent(
+                         name: String,
+                         displayName: String,
+                         storedFrom: String,
+                         storedFor: String,
+                         searchKeys: Seq[SearchKey]
+                       )

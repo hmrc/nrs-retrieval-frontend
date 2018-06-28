@@ -4,6 +4,7 @@ service.name.lbl=Search the Non-Repudiation Store
 years.lbl=years
 page.previous.lbl=Previous page
 page.next.lbl=Next page
+button.continue.lbl=Continue
 
 ################################## Start Page ####################################################
 start.page.header.lbl=Search the Non-Repudiation Store
@@ -14,6 +15,12 @@ start.text.two.option.one.lbl=search for a submission, such as a VAT return or C
 start.text.two.option.two.lbl=retrieve and download a signed copy of the submission
 start.text.three.lbl=Submissions are held in encrypted long term storage, retrieval may take up to 5 minutes.
 start.button.start.lbl=Start now
+
+################################## Selector Page ####################################################
+selector.page.header.lbl=Choose a digital submission type
+selector.page.vat-return.lbl=VAT return
+selector.page.cds-declaration.lbl=Customs declaration
+selector.page.error.required=Please select a type of digital submission to retrieve
 
 ################################## Service Scope Table ###########################################
 service.scope.summary.lbl=Check storage dates, submission types and how you search for them
@@ -26,10 +33,19 @@ service.scope.footer.lbl=More services will be added in the future.
 
 ################################## Search Page ###################################################
 search.page.header.lbl=Search for digital submissions
+search.page.dynamic.header.lbl=Search for {0}s
+search.page.vat-return.header.lbl=Search for VAT returns
+search.page.cds-declaration.header.lbl=Search for Customs declarations
 search.page.title.lbl=Search
 enter-vrn.lbl=Enter a VAT Registration Number (VRN)
+search.page.searchkey.lbl=Enter a {0}
+search.page.vat-return.lbl=Enter a VAT Registration Number (VRN)
+search.page.cds-declaration.lbl=Enter a Conversation ID
+search.page.hint=Retrieval from long term storage takes up to 5 minutes
 search.button.search.lbl=Search
 search.button.refresh.lbl=Refresh
+search.page.stored.info=You can search for records stored from {0} onwards. The records are stored for {1}.
+search.page.results.info=We found {0} results for {1}: {2}
 
 ################################## Search Results ################################################
 search.results.notfound.lbl=No results found
@@ -42,7 +58,7 @@ search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieval may take up to 5 minutes
 search.results.error.summary.lbl=There's a problem
-search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact xxxxxxxxxx
+search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact <a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.
 
 ################################## Error Page 500 ####################################################
 global.error.InternalServerError500.title=Service unavailable

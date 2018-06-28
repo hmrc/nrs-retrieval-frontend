@@ -18,7 +18,9 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class SearchQuery(searchText: Option[String])
+case class SearchQuery(searchKeyName_0: Option[String], searchKeyValue_0: Option[String], notableEventType: String) {
+  def searchText = s"notableEvent=${notableEventType}&${searchKeyName_0.getOrElse("")}=${searchKeyValue_0.getOrElse("")}"
+}
 
 object SearchQuery {
   implicit val formats: OFormat[SearchQuery] = Json.format[SearchQuery]

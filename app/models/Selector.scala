@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package model
+package models
 
-import support.fixtures.{NrsSearchFixture, SearchFixture}
-import uk.gov.hmrc.play.test.UnitSpec
+import play.api.libs.json.{Json, OFormat}
 
-class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
+case class Selector(val notableEventType: String)
 
-  "fromNrsSearchResult" should {
-    "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe(vatSearchResult)
-    }
-  }
-
-  "searchResult" should {
-    "create link text" in {
-      vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
-    }
-  }
-
+object Selector {
+  implicit val formats: OFormat[Selector] = Json.format[Selector]
 }

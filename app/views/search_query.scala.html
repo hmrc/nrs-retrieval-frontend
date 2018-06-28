@@ -15,11 +15,27 @@
  *@
 
 @import config.AppConfig
-@(searchForm: Form[Search])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@import views.helpers._
+@import views.html.helpers._
+@(searchForm: Form[SearchQuery], notableEventType: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+ @notableEvent = @{
+  appConfig.notableEvents(notableEventType)
+ }
+
+ @for((searchKey, index) <- notableEvent.searchKeys.zipWithIndex){
+  <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
+  @TextInput(
+   TextInputParams(
+    value=searchForm(s"searchKeyValue_$index").value,
+    name={s"searchKeyValue_$index"},
+    label=Messages(s"search.page.searchkey.lbl", searchKey.label),
+    hintText=Some(Messages("search.page.hint")),
+    error="Enter a search term"
+   )
+  )
+ }
 
 <div class="form-group">
-   @views.html.helper.input(searchForm("query.searchText"), '_label -> Messages("enter-vrn.lbl")) { (id, name, value, args) =>
-    <input type="text" name="@name" id="@id" value="@searchForm("query.searchText").value">
     <button id="searchButton" type="submit" name="action" value="search" class="button">@Messages("search.button.search.lbl")</button>
-   }
 </div>

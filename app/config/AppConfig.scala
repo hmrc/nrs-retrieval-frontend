@@ -17,14 +17,13 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-import models.{NotableEvent, Service, ServiceScope, SubmissionType}
+import models._
 import org.joda.time.LocalDate
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.collection.JavaConversions._
-
 import scala.concurrent.duration._
 
 
@@ -66,7 +65,16 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
       .map { client =>
           NotableEvent(
             loadFromConfig(client, "notableEvent"),
-            loadFromConfig(client, "displayName")
+            loadFromConfig(client, "displayName"),
+            loadFromConfig(client, "storedFrom"),
+            loadFromConfig(client, "storedFor"),
+            client.getConfigSeq("searchKeys").getOrElse(throw new Exception(s"Missing search keys"))
+                .map{ searchKey =>
+                  SearchKey(
+                    loadFromConfig(searchKey, "name"),
+                    loadFromConfig(searchKey, "label")
+                  )
+                }
           )
         }.map(nE => nE.name -> nE).toMap
 

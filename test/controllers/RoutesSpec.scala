@@ -16,8 +16,8 @@
 
 package controllers
 
-import org.mockito.Mockito._
 import org.mockito.Matchers._
+import org.mockito.Mockito._
 import play.api.i18n.Messages
 import play.api.libs.ws.WSResponse
 import play.api.mvc.Result
@@ -27,9 +27,9 @@ import support.fixtures.NrsSearchFixture
 import support.{BaseSpec, GuiceAppSpec}
 import uk.gov.hmrc.http.{Upstream4xxResponse, Upstream5xxResponse}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Failure
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
@@ -46,12 +46,13 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
   "GET /search" should {
     "show the search empty search page" in {
-      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search"))
+      val notableEventType: String = "vat-return"
+      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search?notableEventType=" + notableEventType))
 
       result.map(status(_)) shouldBe Some(OK)
 
       val text: String = result.map(contentAsString(_)).get
-      text should include(Messages("search.page.header.lbl"))
+      text should include(Messages(s"search.page.$notableEventType.header.lbl"))
       text should not include(Messages("search.results.notfound.lbl"))
       text should not include(Messages("search.results.results.lbl"))
     }
@@ -63,8 +64,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq.empty))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
-          ("action", "search"),
-          ("query.searchText", "noResults")
+          ("notableEventType", "vat-return")
         )))
 
         result.map(status(_)) shouldBe Some(OK)
@@ -75,20 +75,22 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
       "the search returns results" in {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-
+        val notableEventType: String = "vat-return"
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
-          ("action", "search"),
-          ("query.searchText", "results")
+          ("searchKeyName_0", "vrn"),
+          ("searchKeyValue_0", "noResults"),
+          ("notableEventType", notableEventType)
         )))
 
         result.map(status(_)) shouldBe Some(OK)
 
         val text: String = result.map(contentAsString(_)).get
-        text should include(Messages("search.page.header.lbl"))
+        text should include(Messages(s"search.page.$notableEventType.header.lbl"))
         text should not include (Messages("search.results.notfound.lbl"))
         text should include(Messages("search.results.results.lbl"))
       }
     }
+
     "show an error page" when {
       "5xx response from the upstream search service" in {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
@@ -103,6 +105,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
           case _ => fail
         }
       }
+
       "4xx response from the upstream search service" in {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
 

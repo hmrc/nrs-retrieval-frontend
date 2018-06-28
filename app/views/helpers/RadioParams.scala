@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package model
+package views.helpers
 
-import support.fixtures.{NrsSearchFixture, SearchFixture}
-import uk.gov.hmrc.play.test.UnitSpec
-
-class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
-
-  "fromNrsSearchResult" should {
-    "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe(vatSearchResult)
-    }
-  }
-
-  "searchResult" should {
-    "create link text" in {
-      vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
-    }
-  }
-
-}
+case class RadioParams(
+                        value: String,
+                        label: String,
+                        dataTarget: Option[String] = None
+                      )

@@ -15,7 +15,7 @@
  */
 
 package connectors
-import models.NrsSearchResult
+import models.{NrsSearchResult, SearchQuery}
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -23,7 +23,7 @@ import scala.concurrent.Future
 
 trait NrsRetrievalConnector {
 
-  def search(vrn: String)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]]
+  def search(query: SearchQuery)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]]
 
   def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
 

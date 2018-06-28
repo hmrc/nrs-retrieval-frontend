@@ -16,15 +16,11 @@
 
 package controllers
 
-import models.{Search, SearchQuery, SearchResult, SearchResults}
+import models._
 import play.api.data.Form
-import play.api.data.Forms.{longNumber, mapping, number, optional, seq, text}
+import play.api.data.Forms.{longNumber, mapping, optional, text}
 
 object FormMappings {
-
-  private val searchQueryMapping = mapping(
-    "searchText" -> optional(text)
-  )(SearchQuery.apply)(SearchQuery.unapply)
 
   private val searchResultMapping = mapping(
     "notableEventDisplayName" -> text,
@@ -35,13 +31,15 @@ object FormMappings {
     "retrievalStatus" -> optional(text)
   )(SearchResult.apply)(SearchResult.unapply)
 
-  private val searchResultsMapping = mapping(
-    "results" -> seq[SearchResult](searchResultMapping),
-    "resultCount" -> number
-  )(SearchResults.apply)(SearchResults.unapply)
+  val searchForm: Form[SearchQuery] = Form(
+    mapping(
+      "searchKeyName_0" -> optional(text),
+      "searchKeyValue_0" -> optional(text),
+      "notableEventType" -> text
+    )(SearchQuery.apply)(SearchQuery.unapply))
 
-  val searchForm: Form[Search] = Form(
-    mapping("query" -> searchQueryMapping,
-      "results" -> optional(searchResultsMapping)
-    )(Search.apply)(Search.unapply))
+  val selectorForm: Form[Selector] = Form(
+    mapping(
+      "notableEventType" -> text
+    )(Selector.apply)(Selector.unapply))
 }

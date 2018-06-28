@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package views.helpers
 
-trait SearchPageAction
-
-case object UnknownAction extends SearchPageAction
-
-case object SearchAction extends SearchPageAction
-
-case object RefreshAction extends SearchPageAction
-
-case class DownloadAction(vaultId: String, archiveId: String) extends SearchPageAction
-
-case class RetrieveAction(vaultId: String, archiveId: String) extends SearchPageAction
-
+case class TextInputParams(
+                            name: String,
+                            context: Option[String] = None,
+                            hiddenNested: Boolean = false,
+                            value: Option[String] = None,
+                            label: String,
+                            hintText: Option[String] = None,
+                            error: String,
+                            hasErrors: Boolean = false,
+                            labelAsHeading: Boolean = false
+                          )

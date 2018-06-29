@@ -19,6 +19,7 @@ package config
 import javax.inject.{Inject, Singleton}
 import models._
 import org.joda.time.LocalDate
+import play.Logger
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -77,6 +78,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
                 }
           )
         }.map(nE => nE.name -> nE).toMap
+
+  Logger.info(s"Notable events available $notableEvents")
 
   // todo : this to be replaced on integration with STRIDE
   val userName = "Susan Smith"

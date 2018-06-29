@@ -34,7 +34,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  private def loadFromConfig(config: Configuration, key: String) = config.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  private def loadFromConfig(config: Configuration, key: String) =
+    config.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key")).replace("_", " ")
 
   private def loadConfigWithDefault(key: String, default: String) = runModeConfiguration.getString(key).getOrElse(default)
 
@@ -61,7 +62,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   val serviceScope = ServiceScope(Seq(vatService))
 
-  val notableEvents: Map[String, NotableEvent] =
+  lazy val notableEvents: Map[String, NotableEvent] =
     runModeConfiguration.getConfigList(s"notableEvents").getOrElse(throw new Exception(s"Missing configuration"))
       .map { client =>
           NotableEvent(

@@ -25,9 +25,13 @@
 <div class="divider--top"></div>
 
 @if(results.isEmpty) {
-    <h2 class="heading-medium" id="notFound">@Messages("search.results.notfound.lbl")</h2>
-    <p>@Messages("search.results.check.lbl")</p>
-    @service_scope()
+    @*
+    * here we only repeat the search term for the first search key
+    * replaying more search key values will require a revisit to this pattern
+    *@
+    <h2 class="heading-medium" id="notFound">
+      @Messages("search.results.notfoundfor.lbl", searchForm("searchKeyValue_0").value.getOrElse(""))
+    </h2>
 } else {
     <div id="resultsFound">
         <br>

@@ -48,6 +48,10 @@
       @Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)
     </p>
 
+    <p>
+      @Messages("search.page.hint").
+    </p>
+
     @form(
         action = routes.SearchController.submitSearchPage,
         'class -> "form js-form") {

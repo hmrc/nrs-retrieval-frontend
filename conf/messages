@@ -49,6 +49,7 @@ search.page.results.info=We found {0} results for {1}: {2}
 
 ################################## Search Results ################################################
 search.results.notfound.lbl=No results found
+search.results.notfoundfor.lbl=No results found for "{0}"
 search.results.check.lbl=Check which submission types are stored
 search.results.submitted.lbl=Received at
 search.results.filename.lbl=Filename

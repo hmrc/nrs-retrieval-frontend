@@ -21,12 +21,6 @@ import java.time.ZonedDateTime
 import org.joda.time.LocalDate
 import play.api.libs.json._
 
-case class SearchKeys(vrn: String, taxPeriodEndDate: Option[LocalDate])
-
-object SearchKeys {
-  implicit val searchKeysFormat: OFormat[SearchKeys] = Json.format[SearchKeys]
-}
-
 case class HeaderData(govClientPublicIP: String, govClientPublicPort: String)
 
 case class Glacier (
@@ -54,7 +48,6 @@ case class NrsSearchResult(
   identityData: JsValue,
   userAuthToken: String,
   headerData: JsValue,
-  searchKeys: SearchKeys,
   nrSubmissionId: String,
   bundle: Bundle,
   expiryDate: LocalDate,

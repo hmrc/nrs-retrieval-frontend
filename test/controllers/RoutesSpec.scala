@@ -47,7 +47,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
   "GET /search" should {
     "show the search empty search page" in {
       val notableEventType: String = "vat-return"
-      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search?notableEventType=" + notableEventType))
+      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search/" + notableEventType))
 
       result.map(status(_)) shouldBe Some(OK)
 
@@ -60,11 +60,12 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
   "POST /search" should {
     "show the search page" when {
+      val notableEventType: String = "vat-return"
       "the search returns no results" in {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq.empty))
 
-        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
-          ("notableEventType", "vat-return")
+        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, s"/nrs-retrieval/search/$notableEventType").withFormUrlEncodedBody(
+          ("notableEventType", notableEventType)
         )))
 
         result.map(status(_)) shouldBe Some(OK)
@@ -75,8 +76,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
       "the search returns results" in {
         when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-        val notableEventType: String = "vat-return"
-        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
+        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, s"/nrs-retrieval/search/$notableEventType").withFormUrlEncodedBody(
           ("searchKeyName_0", "vrn"),
           ("searchKeyValue_0", "noResults"),
           ("notableEventType", notableEventType)

@@ -59,21 +59,17 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
+  def noParameters(): Action[AnyContent] = Action.async { implicit request =>
+    Future(Redirect(routes.StartController.showStartPage()))
+  }
+
   def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the search page", { nrUser =>
-      searchForm.bindFromRequest.fold(
-        formWithErrors => {
-          logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-          Future.successful(BadRequest(formWithErrors.errors.toString()))
-        },
-        search => {
-          Future(Ok(views.html.search_page(searchForm.bindFromRequest(), Some(nrUser), None)))
-        }
-      )
+      Future(Ok(views.html.search_page(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
     })
   }
 
-  def submitSearchPage: Action[AnyContent] = Action.async { implicit request =>
+  def submitSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Submit the search page", { nrUser =>
       searchForm.bindFromRequest.fold(
         formWithErrors => {

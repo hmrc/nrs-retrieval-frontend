@@ -1,9 +1,6 @@
-import sbt._
-import play.sbt.PlayImport._
 import play.core.PlayVersion
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.sbt.PlayImport._
+import sbt._
 
 object FrontendBuild extends Build with MicroService {
 
@@ -15,7 +12,7 @@ object FrontendBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "govuk-template" % "5.19.0",
     "uk.gov.hmrc" %% "play-ui" % "7.14.0",
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % "1.5.0",
+    "uk.gov.hmrc" %% "bootstrap-play-25" % "1.7.0",
     "uk.gov.hmrc" %% "auth-client" % "2.6.0"
   )
 

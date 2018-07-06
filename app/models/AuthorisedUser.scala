@@ -16,8 +16,4 @@
 
 package models
 
-case class NRUser (userName: String)
-
-object NRUser {
-  val user = NRUser("Susan Smith")
-}
+case class AuthorisedUser(userName: String, authProviderId: String)

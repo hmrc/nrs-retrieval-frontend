@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import models.NRUser
+import models.AuthorisedUser
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Controller, Request, Result}
@@ -49,14 +49,14 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
     }
   }
 
-  def authWithStride(actionName: String, f: NRUser => Future[Result])(
+  def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])(
     implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
 
     if (appConfig.strideAuth) {
       strideAuthorised {
         case credentials ~ enrolments ~ name =>
           logger.debug(s"$actionName - authorised, enrolments=$enrolments")
-          f(NRUser((name.name.toList ++ name.lastName.toList).mkString(" ")))
+          f(AuthorisedUser((name.name.toList ++ name.lastName.toList).mkString(" "), credentials.providerId))
       }.recover {
         case _: NoActiveSession =>
           logger.debug(s"$actionName - NoActiveSession")
@@ -76,7 +76,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
       }
     } else {
       logger.debug(s"$actionName - auth switched off")
-      f(NRUser(appConfig.userName))
+      f(AuthorisedUser("Auth disabled", "Auth disabled"))
     }
 
   }

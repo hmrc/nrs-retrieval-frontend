@@ -24,6 +24,7 @@ import akka.util.Timeout
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import javax.inject.Inject
+import models.AuthorisedUser
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,16 +43,16 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
   implicit val system: ActorContext = context
 
   def receive = {
-    case SubmitMessage(vaultId, archiveId, headerCarrier) =>
-      sender ! submitRetrievalRequest(vaultId, archiveId)(headerCarrier)
+    case SubmitMessage(vaultId, archiveId, headerCarrier, user) =>
+      sender ! submitRetrievalRequest(vaultId, archiveId, user)(headerCarrier)
     case IsCompleteMessage(vaultId, archiveId) =>
       sender ! pas.eventualPollingActor(vaultId, archiveId).flatMap(aR => aR ? IsCompleteMessage(vaultId, archiveId))
     case _ => logger.warn(s"An unexpected message has been received")
   }
 
-  private def submitRetrievalRequest(vaultId: String, archiveId: String)(implicit headerCarrier: HeaderCarrier) = {
+  private def submitRetrievalRequest(vaultId: String, archiveId: String, user: AuthorisedUser)(implicit headerCarrier: HeaderCarrier) = {
     logger.info(s"Submit retrieval request for vault: $vaultId, archive: $archiveId.")
-    nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId)
+    nrsRetrievalConnector.submitRetrievalRequest(vaultId, archiveId, user)
       .flatMap { response =>
         if (response.status == ACCEPTED) {
           pas.pollingActorExists(vaultId, archiveId).flatMap {

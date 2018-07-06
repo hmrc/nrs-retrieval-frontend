@@ -43,7 +43,7 @@ class StartController @Inject()(
   logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
   def showStartPage: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride("Show the start page", { nrUser =>
+    authWithStride("Show the start page", { _ =>
       Future.successful(
         Ok(views.html.start_page())
       )

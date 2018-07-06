@@ -70,26 +70,27 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def submitSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
-    authWithStride("Submit the search page", { nrUser =>
+    authWithStride("Submit the search page", { user =>
       searchForm.bindFromRequest.fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          doSearch(search).map { results =>
+          doSearch(search, user).map { results =>
             logger.info(s"Form $results")
-            Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser), Some(results)))
-          }.recoverWith {case e =>
+            Ok(views.html.search_page(searchForm.bindFromRequest, Some(user), Some(results)))
+          }.recoverWith { case e =>
             logger.info(s"SubmitSearchPage $e")
-            Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
+            Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))
+          }
         }
       )
     })
   }
 
-  private def doSearch(search: SearchQuery)(implicit hc: HeaderCarrier) = {
-    nrsRetrievalConnector.search(search)
+  private def doSearch(search: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier) = {
+    nrsRetrievalConnector.search(search, user)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
   }
 
@@ -103,17 +104,21 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-      case _ => Accepted(CompletionStatus.incomplete)
-    } recoverWith {
-      case e: AskTimeoutException => Future(Accepted(CompletionStatus.incomplete))
-    }
+    authWithStride("Download", { user =>
+      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map {
+        case _ => Accepted(CompletionStatus.incomplete)
+      } recoverWith {
+        case e: AskTimeoutException => Future(Accepted(CompletionStatus.incomplete))
+      }
+    })
   }
 
-    def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId).map { response =>
-      Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
-    }.recoverWith {case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))}
+  def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    authWithStride("Download", { user =>
+      nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId, user).map { response =>
+        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
+      }.recoverWith { case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message")))) }
+    })
   }
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =

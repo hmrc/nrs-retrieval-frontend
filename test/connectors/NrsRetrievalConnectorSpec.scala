@@ -20,7 +20,7 @@ import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Guice, Injector}
 import config.{AppConfig, Auditable, MicroserviceAudit, WSHttpT}
 import javax.inject.Provider
-import models.NrsSearchResult
+import models.{AuthorisedUser, NrsSearchResult}
 import models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
@@ -44,21 +44,21 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
     "make a get call to /submission-metadata returning data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.search(searchQuery)).size shouldBe 1
+      await(connector.search(searchQuery, testUser)).size shouldBe 1
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
     "make a get call to /submission-metadata with parameters returning no data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.failed(new Throwable("404")))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.search(searchQuery)).size shouldBe 0
+      await(connector.search(searchQuery, testUser)).size shouldBe 0
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
     "make a get call to /submission-metadata with parameters resulting in a failure" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.failed(new Throwable("401")))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      a[Throwable] should be thrownBy await(connector.search(searchQuery))
+      a[Throwable] should be thrownBy await(connector.search(searchQuery, testUser))
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
@@ -73,16 +73,25 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
           }
         }
       })
-      await(connector.search(searchQuery)).head.nrSubmissionId shouldBe nrSubmissionId
+      await(connector.search(searchQuery, testUser)).head.nrSubmissionId shouldBe nrSubmissionId
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
+
+    "write an audit record containing the required data" in {
+      when(mockWsHttp.GET[Seq[NrsSearchResult]](any())(any(), any(), any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
+      when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])(any())).thenReturn(Future.successful(()))
+      await(connector.search(searchQuery, testUser)).size shouldBe 1
+      val searchAudit = NonRepudiationStoreSearch("anAuthProviderId", "aUser", "notableEvent=aNotableEvent&aName=aValue", nrsVatSearchResult.nrSubmissionId, "null/submission-metadata?notableEvent=aNotableEvent&aName=aValue")
+      verify(mockAuditable, times(1)).sendDataEvent(searchAudit)(hc)
+    }
+
  }
 
   "submitRetrievalRequest" should {
     "make a post call to /retrieval-requests" in {
       when(mockWsHttp.POST[Any, Any](any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).body should be("Some Text")
+      await(connector.submitRetrievalRequest(testAuditId, testArchiveId, testUser)).body should be("Some Text")
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])(any())
     }
     "make a post call to /retrieval-requests and retrieve nr-submission-id from header" in {
@@ -98,7 +107,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
           }
         }
       })
-      await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
+      await(connector.submitRetrievalRequest(testAuditId, testArchiveId, testUser)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])(any())
     }
   }
@@ -123,7 +132,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
       when(mockWSRequest1.withHeaders(any())).thenReturn(mockWSRequest2)
       when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.getSubmissionBundle(testAuditId, testArchiveId)).body shouldBe "Some Text"
+      await(connector.getSubmissionBundle(testAuditId, testArchiveId, testUser)).body shouldBe "Some Text"
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
     }
 
@@ -145,7 +154,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
           }
         }
       })
-      await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
+      await(connector.submitRetrievalRequest(testAuditId, testArchiveId, testUser)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])(any())
     }
   }
@@ -187,5 +196,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   private val testAuditId = "1"
   private val testArchiveId = "2"
+
+  private val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
 
 }

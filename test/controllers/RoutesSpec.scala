@@ -62,7 +62,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
     "show the search page" when {
       val notableEventType: String = "vat-return"
       "the search returns no results" in {
-        when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq.empty))
+        when(mockNrsRetrievalConnector.search(any(), any())(any())).thenReturn(Future.successful(Seq.empty))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, s"/nrs-retrieval/search/$notableEventType").withFormUrlEncodedBody(
           ("notableEventType", notableEventType)
@@ -75,7 +75,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
       }
 
       "the search returns results" in {
-        when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
+        when(mockNrsRetrievalConnector.search(any(), any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, s"/nrs-retrieval/search/$notableEventType").withFormUrlEncodedBody(
           ("searchKeyName_0", "vrn"),
           ("searchKeyValue_0", "noResults"),
@@ -93,7 +93,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
     "show an error page" when {
       "5xx response from the upstream search service" in {
-        when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
+        when(mockNrsRetrievalConnector.search(any(), any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
           ("action", "search"),
@@ -107,7 +107,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
       }
 
       "4xx response from the upstream search service" in {
-        when(mockNrsRetrievalConnector.search(any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
+        when(mockNrsRetrievalConnector.search(any(), any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, "/nrs-retrieval/search").withFormUrlEncodedBody(
           ("action", "search"),
@@ -127,14 +127,14 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
       val mockWsResponse = mock[WSResponse]
       when(mockWsResponse.allHeaders).thenReturn(Map("One" -> Seq("Two")))
 
-      when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any())(any())).thenReturn(Future.successful(mockWsResponse))
+      when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.successful(mockWsResponse))
       val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/download/1/2"))
 
       result.map(status(_)) shouldBe Some(OK)
     }
     "show an error page" when {
       "5xx response from the upstream download service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
+        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/download/1/2")))
 
@@ -144,7 +144,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
         }
       }
       "4xx response from the upstream download service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
+        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/download/1/2")))
 
@@ -159,7 +159,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
   "GET /status/:vaultId/:archiveId" should {
     "show an error page" when {
       "5xx response from the upstream status service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
+        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(new Upstream5xxResponse("Broken", 502, 502)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/status/1/2")))
 
@@ -169,7 +169,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
         }
       }
       "4xx response from the upstream status service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
+        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(new Upstream4xxResponse("Broken", 502, 502)))
 
         val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/status/1/2")))
 

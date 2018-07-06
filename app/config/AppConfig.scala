@@ -82,9 +82,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   Logger.info(s"Notable events available $notableEvents")
 
-  // todo : this to be replaced on integration with STRIDE
-  val userName = "Susan Smith"
-  
   lazy val nrsStrideRole: String = loadConfig("stride.role.name")
   lazy val strideAuth: Boolean = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
   lazy val authHost: String = runModeConfiguration.getString(s"microservice.services.auth.host").getOrElse("none-authHost")

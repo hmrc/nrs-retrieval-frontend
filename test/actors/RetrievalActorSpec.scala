@@ -18,10 +18,11 @@ package actors
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{ActorNotFound, ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActors, TestKit}
 import akka.util.Timeout
+import models.AuthorisedUser
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -30,9 +31,9 @@ import play.api.http.Status._
 import support.fixtures.Infrastructure
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
   with WordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
@@ -53,14 +54,14 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
       when(mockPollingActorService.pollingActor(any(), any())(any(), any())).thenReturn(Future.successful(echo))
 
       val mockHttpResponse = mock[HttpResponse]
-      when(mockNrsRetrievalConnector.submitRetrievalRequest(any(), any())(any())).thenReturn(Future(mockHttpResponse))
+      when(mockNrsRetrievalConnector.submitRetrievalRequest(any(), any(), any())(any())).thenReturn(Future(mockHttpResponse))
       when(mockHttpResponse.status).thenReturn(ACCEPTED)
 
       val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
 
       Await.result(
         Await.result(
-          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId, hc)).mapTo[Future[ActorMessage]]
+          ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId, hc, testUser)).mapTo[Future[ActorMessage]]
           , 5 seconds)
         , 5 seconds) should be(PollingMessage)
     }
@@ -83,5 +84,6 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
 
   val testVaultId: String = "1"
   val testArchiveId: String = "1"
+  val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
 
 }

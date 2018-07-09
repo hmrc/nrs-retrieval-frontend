@@ -1,5 +1,7 @@
 (function ($) {
 
+  var path = '/nrs-retrieval/';
+
   var NrsAjax = {
     http: function (index, vaultName, archiveId) {
       var xmlhttp = new XMLHttpRequest();
@@ -19,14 +21,14 @@
     },
     checkStatus: function (index, vaultName, archiveId) {
       var xmlhttp = this.http(index, vaultName, archiveId);
-      xmlhttp.open("GET", 'status/' + vaultName + '/' + archiveId);
+      xmlhttp.open("GET", path + 'status/' + vaultName + '/' + archiveId);
       xmlhttp.timeout = 5000;
       xmlhttp.send();
     },
     doRetrieve: function (index, vaultName, archiveId) {
       setStatus(index, 'retrieval-incomplete')
       var xmlhttp = this.http(index, vaultName, archiveId);
-      xmlhttp.open("GET", 'retrieve/' + vaultName + '/' + archiveId);
+      xmlhttp.open("GET", path + 'retrieve/' + vaultName + '/' + archiveId);
       xmlhttp.timeout = 30000;
       xmlhttp.send();
     }

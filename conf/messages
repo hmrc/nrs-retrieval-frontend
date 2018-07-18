@@ -5,6 +5,7 @@ years.lbl=years
 page.previous.lbl=Previous page
 page.next.lbl=Next page
 button.continue.lbl=Continue
+link.back=Back
 
 ################################## Start Page ####################################################
 start.page.header.lbl=Search the Non-Repudiation Store

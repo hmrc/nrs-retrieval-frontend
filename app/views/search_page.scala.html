@@ -62,9 +62,9 @@
 
       @search_query(searchForm, notableEventType)
 
-      @if(results.isDefined) {
-        @search_results(searchForm, results.getOrElse(Seq.empty[SearchResult]))
-      }
+    }
 
+    @if(results.isDefined) {
+      @search_results(searchForm, results.getOrElse(Seq.empty[SearchResult]))
     }
 }

@@ -29,16 +29,15 @@
     * here we only repeat the search term for the first search key
     * replaying more search key values will require a revisit to this pattern
     *@
-    <h2 class="heading-medium" id="notFound">
+    <h2 id="notFound" tabindex="0">
       @Messages("search.results.notfoundfor.lbl", searchForm("searchKeyValue_0").value.getOrElse(""))
     </h2>
 } else {
     <div id="resultsFound">
-        <br>
         @for((searchKey, index) <- notableEvent.searchKeys.zipWithIndex){
-          <p>
+          <h2 tabindex="0">
             @Messages("search.page.results.info", results.size, searchKey.label, searchForm(s"searchKeyValue_$index").value.getOrElse(""))
-          </p>
+          </h2>
         }
 
         <div class="results" style="position: relative;">
@@ -46,7 +45,6 @@
                 @results.zipWithIndex.map { sR =>
                     @search_result(sR._1, sR._2.toString)
                 }
-                <hr>
             </div>
         </div>
     </div>

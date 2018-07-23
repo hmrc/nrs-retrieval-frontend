@@ -1,7 +1,6 @@
 .result-retrieve {
-  background: #F8F8F8;
-  padding: 0.78947em;
   margin-bottom: 0.78947em;
+  border-bottom: 1px solid #bfc1c3;
   .start-retrieval {
     display: block;
   }
@@ -30,7 +29,6 @@
     }
   }
   &.retrieval-complete {
-    background: #b2d9c4;
     .start-retrieval {
       display: none;
     }
@@ -38,7 +36,7 @@
       display: none;
     }
     .retrieval-complete {
-      display: block;
+      display: inline-block;
     }
     .retrieval-failed {
       display: none;
@@ -47,6 +45,7 @@
   &.retrieval-failed {
     border: 5px solid #b10e1e;
     background: #fff;
+    padding: 1em;
     h2 {
       margin-top: 0;
     }
@@ -63,4 +62,14 @@
       display: block;
     }
   }
+}
+
+#resultsFound {
+  h2 {
+    padding: 2px;
+  }
+}
+
+#notFound {
+  padding: 2px;
 }

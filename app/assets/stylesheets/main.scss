@@ -14,3 +14,9 @@
   position: absolute;
   left: -9999em;
 }
+/*
+* Too much space below back link
+*/
+a.back-link {
+  margin-bottom: 0;
+}

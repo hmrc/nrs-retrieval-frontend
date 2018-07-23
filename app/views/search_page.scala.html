@@ -40,6 +40,8 @@
 
 @main_template(title = title, userName, scriptElem = Some(pageScripts)) {
 
+    <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
+
     <h1 id="pageHeader">
       @title
     </h1>

@@ -36,6 +36,8 @@
 
 @main_template(title = title, userName) {
 
+  <a id="back" class="back-link" href="@routes.StartController.showStartPage">@Messages("link.back")</a>
+
   @form(
     action = routes.SelectorController.submitSelectorPage(),
     'class -> "form js-form") {

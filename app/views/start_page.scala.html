@@ -24,16 +24,12 @@
 }
 
 @main_template(title=title) {
-
-    @form(action = routes.SelectorController.showSelectorPage()) {
-        <h1 class="heading-large" id="pageHeader">@title</h1>
-        <p class="lede">@Messages("start.text.one.lbl")</p>
-        <p>@Messages("start.text.two.lbl")</p>
-        <ul class="list list-bullet">
-            <li>@Messages("start.text.two.option.one.lbl")</li>
-            <li>@Messages("start.text.two.option.two.lbl")</li>
-        </ul>
-        <hr>
-        <button id="continueButton" type="submit" class="button button--get-started">@Messages("start.button.start.lbl")</button>
-    }
+  <h1 class="heading-large" id="pageHeader">@title</h1>
+  <p class="lede">@Messages("start.text.one.lbl")</p>
+  <p>@Messages("start.text.two.lbl")</p>
+  <ul class="list list-bullet">
+    <li>@Messages("start.text.two.option.one.lbl")</li>
+    <li>@Messages("start.text.two.option.two.lbl")</li>
+  </ul>
+  <a href="@routes.SelectorController.showSelectorPage" class="button button--get-started" role="button">@Messages("start.button.start.lbl")</a>
 }

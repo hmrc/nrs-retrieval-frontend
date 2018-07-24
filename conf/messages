@@ -18,10 +18,10 @@ start.text.three.lbl=Submissions are held in encrypted long term storage, retrie
 start.button.start.lbl=Start now
 
 ################################## Selector Page ####################################################
-selector.page.header.lbl=Choose a digital submission type
+selector.page.header.lbl=What type of digital submission would you like to search for?
 selector.page.vat-return.lbl=VAT return
 selector.page.cds-declaration.lbl=Customs declaration
-selector.page.error.required=Please select a type of digital submission to retrieve
+selector.page.error.required=Please select a type of digital submission to search for
 
 ################################## Service Scope Table ###########################################
 service.scope.summary.lbl=Check storage dates, submission types and how you search for them
@@ -58,7 +58,8 @@ search.results.results.lbl=results
 search.results.retrieve.lbl=Retrieve
 search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
-search.results.retrieval.message.lbl=Retrieval may take up to 5 minutes
+search.results.retrieval.message.lbl=Retrieving {0}
+search.results.retrieval.info=(this may take up to 5 minutes)
 search.results.error.summary.lbl=There's a problem
 search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact <a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.
 

@@ -1,6 +1,7 @@
 .result-retrieve {
   margin-bottom: 0.78947em;
   border-bottom: 1px solid #bfc1c3;
+  padding-top: 1em;
   .start-retrieval {
     display: block;
   }
@@ -62,14 +63,4 @@
       display: block;
     }
   }
-}
-
-#resultsFound {
-  h2:focus {
-    padding: 2px;
-  }
-}
-
-#notFound:focus {
-  padding: 2px;
 }

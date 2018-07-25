@@ -38,7 +38,15 @@
   Messages(s"search.page.dynamic.header.lbl", notableEvent.displayName)
 }
 
-@main_template(title = title, userName, scriptElem = Some(pageScripts)) {
+@pageTitle = @{
+  if (results.isDefined) {
+    Messages("search.page.results") + " - " + title
+  } else {
+    title
+  }
+}
+
+@main_template(title = pageTitle, userName, scriptElem = Some(pageScripts)) {
 
     <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
 

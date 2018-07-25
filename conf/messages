@@ -43,6 +43,7 @@ search.page.searchkey.lbl=Enter a {0}
 search.page.vat-return.lbl=Enter a VAT Registration Number (VRN)
 search.page.cds-declaration.lbl=Enter a Conversation ID
 search.page.hint=Retrieval from long term storage takes up to 5 minutes
+search.page.results=Results
 search.button.search.lbl=Search
 search.button.refresh.lbl=Refresh
 search.page.stored.info=You can search for records stored from {0} onwards. The records are stored for {1}.

@@ -29,14 +29,19 @@
       <span class="retrieval-failed" aria-hidden="true">
         @Messages("search.results.cannot.retrieve.lbl") '@searchResult.linkText'
       </span>
-      <span class="retrieval-incomplete" aria-hidden="true">
-        @Messages("search.results.retrieval.message.lbl")
+      <span class="retrieval-incomplete" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
+        @Messages("search.results.retrieval.message.lbl", searchResult.linkText)
+        <br>
+        @Messages("search.results.retrieval.info")
       </span>
       <a class="retrieval-complete button" aria-hidden="true" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText</a>
       <a class="start-retrieval" data-index="@{index}" data-vault-id="@{searchResult.vaultId}" data-archive-id="@{searchResult.archiveId}" href="#">@Messages("search.results.retrieve.lbl") @searchResult.linkText</a>
     </p>
-    <p>@Messages("search.results.filename.lbl") @searchResult.fileDetails</p>
-    <p>@Messages("search.results.submitted.lbl") @formatDisplayDate(searchResult.submissionDateEpochMilli)</p>
+    <p>
+      @Messages("search.results.filename.lbl"): @searchResult.fileDetails
+      <br>
+      @Messages("search.results.submitted.lbl") @formatDisplayDate(searchResult.submissionDateEpochMilli)
+    </p>
     <p class="retrieval-failed" aria-hidden="true">@Html(Messages("search.results.error.action.message.lbl"))</p>
   </div>
 </div>

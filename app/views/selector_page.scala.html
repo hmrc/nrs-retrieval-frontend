@@ -34,7 +34,11 @@
   appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents.get(key).get.displayName)).toList
 }
 
-@main_template(title = title, userName) {
+@pageScripts = {
+  <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/download.js")}"></script>
+}
+
+@main_template(title = title, userName, scriptElem = Some(pageScripts)) {
 
   <a id="back" class="back-link" href="@routes.StartController.showStartPage">@Messages("link.back")</a>
 

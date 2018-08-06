@@ -38,9 +38,12 @@
 
   <a id="back" class="back-link" href="@routes.StartController.showStartPage">@Messages("link.back")</a>
 
+  @error_summary(selectorForm)
+
   @form(
     action = routes.SelectorController.submitSelectorPage(),
-    'class -> "form js-form") {
+    'class -> "form",
+    'novalidate -> "") {
 
     @RadioGroup(
       RadioGroupParams(
@@ -49,7 +52,8 @@
         legendAsHeading = true,
         inline = false,
         required = true,
-        error = Some(Messages("selector.page.error.required")),
+        hasErrors = selectorForm.hasErrors,
+        error = Some(Messages("notableEventType.error.required")),
         value = selectorForm("notableEventType").value,
         radios = radioOptions
       )

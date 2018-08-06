@@ -49,7 +49,7 @@ class SelectorController @Inject()(
   def showSelectorPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the selector page", { nrUser =>
       Future.successful(
-        Ok(views.html.selector_page(selectorForm.bindFromRequest, Some(nrUser)))
+        Ok(views.html.selector_page(selectorForm, Some(nrUser)))
       )
     })
   }
@@ -59,7 +59,9 @@ class SelectorController @Inject()(
       selectorForm.bindFromRequest.fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-          Future.successful(BadRequest(formWithErrors.errors.toString()))
+          Future.successful(
+            Ok(views.html.selector_page(formWithErrors, Some(nrUser)))
+          )
         },
         v => {
           Future.successful(

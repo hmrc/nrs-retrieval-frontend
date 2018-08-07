@@ -14,8 +14,6 @@
  * limitations under the License.
  *@
 
-  
-
 @(params: views.helpers.RadioGroupParams)(implicit message : Messages)
 
 @legend = {
@@ -58,6 +56,10 @@
   }
 }
 
+@makeSelector(value: String) = @{
+  value.toLowerCase().replace(" ", "-")
+}
+
 <div class="@{formGroupClass}">
   <fieldset @if(params.inline){class="inline"} id="@{params.name}_fieldset">
 
@@ -65,7 +67,7 @@
 
     @if(params.hasErrors) {
       <span class="error-message" id="@{params.name}-inline-error">
-      @params.error
+        @params.error
       </span>
     }
 
@@ -79,8 +81,8 @@
 
     @for(radio <- params.radios){
       <div class="multiple-choice" @if(radio.dataTarget.nonEmpty){data-target="@radio.dataTarget"}>
-        <input class="@inputClass" id="@params.name@radio.value" type="radio" name="@params.name" value="@radio.value" required="required" @checked(radio.value)>
-        <label for="@params.name@radio.value">@radio.label</label>
+        <input id="@{params.name}-@{makeSelector(radio.value)}" class="@inputClass" type="radio" name="@params.name" value="@radio.value" required="required" @checked(radio.value)>
+        <label for="@{params.name}-@{makeSelector(radio.value)}">@radio.label</label>
       </div>
     }
   </fieldset>

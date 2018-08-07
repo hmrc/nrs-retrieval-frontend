@@ -26,6 +26,10 @@
   user.map(u => Html(u.userName))
 }
 
+@titlePrefix = @{
+  if (selectorForm.hasErrors) Messages("generic.errorPrefix") + " " else ""
+}
+
 @title = @{
   Messages("selector.page.header.lbl")
 }
@@ -38,7 +42,7 @@
   <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/nrs.js")}"></script>
 }
 
-@main_template(title = title, userName, scriptElem = Some(pageScripts)) {
+@main_template(title = titlePrefix + title, userName, scriptElem = Some(pageScripts)) {
 
   <a id="back" class="back-link" href="@routes.StartController.showStartPage">@Messages("link.back")</a>
 

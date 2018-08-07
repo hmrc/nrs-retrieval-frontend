@@ -26,6 +26,10 @@
   user.map(u => Html(u.userName))
 }
 
+@titlePrefix = @{
+  if (selectorForm.hasErrors) Messages("generic.errorPrefix") + " " else ""
+}
+
 @title = @{
   Messages("selector.page.header.lbl")
 }
@@ -34,13 +38,20 @@
   appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents.get(key).get.displayName)).toList
 }
 
-@main_template(title = title, userName) {
+@pageScripts = {
+  <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/nrs.js")}"></script>
+}
+
+@main_template(title = titlePrefix + title, userName, scriptElem = Some(pageScripts)) {
 
   <a id="back" class="back-link" href="@routes.StartController.showStartPage">@Messages("link.back")</a>
 
+  @error_summary(selectorForm)
+
   @form(
     action = routes.SelectorController.submitSelectorPage(),
-    'class -> "form js-form") {
+    'class -> "form",
+    'novalidate -> "") {
 
     @RadioGroup(
       RadioGroupParams(
@@ -49,7 +60,8 @@
         legendAsHeading = true,
         inline = false,
         required = true,
-        error = Some(Messages("selector.page.error.required")),
+        hasErrors = selectorForm.hasErrors,
+        error = Some(Messages("notableEventType.error.required")),
         value = selectorForm("notableEventType").value,
         radios = radioOptions
       )

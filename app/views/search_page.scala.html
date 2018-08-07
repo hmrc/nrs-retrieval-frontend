@@ -21,7 +21,7 @@
 @(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @pageScripts = {
-    <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/download.js")}"></script>
+    <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/nrs.js")}"></script>
 }
 
 @userName = @{

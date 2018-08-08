@@ -2,6 +2,14 @@
 /* global GOVUK */
 (function ($) {
 
+
+  $.timeoutDialog({
+    timeout: 900,
+    countdown: 120,
+    keep_alive_url: document.location.href,
+    logout_url: '/nrs-retrieval/start'
+  });
+
   // Use GOV.UK shim-links-with-button-role.js to trigger a link styled to look like a button,
   // with role="button" when the space key is pressed.
   GOVUK.shimLinksWithButtonRole.init()

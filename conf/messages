@@ -1,5 +1,8 @@
 service.name.lbl=Search the Non-Repudiation Store
 
+generic.error=There is a problem
+generic.errorPrefix=Error:
+
 ################################## General #######################################################
 years.lbl=years
 page.previous.lbl=Previous page
@@ -22,6 +25,7 @@ selector.page.header.lbl=What type of digital submission would you like to searc
 selector.page.vat-return.lbl=VAT return
 selector.page.cds-declaration.lbl=Customs declaration
 selector.page.error.required=Please select a type of digital submission to search for
+notableEventType.error.required=Please select a type of digital submission to search for
 
 ################################## Service Scope Table ###########################################
 service.scope.summary.lbl=Check storage dates, submission types and how you search for them

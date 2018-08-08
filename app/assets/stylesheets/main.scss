@@ -21,10 +21,15 @@ a.back-link {
   margin-bottom: 0;
 }
 
+
 /* for when we set focus
 *  on search result information
  */
 h2:focus {
   background-color: #ffbf47;
   outline: 3px solid #ffbf47;
+}
+
+.form-group-error h1 {
+  margin-top: 0;
 }

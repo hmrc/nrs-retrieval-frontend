@@ -20,6 +20,10 @@
 
 @(searchResult: SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@timeSubmitted = {
+  <span class="font-xsmall">@formatDisplayDate(searchResult.submissionDateEpochMilli)</span>
+}
+
 <div id="retrieve@index">
   <div class="result-retrieve" aria-live="polite" aria-busy="false">
     <h2 class="retrieval-failed error-summary-heading" aria-hidden="true" role="alert">
@@ -27,15 +31,15 @@
     </h2>
     <p>
       <span class="retrieval-failed" aria-hidden="true">
-        @Messages("search.results.cannot.retrieve.lbl") '@searchResult.linkText @formatDisplayDate(searchResult.submissionDateEpochMilli)'
+        @Messages("search.results.cannot.retrieve.lbl") '@searchResult.linkText @timeSubmitted'
       </span>
       <span class="retrieval-incomplete" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
-        @Messages("search.results.retrieval.message.lbl", searchResult.linkText) @formatDisplayDate(searchResult.submissionDateEpochMilli)
+        @Messages("search.results.retrieval.message.lbl", searchResult.linkText) @timeSubmitted
         <br>
         @Messages("search.results.retrieval.info")
       </span>
-      <a class="retrieval-complete button--secondary" role="button" aria-hidden="true" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @formatDisplayDate(searchResult.submissionDateEpochMilli)</a>
-      <a class="start-retrieval" data-index="@{index}" data-vault-id="@{searchResult.vaultId}" data-archive-id="@{searchResult.archiveId}" href="#">@Messages("search.results.retrieve.lbl") @searchResult.linkText @formatDisplayDate(searchResult.submissionDateEpochMilli)</a>
+      <a class="retrieval-complete button--secondary" role="button" aria-hidden="true" href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}" download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted</a>
+      <a class="start-retrieval" data-index="@{index}" data-vault-id="@{searchResult.vaultId}" data-archive-id="@{searchResult.archiveId}" href="#">@Messages("search.results.retrieve.lbl") @searchResult.linkText @timeSubmitted</a>
     </p>
     <p>
       @Messages("search.results.filename.lbl"): @searchResult.fileDetails

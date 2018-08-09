@@ -21,6 +21,13 @@ a.back-link {
   margin-bottom: 0;
 }
 
+/* for when we set focus
+*  on search result information
+ */
+h2:focus {
+  outline: none
+}
+
 .form-group-error h1 {
   margin-top: 0;
 }

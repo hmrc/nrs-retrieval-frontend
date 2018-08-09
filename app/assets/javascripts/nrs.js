@@ -110,4 +110,10 @@
     NrsAjax.doRetrieve(data.index, data.vaultId, data.archiveId)
   })
 
+  var $resultsInfo = $('h2[role="alert"]');
+
+  if ($resultsInfo.length) {
+    $resultsInfo.focus()
+  }
+
 })(jQuery);

@@ -51,8 +51,8 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
 
   def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])(
     implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
-
     if (appConfig.strideAuth) {
+      logger.info(s"Verify stride authorisation")
       strideAuthorised {
         case credentials ~ enrolments ~ name =>
           logger.debug(s"$actionName - authorised, enrolments=$enrolments")

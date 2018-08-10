@@ -70,13 +70,15 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
       stopStatusCheck
       context.become(failed)
     case RestartMessage =>
+      logger.info(s"Restart polling.")
       sender ! PollingMessage
     case IsCompleteMessage(_, _) => // consume the message a do not respond
     case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
   def complete: Receive = {
-    case StatusMessage(_, _) => sender ! CompleteMessage
+    case StatusMessage(_, _) =>
+      sender ! CompleteMessage
     case IsCompleteMessage(_, _) => sender ! CompleteMessage
     case RestartMessage =>
       cancellable = startStatusCheck

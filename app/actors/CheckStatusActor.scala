@@ -42,6 +42,7 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
 
   def receive: PartialFunction[Any, Unit] = {
     case StatusMessage(vaultId, archiveId) => {
+      logger.info(s"CheckStatusActor received StatusMessage($vaultId, $archiveId)")
       nrsRetrievalConnector.statusSubmissionBundle(vaultId, archiveId).map { response =>
         response.status match {
           case OK => {
@@ -49,7 +50,10 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
             pollingActor(vaultId, archiveId).map (aR => aR ! CompleteMessage)
           }
           case NOT_FOUND => logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
-          case _ => pollingActor(vaultId, archiveId).map(aR => aR ! FailedMessage)
+          case _ => {
+            logger.info(s"Retrieval request failed for vault $vaultId, archive $archiveId")
+            pollingActor(vaultId, archiveId).map(aR => aR ! FailedMessage)
+          }
         }
       }
     }

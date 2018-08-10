@@ -65,7 +65,6 @@ class SelectorController @Inject()(
         },
         v => {
           Future.successful(
-            //Ok(views.html.search_page(searchForm.bindFromRequest, Some(nrUser)))
            Redirect(routes.SearchController.showSearchPage(v.notableEventType))
           )
         }

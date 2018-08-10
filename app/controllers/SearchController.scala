@@ -60,16 +60,19 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def noParameters(): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"No parameters provided so redirecting to start page")
     Future(Redirect(routes.StartController.showStartPage()))
   }
 
   def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"Show the search page for notable event $notableEventType")
     authWithStride("Show the search page", { nrUser =>
       Future(Ok(views.html.search_page(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
     })
   }
 
   def submitSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"Submit the search page for notable event $notableEventType")
     authWithStride("Submit the search page", { user =>
       searchForm.bindFromRequest.fold(
         formWithErrors => {
@@ -77,6 +80,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
+          logger.info(s"Do search for submitted search query ${search.searchText}")
           doSearch(search, user).map { results =>
             logger.info(s"Form $results")
             Ok(views.html.search_page(searchForm.bindFromRequest, Some(user), Some(results)))
@@ -95,29 +99,45 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"Refresh the result $vaultName, $archiveId")
     ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-      case CompleteMessage => Ok(CompletionStatus.complete)
-      case FailedMessage => Ok(CompletionStatus.failed)
+      case CompleteMessage =>
+        logger.info(s"Retrieval completed for $vaultName, $archiveId")
+        Ok(CompletionStatus.complete)
+      case FailedMessage =>
+        logger.info(s"Retrieval failed for $vaultName, $archiveId")
+        Ok(CompletionStatus.failed)
     } recoverWith {
-      case e: AskTimeoutException => Future(Accepted(CompletionStatus.incomplete))
+      case e: AskTimeoutException =>
+        logger.info(s"Retrieval is still in progress for $vaultName, $archiveId")
+        Future(Accepted(CompletionStatus.incomplete))
     }
   }
 
   def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"Request retrieval for $vaultName, $archiveId")
     authWithStride("Download", { user =>
       ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-        case _ => Accepted(CompletionStatus.incomplete)
+        case _ =>
+          logger.info(s"Retrieval accepted for $vaultName, $archiveId")
+          Accepted(CompletionStatus.incomplete)
       } recoverWith {
-        case e: AskTimeoutException => Future(Accepted(CompletionStatus.incomplete))
+        case e: AskTimeoutException =>
+          logger.info(s"Retrieval is still in progress for $vaultName, $archiveId")
+          Future(Accepted(CompletionStatus.incomplete))
       }
     })
   }
 
-  def download(vaultId: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+  def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"Request dowload of $vaultName, $archiveId")
     authWithStride("Download", { user =>
-      nrsRetrievalConnector.getSubmissionBundle(vaultId, archiveId, user).map { response =>
+      nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
+        logger.info(s"Dowload of $vaultName, $archiveId")
         Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
-      }.recoverWith { case e => Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message")))) }
+      }.recoverWith { case e =>
+        logger.info(s"Dowload of $vaultName, $archiveId failed with $e")
+        Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message")))) }
     })
   }
 

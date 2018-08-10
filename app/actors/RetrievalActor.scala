@@ -44,8 +44,10 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
 
   def receive = {
     case SubmitMessage(vaultId, archiveId, headerCarrier, user) =>
+      logger.info(s"RetrievalActor received SubmitMessage($vaultId, $archiveId, $headerCarrier, $user)")
       sender ! submitRetrievalRequest(vaultId, archiveId, user)(headerCarrier)
     case IsCompleteMessage(vaultId, archiveId) =>
+      logger.info(s"RetrievalActor received IsCompleteMessage($vaultId, $archiveId)")
       sender ! pas.eventualPollingActor(vaultId, archiveId).flatMap(aR => aR ? IsCompleteMessage(vaultId, archiveId))
     case _ => logger.warn(s"An unexpected message has been received")
   }
@@ -69,11 +71,17 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
 
   // reset the polling actor if it complete or has failed
   private def resetPollingActor(vaultId: String, archiveId: String) = {
+    logger.info(s"Reset the polling actor for $vaultId, $archiveId")
     pas.pollingActor(vaultId, archiveId)
       .flatMap { pA =>
         (pA ? StatusMessage(vaultId, archiveId)).mapTo[ActorMessage].map {
-          case CompleteMessage => pA ! RestartMessage
-          case FailedMessage => pA ! RestartMessage
+          case CompleteMessage =>
+            logger.info(s"Send restart message for $vaultId, $archiveId")
+            pA ! RestartMessage
+          case FailedMessage =>
+            logger.info(s"Send restart message for $vaultId, $archiveId")
+            pA ! RestartMessage
+          case _ => logger.info(s"No restart is required $vaultId, $archiveId")
         }
       }
   }

@@ -28,3 +28,4 @@ In order to run the application and all of it's dependencies using service manag
 You should then be able to start teh application using:
 
 > ```sm --start NRS_RETRIEVAL_ALL -f```
+ 

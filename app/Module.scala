@@ -19,6 +19,7 @@ import java.net.URL
 import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import com.google.inject.AbstractModule
 import com.google.inject.name.{Named, Names}
+import com.typesafe.config.Config
 import config.MicroserviceAudit
 import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
 import javax.inject.{Inject, Provider, Singleton}
@@ -76,4 +77,5 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
+  override protected def configuration: Option[Config] = None
 }

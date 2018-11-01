@@ -63,7 +63,7 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"
 
     for {
-      post <- http.POST(path, "", Seq.empty)
+      post <- http.POST[String, HttpResponse](path, "", Seq.empty)
       _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, user.userName, vaultName, archiveId,
         if(post.allHeaders == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield post

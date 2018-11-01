@@ -34,6 +34,7 @@ package config
 
 import javax.inject.{Inject, Named, Singleton}
 import com.google.inject.ImplementedBy
+import com.typesafe.config.Config
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
@@ -61,6 +62,8 @@ trait WSHttpT extends HttpGet with WSGet
 class WSHttp @Inject() (val environment: Environment, val runModeConfiguration: Configuration, val appNameConfiguration: Configuration) extends WSHttpT {
   val mode: Mode = environment.mode
   override val hooks = NoneRequired
+
+  override protected def configuration: Option[Config] = None
 }
 
 class MicroserviceAudit @Inject()(@Named("appName") val applicationName: String,

@@ -12,7 +12,7 @@ addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "1.5.0")
 
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")
 
-addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.2")
+addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.12")
 
 addSbtPlugin("net.ground5hark.sbt" % "sbt-concat" % "0.1.9")
 
@@ -24,4 +24,4 @@ addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "1.8.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-git-versioning" % "1.15.0")
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "0.8.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "0.14.0")

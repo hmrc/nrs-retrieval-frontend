@@ -24,7 +24,7 @@ import config.{AppConfig, Auditable, WSHttpT}
 import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import play.api.libs.ws.{WSClient, WSResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 

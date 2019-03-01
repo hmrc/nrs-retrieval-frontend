@@ -20,14 +20,11 @@ import akka.actor.ActorSystem
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import models._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.error_template
 import controllers.FormMappings._
-import play.api.data.Form
 
 import scala.concurrent.Future
 

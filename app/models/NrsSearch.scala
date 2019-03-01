@@ -61,20 +61,6 @@ case class NotableEventDisplay (
 
 object NrsSearchResult {
 
-  val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-
-  val jodaDateReads: Reads[LocalDate] = Reads[LocalDate](js =>
-    js.validate[String].map[LocalDate](dtString =>
-      LocalDate.parse(dtString, DateTimeFormat.forPattern(dateFormat))
-    )
-  )
-
-  val jodaDateWrites: Writes[LocalDate] = new Writes[LocalDate] {
-    def writes(d: LocalDate): JsValue = JsString(d.toString())
-  }
-
-  implicit val userFormat: Format[LocalDate] = Format(jodaDateReads, jodaDateWrites)
-
   implicit val notableEventFormat: OFormat[NotableEventDisplay] = Json.format[NotableEventDisplay]
   implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]
 }

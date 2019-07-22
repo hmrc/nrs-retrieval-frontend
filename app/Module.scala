@@ -17,6 +17,7 @@
 import java.net.URL
 
 import actors.{ActorService, ActorServiceImpl, RetrievalActor}
+import akka.actor.ActorSystem
 import com.google.inject.AbstractModule
 import com.google.inject.name.{Named, Names}
 import com.typesafe.config.Config
@@ -74,7 +75,7 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 }
 
 @Singleton
-class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String)
+class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String, val actorSystem: ActorSystem)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
   override protected def configuration: Option[Config] = None

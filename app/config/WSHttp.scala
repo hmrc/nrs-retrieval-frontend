@@ -32,6 +32,7 @@ package config
  * limitations under the License.
  */
 
+import akka.actor.ActorSystem
 import javax.inject.{Inject, Named, Singleton}
 import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
@@ -59,7 +60,7 @@ trait WSHttpT extends HttpGet with WSGet
   with AppName with RunMode
 
 @Singleton
-class WSHttp @Inject() (val environment: Environment, val runModeConfiguration: Configuration, val appNameConfiguration: Configuration) extends WSHttpT {
+class WSHttp @Inject() (val environment: Environment, val runModeConfiguration: Configuration, val appNameConfiguration: Configuration, val actorSystem: ActorSystem) extends WSHttpT {
   val mode: Mode = environment.mode
   override val hooks = NoneRequired
 

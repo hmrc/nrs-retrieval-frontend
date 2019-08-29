@@ -23,6 +23,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Controller, Request, Result}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
@@ -32,16 +33,22 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with I18nSupport {
 
-  val strideRole: String
+  val strideRoles: Set[String]
   val logger: Logger
   val appConfig: AppConfig
   val config = appConfig.runModeConfiguration
   val env = appConfig.environment
   val authConnector: AuthConnector
 
+  private def convertRolesSetToPredicate(enrolments: Set[String]): Predicate = {
+    enrolments.map(Enrolment.apply).reduce(
+      (enrolment: Predicate, accumulatedPredicate: Predicate) => enrolment or accumulatedPredicate
+    )
+  }
+
   private def strideAuthorised[B](f: Credentials ~ Enrolments ~ Name => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
     authorised(
-      Enrolment(strideRole).and(AuthProviders(PrivilegedApplication))
+      convertRolesSetToPredicate(strideRoles).and(AuthProviders(PrivilegedApplication))
     ).retrieve(
       Retrievals.credentials.and(Retrievals.authorisedEnrolments).and(Retrievals.name)
     ) {
@@ -67,7 +74,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
             else {
               s"${request.uri}"
             })
-        case ex@InsufficientEnrolments(`strideRole`) =>
+        case ex:InsufficientEnrolments =>
           logger.info(s"$actionName - error, not authorised", ex)
           Ok(error_template("Not authorised", "Not authorised", s"Insufficient enrolments - ${ex.msg}"))
         case ex =>

@@ -37,10 +37,10 @@ class SelectorController @Inject()(
                                ) extends FrontendController with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  override val strideRole: String = appConfig.nrsStrideRole
+  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
 
   logger.info(s"appConfig: stride.enabled: ${appConfig.strideAuth}")
-  logger.info(s"appConfig: stride.role.name: $strideRole")
+  logger.info(s"appConfig: stride.role.name: $strideRoles")
   logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
   def showSelectorPage: Action[AnyContent] = Action.async { implicit request =>

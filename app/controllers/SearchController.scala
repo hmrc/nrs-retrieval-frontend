@@ -52,7 +52,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
                                  val searchResultUtils: SearchResultUtils) extends FrontendController with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  val strideRole: String = appConfig.nrsStrideRole
+  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)

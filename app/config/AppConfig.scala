@@ -34,6 +34,9 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
+  private def loadConfigs(key: String) =
+    runModeConfiguration.getStringList(key).map(_.toSet).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+
   private def loadFromConfig(config: Configuration, key: String) =
     config.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key")).replace("_", " ")
 
@@ -82,7 +85,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   Logger.info(s"Notable events available $notableEvents")
 
-  lazy val nrsStrideRole: String = loadConfig("stride.role.name")
+  lazy val nrsStrideRoles: Set[String] = loadConfigs("stride.role.names")
   lazy val strideAuth: Boolean = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
   lazy val authHost: String = runModeConfiguration.getString(s"microservice.services.auth.host").getOrElse("none-authHost")
   lazy val authPort: Int = runModeConfiguration.getInt(s"microservice.services.auth.port").getOrElse(-1)

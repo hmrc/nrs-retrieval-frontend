@@ -30,8 +30,10 @@ trait StrideFixture extends MockitoSugar {
   val mockAuthConn = mock[MicroAuthConnector]
   val mockAuth = mock[MicroAuthConnector]
 
-  val enr = "fooRole"
-  val authResultOk: Future[~[LegacyCredentials, Enrolments]] = Future.successful(new ~(GGCredId("cred-1234"), Enrolments(Set(Enrolment(enr)))))
+  val role_name = "foo Role"
+  val new_role_name = "foo_Role"
+  val authResultOk: Future[~[LegacyCredentials, Enrolments]] =
+    Future.successful(new ~(GGCredId("cred-1234"), Enrolments(Set(Enrolment(role_name), Enrolment(new_role_name)))))
 
   def authConnOk(authResult: Future[_]): AuthConnector = new AuthConnector {
     override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = {

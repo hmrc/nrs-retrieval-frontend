@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,9 +107,37 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
       case FailedMessage =>
         logger.info(s"Retrieval failed for $vaultName, $archiveId")
         Ok(CompletionStatus.failed)
+      case IncompleteMessage =>
+        logger.info(s"Retrieval in progress for $vaultName, $archiveId")
+        Ok(CompletionStatus.incomplete)
     } recoverWith {
       case e: AskTimeoutException =>
-        logger.info(s"Retrieval is still in progress for $vaultName, $archiveId")
+        logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
+        Future(Accepted(CompletionStatus.incomplete))
+    }
+  }
+
+  def refreshAjax(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    logger.info(s"Refresh the result $vaultName, $archiveId")
+
+    nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map { response =>
+      response.status match {
+        case OK => {
+          logger.info(s"Retrieval request complete for vault $vaultName, archive $archiveId")
+          Ok(CompletionStatus.complete)
+        }
+        case NOT_FOUND => {
+          logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
+          Ok(CompletionStatus.incomplete)
+        }
+        case _ => {
+          logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
+          Ok(CompletionStatus.failed)
+        }
+      }
+    } recoverWith {
+      case e: Exception =>
+        logger.warn(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
         Future(Accepted(CompletionStatus.incomplete))
     }
   }
@@ -123,7 +151,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           Accepted(CompletionStatus.incomplete)
       } recoverWith {
         case e: AskTimeoutException =>
-          logger.info(s"Retrieval is still in progress for $vaultName, $archiveId")
+          logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
           Future(Accepted(CompletionStatus.incomplete))
       }
     })

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
-import akka.testkit.{ImplicitSender, TestKit}
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import akka.util.Timeout
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
@@ -105,6 +105,6 @@ class StatusCheckActorSpec() extends TestKit(ActorSystem("MySpec")) with Implici
 
   val pollingActor: ActorRef = system.actorOf(Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
 
-  val checkStatusActor: ActorRef = system.actorOf(Props(new CheckStatusActor(pollingActor.path, mockAppConfig)(mockNrsRetrievalConnector)))
+  val checkStatusActor = TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
 
 }

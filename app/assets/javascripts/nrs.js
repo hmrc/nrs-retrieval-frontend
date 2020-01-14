@@ -28,6 +28,7 @@
     })
   }
 
+  var timeout = 100
   var path = '/nrs-retrieval/';
 
   var NrsAjax = {
@@ -39,7 +40,9 @@
         } else if (xmlhttp.status === 500) {
           showServerError(index)
         } else {
-          NrsAjax.checkStatus(index, vaultName, archiveId);
+          setTimeout(function () {
+            NrsAjax.checkStatus(index, vaultName, archiveId)
+          }, timeout)
         }
       };
       xmlhttp.ontimeout = function () {
@@ -50,14 +53,16 @@
     checkStatus: function (index, vaultName, archiveId) {
       var xmlhttp = this.http(index, vaultName, archiveId);
       xmlhttp.open("GET", path + 'status/' + vaultName + '/' + archiveId);
-      xmlhttp.timeout = 5000;
+      xmlhttp.timeout = timeout;
       xmlhttp.send();
+      console.log(timeout)
     },
     doRetrieve: function (index, vaultName, archiveId) {
+      timeout = 100
       setStatus(index, 'retrieval-incomplete')
       var xmlhttp = this.http(index, vaultName, archiveId);
       xmlhttp.open("GET", path + 'retrieve/' + vaultName + '/' + archiveId);
-      xmlhttp.timeout = 30000;
+      xmlhttp.timeout = timeout;
       xmlhttp.send();
     }
   };

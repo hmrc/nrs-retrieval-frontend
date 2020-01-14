@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package actors
 
-
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Actor, ActorPath, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorSystem}
 import akka.util.Timeout
 import config.AppConfig
 import connectors.NrsRetrievalConnector
@@ -28,10 +27,9 @@ import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
-class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+class CheckStatusActor(appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
 
   implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 
@@ -47,12 +45,15 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
         response.status match {
           case OK => {
             logger.info(s"Retrieval request complete for vault $vaultId, archive $archiveId")
-            pollingActor(vaultId, archiveId).map (aR => aR ! CompleteMessage)
+            context.parent ! CompleteMessage
           }
-          case NOT_FOUND => logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
+          case NOT_FOUND => {
+            logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
+            context.parent ! IncompleteMessage
+          }
           case _ => {
             logger.info(s"Retrieval request failed for vault $vaultId, archive $archiveId")
-            pollingActor(vaultId, archiveId).map(aR => aR ! FailedMessage)
+            context.parent ! FailedMessage
           }
         }
       }
@@ -62,11 +63,4 @@ class CheckStatusActor(pollingActorPath: ActorPath, appConfig: AppConfig)(implic
       sender ! UnknownMessage
   }
 
-  private def pollingActor(vaultId: String, archiveId: String)(implicit system: ActorSystem, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = {
-    try {
-      system.actorSelection(pollingActorPath).resolveOne()
-    } catch {
-      case e: Throwable => Future(system.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId"))
-    }
-  }
 }

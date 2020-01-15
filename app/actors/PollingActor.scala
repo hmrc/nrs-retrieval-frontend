@@ -18,15 +18,17 @@ package actors
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, Cancellable, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import config.AppConfig
 import connectors.NrsRetrievalConnector
+import org.joda.time.Instant
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
   (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
@@ -41,15 +43,30 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
 
   private val checkStatusActor = context.actorOf(Props(new CheckStatusActor(appConfig)))
 
+  private var cancellable: Cancellable = startStatusCheck
+
+  private def startStatusCheck = {
+    val stopTime = Instant.now().plus(appConfig.runTimeMillis)
+    context.system.scheduler.schedule(appConfig.interval, appConfig.interval) {
+      if (Instant.now().isAfter(stopTime)) {
+        self ! FailedMessage
+      }
+    }
+  }
+
+  private def stopStatusCheck = if (!cancellable.isCancelled) cancellable.cancel()
+
   def poll: Receive = {
     case StatusMessage(_, _) =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId is in progress.")
       sender ! PollingMessage
     case CompleteMessage =>
       logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has successfully completed.")
+      stopStatusCheck
       context.become(complete)
     case FailedMessage =>
-      logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has failed... $sender")
+      logger.info(s"Retrieval request for vault: $vaultId, archive: $archiveId has failed.")
+      stopStatusCheck
       context.become(failed)
     case RestartMessage =>
       logger.info(s"Restart polling.")
@@ -61,14 +78,18 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
   def complete: Receive = {
     case StatusMessage(_, _) => sender ! CompleteMessage
     case IsCompleteMessage(_, _) => sender ! CompleteMessage
-    case RestartMessage => context.become(poll)
+    case RestartMessage =>
+      cancellable = startStatusCheck
+      context.become(poll)
     case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 
   def failed: Receive = {
     case StatusMessage(_, _) => sender ! FailedMessage
     case IsCompleteMessage(_, _) => sender ! FailedMessage
-    case RestartMessage => context.become(poll)
+    case RestartMessage =>
+      cancellable = startStatusCheck
+      context.become(poll)
     case msg => logger.warn(s"An unexpected message $msg has been received by an actor handling vault: $vaultId, archive: $archiveId")
   }
 }

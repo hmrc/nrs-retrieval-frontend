@@ -55,7 +55,7 @@
       xmlhttp.open("GET", path + 'status/' + vaultName + '/' + archiveId);
       xmlhttp.timeout = timeout;
       xmlhttp.send();
-      console.log(timeout)
+      timeout = Math.min(timeout * 2, 5000)
     },
     doRetrieve: function (index, vaultName, archiveId) {
       timeout = 100

@@ -36,56 +36,57 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import play.api.inject.{Binding, Module}
 
-//class Module extends AbstractModule with AkkaGuiceSupport {
-//
-//  override def configure(): Unit = {
-//
-//    bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
-//    bindActor[RetrievalActor]("retrieval-actor")
-//
-//    bind(classOf[HttpGet]).to(classOf[HttpVerbs])
-//    bind(classOf[HttpPost]).to(classOf[HttpVerbs])
-//    bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
-//    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
-//
-//    bind(classOf[Audit]).to(classOf[MicroserviceAudit])
-//  }
-//}
-class Module(val environment: Environment, val configuration: Configuration)
-  extends AbstractModule with AkkaGuiceSupport {
+class Module extends AbstractModule with AkkaGuiceSupport {
 
-  val log: Logger = Logger(this.getClass)
-  log.info(s"appConfig: Starting service env: ${environment.mode}")
+  override def configure(): Unit = {
 
-  override def configure() = {
     bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
-    //bindActor[RetrievalActor]("retrieval-actor")
+    bindActor[RetrievalActor]("retrieval-actor")
 
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
     bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
-    //bindBaseUrl("auth")
 
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
-//    bind(classOf[String])
-//      .annotatedWith(Names.named("appName"))
-//      .toProvider(new ConfigProvider("appName"))
   }
-
-  private class ConfigProvider(confKey: String) extends Provider[String] {
-    override lazy val get = configuration.getString(confKey)
-      .getOrElse(throw new IllegalStateException(s"No value found for configuration property $confKey"))
-  }
-
-  private class BaseUrlProvider(serviceName: String) extends Provider[URL] {
-    override lazy val get = new URL(s"http://localhost:8500/$serviceName")//new URL(baseUrl(serviceName))
-  }
-
-  private def bindBaseUrl(serviceName: String) =
-    bind(classOf[URL]).annotatedWith(Names.named(s"$serviceName-baseUrl")).toProvider(new BaseUrlProvider(serviceName))
-
 }
+
+//class Module(val environment: Environment, val configuration: Configuration)
+//  extends AbstractModule with AkkaGuiceSupport {
+//
+//  val log: Logger = Logger(this.getClass)
+//  log.info(s"appConfig: Starting service env: ${environment.mode}")
+//
+//  override def configure() = {
+//    bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
+//    //bindActor[RetrievalActor]("retrieval-actor")
+//
+//    bind(classOf[HttpGet]).to(classOf[HttpVerbs])
+//    bind(classOf[HttpPost]).to(classOf[HttpVerbs])
+//    bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
+//    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
+//    //bindBaseUrl("auth")
+//
+//    bind(classOf[Audit]).to(classOf[MicroserviceAudit])
+////    bind(classOf[String])
+////      .annotatedWith(Names.named("appName"))
+////      .toProvider(new ConfigProvider("appName"))
+//  }
+//
+//  private class ConfigProvider(confKey: String) extends Provider[String] {
+//    override lazy val get = configuration.getString(confKey)
+//      .getOrElse(throw new IllegalStateException(s"No value found for configuration property $confKey"))
+//  }
+//
+//  private class BaseUrlProvider(serviceName: String) extends Provider[URL] {
+//    override lazy val get = new URL(s"http://localhost:8500/$serviceName")//new URL(baseUrl(serviceName))
+//  }
+//
+//  private def bindBaseUrl(serviceName: String) =
+//    bind(classOf[URL]).annotatedWith(Names.named(s"$serviceName-baseUrl")).toProvider(new BaseUrlProvider(serviceName))
+//
+//}
 
 @Singleton
 class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String, val actorSystem: ActorSystem, val wsClient: WSClient)

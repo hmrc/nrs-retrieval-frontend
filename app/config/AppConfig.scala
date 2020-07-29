@@ -43,7 +43,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   private val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
-  lazy val authUrl: String = runModeConfiguration.get[MDTPService]("microservice.services.auth").baseUrl
+  //lazy val authUrl: String = runModeConfiguration.get[MDTPService]("microservice.services.auth").baseUrl
+  lazy val authUrl: String = servicesConfig.baseUrl("auth")
 
   lazy val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version")
   lazy val analyticsToken: String = loadConfig(s"google-analytics.token")

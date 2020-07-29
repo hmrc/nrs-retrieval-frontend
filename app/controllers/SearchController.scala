@@ -42,8 +42,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 @Singleton
-class SearchController @Inject()(/*override val messagesApi: play.api.i18n.MessagesApi,*/
-                                 /*@Named("retrieval-actor") retrievalActor: ActorRef,*/
+class SearchController @Inject()(override val messagesApi: play.api.i18n.MessagesApi,
+                                 @Named("retrieval-actor") retrievalActor: ActorRef,
                                  val authConnector: AuthConnector,
                                  val nrsRetrievalConnector: NrsRetrievalConnector,
                                  val searchResultUtils: SearchResultUtils,
@@ -56,7 +56,7 @@ class SearchController @Inject()(/*override val messagesApi: play.api.i18n.Messa
   override val logger: Logger = Logger(this.getClass)
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
-val retrievalActor: ActorRef = null
+
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
@@ -161,13 +161,13 @@ val retrievalActor: ActorRef = null
   }
 
   def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Request dowload of $vaultName, $archiveId")
+    logger.info(s"Request download of $vaultName, $archiveId")
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        logger.info(s"Dowload of $vaultName, $archiveId")
+        logger.info(s"Download of $vaultName, $archiveId")
         Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
       }.recoverWith { case e =>
-        logger.info(s"Dowload of $vaultName, $archiveId failed with $e")
+        logger.info(s"Download of $vaultName, $archiveId failed with $e")
         Future(Ok(error_template(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message")))) }
     })
   }

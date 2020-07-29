@@ -18,11 +18,12 @@ package connectors
 
 import java.net.URL
 
+import config.AppConfig
 import javax.inject.{Inject, Named, Singleton}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.http.{HttpGet, HttpPost}
 
 @Singleton
-class MicroAuthConnector @Inject()(@Named("auth-baseUrl") baseUrl: URL, val http: HttpGet with HttpPost) extends PlayAuthConnector {
-  override val serviceUrl: String = baseUrl.toString
+class MicroAuthConnector @Inject()(appConfig: AppConfig, val http: HttpGet with HttpPost) extends PlayAuthConnector {
+  override val serviceUrl: String = appConfig.authUrl
 }

@@ -20,17 +20,15 @@ import javax.inject.{Inject, Singleton}
 import models._
 import org.joda.time.LocalDate
 import play.Logger
-import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.collection.JavaConversions._
 import scala.concurrent.duration._
 
 
 @Singleton
-class AppConfig @Inject()(val runModeConfiguration: Configuration, val environment: Environment) extends ServicesConfig {
-  override protected def mode: Mode = environment.mode
+class AppConfig @Inject()(val runModeConfiguration: Configuration, val environment: Environment, servicesConfig: ServicesConfig) {
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
@@ -45,12 +43,14 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   private val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
+  lazy val authUrl: String = runModeConfiguration.get[MDTPService]("microservice.services.auth").baseUrl
+
   lazy val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version")
   lazy val analyticsToken: String = loadConfig(s"google-analytics.token")
   lazy val analyticsHost: String = loadConfig(s"google-analytics.host")
   lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val nrsRetrievalUrl = s"${baseUrl("nrs-retrieval")}/nrs-retrieval"
+  lazy val nrsRetrievalUrl = s"${servicesConfig.baseUrl("nrs-retrieval")}/nrs-retrieval"
   lazy val xApiKey: String = loadConfigWithDefault(s"microservice.services.nrs-retrieval.xApiKey", "missingKey")
 
   lazy val isLocal: Boolean = loadConfigWithDefault(s"microservice.services.nrs-retrieval.isLocal", "false").toBoolean

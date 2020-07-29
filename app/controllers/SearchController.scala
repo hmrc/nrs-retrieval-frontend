@@ -30,7 +30,7 @@ import controllers.FormMappings._
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,25 +42,28 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 @Singleton
-class SearchController @Inject()(val messagesApi: MessagesApi,
-                                 @Named("retrieval-actor") retrievalActor: ActorRef,
-                                 implicit val appConfig: AppConfig,
+class SearchController @Inject()(/*override val messagesApi: play.api.i18n.MessagesApi,*/
+                                 /*@Named("retrieval-actor") retrievalActor: ActorRef,*/
                                  val authConnector: AuthConnector,
                                  val nrsRetrievalConnector: NrsRetrievalConnector,
+                                 val searchResultUtils: SearchResultUtils,
+                                 override val controllerComponents: MessagesControllerComponents)
+                                (implicit val appConfig: AppConfig,
                                  implicit val system: ActorSystem,
-                                 implicit val mat: Materializer,
-                                 val searchResultUtils: SearchResultUtils) extends FrontendController with I18nSupport with Stride {
+                                 implicit val mat: Materializer/*,
+                                 implicit val messages: Messages*/) extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
-
+  override lazy val parse: PlayBodyParsers = controllerComponents.parsers
+val retrievalActor: ActorRef = null
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def noParameters(): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"No parameters provided so redirecting to start page")
+    logger.info(s"No parameters provided so redirecting to start page on request $request")
     Future(Redirect(routes.StartController.showStartPage()))
   }
 
@@ -86,7 +89,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
             Ok(views.html.search_page(searchForm.bindFromRequest, Some(user), Some(results)))
           }.recoverWith { case e =>
             logger.info(s"SubmitSearchPage $e")
-            Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))
+            Future(Ok(error_template(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
           }
         }
       )
@@ -99,7 +102,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Refresh the result $vaultName, $archiveId")
+    logger.info(s"Refresh the result $vaultName, $archiveId on request $request")
     ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
       case CompleteMessage =>
         logger.info(s"Retrieval completed for $vaultName, $archiveId")
@@ -165,7 +168,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
         Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
       }.recoverWith { case e =>
         logger.info(s"Dowload of $vaultName, $archiveId failed with $e")
-        Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message")))) }
+        Future(Ok(error_template(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message")))) }
     })
   }
 

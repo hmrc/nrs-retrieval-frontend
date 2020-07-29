@@ -43,8 +43,8 @@ import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.http.ws._
+import play.api.libs.ws.WSClient
 
 trait Hooks extends HttpHooks with HttpAuditing {
   val hooks = Seq(AuditingHook)
@@ -57,10 +57,10 @@ trait WSHttpT extends HttpGet with WSGet
   with HttpDelete with WSDelete
   with HttpPatch with WSPatch
   with HttpHead with WSHead
-  with AppName with RunMode
 
 @Singleton
-class WSHttp @Inject() (val environment: Environment, val runModeConfiguration: Configuration, val appNameConfiguration: Configuration, val actorSystem: ActorSystem) extends WSHttpT {
+class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configuration, val appNameConfig: Configuration, val wsClient: WSClient)
+                       (implicit val actorSystem: ActorSystem) extends WSHttpT {
   val mode: Mode = environment.mode
   override val hooks = NoneRequired
 

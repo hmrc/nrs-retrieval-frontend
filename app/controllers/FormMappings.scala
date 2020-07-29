@@ -22,7 +22,7 @@ import play.api.data.Forms.{longNumber, mapping, optional, text}
 
 object FormMappings {
 
-  private val searchResultMapping = mapping(
+  val searchResultMapping = mapping(
     "notableEventDisplayName" -> text,
     "fileDetails" -> text,
     "vaultId" -> text,

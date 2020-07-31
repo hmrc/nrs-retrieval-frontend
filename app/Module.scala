@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-import java.net.URL
-
 import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import akka.actor.ActorSystem
 import com.google.inject.AbstractModule
-import com.google.inject.name.{Named, Names}
+import com.google.inject.name.Named
 import com.typesafe.config.Config
 import config.MicroserviceAudit
 import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
-import javax.inject.{Inject, Provider, Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-import play.api.inject.{Binding, Module}
 
-class Module extends AbstractModule with AkkaGuiceSupport {
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
-
     bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
     bindActor[RetrievalActor]("retrieval-actor")
 
@@ -51,42 +46,6 @@ class Module extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
   }
 }
-
-//class Module(val environment: Environment, val configuration: Configuration)
-//  extends AbstractModule with AkkaGuiceSupport {
-//
-//  val log: Logger = Logger(this.getClass)
-//  log.info(s"appConfig: Starting service env: ${environment.mode}")
-//
-//  override def configure() = {
-//    bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
-//    //bindActor[RetrievalActor]("retrieval-actor")
-//
-//    bind(classOf[HttpGet]).to(classOf[HttpVerbs])
-//    bind(classOf[HttpPost]).to(classOf[HttpVerbs])
-//    bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
-//    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
-//    //bindBaseUrl("auth")
-//
-//    bind(classOf[Audit]).to(classOf[MicroserviceAudit])
-////    bind(classOf[String])
-////      .annotatedWith(Names.named("appName"))
-////      .toProvider(new ConfigProvider("appName"))
-//  }
-//
-//  private class ConfigProvider(confKey: String) extends Provider[String] {
-//    override lazy val get = configuration.getString(confKey)
-//      .getOrElse(throw new IllegalStateException(s"No value found for configuration property $confKey"))
-//  }
-//
-//  private class BaseUrlProvider(serviceName: String) extends Provider[URL] {
-//    override lazy val get = new URL(s"http://localhost:8500/$serviceName")//new URL(baseUrl(serviceName))
-//  }
-//
-//  private def bindBaseUrl(serviceName: String) =
-//    bind(classOf[URL]).annotatedWith(Names.named(s"$serviceName-baseUrl")).toProvider(new BaseUrlProvider(serviceName))
-//
-//}
 
 @Singleton
 class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String, val actorSystem: ActorSystem, val wsClient: WSClient)

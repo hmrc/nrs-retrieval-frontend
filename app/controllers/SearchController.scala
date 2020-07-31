@@ -19,9 +19,8 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.pattern.{AskTimeoutException, ask}
-import akka.stream.Materializer
 import akka.util.Timeout
 import com.google.inject.name.Named
 import config.AppConfig
@@ -30,28 +29,26 @@ import controllers.FormMappings._
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.error_template
-
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import views.html.{error_template, search_page}
 
 @Singleton
-class SearchController @Inject()(override val messagesApi: play.api.i18n.MessagesApi,
-                                 @Named("retrieval-actor") retrievalActor: ActorRef,
+class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: ActorRef,
                                  val authConnector: AuthConnector,
                                  val nrsRetrievalConnector: NrsRetrievalConnector,
                                  val searchResultUtils: SearchResultUtils,
-                                 override val controllerComponents: MessagesControllerComponents)
-                                (implicit val appConfig: AppConfig,
-                                 implicit val system: ActorSystem,
-                                 implicit val mat: Materializer/*,
-                                 implicit val messages: Messages*/) extends FrontendController(controllerComponents) with I18nSupport with Stride {
+                                 override val controllerComponents: MessagesControllerComponents,
+                                 val searchPage: search_page,
+                                 override val errorPage: error_template)
+                                (implicit val appConfig: AppConfig)
+  extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
@@ -70,7 +67,7 @@ class SearchController @Inject()(override val messagesApi: play.api.i18n.Message
   def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Show the search page for notable event $notableEventType")
     authWithStride("Show the search page", { nrUser =>
-      Future(Ok(views.html.search_page(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
+      Future(Ok(searchPage(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
     })
   }
 
@@ -86,10 +83,10 @@ class SearchController @Inject()(override val messagesApi: play.api.i18n.Message
           logger.info(s"Do search for submitted search query ${search.searchText}")
           doSearch(search, user).map { results =>
             logger.info(s"Form $results")
-            Ok(views.html.search_page(searchForm.bindFromRequest, Some(user), Some(results)))
+            Ok(searchPage(searchForm.bindFromRequest, Some(user), Some(results)))
           }.recoverWith { case e =>
             logger.info(s"SubmitSearchPage $e")
-            Future(Ok(error_template(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+            Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
           }
         }
       )
@@ -168,7 +165,8 @@ class SearchController @Inject()(override val messagesApi: play.api.i18n.Message
         Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
       }.recoverWith { case e =>
         logger.info(s"Download of $vaultName, $archiveId failed with $e")
-        Future(Ok(error_template(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message")))) }
+        Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+      }
     })
   }
 

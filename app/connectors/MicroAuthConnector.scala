@@ -16,10 +16,8 @@
 
 package connectors
 
-import java.net.URL
-
 import config.AppConfig
-import javax.inject.{Inject, Named, Singleton}
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.http.{HttpGet, HttpPost}
 

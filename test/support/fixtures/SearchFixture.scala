@@ -20,12 +20,13 @@ import config.AppConfig
 import models.{SearchResult, SearchResultUtils}
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait SearchFixture extends NrSubmissionId {
 
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
-  private val appConfig = new AppConfig(configuration, env)
+  private val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
 
   val searchResultUtils: SearchResultUtils = new SearchResultUtils(appConfig)
 

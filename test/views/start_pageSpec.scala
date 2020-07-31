@@ -41,6 +41,8 @@ import views.html.start_page
 
 class start_pageSpec extends GuiceAppSpec {
 
+  val startPage: start_page = new start_page()
+
   "start page" should {
     "have a matching page title and h1 header" in new StartPageViewFixture {
       val view: HtmlFormat.Appendable = start_page()

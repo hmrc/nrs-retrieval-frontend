@@ -36,7 +36,6 @@ import akka.actor.ActorSystem
 import javax.inject.{Inject, Named, Singleton}
 import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
-import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
@@ -61,7 +60,6 @@ trait WSHttpT extends HttpGet with WSGet
 @Singleton
 class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configuration, val appNameConfig: Configuration, val wsClient: WSClient)
                        (implicit val actorSystem: ActorSystem) extends WSHttpT {
-  val mode: Mode = environment.mode
   override val hooks = NoneRequired
 
   override protected def configuration: Option[Config] = None

@@ -19,13 +19,17 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "play-ui" % "8.11.0-play-27",
   "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-27",
   "uk.gov.hmrc" %% "auth-client" % "3.0.0-play-27",
-  "com.typesafe.play" %% "play-json-joda" % "2.9.0"
+  "com.typesafe.play" %% "play-json-joda" % "2.9.0",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.8",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.6.8"
 )
 
 def test(scope: String) = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.8" % scope,
   "org.mockito" % "mockito-all" % "2.0.2-beta" % scope
 )
 

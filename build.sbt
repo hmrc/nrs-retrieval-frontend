@@ -36,6 +36,8 @@ def test(scope: String) = Seq(
 
 lazy val appName: String = "nrs-retrieval-frontend"
 
+val silencerVersion = "1.7.1"
+
 lazy val root = (project in file("."))
   .settings(
     name := appName,
@@ -50,6 +52,11 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     libraryDependencies ++= compile ++ test("test") ++ test("it"),
+    libraryDependencies ++= Seq(
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    ),
+    scalacOptions += "-P:silencer:pathFilters=target/.*",
     publishingSettings,
     scoverageSettings)
   .configs(IntegrationTest)

@@ -23,24 +23,24 @@ import play.Logger
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 
 
 @Singleton
 class AppConfig @Inject()(val runModeConfiguration: Configuration, val environment: Environment, servicesConfig: ServicesConfig) {
 
-  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  private def loadConfig(key: String) = runModeConfiguration.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   private def loadConfigs(key: String) =
-    runModeConfiguration.getStringList(key).map(_.toSet).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+    runModeConfiguration.getStringList(key).map(_.asScala.toSet).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   private def loadFromConfig(config: Configuration, key: String) =
-    config.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key")).replace("_", " ")
+    config.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key")).replace("_", " ")
 
-  private def loadConfigWithDefault(key: String, default: String) = runModeConfiguration.getString(key).getOrElse(default)
+  private def loadConfigWithDefault(key: String, default: String) = runModeConfiguration.getOptional[String](key).getOrElse(default)
 
-  private val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
+  private val contactHost = runModeConfiguration.getOptional[String](s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
   lazy val authUrl: String = servicesConfig.baseUrl("auth")
@@ -66,7 +66,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   val serviceScope = ServiceScope(Seq(vatService))
 
   lazy val notableEvents: Map[String, NotableEvent] =
-    runModeConfiguration.getConfigList(s"notableEvents").getOrElse(throw new Exception(s"Missing configuration"))
+    runModeConfiguration.getConfigList(s"notableEvents").getOrElse(throw new Exception(s"Missing configuration")).asScala
       .map { client =>
           NotableEvent(
             loadFromConfig(client, "notableEvent"),
@@ -83,11 +83,11 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
           )
         }.map(nE => nE.name -> nE).toMap
 
-  Logger.info(s"Notable events available $notableEvents")
+  Logger.of(classOf[AppConfig]).info(s"Notable events available $notableEvents")
 
   lazy val nrsStrideRoles: Set[String] = loadConfigs("stride.role.names")
-  lazy val strideAuth: Boolean = runModeConfiguration.getBoolean("stride.enabled").getOrElse(false)
-  lazy val authHost: String = runModeConfiguration.getString(s"microservice.services.auth.host").getOrElse("none-authHost")
-  lazy val authPort: Int = runModeConfiguration.getInt(s"microservice.services.auth.port").getOrElse(-1)
+  lazy val strideAuth: Boolean = runModeConfiguration.getOptional[Boolean]("stride.enabled").getOrElse(false)
+  lazy val authHost: String = runModeConfiguration.getOptional[String](s"microservice.services.auth.host").getOrElse("none-authHost")
+  lazy val authPort: Int = runModeConfiguration.getOptional[Int](s"microservice.services.auth.port").getOrElse(-1)
 
 }

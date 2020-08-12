@@ -162,7 +162,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
         logger.info(s"Download of $vaultName, $archiveId")
-        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
+        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.headers): _*)
       }.recoverWith { case e =>
         logger.info(s"Download of $vaultName, $archiveId failed with $e")
         Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))

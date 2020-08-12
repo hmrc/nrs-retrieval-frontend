@@ -22,7 +22,7 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.i18n.DefaultMessagesApi
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig

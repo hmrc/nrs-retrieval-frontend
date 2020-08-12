@@ -96,7 +96,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
     }
     "make a post call to /retrieval-requests and retrieve nr-submission-id from header" in {
       when(mockWsHttp.POST[Any, Any](any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
-      when(mockHttpResponse.allHeaders).thenReturn(Map("nr-submission-id" -> Seq(nrSubmissionId)))
+      when(mockHttpResponse.headers).thenReturn(Map("nr-submission-id" -> Seq(nrSubmissionId)))
       when(mockHttpResponse.header("nr-submission-id")).thenReturn(Some(nrSubmissionId))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenAnswer(new Answer[Future[Unit]](){
         override def answer(invocationOnMock: InvocationOnMock): Future[Unit] = {
@@ -129,7 +129,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
       when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
       when(mockWSResponse.body).thenReturn("Some Text")
       val mockWSRequest1 = mock[WSRequest]
-      when(mockWSRequest1.withHeaders(any())).thenReturn(mockWSRequest2)
+      when(mockWSRequest1.withHttpHeaders(any())).thenReturn(mockWSRequest2)
       when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
       await(connector.getSubmissionBundle(testAuditId, testArchiveId, testUser)).body shouldBe "Some Text"
@@ -143,7 +143,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
       when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
       when(mockWSResponse.body).thenReturn("Some Text")
       val mockWSRequest1 = mock[WSRequest]
-      when(mockWSRequest1.withHeaders(any())).thenReturn(mockWSRequest2)
+      when(mockWSRequest1.withHttpHeaders(any())).thenReturn(mockWSRequest2)
       when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenAnswer(new Answer[Future[Unit]](){
         override def answer(invocationOnMock: InvocationOnMock): Future[Unit] = {

@@ -47,11 +47,11 @@ class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
 
   private def startStatusCheck = {
     val stopTime = Instant.now().plus(appConfig.runTimeMillis)
-    context.system.scheduler.schedule(appConfig.interval, appConfig.interval) {
+    context.system.scheduler.scheduleWithFixedDelay(appConfig.interval, appConfig.interval)(() => {
       if (Instant.now().isAfter(stopTime)) {
         self ! FailedMessage
       }
-    }
+    })
   }
 
   private def stopStatusCheck = if (!cancellable.isCancelled) cancellable.cancel()

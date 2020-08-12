@@ -22,16 +22,15 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsJson
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.{Configuration, Environment}
 import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import views.html.{error_template, search_page}
-import scala.concurrent.Future
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+
+import scala.concurrent.Future
 
 class SearchControllerControllerSpec extends UnitSpec
   with WithFakeApplication
@@ -47,14 +46,13 @@ class SearchControllerControllerSpec extends UnitSpec
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
 
-  private val messageApi = new DefaultMessagesApi()
   implicit val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
   private val mockActorRef = mock[ActorRef]
   private val mockNRC = mock[NrsRetrievalConnector]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
   implicit val mockMaterializer: Materializer = mock[Materializer]
-  private val searchPage = mock[search_page]
-  private val errorPage = mock[error_template]
+  private val searchPage = fakeApplication.injector.instanceOf[views.html.search_page]
+  private val errorPage = fakeApplication.injector.instanceOf[views.html.error_template]
 
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
     extends SearchController(mockActorRef, mockAuthConn, mockNRC, searchResultUtils, stubMessagesControllerComponents(), searchPage, errorPage) {

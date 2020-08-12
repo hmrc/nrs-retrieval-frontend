@@ -41,21 +41,22 @@ import views.html.start_page
 
 class start_pageSpec extends GuiceAppSpec {
 
-  val startPage: start_page = new start_page()
+  implicit val appConfig = app.injector.instanceOf[AppConfig]
+  val startPage: start_page = fakeApplication.injector.instanceOf[views.html.start_page]
 
   "start page" should {
     "have a matching page title and h1 header" in new StartPageViewFixture {
-      val view: HtmlFormat.Appendable = start_page()
+      val view: HtmlFormat.Appendable = startPage()
       doc.title mustBe doc.getElementById("pageHeader").text()
     }
 
     "have the correct page header" in new StartPageViewFixture {
-      val view: HtmlFormat.Appendable = start_page()
+      val view: HtmlFormat.Appendable = startPage()
       doc.getElementById("pageHeader").text() mustBe Messages("start.page.header.lbl")
     }
 
     "have the correct start button" in new StartPageViewFixture {
-      val view: HtmlFormat.Appendable = start_page()
+      val view: HtmlFormat.Appendable = startPage()
       doc.getElementsByClass("button--get-started").text() mustBe Messages("start.button.start.lbl")
     }
   }
@@ -63,8 +64,5 @@ class start_pageSpec extends GuiceAppSpec {
   trait StartPageViewFixture extends ViewFixture {
     implicit val requestWithToken = addToken(request)
   }
-
-  implicit val appConfig = app.injector.instanceOf[AppConfig]
-
 
 }

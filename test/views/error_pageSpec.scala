@@ -34,6 +34,7 @@ package views
 
 import config.AppConfig
 import play.api.i18n.Messages
+import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
 import support.fixtures.ViewFixture
@@ -41,9 +42,13 @@ import views.html.error_template
 
 class error_pageSpec extends GuiceAppSpec {
 
+  val errorPage: error_template = fakeApplication.injector.instanceOf[views.html.error_template]
+  implicit val appConfig = app.injector.instanceOf[AppConfig]
+  val request: FakeRequest[_] = FakeRequest()
+
   "error page" should {
     "have the correct title" in new StartPageViewFixture {
-      val view: HtmlFormat.Appendable = error_template(
+      val view: HtmlFormat.Appendable = errorPage(
         Messages("global.error.InternalServerError500.title"),
         Messages("global.error.InternalServerError500.heading"),
         Messages("global.error.InternalServerError500.message")
@@ -55,8 +60,5 @@ class error_pageSpec extends GuiceAppSpec {
   trait StartPageViewFixture extends ViewFixture {
     implicit val requestWithToken = addToken(request)
   }
-
-  implicit val appConfig = app.injector.instanceOf[AppConfig]
-
 
 }

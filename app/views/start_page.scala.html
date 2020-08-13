@@ -17,13 +17,16 @@
 @import config.AppConfig
 @import controllers.routes
 @import uk.gov.hmrc.play.views.html.helpers.form
+
+@this(mainTemplate: views.html.main_template, helpersForm: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF)
+
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @title = @{
   Messages("start.page.header.lbl")
 }
 
-@main_template(title=title) {
+@mainTemplate(title=title) {
   <h1 class="heading-large" id="pageHeader">@title</h1>
   <p class="lede">@Messages("start.text.one.lbl")</p>
   <p>@Messages("start.text.two.lbl")</p>

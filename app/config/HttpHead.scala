@@ -42,7 +42,7 @@ trait CoreHead {
 trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
 
   override def doHead(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    import play.api.libs.concurrent.Execution.Implicits.defaultContext
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     buildRequest(url).head().map(new WSHttpResponse(_))
   }

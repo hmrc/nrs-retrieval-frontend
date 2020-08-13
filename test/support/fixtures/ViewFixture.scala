@@ -18,12 +18,8 @@ package support.fixtures
 
 import org.jsoup.Jsoup
 import org.scalatest.MustMatchers
-import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
-import support.GuiceAppSpec
-
-import scala.collection.JavaConverters._
 
 trait ViewFixture extends MustMatchers {
   implicit val request = FakeRequest()

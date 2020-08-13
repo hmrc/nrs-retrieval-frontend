@@ -20,7 +20,7 @@ import config.AppConfig
 import models.AuthorisedUser
 import play.api.Logger
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Controller, Request, Result}
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -28,10 +28,10 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import views.html.error_template
-
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with I18nSupport {
+trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseController with I18nSupport {
 
   val strideRoles: Set[String]
   val logger: Logger
@@ -39,6 +39,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
   val config = appConfig.runModeConfiguration
   val env = appConfig.environment
   val authConnector: AuthConnector
+  val errorPage: error_template
 
   private def convertRolesSetToPredicate(enrolments: Set[String]): Predicate = {
     enrolments.map(Enrolment.apply).reduce(
@@ -76,10 +77,10 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with Controller with
             })
         case ex:InsufficientEnrolments =>
           logger.info(s"$actionName - error, not authorised", ex)
-          Ok(error_template("Not authorised", "Not authorised", s"Insufficient enrolments - ${ex.msg}"))
+          Ok(errorPage("Not authorised", "Not authorised", s"Insufficient enrolments - ${ex.msg}"))
         case ex =>
           logger.warn(s"$actionName - error, other error", ex)
-          Ok(error_template("Not authorised", "Not authorised", "Sorry, not authorised"))
+          Ok(errorPage("Not authorised", "Not authorised", "Sorry, not authorised"))
       }
     } else {
       logger.debug(s"$actionName - auth switched off")

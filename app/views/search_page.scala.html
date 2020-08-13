@@ -18,6 +18,9 @@
 @import models.AuthorisedUser
 @import models.Search
 @import uk.gov.hmrc.play.views.html.helpers.{form, input}
+
+@this(mainTemplate: views.html.main_template, helpersForm: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF)
+
 @(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @pageScripts = {
@@ -46,7 +49,7 @@
   }
 }
 
-@main_template(title = pageTitle, userName, scriptElem = Some(pageScripts)) {
+@mainTemplate(title = pageTitle, userName, scriptElem = Some(pageScripts)) {
 
     <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
 

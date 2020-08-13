@@ -16,30 +16,29 @@
 
 package controllers
 
-import akka.actor.ActorSystem
 import config.AppConfig
 import play.api.http.Status
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
-import play.api.test.FakeRequest
-import play.api.{Configuration, Environment, Logger}
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
+import play.api.{Configuration, Environment}
 import support.fixtures.StrideFixture
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class StartControllerControllerSpec extends UnitSpec with WithFakeApplication with StrideFixture {
+class StartControllerControllerSpec extends UnitSpec with WithFakeApplication with StrideFixture with StubControllerComponentsFactory {
 
   private val fakeRequest = FakeRequest("GET", "/")
 
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
 
-  private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
-  private val appConfig = new AppConfig(configuration, env)
-  private val mockActorSystem = mock[ActorSystem]
+  private val startPage = fakeApplication.injector.instanceOf[views.html.start_page]
+  private val errorPage = fakeApplication.injector.instanceOf[views.html.error_template]
+  implicit val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
 
   private class StartControllerWithAuth(stubbedRetrievalResult: Future[_])
-    extends StartController(messageApi, mockActorSystem, appConfig, mockAuthConn) {
+    extends StartController(authConnOk(stubbedRetrievalResult), stubMessagesControllerComponents(), startPage, errorPage) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

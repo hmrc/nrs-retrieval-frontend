@@ -22,9 +22,10 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.i18n.DefaultMessagesApi
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.duration._
 
@@ -35,9 +36,9 @@ trait Infrastructure extends AnyRef with MockitoSugar {
 
   val configuration: Configuration = Configuration.load(environment)
 
-  val messageApi: DefaultMessagesApi = new DefaultMessagesApi(environment, configuration, new DefaultLangs(configuration))
+  val messageApi: DefaultMessagesApi = new DefaultMessagesApi()
 
-  val appConfig: AppConfig = new AppConfig(configuration, environment)
+  val appConfig: AppConfig = new AppConfig(configuration, environment, new ServicesConfig(configuration))
 
   // mocks
   val mockActorRef: ActorRef = mock[ActorRef]

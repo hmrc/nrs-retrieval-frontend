@@ -19,8 +19,9 @@ package models
 import java.time.ZonedDateTime
 
 import org.joda.time.LocalDate
-import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
+import play.api.libs.json.JodaWrites._
+import play.api.libs.json.JodaReads._
 
 case class HeaderData(govClientPublicIP: String, govClientPublicPort: String)
 
@@ -41,6 +42,7 @@ case class Bundle (
 object Bundle {
   implicit val formats: OFormat[Bundle] = Json.format[Bundle]
 }
+
 case class NrsSearchResult(
   businessId: String,
   notableEvent: String,
@@ -52,7 +54,8 @@ case class NrsSearchResult(
   nrSubmissionId: String,
   bundle: Bundle,
   expiryDate: LocalDate,
-  glacier: Glacier)
+  glacier: Glacier
+)
 
 case class NotableEventDisplay (
   name: String,

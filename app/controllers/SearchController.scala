@@ -19,9 +19,8 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import actors._
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.pattern.{AskTimeoutException, ask}
-import akka.stream.Materializer
 import akka.util.Timeout
 import com.google.inject.name.Named
 import config.AppConfig
@@ -30,29 +29,30 @@ import controllers.FormMappings._
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.error_template
-
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import views.html.{error_template, search_page}
 
 @Singleton
-class SearchController @Inject()(val messagesApi: MessagesApi,
-                                 @Named("retrieval-actor") retrievalActor: ActorRef,
-                                 implicit val appConfig: AppConfig,
+class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: ActorRef,
                                  val authConnector: AuthConnector,
                                  val nrsRetrievalConnector: NrsRetrievalConnector,
-                                 implicit val system: ActorSystem,
-                                 implicit val mat: Materializer,
-                                 val searchResultUtils: SearchResultUtils) extends FrontendController with I18nSupport with Stride {
+                                 val searchResultUtils: SearchResultUtils,
+                                 override val controllerComponents: MessagesControllerComponents,
+                                 val searchPage: search_page,
+                                 override val errorPage: error_template)
+                                (implicit val appConfig: AppConfig)
+  extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
+  override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
     .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
@@ -60,14 +60,14 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def noParameters(): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"No parameters provided so redirecting to start page")
+    logger.info(s"No parameters provided so redirecting to start page on request $request")
     Future(Redirect(routes.StartController.showStartPage()))
   }
 
   def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Show the search page for notable event $notableEventType")
     authWithStride("Show the search page", { nrUser =>
-      Future(Ok(views.html.search_page(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
+      Future(Ok(searchPage(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
     })
   }
 
@@ -83,10 +83,10 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
           logger.info(s"Do search for submitted search query ${search.searchText}")
           doSearch(search, user).map { results =>
             logger.info(s"Form $results")
-            Ok(views.html.search_page(searchForm.bindFromRequest, Some(user), Some(results)))
+            Ok(searchPage(searchForm.bindFromRequest, Some(user), Some(results)))
           }.recoverWith { case e =>
             logger.info(s"SubmitSearchPage $e")
-            Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message"))))
+            Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
           }
         }
       )
@@ -99,7 +99,7 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Refresh the result $vaultName, $archiveId")
+    logger.info(s"Refresh the result $vaultName, $archiveId on request $request")
     ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
       case CompleteMessage =>
         logger.info(s"Retrieval completed for $vaultName, $archiveId")
@@ -158,14 +158,15 @@ class SearchController @Inject()(val messagesApi: MessagesApi,
   }
 
   def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Request dowload of $vaultName, $archiveId")
+    logger.info(s"Request download of $vaultName, $archiveId")
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        logger.info(s"Dowload of $vaultName, $archiveId")
-        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.allHeaders): _*)
+        logger.info(s"Download of $vaultName, $archiveId")
+        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.headers): _*)
       }.recoverWith { case e =>
-        logger.info(s"Dowload of $vaultName, $archiveId failed with $e")
-        Future(Ok(error_template(Messages("error.page.title"), Messages("error.page.heading"), Messages("error.page.message")))) }
+        logger.info(s"Download of $vaultName, $archiveId failed with $e")
+        Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+      }
     })
   }
 

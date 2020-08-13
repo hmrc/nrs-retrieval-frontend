@@ -22,17 +22,23 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsJson
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.{Configuration, Environment}
 import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with SearchFixture with NrsSearchFixture with StrideFixture {
+class SearchControllerControllerSpec extends UnitSpec
+  with WithFakeApplication
+  with MockitoSugar
+  with SearchFixture
+  with NrsSearchFixture
+  with StrideFixture
+  with StubControllerComponentsFactory {
 
   private val jsonBody: JsValue = Json.parse("""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
   private implicit val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest("GET", "/").withJsonBody(jsonBody)
@@ -40,15 +46,16 @@ class SearchControllerControllerSpec extends UnitSpec with WithFakeApplication w
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
 
-  private val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
-  private val appConfig = new AppConfig(configuration, env)
-  private val mockAcorRef = mock[ActorRef]
+  implicit val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
+  private val mockActorRef = mock[ActorRef]
   private val mockNRC = mock[NrsRetrievalConnector]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
   implicit val mockMaterializer: Materializer = mock[Materializer]
+  private val searchPage = fakeApplication.injector.instanceOf[views.html.search_page]
+  private val errorPage = fakeApplication.injector.instanceOf[views.html.error_template]
 
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    extends SearchController(messageApi, mockAcorRef, appConfig, mockAuthConn, mockNRC, mockSystem, mockMaterializer, searchResultUtils) {
+    extends SearchController(mockActorRef, mockAuthConn, mockNRC, searchResultUtils, stubMessagesControllerComponents(), searchPage, errorPage) {
 
     override val authConnector = authConnOk(stubbedRetrievalResult)
 

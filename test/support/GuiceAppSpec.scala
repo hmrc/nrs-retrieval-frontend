@@ -20,9 +20,9 @@ import connectors.NrsRetrievalConnector
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.libs.typedmap.TypedKey
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
-import play.filters.csrf.CSRF.Token
 import play.filters.csrf.{CSRFConfigProvider, CSRFFilter}
 
 class GuiceAppSpec extends BaseSpec {
@@ -36,7 +36,7 @@ class GuiceAppSpec extends BaseSpec {
 
   implicit override lazy val app: Application = {
     new GuiceApplicationBuilder().configure(additionalConfig)
-      .bindings(bindModules:_*).in(Mode.Test)
+      .bindings(bindModules: _*).in(Mode.Test)
       .overrides(bind[NrsRetrievalConnector].toInstance(mockNrsRetrievalConnector))
       .build()
   }
@@ -46,14 +46,14 @@ class GuiceAppSpec extends BaseSpec {
 
 
   def addToken[T](fakeRequest: FakeRequest[T]) = {
-    val csrfConfig     = app.injector.instanceOf[CSRFConfigProvider].get
-    val csrfFilter     = app.injector.instanceOf[CSRFFilter]
-    val token          = csrfFilter.tokenProvider.generateToken
+    val csrfConfig = app.injector.instanceOf[CSRFConfigProvider].get
+    val csrfFilter = app.injector.instanceOf[CSRFFilter]
+    val token = csrfFilter.tokenProvider.generateToken
 
-    fakeRequest.copyFakeRequest(tags = fakeRequest.tags ++ Map(
-      Token.NameRequestTag  -> csrfConfig.tokenName,
-      Token.RequestTag      -> token
-    )).withHeaders((csrfConfig.headerName, token))
+    fakeRequest
+      .withAttrs(fakeRequest.attrs + (
+        TypedKey("CSRF_TOKEN") -> token,
+        TypedKey("CSRF_TOKEN_NAME") -> csrfConfig.tokenName))
+      .withHeaders((csrfConfig.headerName, token))
   }
-
 }

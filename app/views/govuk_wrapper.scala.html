@@ -15,29 +15,33 @@
  *@
 
 @import config.AppConfig
+
+@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
+@import layouts.GovUkTemplate
+
+@this(govUkTemplate: GovUkTemplate, layoutsHead: uiLayouts.Head, layoutsFooter: uiLayouts.Footer, layoutsFooterLinks: uiLayouts.FooterLinks, layoutsServiceInfo: uiLayouts.ServiceInfo, layoutsMainContentHeader: uiLayouts.MainContentHeader, layoutsMainContent: uiLayouts.MainContent)
+
 @(appConfig: AppConfig,
   title: String,
   mainClass: Option[String] = None,
   mainDataAttributes: Option[Html] = None,
   bodyClasses: Option[String] = None,
-  sidebar: Html = HtmlFormat.empty,
+  sidebar: Html = play.twirl.api.HtmlFormat.empty,
   contentHeader: Option[Html] = None,
   headScripts: Option[Html] = None,
-  mainContent: Html = HtmlFormat.empty,
-  serviceInfoContent: Html = HtmlFormat.empty,
+  mainContent: Html = play.twirl.api.HtmlFormat.empty,
+  serviceInfoContent: Html = play.twirl.api.HtmlFormat.empty,
   scriptElem: Option[Html] = None,
   userName:  Option[Html] = None)(implicit request: Request[_], messages: Messages)
 
-@import layouts.{govuk_template => hmrcGovUkTemplate}
-@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
-@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+
 
 @linkElement = {
     <link href='@controllers.routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
 }
 
 @head = {
-    @uiLayouts.head(
+    @layoutsHead(
       linkElem = Some(linkElement),
       headScripts)
 }
@@ -55,7 +59,7 @@
 @afterHeader = {}
 
 @bodyEnd = {
-    @uiLayouts.footer(
+    @layoutsFooter(
       analyticsToken = Some(appConfig.analyticsToken),
       analyticsHost = appConfig.analyticsHost,
       ssoUrl = None,
@@ -77,17 +81,21 @@
     }
 
 @serviceInfo = {
-    @uiLayouts.serviceInfo(
+    @layoutsServiceInfo(
       betaBanner = betaBanner,
       includeGridWrapper = false,
       serviceInfoContent = Some(serviceInfoContent),
       includeHMRCBranding = false)
 }
 
-@mainContentHeader = {@contentHeader}
+@mainContentHeader = {
+    @if(contentHeader.isDefined) {
+        @layoutsMainContentHeader(contentHeader = contentHeader.get)
+    }
+}
 
 @content = {
-    @uiLayouts.main_content(
+    @layoutsMainContent(
       article = mainContent,
       mainClass = mainClass,
       mainDataAttributes = mainDataAttributes,
@@ -96,4 +104,4 @@
       sidebar = sidebar)
 }
 
-@hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, None, true)(content)
+@govUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, None, true)(content)

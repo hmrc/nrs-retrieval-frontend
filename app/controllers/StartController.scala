@@ -16,27 +16,28 @@
 
 package controllers
 
-import akka.actor.ActorSystem
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import views.html.{error_template, start_page}
 
 @Singleton
-class StartController @Inject()(
-  val messagesApi: MessagesApi,
-  val system: ActorSystem,
-  implicit val appConfig: AppConfig,
-  val authConnector: AuthConnector
-) extends FrontendController with I18nSupport with Stride {
+class StartController @Inject()(val authConnector: AuthConnector,
+                                override val controllerComponents: MessagesControllerComponents,
+                                val startPage: start_page,
+                                override val errorPage: error_template)
+                               (implicit val appConfig: AppConfig) extends FrontendController(controllerComponents)
+  with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
+  override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   logger.info(s"appConfig: stride.enabled: ${appConfig.strideAuth}")
   logger.info(s"appConfig: stride.role.name: $strideRoles")
@@ -46,7 +47,7 @@ class StartController @Inject()(
     logger.info(s"S=how start page")
     authWithStride("Show the start page", { _ =>
       Future.successful(
-        Ok(views.html.start_page())
+        Ok(startPage())
       )
     })
 

@@ -18,7 +18,6 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 import play.api.{Environment, Logger}
-import play.api.Mode.Mode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import config.{AppConfig, Auditable, WSHttpT}
 import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
@@ -65,7 +64,7 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
     for {
       post <- http.POST[String, HttpResponse](path, "", Seq.empty)
       _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, user.userName, vaultName, archiveId,
-        if(post.allHeaders == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
+        if(post.headers == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield post
   }
 
@@ -80,12 +79,10 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     for{
-      get <- ws.url(path).withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      get <- ws.url(path).withHttpHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     }yield get
   }
-
-  protected def mode: Mode = environment.mode
 
 }

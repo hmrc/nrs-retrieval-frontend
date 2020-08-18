@@ -118,7 +118,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   }
 
   def refreshAjax(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Refresh the result $vaultName, $archiveId")
+    logger.info(s"Refresh the result $vaultName, $archiveId on ajax call")
 
     nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map { response =>
       response.status match {

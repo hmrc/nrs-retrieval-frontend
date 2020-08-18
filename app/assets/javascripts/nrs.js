@@ -58,7 +58,7 @@
       timeout = Math.min(timeout * 2, 5000)
     },
     doRetrieve: function (index, vaultName, archiveId) {
-      timeout = 100
+      timeout = 250
       setStatus(index, 'retrieval-incomplete')
       var xmlhttp = this.http(index, vaultName, archiveId);
       xmlhttp.open("GET", path + 'retrieve/' + vaultName + '/' + archiveId);

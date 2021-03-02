@@ -23,7 +23,7 @@ import java.time.ZonedDateTime
 
 trait NrsSearchFixture extends NrSubmissionId {
 
-  val headerData: JsValue = Json.parse("""{"SomeAttribute":"SomeValue"}""")
+  val headerData: Option[JsValue] = Some(Json.parse("""{"SomeAttribute":"SomeValue"}"""))
 
   val bundle = Bundle("zip", 123456)
 

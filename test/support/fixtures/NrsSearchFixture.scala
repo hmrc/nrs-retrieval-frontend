@@ -33,9 +33,5 @@ trait NrsSearchFixture extends NrSubmissionId {
     ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData,
     nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
 
-  val nrsCdsSearchResult = NrsSearchResult("businessId", "cds-declaration", "payloadContentType",
-    ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Json.parse("{}"), "userAuthToken", headerData,
-    nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
-
   val searchQuery = SearchQuery(Some("aName"), Some("aValue"), "aNotableEvent")
 }

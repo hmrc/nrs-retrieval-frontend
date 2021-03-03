@@ -34,7 +34,6 @@ trait SearchFixture extends NrSubmissionId {
 
   val fileSize = 123456L
   val vatSearchResult = SearchResult("VAT return", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
-  val cdsSearchResult = SearchResult("CDS declaration", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
 
 }
 

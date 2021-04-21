@@ -48,7 +48,7 @@ case class NrsSearchResult(
   notableEvent: String,
   payloadContentType: String,
   userSubmissionTimestamp: ZonedDateTime,
-  identityData: JsValue,
+  identityData: Option[JsValue],
   userAuthToken: String,
   headerData: Option[JsValue],
   nrSubmissionId: String,

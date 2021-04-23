@@ -38,7 +38,7 @@
 }
 
 @radioOptions = @{
-  appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents.get(key).get.displayName)).toList
+  appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents.get(key).get.displayName)).toList.sortBy(_.label)
 }
 
 @pageScripts = {

@@ -17,7 +17,7 @@
 package support.fixtures
 
 import connectors.MicroAuthConnector
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{GGCredId, LegacyCredentials, Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments}

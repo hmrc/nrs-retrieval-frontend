@@ -19,7 +19,7 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "play-ui" % "9.2.0-play-27",
   "uk.gov.hmrc" %% "govuk-template" % "5.63.0-play-27",
   "uk.gov.hmrc" %% "auth-client" % "3.0.0-play-27",
-  "com.typesafe.play" %% "play-json-joda" % "2.9.0",
+  "com.typesafe.play" %% "play-json-joda" % "2.9.2",
   "com.typesafe.akka" %% "akka-stream" % "2.6.8",
   "com.typesafe.akka" %% "akka-slf4j" % "2.6.8"
 )

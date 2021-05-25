@@ -79,7 +79,7 @@ class SearchControllerControllerSpec extends UnitSpec
       validatedForm.errors shouldBe empty
     }
     "create a header carrier with X-API-Key when one exists in config" in {
-      controller.hc.headers should contain ("X-API-Key" -> appConfig.xApiKey)
+      controller.hc.extraHeaders should contain ("X-API-Key" -> appConfig.xApiKey)
     }
   }
 

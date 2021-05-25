@@ -38,7 +38,7 @@ import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.hooks.HttpHooks
+import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
@@ -60,9 +60,9 @@ trait WSHttpT extends HttpGet with WSGet
 @Singleton
 class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configuration, val appNameConfig: Configuration, val wsClient: WSClient)
                        (implicit val actorSystem: ActorSystem) extends WSHttpT {
-  override val hooks = NoneRequired
+  override val hooks: Seq[HttpHook] = NoneRequired
 
-  override protected def configuration: Option[Config] = None
+  override protected def configuration: Config = runModeConfig.underlying
 }
 
 class MicroserviceAudit @Inject()(@Named("appName") val applicationName: String,

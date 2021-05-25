@@ -22,6 +22,7 @@ import config.{AppConfig, Auditable, MicroserviceAudit, WSHttpT}
 import javax.inject.Provider
 import models.{AuthorisedUser, NrsSearchResult}
 import models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
+import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
@@ -114,7 +115,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "statusSubmissionBundle" should {
     "make a head call to /submission-bundles" in {
-      when(mockWsHttp.HEAD[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockWsHttp.HEAD[Any](Matchers.contains("submission-bundles"), any[Seq[(String, String)]])(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
       await(connector.statusSubmissionBundle(testAuditId, testArchiveId)).body should be ("Some Text")
       verify(mockAuditable, times(0)).sendDataEvent(any[NonRepudiationStoreDownload])(any())

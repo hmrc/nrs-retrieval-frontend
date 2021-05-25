@@ -75,7 +75,7 @@ class SearchControllerControllerSpec extends UnitSpec
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
       "notableEventType" -> "vat-return")
-      val validatedForm = FormMappings.searchForm.bind(postData)
+      val validatedForm = FormMappings.searchForm.bind(postData, 1024)
       validatedForm.errors shouldBe empty
     }
     "create a header carrier with X-API-Key when one exists in config" in {

@@ -1,4 +1,5 @@
 import play.core.PlayVersion
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
@@ -57,6 +58,8 @@ lazy val root = (project in file("."))
     scalacOptions += "-P:silencer:pathFilters=target/.*",
     publishingSettings,
     scoverageSettings)
+  .settings(defaultSettings(): _*)
+  .settings(integrationTestSettings())
   .configs(IntegrationTest)
   .settings(
     Keys.fork in IntegrationTest := false,
@@ -66,4 +69,3 @@ lazy val root = (project in file("."))
   )
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .disablePlugins(JUnitXmlReportPlugin)
-inConfig(IntegrationTest)(Defaults.itSettings)

@@ -27,6 +27,7 @@ lazy val compile = Seq(
 
 def test(scope: String) = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.10.0-play-26" % scope,
+  "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % scope,
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,

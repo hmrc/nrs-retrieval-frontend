@@ -15,14 +15,10 @@
  */
 package uk.gov.hmrc.nrsretrievalfrontend.stubs
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, stubFor, urlEqualTo, _}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.mvc.Http.Status.OK
-
 
 object NrsRetrievalStubs {
-
 //  def givenNrsSearchResultInit(callbackUrl: String): StubMapping =
 //    stubFor(
 //      post(urlEqualTo(s"/api/v2/init"))
@@ -110,12 +106,11 @@ object NrsRetrievalStubs {
 //            .withStatus(202)
 //            .withHeader(HeaderNames.???, callbackUrl)))
 
-
-  def givenHeadSubmissionBundlesSucceeds(server: WireMockServer, vaultName: String, archiveId: String): StubMapping =
+  def givenHeadSubmissionBundlesReturns(vaultName: String, archiveId: String, status: Int): StubMapping =
     stubFor(
       head(urlEqualTo(s"/nrs-retrieval/submission-bundles/$vaultName/$archiveId"))
-      .willReturn(aResponse().withStatus(OK))
-  )
+        .willReturn(aResponse().withStatus(status)))
+
             //.withHeader(HeaderNames.???, s"/get-results/nrs-retrieval/submission-metadata?")))
 
 //  def givenNrsSearchResult(server: WireMockServer): StubMapping =

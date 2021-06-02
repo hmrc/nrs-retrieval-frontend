@@ -106,9 +106,9 @@ object NrsRetrievalStubs {
 //            .withStatus(202)
 //            .withHeader(HeaderNames.???, callbackUrl)))
 
-  def givenHeadSubmissionBundlesReturns(vaultName: String, archiveId: String, status: Int): StubMapping =
+  def givenHeadSubmissionBundlesReturns(status: Int): StubMapping =
     stubFor(
-      head(urlEqualTo(s"/nrs-retrieval/submission-bundles/$vaultName/$archiveId"))
+      head(urlEqualTo(s"/nrs-retrieval/submission-bundles/vaultName/archiveId"))
         .willReturn(aResponse().withStatus(status)))
 
             //.withHeader(HeaderNames.???, s"/get-results/nrs-retrieval/submission-metadata?")))

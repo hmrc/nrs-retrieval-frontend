@@ -24,7 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.baseApplicationBuilder.injector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
 
@@ -50,42 +50,45 @@ class NrsRetrievalContractSpec
     ).build()
 
   "statusSubmissionBundle" should {
+    def statusSubmissionBundle(): HttpResponse =
+      connector.statusSubmissionBundle("vaultName", "archiveId").futureValue
+
     "return OK" when {
       "the retrieval service returns OK" in {
-        givenHeadSubmissionBundlesReturns("vaultName", "archiveId", OK)
-        connector.statusSubmissionBundle("vaultName", "archiveId").futureValue.status shouldBe OK
+        givenHeadSubmissionBundlesReturns(OK)
+        statusSubmissionBundle().status shouldBe OK
       }
     }
 
     "return ACCEPTED" when {
       "the retrieval service returns ACCEPTED" in {
-        givenHeadSubmissionBundlesReturns("vaultName", "archiveId", ACCEPTED)
-        connector.statusSubmissionBundle("vaultName", "archiveId").futureValue.status shouldBe ACCEPTED
+        givenHeadSubmissionBundlesReturns(ACCEPTED)
+        statusSubmissionBundle().status shouldBe ACCEPTED
       }
     }
 
     "fail" when {
       "the retrieval service returns NOT_FOUND" in {
-        givenHeadSubmissionBundlesReturns("vaultName", "archiveId", NOT_FOUND)
+        givenHeadSubmissionBundlesReturns(NOT_FOUND)
 
         intercept[Exception] {
-          connector.statusSubmissionBundle("vaultName", "archiveId").futureValue
+          statusSubmissionBundle()
         }.getCause.asInstanceOf[HttpException].responseCode shouldBe NOT_FOUND
       }
 
       "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-        givenHeadSubmissionBundlesReturns("vaultName", "archiveId", INTERNAL_SERVER_ERROR)
+        givenHeadSubmissionBundlesReturns(INTERNAL_SERVER_ERROR)
 
         intercept[Exception] {
-          connector.statusSubmissionBundle("vaultName", "archiveId").futureValue
+          statusSubmissionBundle()
         }.getCause.asInstanceOf[UpstreamErrorResponse].statusCode shouldBe INTERNAL_SERVER_ERROR
       }
 
       "the retrieval service returns BAD_GATEWAY" in {
-        givenHeadSubmissionBundlesReturns("vaultName", "archiveId", BAD_GATEWAY)
+        givenHeadSubmissionBundlesReturns(BAD_GATEWAY)
 
         intercept[Exception] {
-          connector.statusSubmissionBundle("vaultName", "archiveId").futureValue
+          statusSubmissionBundle()
         }.getCause.asInstanceOf[UpstreamErrorResponse].statusCode shouldBe BAD_GATEWAY
       }
     }

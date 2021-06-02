@@ -16,55 +16,31 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.wiremock
 
-import java.net.URL
-
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.client.WireMock.configureFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
-import uk.gov.hmrc.play.it.Port
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Suite}
+import play.api.http.Status
 
-case class WireMockBaseUrl(value: URL)
-
-object WireMockSupport {
-  // We have to make the wireMockPort constant per-JVM instead of constant
-  // per-WireMockSupport-instance because config values containing it are
-  // cached in the GGConfig object
-  private lazy val wireMockPort = Port.randomAvailable
-}
-
-trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfterEach {
-  me: Suite =>
-
-  def commonStubs(): Unit = {}
-
-  val wireMockPort: Int = WireMockSupport.wireMockPort
+trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfter with Status { self: Suite =>
   val wireMockHost = "localhost"
-  val wireMockBaseUrlAsString = s"http://$wireMockHost:$wireMockPort"
-  val wireMockBaseUrl = new URL(wireMockBaseUrlAsString)
-  protected implicit val implicitWireMockBaseUrl = WireMockBaseUrl(wireMockBaseUrl)
+  val wireMockPort = 9391 // to do fix this
+  val wireMockBaseUrl = s"http://$wireMockHost:$wireMockPort"
 
-  protected def basicWireMockConfig(): WireMockConfiguration = wireMockConfig()
+  lazy val wireMockServer = new WireMockServer(wireMockConfig().port(wireMockPort))
 
-  private val wireMockServer = new WireMockServer(basicWireMockConfig().port(wireMockPort))
+  configureFor(wireMockHost, wireMockPort)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    WireMock.configureFor(wireMockHost, wireMockPort)
     wireMockServer.start()
   }
 
   override protected def afterAll(): Unit = {
-    wireMockServer.stop()
     super.afterAll()
+    wireMockServer.stop()
   }
-
-  override protected def beforeEach(): Unit = {
-    super.beforeEach()
-    WireMock.reset()
-    commonStubs()
-  }
-
 }
+
+
 

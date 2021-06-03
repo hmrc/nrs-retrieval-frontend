@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import connectors.NrsRetrievalConnector
+import connectors.NrsRetrievalConnectorImpl
 import models._
 import org.joda.time.LocalDate
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -26,7 +26,6 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSResponse
-import play.api.test.Helpers.baseApplicationBuilder.injector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
@@ -43,18 +42,18 @@ class NrsRetrievalContractSpec
     with BeforeAndAfterEach {
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private lazy val connector = injector.instanceOf[NrsRetrievalConnector]
-
   private val authorisedUser = AuthorisedUser("userName", "authProviderId")
 
   override def beforeEach(): Unit = WireMock.reset()
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder().configure(Map[String, Any](
-      "microservice.services.nrs-retrieval.port" -> wireMockPort, //not effective - had to set wiremock port to configured nrs port. Wy???
+      "microservice.services.nrs-retrieval.port" -> wireMockPort,
       "auditing.enabled" -> false,
       "metrics.jvm" -> false)
     ).build()
+
+  private lazy val connector = fakeApplication().injector.instanceOf[NrsRetrievalConnectorImpl]
 
   private def anUpstreamErrorResponseShouldBeThrownBy[T](request: () => T, statusCode: Int): Assertion =
     intercept[Exception] {

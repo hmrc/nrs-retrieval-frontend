@@ -24,7 +24,7 @@ import play.api.http.Status
 
 trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfter with Status { self: Suite =>
   val wireMockHost = "localhost"
-  val wireMockPort = 9391 // to do fix this
+  val wireMockPort = 19391
   val wireMockBaseUrl = s"http://$wireMockHost:$wireMockPort"
 
   lazy val wireMockServer = new WireMockServer(wireMockConfig().port(wireMockPort))

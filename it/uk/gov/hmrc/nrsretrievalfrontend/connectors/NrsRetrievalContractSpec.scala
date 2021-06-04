@@ -16,44 +16,23 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock
 import connectors.NrsRetrievalConnectorImpl
 import models._
 import org.joda.time.LocalDate
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{Assertion, BeforeAndAfterEach, Matchers, WordSpecLike}
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatest.Assertion
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
-import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
 
 import java.time.ZonedDateTime
 
-class NrsRetrievalContractSpec
-  extends WordSpecLike
-    with Matchers
-    with ScalaFutures
-    with GuiceOneServerPerSuite
-    with WireMockSupport
-    with IntegrationPatience
-    with BeforeAndAfterEach {
+class NrsRetrievalContractSpec extends IntegrationSpec {
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val authorisedUser = AuthorisedUser("userName", "authProviderId")
 
-  override def beforeEach(): Unit = WireMock.reset()
-
-  override def fakeApplication(): Application =
-    new GuiceApplicationBuilder().configure(Map[String, Any](
-      "microservice.services.nrs-retrieval.port" -> wireMockPort,
-      "auditing.enabled" -> false,
-      "metrics.jvm" -> false)
-    ).build()
-
-  private lazy val connector = fakeApplication().injector.instanceOf[NrsRetrievalConnectorImpl]
+  private lazy val connector = injector.instanceOf[NrsRetrievalConnectorImpl]
 
   private def anUpstreamErrorResponseShouldBeThrownBy[T](request: () => T, statusCode: Int): Assertion =
     intercept[Exception] {
@@ -72,8 +51,6 @@ class NrsRetrievalContractSpec
     }.getCause.asInstanceOf[HttpException].responseCode shouldBe NOT_FOUND
 
   "search" should {
-    val searchQuery = SearchQuery(Some("searchKeyName_0"), Some("searchKeyValue_0"), "notableEventType")
-
     def search(): Seq[NrsSearchResult] = connector.search(searchQuery, authorisedUser).futureValue
 
     "return a sequence of results" when {
@@ -95,12 +72,12 @@ class NrsRetrievalContractSpec
         )
 
       "the retrieval service returns OK with results" in {
-        givenSearchReturns(searchQuery, OK, results)
+        givenSearchReturns(OK, results)
         search() shouldBe results
       }
 
       "the retrieval service returns ACCEPTED with results" in {
-        givenSearchReturns(searchQuery, ACCEPTED, results)
+        givenSearchReturns(ACCEPTED, results)
         search() shouldBe results
       }
     }
@@ -109,29 +86,29 @@ class NrsRetrievalContractSpec
       val emptyResults = Seq.empty
 
       "the retrieval service returns OK with empty results" in {
-        givenSearchReturns(searchQuery, OK, emptyResults)
+        givenSearchReturns(OK, emptyResults)
         search() shouldBe emptyResults
       }
 
       "the retrieval service returns ACCEPTED with empty results" in {
-        givenSearchReturns(searchQuery, ACCEPTED, emptyResults)
+        givenSearchReturns(ACCEPTED, emptyResults)
         search() shouldBe emptyResults
       }
 
       "the retrieval service returns NOT_FOUND" in {
-        givenSearchReturns(searchQuery, NOT_FOUND)
+        givenSearchReturns(NOT_FOUND)
         search() shouldBe emptyResults
       }
     }
 
     "fail" when {
       "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-        givenSearchReturns(searchQuery, INTERNAL_SERVER_ERROR)
+        givenSearchReturns(INTERNAL_SERVER_ERROR)
         anInternalServerErrorShouldBeThrownBy(search)
       }
 
       "the retrieval service returns BAD_GATEWAY" in {
-        givenSearchReturns(searchQuery, BAD_GATEWAY)
+        givenSearchReturns(BAD_GATEWAY)
         aBadGatewayErrorShouldBeThrownBy(search)
       }
     }
@@ -140,10 +117,10 @@ class NrsRetrievalContractSpec
   "getSubmissionBundle" should {
     def submissionBundle(): WSResponse = connector.getSubmissionBundle(vaultName, archiveId, authorisedUser).futureValue
 
-    // the backend only returns OK here...
+    // the backend only returns OK here, to do fix under NONPR-2082
     "return OK" when {
       "the retrieval service returns OK" in {
-        givenGetSubmissionBundles(OK)
+        givenGetSubmissionBundlesReturns(OK)
         submissionBundle().status shouldBe OK
       }
     }

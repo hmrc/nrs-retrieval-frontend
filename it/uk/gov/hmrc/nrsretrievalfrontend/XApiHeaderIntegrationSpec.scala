@@ -10,8 +10,7 @@ class XApiHeaderIntegrationSpec extends IntegrationSpec {
   override val configuration: Map[String, Any] = defaultConfiguration + ("stride.enabled" -> false)
 
   private lazy val wsClient = fakeApplication().injector.instanceOf[WSClient]
-  private lazy val local    = s"http://localhost:$port"
-  private lazy val serviceRoot = s"$local/nrs-retrieval"
+  private lazy val serviceRoot = s"http://localhost:$port/nrs-retrieval"
 
   "GET /download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend" in {

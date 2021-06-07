@@ -27,6 +27,7 @@ import play.api.mvc.AnyContentAsJson
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.{Configuration, Environment}
 import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -46,7 +47,7 @@ class SearchControllerControllerSpec extends UnitSpec
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
 
-  implicit val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
+  implicit val appConfig: AppConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
   private val mockActorRef = mock[ActorRef]
   private val mockNRC = mock[NrsRetrievalConnector]
   implicit val mockSystem: ActorSystem = mock[ActorSystem]
@@ -55,10 +56,9 @@ class SearchControllerControllerSpec extends UnitSpec
   private val errorPage = fakeApplication.injector.instanceOf[views.html.error_template]
 
   private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    extends SearchController(mockActorRef, mockAuthConn, mockNRC, searchResultUtils, stubMessagesControllerComponents(), searchPage, errorPage) {
+    extends SearchController(mockActorRef, authConnector, mockNRC, searchResultUtils, stubMessagesControllerComponents(), searchPage, errorPage) {
 
-    override val authConnector = authConnOk(stubbedRetrievalResult)
-
+    override val authConnector: AuthConnector = authConnOk(stubbedRetrievalResult)
   }
 
   private val controller = new TestControllerAuthSearch(authResultOk)

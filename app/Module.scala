@@ -20,18 +20,17 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Named
 import com.typesafe.config.{Config, ConfigFactory}
 import config.MicroserviceAudit
-import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
-
-import javax.inject.{Inject, Singleton}
+import connectors.{NrsRetrievalConnector, NrsRetrievalConnectorImpl}
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.http.ws.WSHttp
+
+import javax.inject.{Inject, Singleton}
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
@@ -42,8 +41,6 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
-    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
-
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
   }
 }

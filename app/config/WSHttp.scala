@@ -33,9 +33,10 @@ package config
  */
 
 import akka.actor.ActorSystem
-import javax.inject.{Inject, Named, Singleton}
 import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
+import javax.inject.{Inject, Named, Singleton}
+import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
@@ -43,7 +44,6 @@ import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.http.ws._
-import play.api.libs.ws.WSClient
 
 trait Hooks extends HttpHooks with HttpAuditing {
   val hooks = Seq(AuditingHook)
@@ -60,6 +60,7 @@ trait WSHttpT extends HttpGet with WSGet
 @Singleton
 class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configuration, val appNameConfig: Configuration, val wsClient: WSClient)
                        (implicit val actorSystem: ActorSystem) extends WSHttpT {
+
   override val hooks: Seq[HttpHook] = NoneRequired
 
   override protected def configuration: Config = runModeConfig.underlying

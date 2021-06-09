@@ -16,7 +16,6 @@
 
 package support.fixtures
 
-import connectors.MicroAuthConnector
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{GGCredId, LegacyCredentials, Retrieval, ~}
@@ -26,10 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait StrideFixture extends MockitoSugar {
-
-  val mockAuthConn = mock[MicroAuthConnector]
-  val mockAuth = mock[MicroAuthConnector]
-
+  val authConnector: AuthConnector = mock[AuthConnector]
   val role_name = "foo Role"
   val new_role_name = "foo_Role"
   val authResultOk: Future[~[LegacyCredentials, Enrolments]] =

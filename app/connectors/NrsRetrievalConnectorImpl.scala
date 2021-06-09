@@ -23,8 +23,9 @@ import config.{AppConfig, Auditable, WSHttpT}
 import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import play.api.libs.ws.{WSClient, WSResponse}
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderNames.explicitlyIncludedHeaders
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
@@ -71,15 +72,17 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
   override def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
-    http.HEAD(path)
+    http.HEAD(path ,allHeaders)
   }
+  private def allHeaders(implicit hc: HeaderCarrier) =
+    hc.headers(explicitlyIncludedHeaders) ++ hc.extraHeaders ++ hc.otherHeaders
 
   override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     for{
-      get <- ws.url(path).withHttpHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      get <- ws.url(path).withHttpHeaders(allHeaders: _*).get
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     }yield get

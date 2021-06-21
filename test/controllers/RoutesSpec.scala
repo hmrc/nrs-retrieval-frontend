@@ -178,6 +178,54 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
           case _ => fail
         }
       }
+
+      "GET /search for PPT" should {
+        "show the search empty search page" in {
+          val notableEventType: String = "Plastics-Packaging-Tax"
+          val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/search/" + notableEventType))
+
+          result.map(status(_)) shouldBe Some(OK)
+
+          val text: String = result.map(contentAsString(_)).get
+          text should include(Messages(s"search.page.$notableEventType.header.lbl"))
+          text should not include(Messages("search.results.notfound.lbl"))
+          text should not include(Messages("search.results.results.lbl"))
+        }
+      }
+
+      "POST /search for PPT" should {
+        "show the search page" when {
+          val notableEventType: String = "plastics-packaging-tax"
+          "the search PPT no results" in {
+            when(mockNrsRetrievalConnector.search(any(), any())(any())).thenReturn(Future.successful(Seq.empty))
+
+            val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, s"/nrs-retrieval/search/$notableEventType").withFormUrlEncodedBody(
+              ("notableEventType", notableEventType)
+            )))
+
+            result.map(status(_)) shouldBe Some(OK)
+
+            val text: String = result.map(contentAsString(_)).get
+            text should include(Messages("search.results.notfound.lbl"))
+          }
+
+          "the search PPT results" in {
+            when(mockNrsRetrievalConnector.search(any(), any())(any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
+            val result: Option[Future[Result]] = route(app, addToken(FakeRequest(POST, s"/nrs-retrieval/search/$notableEventType").withFormUrlEncodedBody(
+              ("searchKeyName_0", "nino"),
+              ("searchKeyValue_0", "noResults"),
+              ("notableEventType", notableEventType)
+            )))
+
+            result.map(status(_)) shouldBe Some(OK)
+
+            val text: String = result.map(contentAsString(_)).get
+            text should include(Messages(s"search.page.$notableEventType.header.lbl"))
+            text should not include (Messages("search.results.notfound.lbl"))
+            text should include(Messages("search.results.results.lbl"))
+          }
+        }
+      }
     }
   }
 

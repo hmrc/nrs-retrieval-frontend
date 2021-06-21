@@ -41,7 +41,7 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
 
   "searchResult" should {
     "create link text" in {
-      pptSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
+      pptSearchResult.linkText shouldBe "Plastic package tax submitted 18 January 1970"
     }
   }
 

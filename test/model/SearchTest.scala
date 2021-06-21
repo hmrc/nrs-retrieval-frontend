@@ -32,17 +32,4 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
       vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
     }
   }
-
-  "fromNrsSearchResult" should {
-    "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsPptSearchResult) shouldBe(pptSearchResult)
-    }
-  }
-
-  "searchResult" should {
-    "create link text" in {
-      pptSearchResult.linkText shouldBe "Plastic package tax submitted 18 January 1970"
-    }
-  }
-
 }

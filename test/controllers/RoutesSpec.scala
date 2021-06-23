@@ -53,8 +53,8 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
       val text: String = result.map(contentAsString(_)).get
       text should include(Messages(s"search.page.$notableEventType.header.lbl"))
-      text should not include(Messages("search.results.notfound.lbl"))
-      text should not include(Messages("search.results.results.lbl"))
+      text should not include (Messages("search.results.notfound.lbl"))
+      text should not include (Messages("search.results.results.lbl"))
     }
   }
 
@@ -120,65 +120,64 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
         }
       }
     }
-  }
 
-  "GET /download/:vaultId/:archiveId" should {
-    "return OK" in {
-      val mockWsResponse = mock[WSResponse]
-      when(mockWsResponse.headers).thenReturn(Map("One" -> Seq("Two")))
+    "GET /download/:vaultId/:archiveId" should {
+      "return OK" in {
+        val mockWsResponse = mock[WSResponse]
+        when(mockWsResponse.headers).thenReturn(Map("One" -> Seq("Two")))
 
-      when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.successful(mockWsResponse))
-      val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/download/1/2"))
+        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.successful(mockWsResponse))
+        val result: Option[Future[Result]] = route(app, FakeRequest(GET, "/nrs-retrieval/download/1/2"))
 
-      result.map(status(_)) shouldBe Some(OK)
-    }
-    "show an error page" when {
-      "5xx response from the upstream download service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
-
-        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/download/1/2")))
-
-        result.get.onComplete {
-          case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
-          case _ => fail
-        }
+        result.map(status(_)) shouldBe Some(OK)
       }
-      "4xx response from the upstream download service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
+      "show an error page" when {
+        "5xx response from the upstream download service" in {
+          when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
 
-        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/download/1/2")))
+          val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/download/1/2")))
 
-        result.get.onComplete {
-          case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
-          case _ => fail
+          result.get.onComplete {
+            case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
+            case _ => fail
+          }
         }
-      }
-    }
-  }
+        "4xx response from the upstream download service" in {
+          when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
 
-  "GET /status/:vaultId/:archiveId" should {
-    "show an error page" when {
-      "5xx response from the upstream status service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
+          val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/download/1/2")))
 
-        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/status/1/2")))
-
-        result.get.onComplete {
-          case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
-          case _ => fail
-        }
-      }
-      "4xx response from the upstream status service" in {
-        when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
-
-        val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/status/1/2")))
-
-        result.get.onComplete {
-          case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
-          case _ => fail
+          result.get.onComplete {
+            case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
+            case _ => fail
+          }
         }
       }
     }
-  }
 
+    "GET /status/:vaultId/:archiveId" should {
+      "show an error page" when {
+        "5xx response from the upstream status service" in {
+          when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
+
+          val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/status/1/2")))
+
+          result.get.onComplete {
+            case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
+            case _ => fail
+          }
+        }
+        "4xx response from the upstream status service" in {
+          when(mockNrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any())).thenReturn(Future.failed(UpstreamErrorResponse("Broken", 502, 502)))
+
+          val result: Option[Future[Result]] = route(app, addToken(FakeRequest(GET, "/nrs-retrieval/status/1/2")))
+
+          result.get.onComplete {
+            case Failure(e) if e.isInstanceOf[UpstreamErrorResponse] => succeed
+            case _ => fail
+          }
+        }
+      }
+    }
+  }
 }

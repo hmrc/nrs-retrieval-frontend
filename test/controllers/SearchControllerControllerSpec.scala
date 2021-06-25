@@ -70,7 +70,21 @@ class SearchControllerControllerSpec extends UnitSpec
       status(result) shouldBe Status.OK
     }
   }
+  "showSearchPage for PPT" should {
+    "return 200" in {
+      val result = controller.showSearchPage(notableEventType = "ppt-subscription")(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
 
+  "searchForm for PPT" should {
+    "return no errors for valid data" in {
+      val postData = Json.obj("searchText" -> "someSearchText",
+        "notableEventType" -> "ppt-subscription")
+      val validatedForm = FormMappings.searchForm.bind(postData)
+      validatedForm.errors shouldBe empty
+    }
+  }
   "searchForm" should {
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",

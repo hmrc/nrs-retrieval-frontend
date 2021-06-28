@@ -17,14 +17,15 @@
 package controllers
 
 import models._
-import play.api.data.Form
+import play.api.data.{Form, Mapping}
 import play.api.data.Forms.{longNumber, mapping, optional, text}
 
 object FormMappings {
 
-  val searchResultMapping = mapping(
+  val searchResultMapping: Mapping[SearchResult] = mapping(
     "notableEventDisplayName" -> text,
     "fileDetails" -> text,
+    "fileName" -> text,
     "vaultId" -> text,
     "archiveId" -> text,
     "submissionDateEpochMilli" -> longNumber,

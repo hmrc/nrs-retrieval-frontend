@@ -175,5 +175,4 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
-
 }

@@ -48,8 +48,8 @@ object NrsRetrievalStubs {
   def verifySearchWithXApiKeyHeader(): Unit =
     verify(getRequestedFor(urlEqualTo(searchPath)).withHeader(xApiKeyHeader, equalToXApiKey))
 
-  def givenGetSubmissionBundlesReturns(status: Int): StubMapping =
-    stubFor(get(urlEqualTo(submissionBundlesPath)).willReturn(aResponse().withStatus(status)))
+  def givenGetSubmissionBundlesReturns(status: Int, body: String = ""): StubMapping =
+    stubFor(get(urlEqualTo(submissionBundlesPath)).willReturn(aResponse().withStatus(status).withBody(body)))
 
   def verifyGetSubmissionBundlesWithXApiKeyHeader(): Unit =
     verify(getRequestedFor(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey))

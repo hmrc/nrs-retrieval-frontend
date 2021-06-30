@@ -28,7 +28,7 @@ import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Environment
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{WSClient, WSResponse}
 import support.fixtures.{Infrastructure, NrsSearchFixture}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -124,7 +124,6 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
           "null/submission-metadata?notableEvent=aNotableEvent&aName=aValue")
       verify(mockAuditable, times(1)).sendDataEvent(searchAudit)(hc)
     }
-
  }
 
   "submitRetrievalRequest" should {
@@ -165,39 +164,12 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "getSubmissionBundle" should {
     "make a get call to /submission-bundles" in {
-      when(mockWsHttp.GET[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
-      val mockWSRequest2 = mock[WSRequest]
-      when(mockWSRequest2.get).thenReturn(Future.successful(mockWSResponse))
+      when(mockWsHttp.GETRaw(any(), any())(any(), any())).thenReturn(Future.successful(mockWSResponse))
       when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
       when(mockWSResponse.body).thenReturn("Some Text")
-      val mockWSRequest1 = mock[WSRequest]
-      when(mockWSRequest1.withHttpHeaders(any())).thenReturn(mockWSRequest2)
-      when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
       await(connector.getSubmissionBundle(testAuditId, testArchiveId, testUser)).body shouldBe "Some Text"
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
-    }
-
-    "make a get call to /submission-bundles and retrieve nr-submission-id from header" in {
-      when(mockWsHttp.GET[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
-      val mockWSRequest2 = mock[WSRequest]
-      when(mockWSRequest2.get).thenReturn(Future.successful(mockWSResponse))
-      when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
-      when(mockWSResponse.body).thenReturn("Some Text")
-      val mockWSRequest1 = mock[WSRequest]
-      when(mockWSRequest1.withHttpHeaders(any())).thenReturn(mockWSRequest2)
-      when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
-      when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenAnswer(new Answer[Future[Unit]](){
-        override def answer(invocationOnMock: InvocationOnMock): Future[Unit] = {
-          if(invocationOnMock.getArgumentAt(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId){
-            Future.successful(())
-          }else{
-            Future.failed(new Throwable())
-          }
-        }
-      })
-      await(connector.submitRetrievalRequest(testAuditId, testArchiveId, testUser)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
-      verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])(any())
     }
   }
 

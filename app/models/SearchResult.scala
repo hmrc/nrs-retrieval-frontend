@@ -25,7 +25,6 @@ import play.api.libs.json.{Json, OFormat}
 
 case class SearchResult( notableEventDisplayName: String,
                          fileDetails: String,
-                         fileName: String,
                          vaultId: String,
                          archiveId: String,
                          submissionDateEpochMilli: Long,
@@ -45,16 +44,13 @@ class SearchResultUtils @Inject()(appConfig: AppConfig) {
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
       appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
-      fileDetails(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
-      fileName(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType),
+      filename(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
       nrsSearchResult.glacier.vaultName,
       nrsSearchResult.glacier.archiveId,
       nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
     )
 
-  private def fileName(nrSubmissionId: String, fileType: String) = s"$nrSubmissionId.$fileType"
-
-  private def fileDetails(nrSubmissionId: String, fileType: String, fileSize: Long) =
-    s"${fileName(nrSubmissionId, fileType)} (${byteCountToDisplaySize(fileSize)})"
+  private def filename (nrSubmissionId: String, fileType: String, fileSize: Long) =
+    s"$nrSubmissionId.$fileType (${byteCountToDisplaySize(fileSize)})"
 
 }

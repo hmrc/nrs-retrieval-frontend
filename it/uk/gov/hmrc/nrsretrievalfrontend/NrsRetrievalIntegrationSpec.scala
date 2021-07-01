@@ -20,7 +20,7 @@ import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
-class XApiHeaderIntegrationSpec extends IntegrationSpec {
+class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   private implicit val headerCarrierWithoutXApiKeyHeader: HeaderCarrier = HeaderCarrier()
 
   override val configuration: Map[String, Any] = defaultConfiguration + ("stride.enabled" -> false)
@@ -29,10 +29,31 @@ class XApiHeaderIntegrationSpec extends IntegrationSpec {
   private lazy val serviceRoot = s"http://localhost:$port/nrs-retrieval"
 
   "GET /download/:vaultId/:archiveId" should {
-    "pass the X-API-HEADER to the nrs-retrieval backend" in {
-      givenGetSubmissionBundlesReturns(OK)
-      wsClient.url(s"$serviceRoot/download/$vaultName/$archiveId").get.futureValue.status shouldBe OK
-      verifyGetSubmissionBundlesWithXApiKeyHeader()
+    "pass the X-API-HEADER to the nrs-retrieval backend and return the file contents" when {
+      "the upstream call is successful" in {
+        val fileContents = "file contents"
+
+        givenGetSubmissionBundlesReturns(OK, fileContents)
+
+        val eventualResponse = wsClient.url(s"$serviceRoot/download/$vaultName/$archiveId").get.futureValue
+
+        eventualResponse.status shouldBe OK
+        eventualResponse.body shouldBe fileContents
+        verifyGetSubmissionBundlesWithXApiKeyHeader()
+      }
+    }
+
+    Seq(BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, INTERNAL_SERVER_ERROR, BAD_GATEWAY).foreach{ unexpectedStatusCode =>
+      "fail" when {
+        s"the upstream call returns the unexpected status code $unexpectedStatusCode" in {
+          givenGetSubmissionBundlesReturns(unexpectedStatusCode)
+
+          val eventualResponse = wsClient.url(s"$serviceRoot/download/$vaultName/$archiveId").get.futureValue
+
+          eventualResponse.status shouldBe INTERNAL_SERVER_ERROR
+          verifyGetSubmissionBundlesWithXApiKeyHeader()
+        }
+      }
     }
   }
 

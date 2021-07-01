@@ -31,9 +31,6 @@ trait HeadHttpTransport {
             (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 }
 
-trait HttpTransport extends GetHttpTransport {
-}
-
 trait CoreHead {
   def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
 
@@ -45,7 +42,7 @@ trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
   override def doHead(url: String, headers: Seq[(String, String)])
                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     buildRequest(url, headers).head().map(WSHttpResponse(_))
-  }
+}
 
 trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks {
 

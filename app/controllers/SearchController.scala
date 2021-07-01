@@ -16,8 +16,6 @@
 
 package controllers
 
-import java.util.concurrent.TimeUnit
-
 import actors._
 import akka.actor.ActorRef
 import akka.pattern.{AskTimeoutException, ask}
@@ -26,18 +24,20 @@ import com.google.inject.name.Named
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
-import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import views.html.{error_template, search_page}
+
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import views.html.{error_template, search_page}
 
 @Singleton
 class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: ActorRef,
@@ -93,10 +93,9 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
     })
   }
 
-  private def doSearch(search: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier) = {
+  private def doSearch(search: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier) =
     nrsRetrievalConnector.search(search, user)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
-  }
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Refresh the result $vaultName, $archiveId on request $request")
@@ -122,18 +121,15 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
     nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map { response =>
       response.status match {
-        case OK => {
+        case OK =>
           logger.info(s"Retrieval request complete for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.complete)
-        }
-        case NOT_FOUND => {
+        case NOT_FOUND =>
           logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
           Ok(CompletionStatus.incomplete)
-        }
-        case _ => {
+        case _ =>
           logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.failed)
-        }
       }
     } recoverWith {
       case e: Exception =>
@@ -145,10 +141,9 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Request retrieval for $vaultName, $archiveId")
     authWithStride("Download", { user =>
-      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-        case _ =>
-          logger.info(s"Retrieval accepted for $vaultName, $archiveId")
-          Accepted(CompletionStatus.incomplete)
+      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map { _ =>
+        logger.info(s"Retrieval accepted for $vaultName, $archiveId")
+        Accepted(CompletionStatus.incomplete)
       } recoverWith {
         case e: AskTimeoutException =>
           logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
@@ -158,19 +153,26 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   }
 
   def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Request download of $vaultName, $archiveId")
+    val messagePrefix = s"Request download of $vaultName, $archiveId"
+
+    logger.info(messagePrefix)
+
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        logger.info(s"Download of $vaultName, $archiveId")
-        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.headers): _*)
-      }.recoverWith { case e =>
-        logger.info(s"Download of $vaultName, $archiveId failed with $e")
-        Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+        val errorMessage = s"$messagePrefix received unexpected response status: ${response.status.toString}"
+
+        response.status match {
+          case status if status >= MULTIPLE_CHOICES => throw new HttpException(errorMessage, status)
+          case status =>
+            // log response size rather than the content as this might contain sensitive information
+            val bytes = response.bodyAsBytes
+            logger.info(s"$messagePrefix received status: [$status] and ${bytes.size} bytes from upstream.")
+            Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
+        }
       }
     })
   }
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
-
 }

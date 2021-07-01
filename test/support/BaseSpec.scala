@@ -17,15 +17,15 @@
 package support
 
 import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, Matchers, Suite}
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.reflect.ClassTag
 
-trait BaseSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with PatienceConfiguration with BeforeAndAfterEach with Matchers { this: Suite =>
+trait BaseSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with PatienceConfiguration with BeforeAndAfterEach { this: Suite =>
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

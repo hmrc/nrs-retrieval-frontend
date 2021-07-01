@@ -1,5 +1,4 @@
 import play.core.PlayVersion
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
@@ -16,21 +15,21 @@ lazy val scoverageSettings = {
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "bootstrap-frontend-play-27" % "5.3.0",
-  "uk.gov.hmrc" %% "play-ui" % "9.2.0-play-27",
-  "uk.gov.hmrc" %% "govuk-template" % "5.66.0-play-27",
-  "com.typesafe.play" %% "play-json-joda" % "2.9.2",
-  "com.typesafe.akka" %% "akka-stream" % "2.6.14",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.6.14",
-  "com.typesafe.akka" %% "akka-testkit" % "2.6.14"
+  "uk.gov.hmrc" %% "bootstrap-frontend-play-27" % "2.24.0",
+  "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-27",
+  "uk.gov.hmrc" %% "govuk-template" % "5.63.0-play-27",
+  "uk.gov.hmrc" %% "auth-client" % "3.0.0-play-27",
+  "com.typesafe.play" %% "play-json-joda" % "2.9.0",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.8",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.6.8"
 )
 
 def test(scope: String) = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.10.0-play-26" % scope,
-  "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.8" % scope,
   "org.mockito" % "mockito-all" % "2.0.2-beta" % scope,
   "org.jsoup" % "jsoup" % "1.13.1" % scope
 )
@@ -46,8 +45,11 @@ lazy val root = (project in file("."))
     PlayKeys.playDefaultPort := 9390,
     majorVersion := 0,
     scalaVersion := "2.12.12",
-    resolvers ++= Seq(
+    resolvers := Seq(
+      Resolver.bintrayRepo("hmrc", "releases"),
+      Resolver.bintrayRepo("hmrc", "release-candidates"),
       Resolver.typesafeRepo("releases"),
+      Resolver.jcenterRepo
     ),
     libraryDependencies ++= compile ++ test("test") ++ test("it"),
     libraryDependencies ++= Seq(
@@ -57,8 +59,6 @@ lazy val root = (project in file("."))
     scalacOptions += "-P:silencer:pathFilters=target/.*",
     publishingSettings,
     scoverageSettings)
-  .settings(defaultSettings(): _*)
-  .settings(integrationTestSettings())
   .configs(IntegrationTest)
   .settings(
     Keys.fork in IntegrationTest := false,
@@ -68,3 +68,4 @@ lazy val root = (project in file("."))
   )
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .disablePlugins(JUnitXmlReportPlugin)
+inConfig(IntegrationTest)(Defaults.itSettings)

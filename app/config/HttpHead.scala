@@ -16,7 +16,7 @@
 
 package config
 
-import java.net.{URL, URLEncoder}
+import java.net.URLEncoder
 
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpVerbs.{HEAD => HEAD_VERB}
@@ -27,34 +27,39 @@ import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeadHttpTransport {
-  def doHead(url: String, headers: Seq[(String, String)])
-            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+  def doHead(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
+}
+
+trait HttpTransport extends GetHttpTransport {
 }
 
 trait CoreHead {
-  def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
+  def HEAD[A](url: String)(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
 
-  def HEAD[A](url: String, queryParams: Seq[(String, String)], headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
+  def HEAD[A](url: String, queryParams: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
 }
 
 trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
 
-  override def doHead(url: String, headers: Seq[(String, String)])
-                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    buildRequest(url, headers).head().map(WSHttpResponse(_))
+  override def doHead(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    buildRequest(url).head().map(new WSHttpResponse(_))
+  }
+
 }
 
 trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks {
 
-  override def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
+  override def HEAD[A](url: String)(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
     withTracing(HEAD_VERB, url) {
 
-      val httpResponse = doHead(url, headers)
-      executeHooks(HEAD_VERB, new URL(url), headers, None, httpResponse)
+      val httpResponse = doHead(url)
+      executeHooks(url, HEAD_VERB, None, httpResponse)
       mapErrors(HEAD_VERB, url, httpResponse).map(response => rds.read(HEAD_VERB, url, response))
     }
 
-  override def HEAD[A](url: String, queryParams: Seq[(String, String)], headers: Seq[(String, String)])(
+  override def HEAD[A](url: String, queryParams: Seq[(String, String)])(
     implicit rds: HttpReads[A],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[A] = {
@@ -65,7 +70,7 @@ trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with Connec
         s"${this.getClass}.HEAD(url, queryParams)",
         "Query parameters must be provided as a Seq of tuples to this method")
     }
-    HEAD(url + queryString, headers)
+    HEAD(url + queryString)
   }
 
   private def makeQueryString(queryParams: Seq[(String, String)]) = {

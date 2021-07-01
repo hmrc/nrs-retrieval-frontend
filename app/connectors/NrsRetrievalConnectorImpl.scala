@@ -16,21 +16,24 @@
 
 package connectors
 
-import config.{AppConfig, Auditable, WSHttpT}
-import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
-import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
-import play.api.Logger
-import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.HeaderNames.explicitlyIncludedHeaders
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-
 import javax.inject.{Inject, Singleton}
+import play.api.{Environment, Logger}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import config.{AppConfig, Auditable, WSHttpT}
+import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
+import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
+import play.api.libs.ws.{WSClient, WSResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.Future
 
 @Singleton
-class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
-                                         (implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
+class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
+                                          val http: WSHttpT,
+                                          val auditable: Auditable,
+                                          ws: WSClient,
+                                          implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
+
   val logger: Logger = Logger(this.getClass)
 
   override def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
@@ -43,9 +46,10 @@ class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
         .map { r => r }
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
-          case e if e.getMessage.contains("401") =>
+          case e if e.getMessage.contains("401") => {
             auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, "Unauthorized", path))
             throw e
+          }
         }
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
@@ -67,21 +71,18 @@ class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
   override def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
-    http.HEAD(path ,allHeaders)
+    http.HEAD(path)
   }
-
-  private def allHeaders(implicit hc: HeaderCarrier) =
-    hc.headers(explicitlyIncludedHeaders) ++ hc.extraHeaders ++ hc.otherHeaders
 
   override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId")
-
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     for{
-      get <- http.GETRaw(path, allHeaders)
+      get <- ws.url(path).withHttpHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
-    } yield get
+    }yield get
   }
+
 }

@@ -34,9 +34,9 @@ class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
   val logger: Logger = Logger(this.getClass)
 
   override def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
-    logger.info(s"Search for ${query.searchText}")
-
     val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
+
+    logger.info(s"Search for ${query.searchText} with path $path")
 
     for{
       get <- http.GET[Seq[NrsSearchResult]](path)
@@ -53,9 +53,9 @@ class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
   }
 
   override def submitRetrievalRequest(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Submit a retrieval request for vault: $vaultName, archive: $archiveId")
-
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"
+
+    logger.info(s"Submit a retrieval request for vault: $vaultName, archive: $archiveId with path $path")
 
     for {
       post <- http.POST[String, HttpResponse](path, "", Seq.empty)
@@ -65,8 +65,8 @@ class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
   }
 
   override def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
+    logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId with path $path")
     http.HEAD(path ,allHeaders)
   }
 
@@ -74,9 +74,9 @@ class NrsRetrievalConnectorImpl @Inject()(http: WSHttpT, auditable: Auditable)
     hc.headers(explicitlyIncludedHeaders) ++ hc.extraHeaders ++ hc.otherHeaders
 
   override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
-    logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId")
-
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
+
+    logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId with path $path")
 
     for{
       get <- http.GETRaw(path, allHeaders)

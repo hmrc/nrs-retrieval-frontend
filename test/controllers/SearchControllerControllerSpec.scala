@@ -70,7 +70,20 @@ class SearchControllerControllerSpec extends UnitSpec
       status(result) shouldBe Status.OK
     }
   }
-
+  "showSearchPage for IRR" should {
+    "return 200" in {
+      val result = controller.showSearchPage(notableEventType = "interest-restriction-return")(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
+  "searchForm for IRR" should {
+    "return no errors for IRR valid data" in {
+      val postData = Json.obj("searchText" -> "someSearchText",
+        "notableEventType" -> "interest-restriction-return")
+      val validatedForm = FormMappings.searchForm.bind(postData)
+      validatedForm.errors shouldBe empty
+    }
+  }
   "searchForm" should {
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",

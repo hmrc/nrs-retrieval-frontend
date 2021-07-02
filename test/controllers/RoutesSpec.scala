@@ -53,8 +53,8 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
       val text: String = result.map(contentAsString(_)).get
       text should include(Messages(s"search.page.$notableEventType.header.lbl"))
-      text should not include(Messages("search.results.notfound.lbl"))
-      text should not include(Messages("search.results.results.lbl"))
+      text should not include Messages("search.results.notfound.lbl")
+      text should not include Messages("search.results.results.lbl")
 
     }
   }
@@ -87,7 +87,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
 
         val text: String = result.map(contentAsString(_)).get
         text should include(Messages(s"search.page.$notableEventType.header.lbl"))
-        text should not include (Messages("search.results.notfound.lbl"))
+        text should not include Messages("search.results.notfound.lbl")
         text should include(Messages("search.results.results.lbl"))
       }
     }
@@ -154,6 +154,7 @@ class RoutesSpec extends GuiceAppSpec with BaseSpec with NrsSearchFixture {
         }
       }
     }
+  }
 
 
     "GET /status/:vaultId/:archiveId" should {

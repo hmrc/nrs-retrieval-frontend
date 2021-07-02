@@ -21,7 +21,7 @@ import akka.stream.Materializer
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.DefaultMessagesApi
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier

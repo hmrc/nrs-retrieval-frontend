@@ -31,4 +31,5 @@ test-result
 tmp
 .idea_modules
 bin
-.bsp/
+/.bsp
+

@@ -20,7 +20,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import config.AppConfig
 import connectors.NrsRetrievalConnector
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsJson

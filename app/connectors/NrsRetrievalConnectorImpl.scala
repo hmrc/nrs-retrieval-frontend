@@ -46,10 +46,9 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
         .map { r => r }
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
-          case e if e.getMessage.contains("401") => {
+          case e if e.getMessage.contains("401") =>
             auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, "Unauthorized", path))
             throw e
-          }
         }
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
@@ -69,20 +68,22 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
   }
 
   override def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
+
+    logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId, path: $path")
+
     http.HEAD(path)
   }
 
   override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
-    logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId")
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
+
+    logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
     for{
       get <- ws.url(path).withHttpHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
-    }yield get
+    } yield get
   }
-
 }

@@ -122,18 +122,15 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
     nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map { response =>
       response.status match {
-        case OK => {
+        case OK =>
           logger.info(s"Retrieval request complete for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.complete)
-        }
-        case NOT_FOUND => {
+        case NOT_FOUND =>
           logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
           Ok(CompletionStatus.incomplete)
-        }
-        case _ => {
+        case _ =>
           logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.failed)
-        }
       }
     } recoverWith {
       case e: Exception =>
@@ -145,10 +142,9 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Request retrieval for $vaultName, $archiveId")
     authWithStride("Download", { user =>
-      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-        case _ =>
-          logger.info(s"Retrieval accepted for $vaultName, $archiveId")
-          Accepted(CompletionStatus.incomplete)
+      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map { _ =>
+        logger.info(s"Retrieval accepted for $vaultName, $archiveId")
+        Accepted(CompletionStatus.incomplete)
       } recoverWith {
         case e: AskTimeoutException =>
           logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
@@ -158,13 +154,21 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   }
 
   def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Request download of $vaultName, $archiveId")
+    val messagePrefix = s"Request download of $vaultName, $archiveId"
+
+    logger.info(messagePrefix)
+
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        logger.info(s"Download of $vaultName, $archiveId")
-        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.headers): _*)
+        val bytes = response.bodyAsBytes
+
+        // log response size rather than the content as this might contain sensitive information
+        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream.")
+
+        Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
       }.recoverWith { case e =>
-        logger.info(s"Download of $vaultName, $archiveId failed with $e")
+        logger.error(s"$messagePrefix failed with $e")
+
         Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
       }
     })

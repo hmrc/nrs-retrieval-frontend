@@ -23,6 +23,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.ws.WSClient
 import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
 
 trait IntegrationSpec extends WordSpecLike
@@ -39,9 +40,13 @@ trait IntegrationSpec extends WordSpecLike
   val defaultConfiguration: Map[String, Any] = Map[String, Any](
     "microservice.services.nrs-retrieval.port" -> wireMockPort,
     "auditing.enabled" -> false,
-    "metrics.jvm" -> false)
+    "metrics.jvm" -> false,
+    "stride.enabled" -> false)
 
   def configuration: Map[String, Any] = defaultConfiguration
 
   lazy val injector: Injector = fakeApplication().injector
+  lazy val wsClient: WSClient = injector.instanceOf[WSClient]
+
+  lazy val serviceRoot = s"http://localhost:$port/nrs-retrieval"
 }

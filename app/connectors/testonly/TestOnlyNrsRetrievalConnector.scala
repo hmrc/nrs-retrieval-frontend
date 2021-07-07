@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package connectors.testonly
 
-class StartControllerControllerSpec extends ControllerSpec {
-  private lazy val controller =
-    new StartController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[views.html.start_page], error_template)
+import models.AuthorisedUser
+import models.testonly.ValidateDownloadResult
+import uk.gov.hmrc.http.HeaderCarrier
 
-  "GET /" should {
-    "return 200" in {
-      val result = controller.showStartPage(getRequest)
-      status(result) shouldBe OK
-    }
-  }
+import scala.concurrent.Future
+
+trait TestOnlyNrsRetrievalConnector {
+  def validateDownload(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[ValidateDownloadResult]
 }

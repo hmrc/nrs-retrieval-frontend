@@ -20,7 +20,9 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import config.MicroserviceAudit
+import connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
 import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
+
 import javax.inject.{Inject, Singleton}
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
@@ -41,8 +43,8 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
+    bind(classOf[TestOnlyNrsRetrievalConnector]).to(classOf[TestOnlyNrsRetrievalConnectorImpl])
     bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
-
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
   }
 }

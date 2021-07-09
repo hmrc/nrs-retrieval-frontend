@@ -31,7 +31,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
   }
 
   "POST /nrs-retrieval/test-only/validate-download" should {
-    "return NOT_FOUND" when {
+    "display the validate-download page" when {
       "the default router is used" in {
         validate(postValidateDownloadRequest())
       }

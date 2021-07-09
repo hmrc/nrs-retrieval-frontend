@@ -30,7 +30,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.contentAsString
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.Future

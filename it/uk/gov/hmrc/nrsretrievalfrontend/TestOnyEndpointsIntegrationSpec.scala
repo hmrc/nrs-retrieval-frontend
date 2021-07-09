@@ -3,21 +3,37 @@ package uk.gov.hmrc.nrsretrievalfrontend
 import play.api.libs.ws.WSResponse
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
-  def validateDownloadRequest(): WSResponse =
+  def getValidateDownloadRequest(): WSResponse =
     wsClient.url(s"$serviceRoot/test-only/validate-download").get.futureValue
+
+  def postValidateDownloadRequest(): WSResponse =
+    wsClient
+      .url(s"$serviceRoot/test-only/validate-download")
+      .post(Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))).futureValue
 
   override val configuration: Map[String, Any] =
     defaultConfiguration + ("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
 }
 
 class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
+  private def validate(response: WSResponse) = {
+    response.status shouldBe OK
+    response.contentType shouldBe "text/html; charset=UTF-8"
+    response.body.contains("Test-only validate download") shouldBe true
+  }
+
   "GET /nrs-retrieval/test-only/validate-download" should {
     "display the validate-download page" when {
       "the testOnlyDoNotUseInAppConf router is used" in {
-        val response = validateDownloadRequest()
-        response.status shouldBe OK
-        response.contentType shouldBe "text/html; charset=UTF-8"
-        response.body.contains("Test-only validate download") shouldBe true
+        validate(getValidateDownloadRequest())
+      }
+    }
+  }
+
+  "POST /nrs-retrieval/test-only/validate-download" should {
+    "return NOT_FOUND" when {
+      "the default router is used" in {
+        validate(postValidateDownloadRequest())
       }
     }
   }
@@ -29,7 +45,15 @@ class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegratio
   "GET /nrs-retrieval/test-only/validate-download" should {
     "return NOT_FOUND" when {
       "the default router is used" in {
-        validateDownloadRequest().status shouldBe NOT_FOUND
+        getValidateDownloadRequest().status shouldBe NOT_FOUND
+      }
+    }
+  }
+
+  "POST /nrs-retrieval/test-only/validate-download" should {
+    "return NOT_FOUND" when {
+      "the default router is used" in {
+        postValidateDownloadRequest().status shouldBe NOT_FOUND
       }
     }
   }

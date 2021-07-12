@@ -59,6 +59,10 @@ class ValidateDownloadControllerSpec extends ControllerSpec with MockitoSugar {
     content.getElementById("archiveId").tag().getName shouldBe "input"
     content.getElementById("submitButton").text() shouldBe "test-only.validate-download.form.submit"
 
+    val form = content.getElementsByClass("form")
+    form.attr("action") shouldBe routes.ValidateDownloadController.submitValidateDownload().url
+    form.attr("method") shouldBe "POST"
+
     content
   }
 
@@ -89,7 +93,6 @@ class ValidateDownloadControllerSpec extends ControllerSpec with MockitoSugar {
       val content = validateResponse(eventualResult)
 
       content.getElementById("resultsHeader").text() shouldBe "test-only.validate-download.results.title"
-      content.getElementById("status").text() shouldBe OK.toString
       content.getElementById("status").text() shouldBe OK.toString
       content.getElementById("numberOfZippedFiles").text() shouldBe files.size.toString
       content.getElementById(file1).text() shouldBe file1

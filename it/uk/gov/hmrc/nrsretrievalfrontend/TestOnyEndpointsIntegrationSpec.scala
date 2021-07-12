@@ -12,7 +12,7 @@ trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
       .post(Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))).futureValue
 
   override val configuration: Map[String, Any] =
-    defaultConfiguration + ("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+    defaultConfiguration + ("application.router" -> "testOnlyDoNotUseInAppConf.Routes")
 }
 
 class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {

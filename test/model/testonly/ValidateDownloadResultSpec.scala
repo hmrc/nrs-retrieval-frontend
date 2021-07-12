@@ -33,7 +33,7 @@ class ValidateDownloadResultSpec extends UnitSpec with MockitoSugar with Status 
 
   "ValidateDownloadResultSpec.apply" should {
     "transform a WSResponse" in {
-      val file = new File(getClass.getResource("/resources/604958ae-973a-4554-9e4b-fed3025dd845.zip").getFile)
+      val file = new File(getClass.getResource("/resources/submission.zip").getFile)
       val bytes = ByteString(readAllBytes(file.toPath))
 
       when(wsResponse.status).thenReturn(OK)

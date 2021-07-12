@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.testonly
 
-class StartControllerControllerSpec extends ControllerSpec {
-  private lazy val controller =
-    new StartController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[views.html.start_page], error_template)
+import models.testonly.ValidateDownloadRequest
+import play.api.data.Form
+import play.api.data.Forms.{mapping, text}
 
-  "GET /" should {
-    "return 200" in {
-      val result = controller.showStartPage(getRequest)
-      status(result) shouldBe OK
-    }
-  }
+object FormMappings {
+  val vaultName = "vaultName"
+  val archiveId = "archiveId"
+
+  val validateDownloadForm: Form[ValidateDownloadRequest] =
+    Form(mapping(vaultName -> text, archiveId -> text)(ValidateDownloadRequest.apply)(ValidateDownloadRequest.unapply))
 }

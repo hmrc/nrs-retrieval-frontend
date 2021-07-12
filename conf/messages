@@ -80,3 +80,17 @@ error.page.title=Service unavailable
 error.page.heading=Service unavailable
 error.page.message=You will be able to use the service later.
 
+################################## Test-only Validate Download Page ####################################################
+test-only.validate-download.page.header=Test-only validate download
+test-only.validate-download.page.info=Validate a submission download
+test-only.validate-download.form.vaultName=Vault name
+test-only.validate-download.form.vaultName.error=Enter a vault name
+test-only.validate-download.form.archiveId=Archive id
+test-only.validate-download.form.archiveId.error=Enter an archive id
+test-only.validate-download.form.submit=Submit
+test-only.validate-download.results.title=Results
+test-only.validate-download.results.status=Status
+test-only.validate-download.results.numberOfZippedBytes=Number of zipped bytes
+test-only.validate-download.results.numberOfZippedFiles=Number of zipped files
+test-only.validate-download.results.files=Files
+test-only.validate-download.results.headers=Headers

@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package controllers
+package models.testonly
 
-class StartControllerControllerSpec extends ControllerSpec {
-  private lazy val controller =
-    new StartController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[views.html.start_page], error_template)
-
-  "GET /" should {
-    "return 200" in {
-      val result = controller.showStartPage(getRequest)
-      status(result) shouldBe OK
-    }
-  }
-}
+case class ValidateDownloadRequest(vaultName: String, archiveId: String)

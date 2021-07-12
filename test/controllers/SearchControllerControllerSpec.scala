@@ -16,66 +16,43 @@
 
 package controllers
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.stream.Materializer
-import config.AppConfig
-import connectors.NrsRetrievalConnector
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status
-import play.api.libs.json.{JsValue, Json}
+import akka.actor.ActorRef
+import play.api.libs.json.Json
+import play.api.libs.json.Json.parse
 import play.api.mvc.AnyContentAsJson
-import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import play.api.{Configuration, Environment}
-import support.fixtures.{NrsSearchFixture, SearchFixture, StrideFixture}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import play.api.test.FakeRequest
+import support.fixtures.{NrsSearchFixture, SearchFixture}
 
-import scala.concurrent.Future
+class SearchControllerControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
+  private val getRequestWithJsonBody: FakeRequest[AnyContentAsJson] =
+    getRequest.withJsonBody(
+      parse("""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}"""))
 
-class SearchControllerControllerSpec extends UnitSpec
-  with WithFakeApplication
-  with MockitoSugar
-  with SearchFixture
-  with NrsSearchFixture
-  with StrideFixture
-  with StubControllerComponentsFactory {
-
-  private val jsonBody: JsValue = Json.parse("""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
-  private implicit val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest("GET", "/").withJsonBody(jsonBody)
-
-  private val env = Environment.simple()
-  private val configuration = Configuration.load(env)
-
-  implicit val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
-  private val mockActorRef = mock[ActorRef]
-  private val mockNRC = mock[NrsRetrievalConnector]
-  implicit val mockSystem: ActorSystem = mock[ActorSystem]
-  implicit val mockMaterializer: Materializer = mock[Materializer]
-  private val searchPage = fakeApplication.injector.instanceOf[views.html.search_page]
-  private val errorPage = fakeApplication.injector.instanceOf[views.html.error_template]
-
-  private class TestControllerAuthSearch(stubbedRetrievalResult: Future[_])
-    extends SearchController(mockActorRef, mockAuthConn, mockNRC, searchResultUtils, stubMessagesControllerComponents(), searchPage, errorPage) {
-
-    override val authConnector = authConnOk(stubbedRetrievalResult)
-
-  }
-
-  private val controller = new TestControllerAuthSearch(authResultOk)
-
+  private lazy val controller = new SearchController(
+    mock[ActorRef],
+    mockAuthConnector,
+    nrsRetrievalConnector,
+    searchResultUtils,
+    stubMessagesControllerComponents(),
+    injector.instanceOf[views.html.search_page],
+    error_template)
 
   "showSearchPage" should {
-    "return 200" in {
-      val result = controller.showSearchPage(notableEventType = "vat-return")(fakeRequest)
-      status(result) shouldBe Status.OK
+    "return 200" when {
+      "a vat-return is specified" in {
+        status(controller.showSearchPage(notableEventType = "vat-return")(getRequestWithJsonBody)) shouldBe OK
+      }
+
+      "a interest-restriction-return is specified" in {
+        status(controller.showSearchPage(notableEventType = "interest-restriction-return")(getRequestWithJsonBody)) shouldBe OK
+      }
+    }
+
+    "a for PPT return is specified"  in {
+      status(controller.showSearchPage(notableEventType = "ppt-subscription")(getRequestWithJsonBody)) shouldBe OK
     }
   }
-  "showSearchPage for IRR" should {
-    "return 200" in {
-      val result = controller.showSearchPage(notableEventType = "interest-restriction-return")(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-  }
+
   "searchForm for IRR" should {
     "return no errors for IRR valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
@@ -84,12 +61,7 @@ class SearchControllerControllerSpec extends UnitSpec
       validatedForm.errors shouldBe empty
     }
   }
-  "showSearchPage for PPT" should {
-    "return 200" in {
-      val result = controller.showSearchPage(notableEventType = "ppt-subscription")(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-  }
+
   "searchForm for PPT" should {
     "return no errors for IRR valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
@@ -98,6 +70,7 @@ class SearchControllerControllerSpec extends UnitSpec
       validatedForm.errors shouldBe empty
     }
   }
+
   "searchForm" should {
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
@@ -105,11 +78,11 @@ class SearchControllerControllerSpec extends UnitSpec
       val validatedForm = FormMappings.searchForm.bind(postData)
       validatedForm.errors shouldBe empty
     }
+
     "create a header carrier with X-API-Key when one exists in config" in {
-      controller.hc.headers should contain ("X-API-Key" -> appConfig.xApiKey)
+      controller.hc(getRequestWithJsonBody).headers should contain ("X-API-Key" -> appConfig.xApiKey)
     }
   }
-
 }
 
 

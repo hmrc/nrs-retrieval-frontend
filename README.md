@@ -28,4 +28,16 @@ In order to run the application and all of it's dependencies using service manag
 You should then be able to start the application using:
 
 > ```sm --start NRS_RETRIEVAL_ALL -f```
- 
+
+### Test-only endpoints
+
+There is a test-only page that can be used to validate the download functionality and the contents of an available 
+zip to download.
+
+To use this, run the service using the `./run-with-test-only-endpoints.sh` script. 
+
+Navigate to
+
+  `GET  /nrs-retrieval/test-only/validate-download`
+
+and enter the archive name and vault id of the download to verify.

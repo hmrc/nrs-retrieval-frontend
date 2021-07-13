@@ -25,27 +25,36 @@ import play.api.http.Status
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.play.test.UnitSpec
 
-import java.io.File
-import java.nio.file.Files.readAllBytes
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
+import java.util.zip.{ZipEntry, ZipOutputStream}
 
 class ValidateDownloadResultSpec extends UnitSpec with MockitoSugar with Status {
   private val wsResponse = mock[WSResponse]
 
   "ValidateDownloadResultSpec.apply" should {
     "transform a WSResponse" in {
-      val file = new File(getClass.getResource("/resources/604958ae-973a-4554-9e4b-fed3025dd845.zip").getFile)
-      val bytes = ByteString(readAllBytes(file.toPath))
+      val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())
+      val byteArrayOutputStream = new ByteArrayOutputStream()
+      val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
+      val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+
+      fileNames.foreach { fileName =>
+        val zipEntry: ZipEntry = new ZipEntry(fileName)
+        zipOutputStream.putNextEntry(zipEntry)
+        zipOutputStream.write(output)
+        zipOutputStream.closeEntry()
+      }
+
+      val bytes = ByteString(byteArrayOutputStream.toByteArray)
 
       when(wsResponse.status).thenReturn(OK)
       when(wsResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
       when(wsResponse.bodyAsBytes).thenReturn(bytes)
 
-      ValidateDownloadResult(wsResponse) shouldBe
-        ValidateDownloadResult(
-          OK,
-          bytes.length,
-          Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m"),
-          Seq(("foo", "bar")) )
+      ValidateDownloadResult(wsResponse) shouldBe ValidateDownloadResult(OK, bytes.length, fileNames, Seq(("foo", "bar")) )
+
+      zipOutputStream.close()
     }
   }
 }

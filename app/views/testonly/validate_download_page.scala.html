@@ -79,7 +79,7 @@
                 <td id="zipSize">@{result.zipSize}</td>
             </tr>
             <tr>
-                <td>@Messages("test-only.validate-download.results.numberOfZippedFiles")s</td>
+                <td>@Messages("test-only.validate-download.results.numberOfZippedFiles")</td>
                 <td id="numberOfZippedFiles">@{result.files.size}</td>
             </tr>
         </table>
@@ -111,7 +111,7 @@
             </thead>
             @result.headers.map{ header =>
                 <tr>
-                    <td>Header: @header._1</td>
+                    <td>@header._1</td>
                     <td id="@header._1">@header._2</td>
                 </tr>
             }

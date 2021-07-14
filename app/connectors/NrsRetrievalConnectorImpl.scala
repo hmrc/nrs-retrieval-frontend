@@ -16,23 +16,25 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
-import play.api.{Environment, Logger}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import config.{AppConfig, Auditable, WSHttpT}
-import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
+import config.{AppConfig, Auditable}
+import http.WSHttpT
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
-import play.api.libs.ws.{WSClient, WSResponse}
-import scala.concurrent.ExecutionContext.Implicits.global
+import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
+import play.api.Logger
+import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
+class NrsRetrievalConnectorImpl @Inject()(//val environment: Environment,
                                           val http: WSHttpT,
                                           val auditable: Auditable,
-                                          ws: WSClient,
-                                          implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
+                                          //ws: WSClient,
+                                          //implicit val appConfig: AppConfig
+                                         )(implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
 
   val logger: Logger = Logger(this.getClass)
 
@@ -81,7 +83,7 @@ class NrsRetrievalConnectorImpl @Inject()(val environment: Environment,
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
     for{
-      get <- ws.url(path).withHttpHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      get <- http.GETRaw(path)//..withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield get

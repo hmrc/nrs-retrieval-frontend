@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package config
+package http
 
-import java.net.URLEncoder
-
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpVerbs.{HEAD => HEAD_VERB}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.http.logging.ConnectionTracing
 import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 
+import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeadHttpTransport {
   def doHead(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
-}
-
-trait HttpTransport extends GetHttpTransport {
 }
 
 trait CoreHead {

@@ -25,7 +25,9 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse, UpstreamErr
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
+import java.io.ByteArrayInputStream
 import java.time.ZonedDateTime
+import java.util.zip.ZipInputStream
 
 class NrsRetrievalContractSpec extends IntegrationSpec {
   private implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -121,7 +123,22 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
     "return OK" when {
       "the retrieval service returns OK" in {
         givenGetSubmissionBundlesReturns(OK)
-        submissionBundle().status shouldBe OK
+
+        val response = submissionBundle()
+        val body = response.bodyAsBytes
+        val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
+        val zippedFileNames: Seq[String] = Stream.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
+
+        response.status shouldBe OK
+        zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+        response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
+        response.header("Content-Length") shouldBe Some(s"${body.size}")
+        response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
+        response.header("Content-Type") shouldBe Some("application/octet-stream")
+        response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
+        response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
+
+        zipInputStream.close()
       }
     }
   }

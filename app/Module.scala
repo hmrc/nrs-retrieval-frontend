@@ -19,9 +19,9 @@ import akka.actor.ActorSystem
 import com.google.inject.AbstractModule
 import com.google.inject.name.Named
 import com.typesafe.config.Config
-import config.MicroserviceAudit
 import connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
 import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
+import http.MicroserviceAudit
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.concurrent.AkkaGuiceSupport

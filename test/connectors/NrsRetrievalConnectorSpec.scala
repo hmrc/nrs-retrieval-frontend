@@ -18,10 +18,10 @@ package connectors
 
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Guice, Injector}
-import config.{AppConfig, Auditable, MicroserviceAudit, WSHttpT}
-import javax.inject.Provider
-import models.{AuthorisedUser, NrsSearchResult}
+import config.{AppConfig, Auditable}
+import http.{MicroserviceAudit, WSHttpT}
 import models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
+import models.{AuthorisedUser, NrsSearchResult}
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
@@ -29,16 +29,55 @@ import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Environment
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{WSClient, WSResponse}
 import support.fixtures.{Infrastructure, NrsSearchFixture}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.test.UnitSpec
 
+import javax.inject.Provider
 import scala.concurrent.Future
 
 class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
+  override protected def beforeEach(): Unit = {
+    reset(mockAuditConnector)
+    reset(mockAuditable)
+  }
+
+  private val mockWsHttp = mock[WSHttpT]
+  private val mockEnvironemnt = mock[Environment]
+  private val mockHttpResponse = mock[HttpResponse]
+  private val mockWSResponse = mock[WSResponse]
+  private val mockAuditConnector = mock[AuditConnector]
+  private val mockAuditable = mock[Auditable]
+  private val mockWSClient = mock[WSClient]
+  when(mockHttpResponse.body).thenReturn("Some Text")
+
+  private val testModule = new AbstractModule {
+    override def configure(): Unit = {
+      bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
+      bind(classOf[WSHttpT]).toInstance(mockWsHttp)
+      bind(classOf[Environment]).toInstance(mockEnvironemnt)
+      bind(classOf[AppConfig]).toInstance(mockAppConfig)
+      bind(classOf[Auditable]).toInstance(mockAuditable)
+      bind(classOf[AuditConnector]).toInstance(mockAuditConnector)
+      bind(classOf[WSClient]).toInstance(mockWSClient)
+      bind(classOf[Audit]).to(classOf[MicroserviceAudit])
+      bind(classOf[String]).annotatedWith(Names.named("appName")).toProvider(AppNameProvider)
+    }
+
+    private object AppNameProvider extends Provider[String] {
+      def get(): String = "nrs-retrieval"
+    }
+  }
+
+  private val injector: Injector = Guice.createInjector(testModule)
+  private val connector = injector.getInstance(classOf[NrsRetrievalConnector])
+  private val testAuditId = "1"
+  private val testArchiveId = "2"
+  private val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
+
 
   "search" should {
     "make a get call to /submission-metadata returning data" in {
@@ -123,80 +162,12 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "getSubmissionBundle" should {
     "make a get call to /submission-bundles" in {
-      when(mockWsHttp.GET[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
-      val mockWSRequest2 = mock[WSRequest]
-      when(mockWSRequest2.get).thenReturn(Future.successful(mockWSResponse))
+      when(mockWsHttp.GETRaw(any())(any(), any())).thenReturn(Future.successful(mockWSResponse))
       when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
-      when(mockWSResponse.body).thenReturn("Some Text")
-      val mockWSRequest1 = mock[WSRequest]
-      when(mockWSRequest1.withHttpHeaders(any())).thenReturn(mockWSRequest2)
-      when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
+      when(mockWSResponse.body).thenReturn("Some zipped bytes")
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.getSubmissionBundle(testAuditId, testArchiveId, testUser)).body shouldBe "Some Text"
+      await(connector.getSubmissionBundle(testAuditId, testArchiveId, testUser)).body shouldBe "Some zipped bytes"
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
     }
-
-    "make a get call to /submission-bundles and retrieve nr-submission-id from header" in {
-      when(mockWsHttp.GET[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
-      val mockWSRequest2 = mock[WSRequest]
-      when(mockWSRequest2.get).thenReturn(Future.successful(mockWSResponse))
-      when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
-      when(mockWSResponse.body).thenReturn("Some Text")
-      val mockWSRequest1 = mock[WSRequest]
-      when(mockWSRequest1.withHttpHeaders(any())).thenReturn(mockWSRequest2)
-      when(mockWSClient.url(any())).thenReturn(mockWSRequest1)
-      when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenAnswer(new Answer[Future[Unit]](){
-        override def answer(invocationOnMock: InvocationOnMock): Future[Unit] = {
-          if(invocationOnMock.getArgumentAt(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId){
-            Future.successful(())
-          }else{
-            Future.failed(new Throwable())
-          }
-        }
-      })
-      await(connector.submitRetrievalRequest(testAuditId, testArchiveId, testUser)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
-      verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])(any())
-    }
   }
-
-  override protected def beforeEach(): Unit = {
-    reset(mockAuditConnector)
-    reset(mockAuditable)
-  }
-
-  private val mockWsHttp = mock[WSHttpT]
-  private val mockEnvironemnt = mock[Environment]
-  private val mockHttpResponse = mock[HttpResponse]
-  private val mockWSResponse = mock[WSResponse]
-  private val mockAuditConnector = mock[AuditConnector]
-  private val mockAuditable = mock[Auditable]
-  private val mockWSClient = mock[WSClient]
-  when(mockHttpResponse.body).thenReturn("Some Text")
-
-  private val testModule = new AbstractModule {
-    override def configure(): Unit = {
-      bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
-      bind(classOf[WSHttpT]).toInstance(mockWsHttp)
-      bind(classOf[Environment]).toInstance(mockEnvironemnt)
-      bind(classOf[AppConfig]).toInstance(mockAppConfig)
-      bind(classOf[Auditable]).toInstance(mockAuditable)
-      bind(classOf[AuditConnector]).toInstance(mockAuditConnector)
-      bind(classOf[WSClient]).toInstance(mockWSClient)
-      bind(classOf[Audit]).to(classOf[MicroserviceAudit])
-      bind(classOf[String]).annotatedWith(Names.named("appName")).toProvider(AppNameProvider)
-    }
-
-    private object AppNameProvider extends Provider[String] {
-      def get(): String = "nrs-retrieval"
-    }
-  }
-
-  private val injector: Injector = Guice.createInjector(testModule)
-  private val connector = injector.getInstance(classOf[NrsRetrievalConnector])
-
-  private val testAuditId = "1"
-  private val testArchiveId = "2"
-
-  private val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
-
 }

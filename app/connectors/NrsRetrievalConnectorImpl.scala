@@ -29,13 +29,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class NrsRetrievalConnectorImpl @Inject()(//val environment: Environment,
-                                          val http: WSHttpT,
-                                          val auditable: Auditable,
-                                          //ws: WSClient,
-                                          //implicit val appConfig: AppConfig
-                                         )(implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
-
+class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Auditable)
+                                         (implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
   val logger: Logger = Logger(this.getClass)
 
   override def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
@@ -83,7 +78,7 @@ class NrsRetrievalConnectorImpl @Inject()(//val environment: Environment,
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
     for{
-      get <- http.GETRaw(path)//..withHeaders(hc.headers ++ hc.extraHeaders ++ hc.otherHeaders: _*).get
+      get <- http.GETRaw(path)
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield get

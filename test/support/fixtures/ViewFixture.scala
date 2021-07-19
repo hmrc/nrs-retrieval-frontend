@@ -17,25 +17,20 @@
 package support.fixtures
 
 import org.jsoup.Jsoup
-import org.scalatest.MustMatchers
+import org.jsoup.nodes.{Document, Element}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 
-trait ViewFixture extends MustMatchers {
-  implicit val request = FakeRequest()
+trait ViewFixture {
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   def view: HtmlFormat.Appendable
-  lazy val html = view.body
-  lazy val doc = Jsoup.parse(html)
-  lazy val form = doc.getElementsByTag("form").first()
-  lazy val heading = doc.getElementsByTag("h1").first()
-  lazy val subHeading = doc.getElementsByClass("heading-secondary").first()
-  lazy val errorSummary = doc.getElementsByClass("amls-error-summary").first()
 
-  //  def validateParagraphizedContent(messageKey: String)(implicit messages: Messages): Unit = {
-//    for(p <- Jsoup.parse(messages(messageKey).paragraphize).getElementsByTag("p").asScala) {
-//      doc.body().toString must include(p.text())
-//    }
-//  }
-
+  lazy val html: String = view.body
+  lazy val doc: Document = Jsoup.parse(html)
+  lazy val form: Element = doc.getElementsByTag("form").first()
+  lazy val heading: Element = doc.getElementsByTag("h1").first()
+  lazy val subHeading: Element = doc.getElementsByClass("heading-secondary").first()
+  lazy val errorSummary: Element = doc.getElementsByClass("amls-error-summary").first()
 }

@@ -17,21 +17,23 @@
 package config
 
 import models.audit.NonRepudiationStoreSearch
-import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito._
 import org.mockito.Matchers.any
+import org.mockito.Mockito._
+import org.scalatestplus.mockito.MockitoSugar
+import support.UnitSpec
 import support.fixtures.Infrastructure
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
-import uk.gov.hmrc.play.test.UnitSpec
 
 class AuditableSpec extends UnitSpec with MockitoSugar with Infrastructure {
+  private val appName = "TestAppName"
+  private val mockAudit: Audit = mock[Audit]
+  private val auditable = new Auditable(appName, mockAudit)
 
   "sendDataEvent" should {
     "send a NonRepudiationStoreSearch audit event" in {
       val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", "name", "vatReturnVRN", "nrSubmissionId", "path")
 
-      val func: (DataEvent) => Unit = mock[(DataEvent) => Unit]
+      val func: DataEvent => Unit = mock[DataEvent => Unit]
       when(func.apply(any())).thenReturn(())
       when(mockAudit.sendDataEvent).thenReturn(func)
 
@@ -39,10 +41,4 @@ class AuditableSpec extends UnitSpec with MockitoSugar with Infrastructure {
       verify(mockAudit, times(1)).sendDataEvent
     }
   }
-
-  private val appName = "TestAppName"
-  val mockAudit: Audit = mock[Audit]
-  val mockAuditConnector: AuditConnector = mock[AuditConnector]
-  val audit: Audit = Audit(appName, mockAuditConnector)
-  private val auditable = new Auditable(appName, mockAudit)
 }

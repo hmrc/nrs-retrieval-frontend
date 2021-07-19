@@ -30,16 +30,17 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Environment
 import play.api.libs.ws.{WSClient, WSResponse}
+import support.UnitSpec
 import support.fixtures.{Infrastructure, NrsSearchFixture}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.test.UnitSpec
 
 import javax.inject.Provider
 import scala.concurrent.Future
 
-class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
+class NrsRetrievalConnectorSpec extends UnitSpec
+  with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
   override protected def beforeEach(): Unit = {
     reset(mockAuditConnector)
     reset(mockAuditable)

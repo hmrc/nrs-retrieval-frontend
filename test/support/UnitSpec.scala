@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package model
+package support
 
-import support.UnitSpec
-import support.fixtures.{NrsSearchFixture, SearchFixture}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
-  "fromNrsSearchResult" should {
-    "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe vatSearchResult
-    }
-  }
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{FiniteDuration, _}
 
-  "searchResult" should {
-    "create link text" in {
-      vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
-    }
-  }
+class UnitSpec extends AnyWordSpec with Matchers {
+  implicit val defaultTimeout: FiniteDuration = 5 seconds
+
+  def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 }

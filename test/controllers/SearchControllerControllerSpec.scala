@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.AnyContentAsJson
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 
 class SearchControllerControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {

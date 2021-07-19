@@ -33,7 +33,7 @@ package views
  */
 
 import play.api.i18n.Messages
-import config.AppConfig
+import config.{AppConfig, ViewConfig}
 import controllers.FormMappings
 import models.SearchResult
 import play.api.libs.json.{JsValue, Json}
@@ -41,14 +41,19 @@ import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
 import support.fixtures.{SearchFixture, ViewFixture}
 import views.html._
+import org.scalatest.matchers.must.Matchers._
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 
 class search_pageSpec extends GuiceAppSpec with SearchFixture{
 
-  implicit val appConfig = app.injector.instanceOf[AppConfig]
-  val searchPage: search_page = fakeApplication.injector.instanceOf[views.html.search_page]
+  implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+  implicit val viewConfig: ViewConfig = app.injector.instanceOf[ViewConfig]
 
-  val jsonBody: JsValue = Json.parse("""{"searchKeyName_0": "vrn", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
-  val searchForm = FormMappings.searchForm.bind(jsonBody)
+  private val searchPage = fakeApplication.injector.instanceOf[views.html.search_page]
+  private val jsonBody = Json.parse("""{"searchKeyName_0": "vrn", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
+  private val searchForm = FormMappings.searchForm.bind(jsonBody)
+
   "search page with a valid form only" should {
     "have a matching page title and header" in new SearchPageViewFixture {
       val view: HtmlFormat.Appendable = searchPage(searchForm, None, None)
@@ -98,7 +103,7 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
   }
 
   trait SearchPageViewFixture extends ViewFixture {
-    implicit val requestWithToken = addToken(request)
+    implicit val requestWithToken: FakeRequest[AnyContentAsEmpty.type] = addToken(request)
   }
 
 }

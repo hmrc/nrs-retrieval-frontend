@@ -25,8 +25,8 @@ import org.mockito.internal.stubbing.answers.Returns
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.ws.WSResponse
+import support.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 

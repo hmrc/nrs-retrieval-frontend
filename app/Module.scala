@@ -18,7 +18,7 @@ import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import akka.actor.ActorSystem
 import com.google.inject.AbstractModule
 import com.google.inject.name.Named
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigFactory}
 import connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
 import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
 import http.MicroserviceAudit
@@ -50,11 +50,8 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 }
 
 @Singleton
-class HttpVerbs @Inject()(override val configuration: Config,
-                          val auditConnector: AuditConnector,
-                          @Named("appName") val appName: String,
-                          val actorSystem: ActorSystem,
-                          val wsClient: WSClient)
+class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String, val actorSystem: ActorSystem, val wsClient: WSClient)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
+  override protected def configuration: Config = ConfigFactory.empty()
 }

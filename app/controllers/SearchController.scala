@@ -21,7 +21,7 @@ import akka.actor.ActorRef
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
 import com.google.inject.name.Named
-import config.{AppConfig, ViewConfig}
+import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
 import models._
@@ -47,7 +47,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
                                  override val controllerComponents: MessagesControllerComponents,
                                  val searchPage: search_page,
                                  override val errorPage: error_template)
-                                (implicit val appConfig: AppConfig, viewConfig: ViewConfig)
+                                (implicit val appConfig: AppConfig)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

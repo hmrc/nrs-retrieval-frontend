@@ -39,7 +39,7 @@
         allowTimeoutDialog: Boolean = true,
         useTrackingConsent: Boolean = true,
         fullWidth: Boolean = false
-)(mainContent: Html)(implicit request: Request[_], messages: play.api.i18n.Messages, viewConfig: ViewConfig)
+)(mainContent: Html)(implicit request: Request[_], messages: play.api.i18n.Messages)
 
 @head = {
     <link href='@routes.Assets.versioned("stylesheets/directDebitFrontend-print.css")' media="print" rel="stylesheet" type="text/css">
@@ -71,17 +71,17 @@
     headerBlock = Some(hmrcHeader(Header(
         homepageUrl = "https://www.gov.uk",
         serviceName = Some(navTitle.getOrElse(Messages("header.default"))),
-        phaseBanner = Some(standardBetaBanner(viewConfig.feedbackUrl)),
-        signOutHref = if(canSignOut) Some(s"${viewConfig.signOut}${signOutContinueUrl.map(url => s"?continue=$url").getOrElse("")}") else None
+        phaseBanner = None, //to-do
+        signOutHref = None
     ))),
     scriptsBlock = None,
     beforeContentBlock = Some(beforeContentBlock),
     footerItems = Seq(
-        FooterItem(text = Some(Messages("footer_cookies.link")), href = Some(viewConfig.cookiesUrl)),
-        FooterItem(text = Some(Messages("footer_privacyNotice.link")), href = Some(viewConfig.privacyNoticeUrl)),
-        FooterItem(text = Some(Messages("footer_termsAndConditions.link")), href = Some(viewConfig.termsAndConditionsUrl)),
-        FooterItem(text = Some(Messages("footer_helpUsingGovUk.link")), href = Some(viewConfig.helpUsingGovUkUrl))
+        FooterItem(text = Some(Messages("footer_cookies.link")), href = Some(ViewConfig.cookiesUrl)),
+        FooterItem(text = Some(Messages("footer_privacyNotice.link")), href = Some(ViewConfig.privacyNoticeUrl)),
+        FooterItem(text = Some(Messages("footer_termsAndConditions.link")), href = Some(ViewConfig.termsAndConditionsUrl)),
+        FooterItem(text = Some(Messages("footer_helpUsingGovUk.link")), href = Some(ViewConfig.helpUsingGovUkUrl))
     ),
     bodyEndBlock = None,
-    mainContentLayout = (if (!fullWidth) Some(twoThirdsMainContent.apply _) else None)
+    mainContentLayout = if (!fullWidth) Some(twoThirdsMainContent.apply _) else None
 )(contentBlock)

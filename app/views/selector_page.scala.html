@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import config.{AppConfig, ViewConfig}
+@import config.AppConfig
 @import models.AuthorisedUser
 @import models.Selector
 @import views.helpers._
@@ -23,7 +23,7 @@
 
 @this(main: views.html.main, formHelper: FormWithCSRF)
 
-@(selectorForm: Form[Selector], user: Option[AuthorisedUser] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig, viewConfig: ViewConfig)
+@(selectorForm: Form[Selector], user: Option[AuthorisedUser] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @userName = @{
   user.map(u => Html(u.userName))

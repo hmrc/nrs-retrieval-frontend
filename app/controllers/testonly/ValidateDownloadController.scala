@@ -16,7 +16,7 @@
 
 package controllers.testonly
 
-import config.{AppConfig, ViewConfig}
+import config.AppConfig
 import connectors.testonly.TestOnlyNrsRetrievalConnector
 import controllers.Stride
 import controllers.testonly.FormMappings.validateDownloadForm
@@ -38,7 +38,7 @@ class ValidateDownloadController @Inject()(override val controllerComponents: Me
                                            override val errorPage: error_template,
                                            connector: TestOnlyNrsRetrievalConnector,
                                            validateDownloadPage: validate_download_page)
-                                          (implicit val appConfig: AppConfig, viewConfig: ViewConfig)
+                                          (implicit val appConfig: AppConfig)
   extends FrontendController(controllerComponents) with Stride {
 
   override val logger: Logger = Logger(this.getClass)

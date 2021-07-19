@@ -16,29 +16,8 @@
 
 package config
 
-import com.google.inject.Inject
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
-import java.net.URL
-
-case class ViewConfig(appName: String, signOut: String, frontendBaseUrl: FrontendBaseUrlProvider) {
-  /*
-    * Everything what depends on the `frontendBaseUrl` has to be lazy. Otherwise it will be impossible to run tests
-    * based on GuiceOneServerPerSuite because `port` at which the test app is served
-    * (which is needed to override `frontendBaseUrl`)
-    * is initialized during application start so you can not refer to it before application is started
-    * and therefore override it in test configs.
-    */
-  lazy val feedbackUrl = s"${frontendBaseUrl.baseUrl()}/contact/beta-feedback?service=$appName"
-  lazy val host: String = new URL(frontendBaseUrl.baseUrl()).getHost
-
-  @Inject
-  def this(servicesConfig:  ServicesConfig, frontendBaseUrl: FrontendBaseUrlProvider) =
-    this(
-      appName = servicesConfig.getString("appName"),
-      signOut = servicesConfig.getString("urls.logout"),
-      frontendBaseUrl = frontendBaseUrl)
-
+object ViewConfig {
+  val appName = "nrs-retrieval-frontend"
   val cookiesUrl: String = "https://www.tax.service.gov.uk/help/cookies"
   val privacyNoticeUrl: String = "https://www.tax.service.gov.uk/help/privacy"
   val termsAndConditionsUrl: String = "https://www.tax.service.gov.uk/help/terms-and-conditions"

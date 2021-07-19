@@ -16,11 +16,11 @@
 
 package controllers
 
-import config.{AppConfig, ViewConfig}
+import config.AppConfig
 import models.AuthorisedUser
-import play.api.{Configuration, Environment, Logger}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Request, Result}
+import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -59,7 +59,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
   }
 
   def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])(
-    implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig, viewConfig: ViewConfig): Future[Result] = {
+    implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
     if (appConfig.strideAuth) {
       logger.info(s"Verify stride authorisation")
       strideAuthorised {

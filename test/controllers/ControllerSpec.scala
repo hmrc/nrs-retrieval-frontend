@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{AppConfig, ViewConfig}
+import config.AppConfig
 import connectors.{MicroAuthConnector, NrsRetrievalConnector}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
@@ -42,6 +42,4 @@ trait ControllerSpec extends GuiceAppSpec with MockitoSugar with StubControllerC
   lazy val error_template: error_template = injector.instanceOf[error_template]
   lazy val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
   lazy val mockAuthConnector: MicroAuthConnector = mock[MicroAuthConnector]
-
-  lazy implicit val viewConfig: ViewConfig = injector.instanceOf[ViewConfig]
 }

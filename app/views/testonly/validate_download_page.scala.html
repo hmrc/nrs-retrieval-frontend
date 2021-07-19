@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import config.{AppConfig, ViewConfig}
+@import config.AppConfig
 @import controllers.testonly
 @import controllers.testonly.FormMappings._
 @import models.testonly.{ValidateDownloadRequest, ValidateDownloadResult}
@@ -24,7 +24,7 @@
 
 @this(main: views.html.main, formHelper: FormWithCSRF)
 
-@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig, viewConfig: ViewConfig)
+@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @pageTitle = @{
     Messages("test-only.validate-download.page.header")

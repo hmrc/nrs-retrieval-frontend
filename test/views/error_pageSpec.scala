@@ -32,19 +32,18 @@ package views
  * limitations under the License.
  */
 
-import config.{AppConfig, ViewConfig}
+import config.AppConfig
+import org.scalatest.matchers.must.Matchers._
 import play.api.i18n.Messages
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
 import support.fixtures.ViewFixture
 import views.html.error_template
-import org.scalatest.matchers.must.Matchers._
-import play.api.mvc.AnyContentAsEmpty
 
 class error_pageSpec extends GuiceAppSpec {
   lazy implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-  lazy implicit val viewConfig: ViewConfig = app.injector.instanceOf[ViewConfig]
 
   lazy val errorPage: error_template = fakeApplication.injector.instanceOf[views.html.error_template]
 

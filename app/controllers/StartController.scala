@@ -16,25 +16,24 @@
 
 package controllers
 
-import config.{AppConfig, ViewConfig}
-
-import javax.inject.{Inject, Singleton}
+import config.AppConfig
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import views.html.{error_template, start_page}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import views.html.{error_template, start_page}
 
 @Singleton
 class StartController @Inject()(val authConnector: AuthConnector,
                                 override val controllerComponents: MessagesControllerComponents,
                                 val startPage: start_page,
                                 override val errorPage: error_template)
-                               (implicit val appConfig: AppConfig, viewConfig: ViewConfig) extends FrontendController(controllerComponents)
+                               (implicit val appConfig: AppConfig) extends FrontendController(controllerComponents)
   with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

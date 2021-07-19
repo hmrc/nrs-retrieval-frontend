@@ -15,13 +15,12 @@
  *@
 
 @import config.AppConfig
-@import config.ViewConfig
 @import models.AuthorisedUser
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
 @this(main: views.html.main, formHelper: FormWithCSRF)
 
-@(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig, viewConfig: ViewConfig)
+@(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @pageScripts = {
     <script type="application/javascript" src="@{routes.Assets.versioned("javascripts/nrs.js")}"></script>

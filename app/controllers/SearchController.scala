@@ -16,17 +16,14 @@
 
 package controllers
 
-import java.util.concurrent.TimeUnit
-
 import actors._
 import akka.actor.ActorRef
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
 import com.google.inject.name.Named
-import config.AppConfig
+import config.{AppConfig, ViewConfig}
 import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
-import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
 import play.api.i18n.I18nSupport
@@ -34,10 +31,13 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import views.html.{error_template, search_page}
+
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import views.html.{error_template, search_page}
 
 @Singleton
 class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: ActorRef,
@@ -47,7 +47,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
                                  override val controllerComponents: MessagesControllerComponents,
                                  val searchPage: search_page,
                                  override val errorPage: error_template)
-                                (implicit val appConfig: AppConfig)
+                                (implicit val appConfig: AppConfig, viewConfig: ViewConfig)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

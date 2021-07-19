@@ -17,24 +17,25 @@
 package controllers
 
 import akka.actor.ActorSystem
-import config.AppConfig
-import javax.inject.{Inject, Singleton}
+import config.{AppConfig, ViewConfig}
+import controllers.FormMappings._
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import controllers.FormMappings._
+import views.html.{error_template, selector_page}
+
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import views.html.{error_template, selector_page}
 
 @Singleton
 class SelectorController @Inject()(val authConnector: AuthConnector,
                                    override val controllerComponents: MessagesControllerComponents,
                                    val selectorPage: selector_page,
                                    override val errorPage: error_template)
-                                  (implicit val appConfig: AppConfig, implicit val system: ActorSystem)
+                                  (implicit val appConfig: AppConfig, system: ActorSystem, viewConfig: ViewConfig)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

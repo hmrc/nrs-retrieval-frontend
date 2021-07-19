@@ -15,10 +15,11 @@
  *@
 
 @import config.AppConfig
+@import config.ViewConfig
 
-@this(govUkWrapper: views.html.govuk_wrapper)
+@this(main: views.html.main)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig, viewConfig: ViewConfig)
 
 @contentHeader = {
   <h1>@heading</h1>
@@ -28,4 +29,4 @@
   <p>@message</p>
 }
 
-@govUkWrapper(appConfig = appConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent)
+@main(title = pageTitle, contentHeader = Some(contentHeader))(mainContent = mainContent)

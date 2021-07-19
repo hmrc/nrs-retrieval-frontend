@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
+@import config.{AppConfig, ViewConfig}
 @import controllers.testonly
 @import controllers.testonly.FormMappings._
 @import models.testonly.{ValidateDownloadRequest, ValidateDownloadResult}
@@ -22,15 +22,15 @@
 @import views.html.helpers._
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
-@this(mainTemplate: views.html.main_template, formHelper: FormWithCSRF)
+@this(main: views.html.main, formHelper: FormWithCSRF)
 
-@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig, viewConfig: ViewConfig)
 
 @pageTitle = @{
     Messages("test-only.validate-download.page.header")
 }
 
-@mainTemplate(title = pageTitle) {
+@main(title = pageTitle) {
     <h1 id="pageHeader">
       @Messages("test-only.validate-download.page.header")
     </h1>

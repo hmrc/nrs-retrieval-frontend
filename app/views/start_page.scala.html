@@ -14,18 +14,18 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
+@import config.{AppConfig, ViewConfig}
 @import controllers.routes
 
-@this(mainTemplate: views.html.main_template)
+@this(main: views.html.main)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig, viewConfig: ViewConfig)
 
 @title = @{
   Messages("start.page.header.lbl")
 }
 
-@mainTemplate(title=title) {
+@main(title=title) {
   <h1 class="heading-large" id="pageHeader">@title</h1>
   <p class="lede">@Messages("start.text.one.lbl")</p>
   <p>@Messages("start.text.two.lbl")</p>

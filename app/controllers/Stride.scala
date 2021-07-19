@@ -16,9 +16,9 @@
 
 package controllers
 
-import config.AppConfig
+import config.{AppConfig, ViewConfig}
 import models.AuthorisedUser
-import play.api.Logger
+import play.api.{Configuration, Environment, Logger}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
@@ -27,17 +27,18 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
-import views.html.error_template
-import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import views.html.error_template
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseController with I18nSupport {
 
   val strideRoles: Set[String]
   val logger: Logger
   val appConfig: AppConfig
-  val config = appConfig.runModeConfiguration
-  val env = appConfig.environment
+  val config: Configuration = appConfig.runModeConfiguration
+  val env: Environment = appConfig.environment
   val authConnector: AuthConnector
   val errorPage: error_template
 
@@ -58,7 +59,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
   }
 
   def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])(
-    implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
+    implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig, viewConfig: ViewConfig): Future[Result] = {
     if (appConfig.strideAuth) {
       logger.info(s"Verify stride authorisation")
       strideAuthorised {
@@ -86,7 +87,5 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
       logger.debug(s"$actionName - auth switched off")
       f(AuthorisedUser("Auth disabled", "Auth disabled"))
     }
-
   }
-
 }

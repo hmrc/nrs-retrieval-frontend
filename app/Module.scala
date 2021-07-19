@@ -50,8 +50,11 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 }
 
 @Singleton
-class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String, val actorSystem: ActorSystem, val wsClient: WSClient)
+class HttpVerbs @Inject()(override val configuration: Config,
+                          val auditConnector: AuditConnector,
+                          @Named("appName") val appName: String,
+                          val actorSystem: ActorSystem,
+                          val wsClient: WSClient)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
-  override protected def configuration: Option[Config] = None
 }

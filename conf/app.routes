@@ -3,14 +3,14 @@ GET        /assets/*file                            controllers.Assets.versioned
 
 
 # microservice specific routes
-GET        /start                                   @controllers.StartController.showStartPage
-GET        /select                                  @controllers.SelectorController.showSelectorPage
-POST       /select                                  @controllers.SelectorController.submitSelectorPage
-GET        /search                                  @controllers.SearchController.noParameters
-GET        /search/:notableEventType                @controllers.SearchController.showSearchPage(notableEventType)
-POST       /search/:notableEventType                @controllers.SearchController.submitSearchPage(notableEventType)
+GET        /start                                   controllers.StartController.showStartPage
+GET        /select                                  controllers.SelectorController.showSelectorPage
+POST       /select                                  controllers.SelectorController.submitSelectorPage
+GET        /search                                  controllers.SearchController.noParameters
+GET        /search/:notableEventType                controllers.SearchController.showSearchPage(notableEventType)
+POST       /search/:notableEventType                controllers.SearchController.submitSearchPage(notableEventType)
 
-GET        /download/:vaultId/:archiveId            @controllers.SearchController.download(vaultId, archiveId)
+GET        /download/:vaultId/:archiveId            controllers.SearchController.download(vaultId, archiveId)
 
-GET        /status/:vaultId/:archiveId              @controllers.SearchController.refresh(vaultId, archiveId)
-GET        /retrieve/:vaultId/:archiveId            @controllers.SearchController.doAjaxRetrieve(vaultId, archiveId)
+GET        /status/:vaultId/:archiveId              controllers.SearchController.refresh(vaultId, archiveId)
+GET        /retrieve/:vaultId/:archiveId            controllers.SearchController.doAjaxRetrieve(vaultId, archiveId)

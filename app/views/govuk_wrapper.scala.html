@@ -16,10 +16,19 @@
 
 @import config.AppConfig
 
-@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
-@import layouts.GovUkTemplate
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.header.Header
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components
 
-@this(govUkTemplate: GovUkTemplate, layoutsHead: uiLayouts.Head, layoutsFooter: uiLayouts.Footer, layoutsFooterLinks: uiLayouts.FooterLinks, layoutsServiceInfo: uiLayouts.ServiceInfo, layoutsMainContentHeader: uiLayouts.MainContentHeader, layoutsMainContent: uiLayouts.MainContent)
+@this(govUkTemplate: GovukTemplate,
+        layoutsHead: GovukHeader,
+        layoutsFooter: GovukFooter,
+        layoutsFooterLinks: uiLayouts.FooterLinks,
+        layoutsServiceInfo: uiLayouts.ServiceInfo,
+        layoutsMainContentHeader: uiLayouts.MainContentHeader,
+        layoutsMainContent: uiLayouts.MainContent)
 
 @(appConfig: AppConfig,
   title: String,

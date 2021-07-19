@@ -69,7 +69,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
 
     logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId, path: $path")
 
-    http.HEAD(path)
+    http.HEAD(path, Seq.empty)
   }
 
   override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
@@ -78,7 +78,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
     for{
-      get <- http.GETRaw(path)
+      get <- http.GETRaw(path, Seq.empty)
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield get

@@ -32,9 +32,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   private def loadConfig(key: String) = runModeConfiguration.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  private def loadConfigs(key: String) =
-    runModeConfiguration.getStringList(key).map(_.asScala.toSet).getOrElse(throw new Exception(s"Missing configuration key: $key"))
-
   private def loadFromConfig(config: Configuration, key: String) =
     config.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key")).replace("_", " ")
 
@@ -63,29 +60,29 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   private val vatService = Service("Value Added Tax (VAT)", Seq(
     SubmissionType("VAT Return", "VAT Registration Number (VRN)", LocalDate.parse("2018-04-01"), 20)))
 
-  val serviceScope = ServiceScope(Seq(vatService))
+  val serviceScope: ServiceScope = ServiceScope(Seq(vatService))
 
   lazy val notableEvents: Map[String, NotableEvent] =
-    runModeConfiguration.getConfigList(s"notableEvents").getOrElse(throw new Exception(s"Missing configuration")).asScala
-      .map { client =>
-          NotableEvent(
-            loadFromConfig(client, "notableEvent"),
-            loadFromConfig(client, "displayName"),
-            loadFromConfig(client, "storedFrom"),
-            loadFromConfig(client, "storedFor"),
-            client.getConfigSeq("searchKeys").getOrElse(throw new Exception(s"Missing search keys"))
-                .map{ searchKey =>
-                  SearchKey(
-                    loadFromConfig(searchKey, "name"),
-                    loadFromConfig(searchKey, "label")
-                  )
-                }
-          )
-        }.map(nE => nE.name -> nE).toMap
+    runModeConfiguration.underlying.getConfigList(s"notableEvents").asScala.map { clientConfig =>
+      val clientConfiguration = Configuration(clientConfig)
+
+      NotableEvent(
+        loadFromConfig(clientConfiguration, "notableEvent"),
+        loadFromConfig(clientConfiguration, "displayName"),
+        loadFromConfig(clientConfiguration, "storedFrom"),
+        loadFromConfig(clientConfiguration, "storedFor"),
+        clientConfig.getConfigList("searchKeys").asScala.map{ searchKeyConfig =>
+          val searchKeyConfiguration = Configuration(searchKeyConfig)
+
+          SearchKey(
+            loadFromConfig(searchKeyConfiguration, "name"), loadFromConfig(searchKeyConfiguration, "label"))
+        }
+      )
+    }.map(nE => nE.name -> nE).toMap
 
   Logger.of(classOf[AppConfig]).info(s"Notable events available $notableEvents")
 
-  lazy val nrsStrideRoles: Set[String] = loadConfigs("stride.role.names")
+  lazy val nrsStrideRoles: Set[String] = runModeConfiguration.underlying.getStringList("stride.role.names").asScala.toSet
   lazy val strideAuth: Boolean = runModeConfiguration.getOptional[Boolean]("stride.enabled").getOrElse(false)
   lazy val authHost: String = runModeConfiguration.getOptional[String](s"microservice.services.auth.host").getOrElse("none-authHost")
   lazy val authPort: Int = runModeConfiguration.getOptional[Int](s"microservice.services.auth.port").getOrElse(-1)

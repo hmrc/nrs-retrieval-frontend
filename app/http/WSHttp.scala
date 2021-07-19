@@ -64,7 +64,7 @@ class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configu
                        (implicit val actorSystem: ActorSystem) extends WSHttpT {
   override val hooks: Seq[HttpHook] = NoneRequired
 
-  override protected def configuration: Option[Config] = None
+  override protected def configuration: Config = runModeConfig.underlying
 }
 
 class MicroserviceAudit @Inject()(@Named("appName") val applicationName: String,

@@ -153,7 +153,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "statusSubmissionBundle" should {
     "make a head call to /submission-bundles" in {
-      when(mockWsHttp.HEAD[Any](any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockWsHttp.HEAD[Any](any(), any())(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
       await(connector.statusSubmissionBundle(testAuditId, testArchiveId)).body should be ("Some Text")
       verify(mockAuditable, times(0)).sendDataEvent(any[NonRepudiationStoreDownload])(any())
@@ -162,7 +162,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with NrsSearc
 
   "getSubmissionBundle" should {
     "make a get call to /submission-bundles" in {
-      when(mockWsHttp.GETRaw(any())(any(), any())).thenReturn(Future.successful(mockWSResponse))
+      when(mockWsHttp.GETRaw(any(), any())(any(), any())).thenReturn(Future.successful(mockWSResponse))
       when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
       when(mockWSResponse.body).thenReturn("Some zipped bytes")
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))

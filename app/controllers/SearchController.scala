@@ -54,9 +54,6 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
-  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
-    .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
-
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   def noParameters(): Action[AnyContent] = Action.async { implicit request =>
@@ -176,5 +173,4 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
-
 }

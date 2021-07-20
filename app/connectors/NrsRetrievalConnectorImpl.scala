@@ -31,7 +31,9 @@ import scala.concurrent.Future
 @Singleton
 class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Auditable)
                                          (implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
-  val logger: Logger = Logger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
+
+  private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
   override def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for ${query.searchText}")
@@ -39,7 +41,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
 
     for{
-      get <- http.GET[Seq[NrsSearchResult]](path)
+      get <- http.GET[Seq[NrsSearchResult]](path, Seq.empty, extraHeaders)
         .map { r => r }
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
@@ -58,7 +60,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"
 
     for {
-      post <- http.POST[String, HttpResponse](path, "", Seq.empty)
+      post <- http.POST[String, HttpResponse](path, "", extraHeaders)
       _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, user.userName, vaultName, archiveId,
         if(post.headers == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield post
@@ -69,7 +71,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
 
     logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId, path: $path")
 
-    http.HEAD(path, Seq.empty)
+    http.HEAD(path, extraHeaders)
   }
 
   override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
@@ -78,7 +80,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
     for{
-      get <- http.GETRaw(path, Seq.empty)
+      get <- http.GETRaw(path, extraHeaders)
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield get

@@ -81,10 +81,6 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
       val validatedForm = FormMappings.searchForm.bind(postData, MAX_VALUE)
       validatedForm.errors shouldBe empty
     }
-
-    "add the X-API-Key header to the header carrier extraHeaders" in {
-      controller.hc(getRequestWithJsonBody).extraHeaders.contains(("X-API-Key", appConfig.xApiKey)) shouldBe true
-    }
   }
 }
 

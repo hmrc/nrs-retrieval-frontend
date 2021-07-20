@@ -46,10 +46,11 @@ object NrsRetrievalStubs {
 
   def givenSearchReturns(status: Int, results: Seq[NrsSearchResult]): StubMapping =
     stubFor(get(urlEqualTo(s"$retrievalPath/submission-metadata?${searchQuery.searchText}"))
+      .withHeader(xApiKeyHeader, equalToXApiKey)
       .willReturn(aResponse().withStatus(status).withBody(toJson(results).toString())))
 
   def givenSearchReturns(status: Int): StubMapping =
-    stubFor(get(urlEqualTo(searchPath)).willReturn(aResponse().withStatus(status)))
+    stubFor(get(urlEqualTo(searchPath)).withHeader(xApiKeyHeader, equalToXApiKey).willReturn(aResponse().withStatus(status)))
 
   def verifySearchWithXApiKeyHeader(): Unit =
     verify(getRequestedFor(urlEqualTo(searchPath)).withHeader(xApiKeyHeader, equalToXApiKey))
@@ -86,6 +87,7 @@ object NrsRetrievalStubs {
 
   def givenPostSubmissionBundlesRetrievalRequestsReturns(status: Int): StubMapping = {
     stubFor(post(urlEqualTo(submissionBundlesRetrievalRequestsPath))
+      .withHeader(xApiKeyHeader, equalToXApiKey)
       .willReturn(aResponse().withStatus(status)))
   }
 
@@ -93,5 +95,7 @@ object NrsRetrievalStubs {
     verify(postRequestedFor(urlEqualTo(submissionBundlesRetrievalRequestsPath)).withHeader(xApiKeyHeader, equalToXApiKey))
 
   def givenHeadSubmissionBundlesReturns(status: Int): StubMapping =
-    stubFor(head(urlEqualTo(submissionBundlesPath)).willReturn(aResponse().withStatus(status)))
+    stubFor(head(urlEqualTo(submissionBundlesPath))
+      .withHeader(xApiKeyHeader, equalToXApiKey)
+      .willReturn(aResponse().withStatus(status)))
 }

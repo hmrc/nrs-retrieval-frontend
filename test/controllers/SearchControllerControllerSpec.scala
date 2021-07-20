@@ -24,6 +24,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 
+import java.lang.Integer.MAX_VALUE
+
 class SearchControllerControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
   private val getRequestWithJsonBody: FakeRequest[AnyContentAsJson] =
     getRequest.withJsonBody(
@@ -58,7 +60,7 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
     "return no errors for IRR valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
         "notableEventType" -> "interest-restriction-return")
-      val validatedForm = FormMappings.searchForm.bind(postData, Integer.MAX_VALUE)
+      val validatedForm = FormMappings.searchForm.bind(postData, MAX_VALUE)
       validatedForm.errors shouldBe empty
     }
   }
@@ -67,7 +69,7 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
     "return no errors for IRR valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
         "notableEventType" -> "ppt-subscription")
-      val validatedForm = FormMappings.searchForm.bind(postData, Integer.MAX_VALUE)
+      val validatedForm = FormMappings.searchForm.bind(postData, MAX_VALUE)
       validatedForm.errors shouldBe empty
     }
   }
@@ -76,12 +78,12 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
     "return no errors for valid data" in {
       val postData = Json.obj("searchText" -> "someSearchText",
       "notableEventType" -> "vat-return")
-      val validatedForm = FormMappings.searchForm.bind(postData, Integer.MAX_VALUE)
+      val validatedForm = FormMappings.searchForm.bind(postData, MAX_VALUE)
       validatedForm.errors shouldBe empty
     }
 
-    "create a header carrier with X-API-Key when one exists in config" in {
-      controller.hc(getRequestWithJsonBody).headers(Seq("X-API-Key")).head shouldBe appConfig.xApiKey
+    "add the X-API-Key header to the header carrier extraHeaders" in {
+      controller.hc(getRequestWithJsonBody).extraHeaders.contains(("X-API-Key", appConfig.xApiKey)) shouldBe true
     }
   }
 }

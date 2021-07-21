@@ -4,19 +4,9 @@
 *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
+@import views.html.helpers.govuk_template
 
-@this(
-        govukLayout: uk.gov.hmrc.govukfrontend.views.html.layouts.govukLayout,
-        twoThirdsMainContent: uk.gov.hmrc.govukfrontend.views.html.layouts.twoThirdsMainContent,
-        govukBackLink: uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink,
-        hmrcHeader: uk.gov.hmrc.hmrcfrontend.views.html.components.hmrcHeader,
-        languageSelect: uk.gov.hmrc.hmrcfrontend.views.html.components.hmrcLanguageSelect,
-        reportTechnicalIssues: uk.gov.hmrc.hmrcfrontend.views.html.components.hmrcReportTechnicalIssue,
-        hmrcTrackingConsentSnippet: uk.gov.hmrc.hmrcfrontend.views.html.helpers.hmrcTrackingConsentSnippet,
-        standardBetaBanner: uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner,
-        hmrcStandardFooter: HmrcStandardFooter
-)
+@this()
 
 @(title: String, contentHeader: Option[Html] = None, userName: Option[Html] = None, scriptElem: Option[Html] = None)(mainContent: Html)(implicit request: Request[_], messages: Messages)
 
@@ -34,20 +24,20 @@
 }
 
 @betaBanner = {
-    @helpers.beta_banner(
-        userLoggedIn = false,
-        betaFeedbackUrl = "",
-        betaFeedbackUnauthenticatedUrl = "",
-        showFeedbackLinkInBetaBanner = false,
-        userName = userName
-    )
+@helpers.beta_banner(
+    userLoggedIn = false,
+    betaFeedbackUrl = "",
+    betaFeedbackUnauthenticatedUrl = "",
+    showFeedbackLinkInBetaBanner = false,
+    userName = userName
+)
 }
 
 @contentBlock = {
     <main id="wrapper" role="main"  >
         <div class="centered-content">
             <div class="service-info ">
-                @betaBanner
+            @betaBanner
             </div>
         </div>
 
@@ -84,25 +74,6 @@
     </div>
 }
 
-@footerContent = {
-    <footer class="group js-footer" id="footer" role="contentinfo">
-        <div class="footer-wrapper">
-            <div class="footer-meta">
-                <div class="footer-meta-inner">
-                    <div class="open-government-licence">
-                        <h2><a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3" rel="noopener noreferrer"><img id="ogl-logo" src="/template/assets/images/open-government-licence_2x.png" alt="Open Government Licence"></a></h2>
-                        <p id="ogl-message">All content is available under the <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3" target="_blank" rel="noopener noreferrer">Open Government Licence v3.0</a>, except where otherwise stated</p>
-                    </div>
-                </div>
-
-                <div class="copyright">
-                    <a href="https://www.nationalarchives.gov.uk/information-management/our-services/crown-copyright.htm" rel="noopener noreferrer">&copy; Crown Copyright</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-}
-
 @bodyEnd = {
     <div id="global-app-error" class="app-error hidden"></div>
 
@@ -112,10 +83,4 @@
     <script language="JavaScript" type="application/javascript" src="/nrs-retrieval/assets/javascripts/nrs.js"></script>
 }
 
-@govukLayout(
-    pageTitle = Some(title),
-    headBlock = Some(head),
-    headerBlock = Some(headerBlock),
-    footerBlock = Some(footerContent),
-    bodyEndBlock = Some(bodyEnd)
-)(contentBlock)
+@govuk_template(Some(title))(head, bodyEnd, headerBlock)(contentBlock)

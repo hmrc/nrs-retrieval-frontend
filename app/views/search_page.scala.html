@@ -48,7 +48,7 @@
   }
 }
 
-@main(title = pageTitle, userName, scriptElem = Some(pageScripts)) {
+@main(title = pageTitle, userName = userName, scriptElem = Some(pageScripts)) {
 
     <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
 

@@ -18,7 +18,7 @@
         hmrcStandardFooter: HmrcStandardFooter
 )
 
-@(title: String, contentHeader: Option[Html] = None, scriptElem: Option[Html] = None)(mainContent: Html)(implicit request: Request[_], messages: Messages)
+@(title: String, contentHeader: Option[Html] = None, userName: Option[Html] = None, scriptElem: Option[Html] = None)(mainContent: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -33,17 +33,21 @@
     <link rel="stylesheet" href="http://localhost:9032/assets/3.2.2/stylesheets/application.min.css">
 }
 
+@betaBanner = {
+    @helpers.beta_banner(
+        userLoggedIn = false,
+        betaFeedbackUrl = "",
+        betaFeedbackUnauthenticatedUrl = "",
+        showFeedbackLinkInBetaBanner = false,
+        userName = userName
+    )
+}
+
 @contentBlock = {
     <main id="wrapper" role="main"  >
         <div class="centered-content">
             <div class="service-info ">
-                <div class="beta-banner">
-                    <p><strong class="phase-tag">BETA</strong><span>This is a new service.
-                    </span>
-                    </p>
-
-                    <span id="username" class="user-name">Welcome <strong>Test User</strong></span>
-                </div>
+                @betaBanner
             </div>
         </div>
 

@@ -16,20 +16,17 @@ lazy val scoverageSettings = {
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.3.0",
-  "uk.gov.hmrc"       %% "play-frontend-govuk"        % "0.77.0-play-28",
-  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "0.74.0-play-28",
+  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.7.0",
+  "uk.gov.hmrc"       %% "play-frontend-govuk"        % "0.80.0-play-28",
+  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "0.84.0-play-28",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
   "com.typesafe.akka" %% "akka-stream"                % "2.6.14",
   "com.typesafe.akka" %% "akka-slf4j"                 % "2.6.14",
-  "com.typesafe.akka" %% "akka-testkit"               % "2.6.14",
   "com.typesafe.akka" %% "akka-actor-typed"           % "2.6.14",
   "com.typesafe.akka" %% "akka-serialization-jackson" % "2.6.14",
 )
 
 def test(scope: String) = Seq(
-  "uk.gov.hmrc" %% "bootstrap-test-play-28" % "5.3.0"   % Test,
-  "uk.gov.hmrc" %% "hmrctest" % "3.10.0-play-26" % scope,
   "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % scope,
   "org.scalatest" %% "scalatest" % "3.2.9" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % scope,
@@ -37,7 +34,7 @@ def test(scope: String) = Seq(
   "org.scalatestplus"      %% "mockito-1-10"           % "3.1.0.0" % Test,
   "org.jsoup" % "jsoup" % "1.13.1" % scope,
   "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
-
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.14",
 )
 
 lazy val appName: String = "nrs-retrieval-frontend"

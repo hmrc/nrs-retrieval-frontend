@@ -46,6 +46,8 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
     if (appConfig.strideAuth) {
       logger.info(s"Verify stride authorisation")
 
+      val notAuthorised = "Not authorised"
+
       authorised(AuthProviders(PrivilegedApplication)).retrieve(credentials and allEnrolments and name) {
         case Some(userCredentials) ~ enrolments ~ Some(userName) =>
           logger.debug(s"$actionName - authorised, enrolments=$enrolments")
@@ -56,7 +58,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
           if (userHasOneOrMoreRequiredRoles) {
             f(AuthorisedUser((userName.name.toList ++ userName.lastName.toList).mkString(" "), userCredentials.providerId))
           } else {
-            Future successful Unauthorized(s"Insufficient Roles - ${enrolments.enrolments.map(_.key)}")
+            Future successful Ok(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${enrolments.enrolments.map(_.key)}"))
           }
       }.recover {
         case _: NoActiveSession =>
@@ -64,10 +66,10 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
           toStrideLogin(if (appConfig.isLocal) s"http://${request.host}${request.uri}" else s"${request.uri}")
         case ex: InsufficientEnrolments =>
           logger.info(s"$actionName - error, not authorised", ex)
-          Ok(errorPage("Not authorised", "Not authorised", s"Insufficient enrolments - ${ex.msg}"))
+          Ok(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${ex.msg}"))
         case ex =>
           logger.warn(s"$actionName - error, other error", ex)
-          Ok(errorPage("Not authorised", "Not authorised", "Sorry, not authorised"))
+          Ok(errorPage(notAuthorised, notAuthorised, "Sorry, not authorised"))
       }
     } else {
       logger.debug(s"$actionName - auth switched off")

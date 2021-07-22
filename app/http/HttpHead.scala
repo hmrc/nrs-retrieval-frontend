@@ -37,7 +37,7 @@ trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def doHead(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    buildRequest(url, headers).head().map(new WSHttpResponse(_))
+    buildRequest(url, headers).head().map(WSHttpResponse.apply)
 }
 
 trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks {

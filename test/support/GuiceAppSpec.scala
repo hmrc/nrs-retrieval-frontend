@@ -45,7 +45,7 @@ class GuiceAppSpec extends BaseSpec {
   implicit val messages: Messages = messagesApi.preferred(FakeRequest())
 
 
-  def addToken[T](fakeRequest: FakeRequest[T]) = {
+  def addToken[T](fakeRequest: FakeRequest[T]): FakeRequest[T] = {
     val csrfConfig = app.injector.instanceOf[CSRFConfigProvider].get
     val csrfFilter = app.injector.instanceOf[CSRFFilter]
     val token = csrfFilter.tokenProvider.generateToken

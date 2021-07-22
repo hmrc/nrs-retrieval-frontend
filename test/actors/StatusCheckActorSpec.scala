@@ -42,7 +42,11 @@ class StatusCheckActorSpec() extends TestKit(ActorSystem("MySpec")) with Implici
 
   private val testVaultId: String = "1"
   private val testArchiveId: String = "1"
-  private val pollingActor = system.actorOf(Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
+
+  private val pollingActor =
+    system.actorOf(Props(new PollingActor(
+      testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
+
   private val checkStatusActor = TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
 
 

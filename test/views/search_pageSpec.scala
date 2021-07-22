@@ -50,7 +50,7 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
 
   private val searchPage = fakeApplication.injector.instanceOf[views.html.search_page]
   private val jsonBody = Json.parse("""{"searchKeyName_0": "vrn", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
-  private val searchForm = FormMappings.searchForm.bind(jsonBody)
+  private val searchForm = FormMappings.searchForm.bind(jsonBody, Int.MaxValue)
 
   "search page with a valid form only" should {
     "have a matching page title and header" in new SearchPageViewFixture {

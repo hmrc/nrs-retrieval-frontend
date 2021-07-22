@@ -48,7 +48,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec
   }
 
   private val mockWsHttp = mock[WSHttpT]
-  private val mockEnvironemnt = mock[Environment]
+  private val mockEnvironment = mock[Environment]
   private val mockHttpResponse = mock[HttpResponse]
   private val mockWSResponse = mock[WSResponse]
   private val mockAuditConnector = mock[AuditConnector]
@@ -60,7 +60,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec
     override def configure(): Unit = {
       bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
       bind(classOf[WSHttpT]).toInstance(mockWsHttp)
-      bind(classOf[Environment]).toInstance(mockEnvironemnt)
+      bind(classOf[Environment]).toInstance(mockEnvironment)
       bind(classOf[AppConfig]).toInstance(mockAppConfig)
       bind(classOf[Auditable]).toInstance(mockAuditable)
       bind(classOf[AuditConnector]).toInstance(mockAuditConnector)
@@ -126,10 +126,17 @@ class NrsRetrievalConnectorSpec extends UnitSpec
     }
 
     "write an audit record containing the required data" in {
+      val searchAudit =
+        NonRepudiationStoreSearch(
+          "anAuthProviderId",
+          "aUser",
+          "notableEvent=aNotableEvent&aName=aValue",
+          nrsVatSearchResult.nrSubmissionId,
+          "null/submission-metadata?notableEvent=aNotableEvent&aName=aValue")
+
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any(), any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
       when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])(any())).thenReturn(Future.successful(()))
       await(connector.search(searchQuery, testUser)).size shouldBe 1
-      val searchAudit = NonRepudiationStoreSearch("anAuthProviderId", "aUser", "notableEvent=aNotableEvent&aName=aValue", nrsVatSearchResult.nrSubmissionId, "null/submission-metadata?notableEvent=aNotableEvent&aName=aValue")
       verify(mockAuditable, times(1)).sendDataEvent(searchAudit)(hc)
     }
 

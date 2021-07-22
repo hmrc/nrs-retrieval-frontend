@@ -3,10 +3,10 @@ package uk.gov.hmrc.nrsretrievalfrontend
 import play.api.libs.ws.WSResponse
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
-  def getValidateDownloadRequest(): WSResponse =
+  def validateDownloadGetRequest(): WSResponse =
     wsClient.url(s"$serviceRoot/test-only/validate-download").get.futureValue
 
-  def postValidateDownloadRequest(): WSResponse =
+  def validateDownloadPostRequest(): WSResponse =
     wsClient
       .url(s"$serviceRoot/test-only/validate-download")
       .post(Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))).futureValue
@@ -25,7 +25,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
   "GET /nrs-retrieval/test-only/validate-download" should {
     "display the validate-download page" when {
       "the testOnlyDoNotUseInAppConf router is used" in {
-        validate(getValidateDownloadRequest())
+        validate(validateDownloadGetRequest())
       }
     }
   }
@@ -33,7 +33,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
   "POST /nrs-retrieval/test-only/validate-download" should {
     "display the validate-download page" when {
       "the default router is used" in {
-        validate(postValidateDownloadRequest())
+        validate(validateDownloadPostRequest())
       }
     }
   }
@@ -45,7 +45,7 @@ class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegratio
   "GET /nrs-retrieval/test-only/validate-download" should {
     "return NOT_FOUND" when {
       "the default router is used" in {
-        getValidateDownloadRequest().status shouldBe NOT_FOUND
+        validateDownloadGetRequest().status shouldBe NOT_FOUND
       }
     }
   }
@@ -53,7 +53,7 @@ class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegratio
   "POST /nrs-retrieval/test-only/validate-download" should {
     "return NOT_FOUND" when {
       "the default router is used" in {
-        postValidateDownloadRequest().status shouldBe NOT_FOUND
+        validateDownloadPostRequest().status shouldBe NOT_FOUND
       }
     }
   }

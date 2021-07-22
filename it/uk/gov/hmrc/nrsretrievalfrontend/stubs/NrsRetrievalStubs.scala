@@ -75,7 +75,7 @@ object NrsRetrievalStubs {
       .withBody(body)
       .withHeader("Cache-Control", "no-cache,no-store,max-age=0")
       .withHeader("Content-Length", s"${body.length}")
-      .withHeader("Content-Disposition", s"inline; filename=${submissionId}.zip")
+      .withHeader("Content-Disposition", s"inline; filename=$submissionId.zip")
       .withHeader("Content-Type", "application/octet-stream")
       .withHeader("nr-submission-id", submissionId)
       .withHeader("Date","Tue, 13 Jul 2021 12:36:51 GMT")

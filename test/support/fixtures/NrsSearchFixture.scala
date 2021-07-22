@@ -16,26 +16,27 @@
 
 package support.fixtures
 
-import play.api.libs.json.{JsValue, Json}
 import models._
 import org.joda.time.LocalDate
+import play.api.libs.json.{JsValue, Json}
+
 import java.time.ZonedDateTime
 
 trait NrsSearchFixture extends NrSubmissionId {
 
   val headerData: Option[JsValue] = Some(Json.parse("""{"SomeAttribute":"SomeValue"}"""))
 
-  val bundle = Bundle("zip", 123456)
+  val bundle: Bundle = Bundle("zip", 123456)
 
-  val glacier = Glacier("12345", "1234567890")
+  val glacier: Glacier = Glacier("12345", "1234567890")
 
-  val nrsVatSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
+  val nrsVatSearchResult: NrsSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
     ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Some(Json.parse("{}")), "userAuthToken", headerData,
     nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
 
-  val nrsVatRegSearchResult = NrsSearchResult("businessId", "vat-registration", "payloadContentType",
+  val nrsVatRegSearchResult: NrsSearchResult = NrsSearchResult("businessId", "vat-registration", "payloadContentType",
     ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Some(Json.parse("{}")), "userAuthToken", headerData,
     nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
 
-  val searchQuery = SearchQuery(Some("aName"), Some("aValue"), "aNotableEvent")
+  val searchQuery: SearchQuery = SearchQuery(Some("aName"), Some("aValue"), "aNotableEvent")
 }

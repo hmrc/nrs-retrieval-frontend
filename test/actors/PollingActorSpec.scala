@@ -42,7 +42,10 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
 
   val testVaultId: String = "1"
   val testArchiveId: String = "1"
-  val pollingActor: ActorRef = system.actorOf(Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
+
+  val pollingActor: ActorRef =
+    system.actorOf(Props(new PollingActor(
+      testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)

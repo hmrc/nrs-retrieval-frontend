@@ -4,75 +4,139 @@
 *@
 
 @import play.api.i18n.Messages
-@import views.html.helpers.govuk_template
 
 @this()
 
 @(title: String, contentHeader: Option[Html] = None, userName: Option[Html] = None, scriptElem: Option[Html] = None)(mainContent: Html)(implicit request: Request[_], messages: Messages)
 
-@head = {
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<!DOCTYPE html>
+    <!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+    <!--[if gt IE 8]><!--><html lang="en" class="no-js"><!--<![endif]-->
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>@title</title>
 
-    <link href='/nrs-retrieval/assets/stylesheets/main.css' media="screen" rel="stylesheet" type="text/css" />
+        <script type="text/javascript">
+                (function(){if(navigator.userAgent.match(/IEMobile\/10\.0/)){var d=document,c="appendChild",a=d.createElement("style");a[c](d.createTextNode("@@-ms-viewport{width:auto!important}"));d.getElementsByTagName("head")[0][c](a);}})();
+        </script>
 
-    <script src='http://localhost:9032/assets/3.2.2/javascripts/vendor/modernizr.js' type='text/javascript'></script>
-    <link rel="stylesheet" href="http://localhost:9032/assets/3.2.2/stylesheets/application.min.css">
-}
+            <!--[if gt IE 8]><!--><link href="@routes.Assets.versioned("stylesheets/govuk-template.css")" media="screen" rel="stylesheet" type="text/css" /><!--<![endif]-->
+        <!--[if IE 6]><link href="@routes.Assets.versioned("stylesheets/govuk-template-ie6.css")" media="screen" rel="stylesheet" type="text/css" /><![endif]-->
+        <!--[if IE 7]><link href="@routes.Assets.versioned("stylesheets/govuk-template-ie7.css")" media="screen" rel="stylesheet" type="text/css" /><![endif]-->
+        <!--[if IE 8]><link href="@routes.Assets.versioned("stylesheets/govuk-template-ie8.css")" media="screen" rel="stylesheet" type="text/css" /><![endif]-->
 
-@betaBanner = {
-    @helpers.beta_banner(userName)
-}
+        <link href="@routes.Assets.versioned("stylesheets/govuk-template-print.css")" media="print" rel="stylesheet" type="text/css" />
 
-@contentBlock = {
-    <main id="wrapper" role="main"  >
+            <!--[if IE 8]>
+    <script type="text/javascript">
+      (function(){if(window.opera){return;}
+       setTimeout(function(){var a=document,g,b={families:(g=
+       ["nta"]),urls:["@routes.Assets.versioned("stylesheets/fonts-ie8.css")"]},
+            c="@routes.Assets.versioned("javascripts/vendor/goog/webfont-debug.js")",d="script",
+            e=a.createElement(d),f=a.getElementsByTagName(d)[0],h=g.length;WebFontConfig
+            ={custom:b},e.src=c,f.parentNode.insertBefore(e,f);for(;h=h-1;a.documentElement
+            .className+=' wf-'+g[h].replace(/\s/g,'').toLowerCase()+'-n4-loading');},0)
+            })()
+        </script>
+        <![endif]-->
+        <!--[if gte IE 9]><!-->
+        <link href="@routes.Assets.versioned("stylesheets/fonts.css")" media="all" rel="stylesheet" type="text/css" />
+            <!--<![endif]-->
+
+
+            <!--[if lt IE 9]>
+    <script src="@routes.Assets.versioned("javascripts/ie.js")" type="text/javascript"></script>
+        <![endif]-->
+
+        <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.ico")" type="image/x-icon" />
+
+            <!-- For third-generation iPad with high-resolution Retina display: -->
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="@routes.Assets.versioned("images/apple-touch-icon-144x144.png")">
+            <!-- For iPhone with high-resolution Retina display: -->
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="@routes.Assets.versioned("images/apple-touch-icon-114x114.png")">
+            <!-- For first- and second-generation iPad: -->
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="@routes.Assets.versioned("images/apple-touch-icon-72x72.png")">
+            <!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
+        <link rel="apple-touch-icon-precomposed" href="@routes.Assets.versioned("images/apple-touch-icon-57x57.png")">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:image" content="@routes.Assets.versioned("images/opengraph-image.png")">
+
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href='/nrs-retrieval/assets/stylesheets/main.css' media="screen" rel="stylesheet" type="text/css" />
+
+        <script src='http://localhost:9032/assets/3.2.2/javascripts/vendor/modernizr.js' type='text/javascript'></script>
+        <link rel="stylesheet" href="http://localhost:9032/assets/3.2.2/stylesheets/application.min.css">
+    </head>
+
+    <body class="">
+        <script type="text/javascript">document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');</script>
+
         <div class="centered-content">
-            <div class="service-info ">
-            @betaBanner
-            </div>
-        </div>
+            <header role="banner" id="global-header" class=" with-proposition ">
+                <div class="header-wrapper">
+                    <div class="header-global">
+                        <div class="header-logo">
+                            <a href="https://www.gov.uk/" title="Go to the GOV.UK homepage" data-journey-click="header:Click:GOV UK" id="logo" class="content">
+                                <img src="/assets/images/gov.uk_logotype_crown.png" alt=""> GOV.UK
+                            </a>
+                        </div>
+                    </div>
 
-        <div id="content">
-            <article class="content__body">
-            @mainContent
-            </article>
-        </div>
-    </main>
-}
-
-@headerBlock = {
-    <div class="centered-content">
-        <header role="banner" id="global-header" class=" with-proposition ">
-            <div class="header-wrapper">
-                <div class="header-global">
-                    <div class="header-logo">
-                        <a href="https://www.gov.uk/" title="Go to the GOV.UK homepage" data-journey-click="header:Click:GOV UK" id="logo" class="content">
-                            <img src="/assets/images/gov.uk_logotype_crown.png" alt=""> GOV.UK
-                        </a>
+                    <div class="header-proposition">
+                        <div class="content">
+                            <nav id="proposition-menu" class="header__menu" role="navigation">
+                                <span class="header__menu__proposition-name">@Messages("service.name.lbl")</span>
+                                <ul id="proposition-links" class="header__menu__proposition-links"></ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
+            </header>
+        </div>
 
-                <div class="header-proposition">
-                    <div class="content">
-                        <nav id="proposition-menu" class="header__menu" role="navigation">
-                            <span class="header__menu__proposition-name">@Messages("service.name.lbl")</span>
-                            <ul id="proposition-links" class="header__menu__proposition-links"></ul>
-                        </nav>
+        <main id="wrapper" role="main"  >
+            <div class="centered-content">
+                <div class="service-info ">
+                @helpers.beta_banner(userName)
+                </div>
+            </div>
+
+            <div id="content">
+                <article class="content__body">
+                @mainContent
+                </article>
+            </div>
+        </main>
+
+
+        <footer class="group js-footer" id="footer" role="contentinfo">
+
+            <div class="footer-wrapper">
+                <div class="footer-meta">
+                    <div class="footer-meta-inner"></div>
+                    <div class="copyright">
+                        <a href="http://www.nationalarchives.gov.uk/information-management/our-services/crown-copyright.htm" target="_blank">&copy; Crown Copyright</a>
                     </div>
                 </div>
             </div>
-        </header>
-    </div>
-}
+        </footer>
 
-@bodyEnd = {
-    <div id="global-app-error" class="app-error hidden"></div>
+            <!--end footer-->
 
-    <!--<script src="/template/assets/javascripts/govuk-template.js" type="text/javascript"></script>-->
-    <script type="text/javascript">var ssoUrl = "";</script>
-    <script src="http://localhost:9032/assets/3.2.2/javascripts/application.min.js" type="text/javascript"></script>
-    <script language="JavaScript" type="application/javascript" src="/nrs-retrieval/assets/javascripts/nrs.js"></script>
-}
+        <div id="global-app-error" class="app-error hidden"></div>
 
-@govuk_template(Some(title))(head, bodyEnd, headerBlock)(contentBlock)
+            <!--<script src="@routes.Assets.versioned("javascripts/govuk-template.js")" type="text/javascript"></script>-->
+
+        <div id="global-app-error" class="app-error hidden"></div>
+
+            <!--<script src="/template/assets/javascripts/govuk-template.js" type="text/javascript"></script>-->
+        <script type="text/javascript">var ssoUrl = "";</script>
+        <script src="http://localhost:9032/assets/3.2.2/javascripts/application.min.js" type="text/javascript"></script>
+        <script language="JavaScript" type="application/javascript" src="/nrs-retrieval/assets/javascripts/nrs.js"></script>
+    </body>
+</html>

@@ -16,8 +16,6 @@
 
 package actors
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActors, TestKit}
@@ -25,20 +23,27 @@ import akka.util.Timeout
 import models.AuthorisedUser
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import play.api.http.Status._
 import support.fixtures.Infrastructure
 import uk.gov.hmrc.http.HttpResponse
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
+  with AnyWordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
 
-  implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+
+  private val testVaultId: String = "1"
+  private val testArchiveId: String = "1"
+  private val testUser = AuthorisedUser("aUser", "anAuthProviderId")
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
@@ -81,9 +86,4 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
         , 5 seconds) should be(IsCompleteMessage(testVaultId, testArchiveId))
     }
   }
-
-  val testVaultId: String = "1"
-  val testArchiveId: String = "1"
-  val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
-
 }

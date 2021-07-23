@@ -16,19 +16,18 @@
 
 package actors
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.{Actor, ActorContext}
 import akka.pattern.ask
 import akka.util.Timeout
 import config.AppConfig
 import connectors.NrsRetrievalConnector
-import javax.inject.Inject
 import models.AuthorisedUser
 import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -38,11 +37,11 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  val logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
 
   implicit val system: ActorContext = context
 
-  def receive = {
+  def receive: Receive = {
     case SubmitMessage(vaultId, archiveId, headerCarrier, user) =>
       logger.info(s"RetrievalActor received SubmitMessage($vaultId, $archiveId, $headerCarrier, $user)")
       sender ! submitRetrievalRequest(vaultId, archiveId, user)(headerCarrier)

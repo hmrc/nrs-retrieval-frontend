@@ -18,12 +18,10 @@ import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import akka.actor.ActorSystem
 import com.google.inject.AbstractModule
 import com.google.inject.name.Named
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigFactory}
 import connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
-import connectors.{MicroAuthConnector, NrsRetrievalConnector, NrsRetrievalConnectorImpl}
+import connectors.{NrsRetrievalConnector, NrsRetrievalConnectorImpl}
 import http.MicroserviceAudit
-
-import javax.inject.{Inject, Singleton}
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
@@ -32,7 +30,11 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.http.ws.WSHttp
+
+import javax.inject.{Inject, Singleton}
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
@@ -44,8 +46,9 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
     bind(classOf[TestOnlyNrsRetrievalConnector]).to(classOf[TestOnlyNrsRetrievalConnectorImpl])
-    bind(classOf[AuthConnector]).to(classOf[MicroAuthConnector])
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
+    bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
+    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
   }
 }
 
@@ -53,5 +56,5 @@ class Module(val environment: Environment, val configuration: Configuration) ext
 class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String, val actorSystem: ActorSystem, val wsClient: WSClient)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
-  override protected def configuration: Option[Config] = None
+  override protected def configuration: Config = ConfigFactory.empty()
 }

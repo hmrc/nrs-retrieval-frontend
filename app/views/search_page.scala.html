@@ -16,16 +16,11 @@
 
 @import config.AppConfig
 @import models.AuthorisedUser
-@import models.Search
-@import uk.gov.hmrc.play.views.html.helpers.{form, input}
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
-@this(mainTemplate: views.html.main_template, helpersForm: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF)
+@this(mainTemplate: views.html.main_template, formHelper: FormWithCSRF)
 
 @(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@pageScripts = {
-    <script language="JavaScript" type="application/javascript" src="@{routes.Assets.versioned("javascripts/nrs.js")}"></script>
-}
 
 @userName = @{
     user.map(u => Html(u.userName))
@@ -49,7 +44,7 @@
   }
 }
 
-@mainTemplate(title = pageTitle, userName, scriptElem = Some(pageScripts)) {
+@mainTemplate(title = pageTitle, userName = userName) {
 
     <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
 
@@ -62,10 +57,10 @@
     </p>
 
     <p>
-      @Messages("search.page.hint").
+      @Messages("search.page.hint")
     </p>
 
-    @form(
+    @formHelper(
         action = routes.SearchController.submitSearchPage(notableEventType),
         'class -> "form js-form") {
 

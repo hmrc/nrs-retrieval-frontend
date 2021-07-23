@@ -16,8 +16,6 @@
 
 package actors
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.{Actor, ActorSystem}
 import akka.util.Timeout
 import config.AppConfig
@@ -26,6 +24,7 @@ import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 
@@ -39,25 +38,21 @@ class CheckStatusActor(appConfig: AppConfig)(implicit val nrsRetrievalConnector:
   private val logger = Logger(this.getClass)
 
   def receive: PartialFunction[Any, Unit] = {
-    case StatusMessage(vaultId, archiveId) => {
+    case StatusMessage(vaultId, archiveId) =>
       logger.info(s"CheckStatusActor received StatusMessage($vaultId, $archiveId)")
       nrsRetrievalConnector.statusSubmissionBundle(vaultId, archiveId).map { response =>
         response.status match {
-          case OK => {
+          case OK =>
             logger.info(s"Retrieval request complete for vault $vaultId, archive $archiveId")
             context.parent ! CompleteMessage
-          }
-          case NOT_FOUND => {
+          case NOT_FOUND =>
             logger.info(s"Status check for vault $vaultId, archive $archiveId returned 404")
             context.parent ! IncompleteMessage
-          }
-          case _ => {
+          case _ =>
             logger.info(s"Retrieval request failed for vault $vaultId, archive $archiveId")
             context.parent ! FailedMessage
-          }
         }
       }
-    }
     case _ =>
       logger.warn(s"An unexpected message has been received")
       sender ! UnknownMessage

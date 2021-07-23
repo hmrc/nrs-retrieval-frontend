@@ -16,8 +16,6 @@
 
 package actors
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.{ActorContext, ActorNotFound, ActorRef, Props}
 import akka.util.Timeout
 import com.google.inject.Inject
@@ -25,13 +23,14 @@ import config.AppConfig
 import connectors.NrsRetrievalConnector
 import play.api.Logger
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
 trait ActorService {
 
-  val logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
 
   def startPollingActor(vaultId: String, archiveId: String)
     (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
@@ -54,14 +53,13 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
     context.actorOf(Props(new PollingActor(vaultId, archiveId, appConfig)), s"pollingActor_key_${vaultId}_key_$archiveId")
 
   override def eventualPollingActor(vaultId: String, archiveId: String)
-                                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = {
+                                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
     context.actorSelection(s"akka://application/user/retrieval-actor/pollingActor_key_${vaultId}_key_$archiveId").resolveOne().recoverWith {
-      case e => {
+      case e =>
         logger.warn(s"Unusual access to retrieval actor, must be recreated because of $e")
         Future(startPollingActor(vaultId, archiveId))
-      }
     }
-  }
+
   override def pollingActor(vaultId: String, archiveId: String)
                            (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] =
     eventualPollingActor(vaultId, archiveId).recover {case _: ActorNotFound => startPollingActor(vaultId, archiveId)}
@@ -69,5 +67,4 @@ class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
   override def pollingActorExists(vaultId: String, archiveId: String)
                            (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean] =
     eventualPollingActor(vaultId, archiveId).map(_ => true).recover{case _: ActorNotFound => false}
-
 }

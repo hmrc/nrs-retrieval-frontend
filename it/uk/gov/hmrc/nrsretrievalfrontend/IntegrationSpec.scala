@@ -17,8 +17,10 @@
 package uk.gov.hmrc.nrsretrievalfrontend
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.matchers.should._
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.Injector
@@ -26,7 +28,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
 
-trait IntegrationSpec extends WordSpecLike
+trait IntegrationSpec extends AnyWordSpec
   with Matchers
   with ScalaFutures
   with GuiceOneServerPerSuite

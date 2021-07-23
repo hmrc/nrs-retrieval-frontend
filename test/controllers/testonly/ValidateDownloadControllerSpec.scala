@@ -17,7 +17,6 @@
 package controllers.testonly
 
 import akka.stream.Materializer
-import akka.util.Timeout
 import connectors.testonly.TestOnlyNrsRetrievalConnector
 import controllers.ControllerSpec
 import controllers.testonly.FormMappings.{archiveId, vaultName}
@@ -29,9 +28,8 @@ import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.contentAsString
+import play.api.test.Helpers.{contentAsString, _}
 
-import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.Future
 
 class ValidateDownloadControllerSpec extends ControllerSpec with MockitoSugar {
@@ -47,8 +45,6 @@ class ValidateDownloadControllerSpec extends ControllerSpec with MockitoSugar {
     )
 
   private implicit lazy val materializer: Materializer = injector.instanceOf[Materializer]
-
-  private implicit val timeout: Timeout = Timeout(1, SECONDS)
 
   private def validateResponse(eventualResult: Future[Result]) = {
     val content = Jsoup.parse(contentAsString(eventualResult))

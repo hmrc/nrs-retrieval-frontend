@@ -14,26 +14,10 @@
  * limitations under the License.
  *@
 
-@(userLoggedIn: Boolean,
-        betaFeedbackUrl: String,
-        betaFeedbackUnauthenticatedUrl: String,
-        showFeedbackLinkInBetaBanner: Boolean = true,
-        noBorder: Boolean = false,
-        userName: Option[Html])
+@(userName: Option[Html])
 
-<div class="beta-banner@if(noBorder) { beta-banner--borderless}">
-    <p><strong class="phase-tag">BETA</strong><span>This is a new service.
-        @if( showFeedbackLinkInBetaBanner ) {
-            Help us improve it - send your
-            @defining(if (userLoggedIn) betaFeedbackUrl else betaFeedbackUnauthenticatedUrl) { linkUrl =>
-                <a id="feedback-link"
-                href="@linkUrl"
-                data-sso="false"
-                data-journey-click="other-global:Click:Feedback">feedback</a>.
-            }
-        }
-    </span>
-    </p>
+<div class="beta-banner>
+    <p><strong class="phase-tag">BETA</strong></p>
 
     @if(userName) {
         <span id="username" class="user-name">Welcome <strong>@userName</strong></span>

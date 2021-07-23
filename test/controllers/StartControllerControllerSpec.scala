@@ -16,6 +16,8 @@
 
 package controllers
 
+import play.api.test.Helpers._
+
 class StartControllerControllerSpec extends ControllerSpec {
   private lazy val controller =
     new StartController(

@@ -23,27 +23,31 @@ import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.http.logging.ConnectionTracing
 import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 trait GetRawHttpTransport {
-  def doGetRaw(url: String)(implicit hc: HeaderCarrier): Future[WSResponse]
+  def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[WSResponse]
 }
 
 trait CoreGetRaw {
-  def GETRaw(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse]
+  def GETRaw(url: String, headers: Seq[(String, String)])
+            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse]
 }
 
 trait WSGetRaw extends WSRequest with CoreGetRaw with GetRawHttpTransport {
-  override def doGetRaw(url: String)(implicit hc: HeaderCarrier): Future[WSResponse] = buildRequest(url).get()
+  override def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[WSResponse] =
+    buildRequest(url, headers).get()
 }
 
 trait HttpGetRaw extends CoreGetRaw with GetRawHttpTransport with HttpVerb with ConnectionTracing with HttpHooks {
-  override def GETRaw(url: String)(implicit  hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse] =
+  override def GETRaw(url: String, headers: Seq[(String, String)])
+                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse] =
     withTracing(GET_VERB, url) {
-      val httpResponse = doGetRaw(url)
+      val httpResponse = doGetRaw(url, headers)
       val wsHttpResponse = httpResponse.map(WSHttpResponse(_))
 
-      executeHooks(url, GET_VERB, None, wsHttpResponse)
+      executeHooks(GET_VERB, new URL(url), headers, None, wsHttpResponse)
       mapErrors(GET_VERB, url, wsHttpResponse)
       httpResponse
     }

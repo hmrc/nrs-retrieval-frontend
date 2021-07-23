@@ -16,14 +16,13 @@
 
 package model
 
+import support.UnitSpec
 import support.fixtures.{NrsSearchFixture, SearchFixture}
-import uk.gov.hmrc.play.test.UnitSpec
 
 class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
-
   "fromNrsSearchResult" should {
     "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe(vatSearchResult)
+      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe vatSearchResult
     }
   }
 
@@ -32,5 +31,4 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
       vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
     }
   }
-
 }

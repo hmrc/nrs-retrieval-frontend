@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package connectors
+package support
 
-import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.http.{HttpGet, HttpPost}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-@Singleton
-class MicroAuthConnector @Inject()(appConfig: AppConfig, val http: HttpGet with HttpPost) extends PlayAuthConnector {
-  override val serviceUrl: String = appConfig.authUrl
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{FiniteDuration, _}
+
+class UnitSpec extends AnyWordSpec with Matchers {
+  implicit val defaultTimeout: FiniteDuration = 5 seconds
+
+  def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 }

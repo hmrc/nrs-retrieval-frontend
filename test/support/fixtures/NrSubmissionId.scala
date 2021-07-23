@@ -16,8 +16,8 @@
 
 package support.fixtures
 
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 trait NrSubmissionId {
-  lazy val nrSubmissionId = UUID.randomUUID().toString
+  lazy val nrSubmissionId: String = randomUUID().toString
 }

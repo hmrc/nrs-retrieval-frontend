@@ -16,8 +16,6 @@
 
 package controllers
 
-import java.util.concurrent.TimeUnit
-
 import actors._
 import akka.actor.ActorRef
 import akka.pattern.{AskTimeoutException, ask}
@@ -26,7 +24,6 @@ import com.google.inject.name.Named
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
-import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
 import play.api.i18n.I18nSupport
@@ -34,10 +31,13 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import views.html.{error_template, search_page}
+
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import views.html.{error_template, search_page}
 
 @Singleton
 class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: ActorRef,
@@ -53,9 +53,6 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   override val logger: Logger = Logger(this.getClass)
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
-
-  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
-    .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
@@ -176,5 +173,4 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
-
 }

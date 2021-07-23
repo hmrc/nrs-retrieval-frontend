@@ -32,16 +32,20 @@ package views
  * limitations under the License.
  */
 
-import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
 import config.AppConfig
+import org.scalatest.matchers.must.Matchers._
+import play.api.i18n.Messages
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
 import support.fixtures.ViewFixture
 import views.html.start_page
 
 class start_pageSpec extends GuiceAppSpec {
 
-  implicit val appConfig = app.injector.instanceOf[AppConfig]
+  lazy implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+
   val startPage: start_page = fakeApplication.injector.instanceOf[views.html.start_page]
 
   "start page" should {
@@ -62,7 +66,6 @@ class start_pageSpec extends GuiceAppSpec {
   }
 
   trait StartPageViewFixture extends ViewFixture {
-    implicit val requestWithToken = addToken(request)
+    implicit val requestWithToken: FakeRequest[AnyContentAsEmpty.type] = addToken(request)
   }
-
 }

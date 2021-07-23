@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class Selector(val notableEventType: String)
+case class Selector(notableEventType: String)
 
 object Selector {
   implicit val formats: OFormat[Selector] = Json.format[Selector]

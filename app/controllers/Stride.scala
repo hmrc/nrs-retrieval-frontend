@@ -18,75 +18,61 @@ package controllers
 
 import config.AppConfig
 import models.AuthorisedUser
-import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Request, Result}
+import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{credentials, _}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
-import views.html.error_template
-import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import views.html.error_template
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseController with I18nSupport {
-
   val strideRoles: Set[String]
   val logger: Logger
   val appConfig: AppConfig
-  val config = appConfig.runModeConfiguration
-  val env = appConfig.environment
+  val config: Configuration = appConfig.runModeConfiguration
+  val env: Environment = appConfig.environment
   val authConnector: AuthConnector
   val errorPage: error_template
 
-  private def convertRolesSetToPredicate(enrolments: Set[String]): Predicate = {
-    enrolments.map(Enrolment.apply).reduce(
-      (enrolment: Predicate, accumulatedPredicate: Predicate) => enrolment or accumulatedPredicate
-    )
-  }
-
-  private def strideAuthorised[B](f: Credentials ~ Enrolments ~ Name => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
-    authorised(
-      convertRolesSetToPredicate(strideRoles).and(AuthProviders(PrivilegedApplication))
-    ).retrieve(
-      Retrievals.credentials.and(Retrievals.authorisedEnrolments).and(Retrievals.name)
-    ) {
-      f
-    }
-  }
-
-  def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])(
-    implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] = {
+  def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])
+                    (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] =
     if (appConfig.strideAuth) {
       logger.info(s"Verify stride authorisation")
-      strideAuthorised {
-        case credentials ~ enrolments ~ name =>
+
+      val notAuthorised = "Not authorised"
+
+      authorised(AuthProviders(PrivilegedApplication)).retrieve(credentials and allEnrolments and name) {
+        case Some(userCredentials) ~ enrolments ~ Some(userName) =>
           logger.debug(s"$actionName - authorised, enrolments=$enrolments")
-          f(AuthorisedUser((name.name.toList ++ name.lastName.toList).mkString(" "), credentials.providerId))
+
+          val userRoles = enrolments.enrolments.map(_.key)
+          val userHasOneOrMoreRequiredRoles = appConfig.nrsStrideRoles.intersect(userRoles).nonEmpty
+
+          if (userHasOneOrMoreRequiredRoles) {
+            f(AuthorisedUser((userName.name.toList ++ userName.lastName.toList).mkString(" "), userCredentials.providerId))
+          } else {
+            Future successful Ok(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${enrolments.enrolments.map(_.key)}"))
+          }
       }.recover {
         case _: NoActiveSession =>
           logger.debug(s"$actionName - NoActiveSession")
-          toStrideLogin(
-            if (appConfig.isLocal) {
-              s"http://${request.host}${request.uri}"
-            }
-            else {
-              s"${request.uri}"
-            })
-        case ex:InsufficientEnrolments =>
+          toStrideLogin(if (appConfig.isLocal) s"http://${request.host}${request.uri}" else s"${request.uri}")
+        case ex: InsufficientEnrolments =>
           logger.info(s"$actionName - error, not authorised", ex)
-          Ok(errorPage("Not authorised", "Not authorised", s"Insufficient enrolments - ${ex.msg}"))
+          Ok(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${ex.msg}"))
         case ex =>
           logger.warn(s"$actionName - error, other error", ex)
-          Ok(errorPage("Not authorised", "Not authorised", "Sorry, not authorised"))
+          Ok(errorPage(notAuthorised, notAuthorised, "Sorry, not authorised"))
       }
     } else {
       logger.debug(s"$actionName - auth switched off")
       f(AuthorisedUser("Auth disabled", "Auth disabled"))
     }
-
-  }
-
 }

@@ -16,28 +16,39 @@
 
 package actors
 
-import java.util.concurrent.TimeUnit
-
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import akka.util.Timeout
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import play.api.http.Status
 import support.fixtures.Infrastructure
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.{Await, Future}
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 // todo : use unit spec in line with our other tests
 class StatusCheckActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
+  with AnyWordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
 
-  implicit val timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+
+  private val testVaultId: String = "1"
+  private val testArchiveId: String = "1"
+
+  private val pollingActor =
+    system.actorOf(Props(new PollingActor(
+      testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
+
+  private val checkStatusActor = TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
+
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
@@ -99,12 +110,5 @@ class StatusCheckActorSpec() extends TestKit(ActorSystem("MySpec")) with Implici
         , 5 seconds) should be(PollingMessage)
     }
   }
-
-  val testVaultId: String = "1"
-  val testArchiveId: String = "1"
-
-  val pollingActor: ActorRef = system.actorOf(Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
-
-  val checkStatusActor = TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
 
 }

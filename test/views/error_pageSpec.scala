@@ -33,7 +33,9 @@ package views
  */
 
 import config.AppConfig
+import org.scalatest.matchers.must.Matchers._
 import play.api.i18n.Messages
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
@@ -41,9 +43,10 @@ import support.fixtures.ViewFixture
 import views.html.error_template
 
 class error_pageSpec extends GuiceAppSpec {
+  lazy implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
-  val errorPage: error_template = fakeApplication.injector.instanceOf[views.html.error_template]
-  implicit val appConfig = app.injector.instanceOf[AppConfig]
+  lazy val errorPage: error_template = fakeApplication.injector.instanceOf[views.html.error_template]
+
   val request: FakeRequest[_] = FakeRequest()
 
   "error page" should {
@@ -58,7 +61,7 @@ class error_pageSpec extends GuiceAppSpec {
   }
 
   trait StartPageViewFixture extends ViewFixture {
-    implicit val requestWithToken = addToken(request)
+    implicit val requestWithToken: FakeRequest[AnyContentAsEmpty.type] = addToken(request)
   }
 
 }

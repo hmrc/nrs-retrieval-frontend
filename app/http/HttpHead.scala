@@ -22,58 +22,30 @@ import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.http.logging.ConnectionTracing
 import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 
-import java.net.URLEncoder
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeadHttpTransport {
-  def doHead(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def doHead(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[HttpResponse]
 }
 
 trait CoreHead {
-  def HEAD[A](url: String)(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
-
-  def HEAD[A](url: String, queryParams: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
+  def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
 }
 
 trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
+  import scala.concurrent.ExecutionContext.Implicits.global
 
-  override def doHead(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    buildRequest(url).head().map(new WSHttpResponse(_))
-  }
-
+  override def doHead(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    buildRequest(url, headers).head().map(WSHttpResponse.apply)
 }
 
 trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks {
-
-  override def HEAD[A](url: String)(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
+  override def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
     withTracing(HEAD_VERB, url) {
-
-      val httpResponse = doHead(url)
-      executeHooks(url, HEAD_VERB, None, httpResponse)
+      val httpResponse = doHead(url, headers)
+      executeHooks(HEAD_VERB, new URL(url), headers, None, httpResponse)
       mapErrors(HEAD_VERB, url, httpResponse).map(response => rds.read(HEAD_VERB, url, response))
     }
-
-  override def HEAD[A](url: String, queryParams: Seq[(String, String)])(
-    implicit rds: HttpReads[A],
-    hc: HeaderCarrier,
-    ec: ExecutionContext): Future[A] = {
-    val queryString = makeQueryString(queryParams)
-    if (url.contains("?")) {
-      throw new UrlValidationException(
-        url,
-        s"${this.getClass}.HEAD(url, queryParams)",
-        "Query parameters must be provided as a Seq of tuples to this method")
-    }
-    HEAD(url + queryString)
-  }
-
-  private def makeQueryString(queryParams: Seq[(String, String)]) = {
-    val paramPairs = queryParams.map(Function.tupled((k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}"))
-    val params = paramPairs.mkString("&")
-
-    if (params.isEmpty) "" else s"?$params"
-  }
 }
 

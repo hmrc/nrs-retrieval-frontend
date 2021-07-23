@@ -23,10 +23,10 @@ import org.mockito.internal.stubbing.answers.Returns
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.play.test.UnitSpec
+import support.UnitSpec
 
 import java.io.ByteArrayOutputStream
-import java.nio.charset.Charset
+import java.nio.charset.Charset.defaultCharset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
 class ValidateDownloadResultSpec extends UnitSpec with MockitoSugar with Status {
@@ -34,7 +34,7 @@ class ValidateDownloadResultSpec extends UnitSpec with MockitoSugar with Status 
 
   "ValidateDownloadResultSpec.apply" should {
     "transform a WSResponse" in {
-      val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())
+      val output: Array[Byte] = "text".getBytes(defaultCharset())
       val byteArrayOutputStream = new ByteArrayOutputStream()
       val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
       val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")

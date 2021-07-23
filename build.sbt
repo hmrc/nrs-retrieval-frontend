@@ -58,6 +58,14 @@ lazy val root = (project in file("."))
     scalacOptions += "-P:silencer:pathFilters=target/.*",
     publishingSettings,
     scoverageSettings)
+  .settings(
+    TwirlKeys.templateImports ++= Seq(
+      "uk.gov.hmrc.govukfrontend.views.html.components._",
+      "uk.gov.hmrc.govukfrontend.views.html.helpers._",
+      "uk.gov.hmrc.hmrcfrontend.views.html.components._",
+      "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
+    )
+  )
   .settings(defaultSettings(): _*)
   .settings(integrationTestSettings())
   .configs(IntegrationTest)

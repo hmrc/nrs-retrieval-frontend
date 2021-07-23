@@ -1,0 +1,62 @@
+@import views.html.helper.CSPNonce
+@import config.AppConfig
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
+@import uk.gov.hmrc.govukfrontend.views.html.components.TwoThirdsMainContent
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcHead
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLanguageSelectHelper
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcScripts
+
+@this(govukLayout: GovukLayout,
+        hmrcInternalHeader: HmrcInternalHeader,
+        hmrcStandardFooter: HmrcStandardFooter,
+        hmrcHead: HmrcHead,
+        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+        hmrcScripts: HmrcScripts,
+        defaultMainContent: TwoThirdsMainContent)
+
+@(  pageTitle: String,
+    userName: Option[Html] = None,
+    additionalScriptsBlock: Option[Html] = None,
+    mainContentLayout: Option[Html => Html] = Some(defaultMainContent(_))
+)(  contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
+
+@nrsHeaderBlock = {
+    @hmrcInternalHeader(
+        params = InternalHeader(
+            homepageUrl = "https://www.gov.uk/",
+            serviceName = Some(Messages("service.name")),
+            serviceUrl = routes.StartController.showStartPage().url,
+            language = En
+        )
+    )
+}
+
+@betaBannerAndContentBlock() = {
+    <main id="wrapper" role="main"  >
+        <div class="centered-content">
+            <div class="service-info ">
+                @helpers.beta_banner(userName)
+            </div>
+        </div>
+
+        <div id="content">
+            <article class="content__body">
+                @contentBlock
+            </article>
+        </div>
+    </main>
+}
+
+@govukLayout(
+    pageTitle = Some(pageTitle),
+    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = None)),
+    headerBlock = Some(nrsHeaderBlock),
+    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = additionalScriptsBlock)),
+    beforeContentBlock = None,
+    footerBlock = Some(hmrcStandardFooter(accessibilityStatementUrl = None)),
+    mainContentLayout = mainContentLayout,
+    assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url),
+    cspNonce = CSPNonce.get
+)(betaBannerAndContentBlock)
+

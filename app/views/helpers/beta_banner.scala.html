@@ -16,11 +16,11 @@
 
 @(userName: Option[Html])
 
-<div class="beta-banner>
-    <p><strong class="phase-tag">BETA</strong></p>
+<div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">BETA</p>
 
     @if(userName) {
-        <span id="username" class="user-name">Welcome <strong>@userName</strong></span>
+        <span id="username" class="govuk-phase-banner__text">Welcome <strong>@userName</strong></span>
     }
 
 </div>

@@ -61,7 +61,7 @@ class start_pageSpec extends GuiceAppSpec {
 
     "have the correct start button" in new StartPageViewFixture {
       val view: HtmlFormat.Appendable = startPage()
-      doc.getElementsByClass("button--get-started").text() mustBe Messages("start.button.start.lbl")
+      doc.getElementById("continueButton").text() mustBe Messages("start.button.start.lbl")
     }
   }
 

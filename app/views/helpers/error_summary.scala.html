@@ -21,9 +21,9 @@
     <h2 class="heading-medium error-summary-heading" id="error-summary-heading">@Messages("generic.error")</h2>
     <ul class="error-summary-list">
 
-    @for(error <- form.errors) {
+    @for((error, index) <- form.errors.zipWithIndex) {
       <li>
-        <a href=@{
+        <a id="@{s"error-message-$index"}" href=@{
           "#" + error.key + "-inline-error"
         }>
         @{Messages(error.key + "." + error.message)}

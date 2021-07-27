@@ -1,3 +1,4 @@
+@import views.html.components.Heading1
 @import views.html.helper.CSPNonce
 @import config.AppConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
@@ -7,19 +8,47 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLanguageSelectHelper
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcScripts
 
-@this(govukLayout: GovukLayout,
+@this(  govukLayout: GovukLayout,
         hmrcInternalHeader: HmrcInternalHeader,
         hmrcStandardFooter: HmrcStandardFooter,
         hmrcHead: HmrcHead,
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcScripts: HmrcScripts,
-        defaultMainContent: TwoThirdsMainContent)
+        defaultMainContent: TwoThirdsMainContent,
+        h1: Heading1,
+        govukBackLink: GovukBackLink)
 
 @(  pageTitle: String,
-    userName: Option[Html] = None,
-    additionalScriptsBlock: Option[Html] = None,
-    mainContentLayout: Option[Html => Html] = Some(defaultMainContent(_))
+    maybePageHeader: Option[String] = None,
+    maybeUser: Option[AuthorisedUser] = None,
+    maybeAdditionalScriptsBlock: Option[Html] = None,
+    maybeMainContentLayout: Option[Html => Html] = Some(defaultMainContent(_)),
+    maybeBackButtonUrl: Option[play.api.mvc.Call] = None
 )(  contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
+
+@headBlock = {
+    <link href='@routes.Assets.versioned("/stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+    <script src='@{s"${appConfig.assetsPrefix}/javascripts/vendor/modernizr.js"}' type='text/javascript'></script>
+}
+
+@bodyEndDefault = {
+    <div id="global-app-error" class="app-error hidden"></div>
+
+    <script type="text/javascript">var ssoUrl = "";</script>
+    <script src="@{s"${appConfig.assetsPrefix}/javascripts/application.min.js"}" type="text/javascript"></script>
+    <script language="JavaScript" type="application/javascript" src="@routes.Assets.versioned("javascripts/nrs.js")"></script>
+}
+
+
+@maybeUserName = @{
+    maybeUser.map(u => Html(u.userName))
+}
+
+@maybeBackLink = @{
+    maybeBackButtonUrl.map { url =>
+        govukBackLink(BackLink(href = url.toString, content = Text(messages("site.back"))))
+    }
+}
 
 @nrsHeaderBlock = {
     @hmrcInternalHeader(
@@ -33,30 +62,22 @@
 }
 
 @betaBannerAndContentBlock() = {
-    <main id="wrapper" role="main"  >
-        <div class="centered-content">
-            <div class="service-info ">
-                @helpers.beta_banner(userName)
-            </div>
-        </div>
-
-        <div id="content">
-            <article class="content__body">
-                @contentBlock
-            </article>
-        </div>
-    </main>
+  @helpers.beta_banner(maybeUserName)
+  @maybeBackLink
+  @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
+  @contentBlock
 }
 
 @govukLayout(
     pageTitle = Some(pageTitle),
-    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = None)),
+    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = Some(headBlock))),
     headerBlock = Some(nrsHeaderBlock),
-    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = additionalScriptsBlock)),
+    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = maybeAdditionalScriptsBlock)),
     beforeContentBlock = None,
     footerBlock = Some(hmrcStandardFooter(accessibilityStatementUrl = None)),
-    mainContentLayout = mainContentLayout,
+    mainContentLayout = maybeMainContentLayout,
     assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url),
-    cspNonce = CSPNonce.get
+    cspNonce = CSPNonce.get,
+    bodyEndBlock = Some(bodyEndDefault)
 )(betaBannerAndContentBlock)
 

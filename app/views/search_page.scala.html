@@ -17,14 +17,13 @@
 @import config.AppConfig
 @import models.AuthorisedUser
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(mainTemplate: views.html.main_template, formHelper: FormWithCSRF)
+@this(layout: Layout, formHelper: FormWithCSRF, p: Paragraph, govukInput: GovukInput, govukButton: GovukButton)
 
-@(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@userName = @{
-    user.map(u => Html(u.userName))
-}
+@(searchForm: Form[SearchQuery], maybeUser: Option[AuthorisedUser] = None, maybeResults: Option[Seq[SearchResult]])(
+        implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @notableEventType = @{searchForm.get.notableEventType}
 
@@ -32,45 +31,46 @@
   appConfig.notableEvents(notableEventType)
 }
 
-@title = @{
-  Messages(s"search.page.dynamic.header.lbl", notableEvent.displayName)
+@pageHeader = @{
+    Messages(s"search.page.dynamic.header.lbl", notableEvent.displayName)
 }
 
 @pageTitle = @{
-  if (results.isDefined) {
-    Messages("search.page.results") + " - " + title
-  } else {
-    title
-  }
+    if (maybeResults.isDefined) s"${Messages("search.page.results")} - $pageHeader" else pageHeader
 }
 
-@mainTemplate(title = pageTitle, userName = userName) {
+@layout(
+    pageTitle = pageTitle,
+    maybePageHeader = Some(pageHeader),
+    maybeUser = maybeUser,
+    maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage())) {
+    @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
+    @p(content = Text(Messages("search.page.hint")))
 
-    <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
+    @formHelper(action = routes.SearchController.submitSearchPage(notableEventType), 'class -> "form js-form") {
+        <input type="hidden" name="notableEventType" value="@{notableEventType}">
 
-    <h1 id="pageHeader">
-      @title
-    </h1>
+        @for((searchKey, index) <- appConfig.notableEvents(notableEventType).searchKeys.zipWithIndex){
+            <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
 
-    <p>
-      @Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)
-    </p>
+            @govukInput(
+                Input(
+                    inputType = "text",
+                    classes = "govuk-input--width-20",
+                    label = Label(classes = "", content = Text(Messages(s"search.page.searchkey.lbl", searchKey.label)))
+                ).withFormField(searchForm(s"searchKeyValue_$index"))
+            )
+        }
 
-    <p>
-      @Messages("search.page.hint")
-    </p>
-
-    @formHelper(
-        action = routes.SearchController.submitSearchPage(notableEventType),
-        'class -> "form js-form") {
-
-      <input type="hidden" name="notableEventType" value="@{notableEventType}">
-
-      @search_query(searchForm, notableEventType)
-
+        @govukButton(
+            Button(
+                name = Some("searchButton"),
+                content = Text(messages("search.button.search.lbl")),
+                inputType = Some("submit"),
+                preventDoubleClick = true))
     }
 
-    @if(results.isDefined) {
-      @search_results(searchForm, results.getOrElse(Seq.empty[SearchResult]))
+    @maybeResults.fold(Html("")){ results =>
+      @search_results(searchForm, results)
     }
 }

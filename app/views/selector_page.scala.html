@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(layout: Layout, formHelper: FormWithCSRF, govukRadios: GovukRadios, govukButton: GovukButton)
+@this(layout: Layout, formHelper: FormWithCSRF, govukRadios: GovukRadios, button: components.Button)
 
 @(selectorForm: Form[Selector], maybeUser: Option[AuthorisedUser] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
@@ -73,12 +73,6 @@
         ).withFormField(selectorForm("notableEventType"))
     )
 
-    @govukButton(
-        Button(
-            name = Some("continueButton"),
-            content = Text(messages("button.continue.lbl")),
-            inputType = Some("submit"),
-            preventDoubleClick = true)
-    )
+    @button(name ="continueButton", content = messages("button.continue.lbl"), inputType = "submit")
   }
 }

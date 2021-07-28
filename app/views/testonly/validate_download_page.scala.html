@@ -20,9 +20,8 @@
 @import models.testonly.{ValidateDownloadRequest, ValidateDownloadResult}
 @import views.html.components._
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(layout:Layout, formHelper: FormWithCSRF, p: Paragraph, govukInput: GovukInput, govukButton: GovukButton, h1: Heading1)
+@this(layout:Layout, formHelper: FormWithCSRF, p: Paragraph, textInput: TextInput, button: components.Button, h1: Heading1)
 
 @(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
@@ -31,28 +30,9 @@
     @p(content = Text(Messages("test-only.validate-download.page.info")))
 
     @formHelper(testonly.routes.ValidateDownloadController.submitValidateDownload, 'class -> "form js-form") {
-        @govukInput(
-            Input(
-                inputType = "text",
-                classes = "govuk-input--width-20",
-                label = Label(classes = "", content = Text(Messages("test-only.validate-download.form.vaultName")))
-            ).withFormField(form(vaultName))
-        )
-
-        @govukInput(
-            Input(
-                inputType = "text",
-                classes = "govuk-input--width-20",
-                label = Label(classes = "", content = Text(Messages("test-only.validate-download.form.archiveId")))
-            ).withFormField(form(archiveId))
-        )
-
-        @govukButton(
-            Button(
-                name = Some("submitButton"),
-                content = Text(messages("test-only.validate-download.form.submit")),
-                inputType = Some("submit"),
-                preventDoubleClick = true))
+        @textInput(Messages("test-only.validate-download.form.vaultName"), form(vaultName))
+        @textInput(Messages("test-only.validate-download.form.archiveId"), form(archiveId))
+        @button(name = "submitButton", content = messages("test-only.validate-download.form.submit"), inputType = "submit")
     }
 
     @maybeResults.fold { @Html("") } { result =>

@@ -18,9 +18,8 @@
 @import models.AuthorisedUser
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import views.html.components._
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(layout: Layout, formHelper: FormWithCSRF, p: Paragraph, govukInput: GovukInput, govukButton: GovukButton)
+@this(layout: Layout, formHelper: FormWithCSRF, p: Paragraph, textInput: TextInput, button: components.Button)
 
 @(searchForm: Form[SearchQuery], maybeUser: Option[AuthorisedUser] = None, maybeResults: Option[Seq[SearchResult]])(
         implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -53,21 +52,10 @@
         @for((searchKey, index) <- appConfig.notableEvents(notableEventType).searchKeys.zipWithIndex){
             <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
 
-            @govukInput(
-                Input(
-                    inputType = "text",
-                    classes = "govuk-input--width-20",
-                    label = Label(classes = "", content = Text(Messages(s"search.page.searchkey.lbl", searchKey.label)))
-                ).withFormField(searchForm(s"searchKeyValue_$index"))
-            )
+            @textInput(Messages("search.page.searchkey.lbl"), searchForm(s"searchKeyValue_$index"))
         }
 
-        @govukButton(
-            Button(
-                name = Some("searchButton"),
-                content = Text(messages("search.button.search.lbl")),
-                inputType = Some("submit"),
-                preventDoubleClick = true))
+        @button(name = "searchButton", content = messages("search.button.search.lbl"), inputType = "submit")
     }
 
     @maybeResults.fold(Html("")){ results =>

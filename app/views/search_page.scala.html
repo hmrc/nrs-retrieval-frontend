@@ -52,7 +52,7 @@
         @for((searchKey, index) <- appConfig.notableEvents(notableEventType).searchKeys.zipWithIndex){
             <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
 
-            @textInput(Messages("search.page.searchkey.lbl"), searchForm(s"searchKeyValue_$index"))
+            @textInput(Messages(s"search.page.searchkey.lbl", searchKey.label), searchForm(s"searchKeyValue_$index"))
         }
 
         @button(name = "searchButton", content = messages("search.button.search.lbl"), inputType = "submit")

@@ -21,10 +21,9 @@
 @(  pageTitle: String,
     maybePageHeader: Option[String] = None,
     maybeUser: Option[AuthorisedUser] = None,
-    maybeAdditionalScriptsBlock: Option[Html] = None,
     maybeMainContentLayout: Option[Html => Html] = Some(defaultMainContent(_)),
     maybeBackButtonUrl: Option[play.api.mvc.Call] = None
-)(  contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
+)(content: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
 
 @headBlock = {
     <link href='@routes.Assets.versioned("/stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
@@ -61,23 +60,23 @@
     )
 }
 
-@betaBannerAndContentBlock() = {
+@contentBlock() = {
   @helpers.beta_banner(maybeUserName)
   @maybeBackLink
   @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
-  @contentBlock
+  @content
 }
 
 @govukLayout(
     pageTitle = Some(pageTitle),
     headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = Some(headBlock))),
     headerBlock = Some(nrsHeaderBlock),
-    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = maybeAdditionalScriptsBlock)),
+    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get)),
     beforeContentBlock = None,
-    footerBlock = Some(hmrcStandardFooter(accessibilityStatementUrl = None)),
+    footerBlock = Some(hmrcStandardFooter()),
     mainContentLayout = maybeMainContentLayout,
     assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url),
     cspNonce = CSPNonce.get,
     bodyEndBlock = Some(bodyEndDefault)
-)(betaBannerAndContentBlock)
+)(contentBlock)
 

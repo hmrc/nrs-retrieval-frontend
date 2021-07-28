@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(layout:Layout, formHelper: FormWithCSRF, p: Paragraph, govukInput: GovukInput, govukButton: GovukButton)
+@this(layout:Layout, formHelper: FormWithCSRF, p: Paragraph, govukInput: GovukInput, govukButton: GovukButton, h1: Heading1)
 
 @(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
@@ -56,9 +56,7 @@
     }
 
     @maybeResults.fold { @Html("") } { result =>
-        <h1 id="resultsHeader">
-            @Messages("test-only.validate-download.results.title")
-        </h1>
+        @h1(id="resultsHeader", content=Text(Messages("test-only.validate-download.results.title")))
 
         <table>
             <tr>

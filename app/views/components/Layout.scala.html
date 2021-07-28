@@ -30,6 +30,16 @@
     <script src='@{s"${appConfig.assetsPrefix}/javascripts/vendor/modernizr.js"}' type='text/javascript'></script>
 }
 
+@banner = {
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">BETA</p>
+
+        maybeUser.map { userName =>
+            <span id="username" class="govuk-phase-banner__content user-name">Welcome <strong>userName</strong></span>
+        }
+    </div>
+}
+
 @bodyEndDefault = {
     <div id="global-app-error" class="app-error hidden"></div>
 
@@ -61,7 +71,7 @@
 }
 
 @contentBlock() = {
-  @helpers.beta_banner(maybeUserName)
+  @banner
   @maybeBackLink
   @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
   @content

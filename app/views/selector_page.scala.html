@@ -19,7 +19,6 @@
 @import models.Selector
 @import views.helpers._
 @import views.html.components._
-@import views.html.helpers._
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
@@ -36,8 +35,33 @@
   appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents(key).displayName)).toList.sortBy(_.label)
 }
 
+@errorSummary = {
+    @if(selectorForm.hasErrors) {
+        <div class="error-summary" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
+            <h2 class="heading-medium error-summary-heading" id="error-summary-heading">@Messages("generic.error")</h2>
+            <ul class="error-summary-list">
+
+            @for((error, index) <- selectorForm.errors.zipWithIndex) {
+                <li>
+                    <a id="@{
+                        s"error-message-$index"
+                    }" href=@{
+                        "#" + error.key + "-inline-error"
+                    }>
+                    @{
+                        Messages(error.key + "." + error.message)
+                    }
+                    </a>
+                </li>
+            }
+
+            </ul>
+        </div>
+    }
+}
+
 @layout(pageTitle = title, maybeUser = maybeUser, maybeBackButtonUrl=Some(routes.StartController.showStartPage) ) {
-  @error_summary(selectorForm)
+  @errorSummary
 
   @formHelper(action = routes.SelectorController.submitSelectorPage(), 'class -> "form", 'novalidate -> "") {
     @govukRadios(

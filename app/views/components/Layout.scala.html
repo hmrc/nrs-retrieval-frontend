@@ -22,13 +22,11 @@
     maybePageHeader: Option[String] = None,
     maybeUser: Option[AuthorisedUser] = None,
     maybeMainContentLayout: Option[Html => Html] = Some(defaultMainContent(_)),
-    maybeBackButtonUrl: Option[play.api.mvc.Call] = None
+    maybeBackButtonUrl: Option[play.api.mvc.Call] = None,
+    maybeHeadBlock: Option[Html] = None,
+    maybeBodyEndBlock: Option[Html] = None
 )(content: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
 
-@headBlock = {
-    <link href='@routes.Assets.versioned("/stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
-    <script src='@{s"${appConfig.assetsPrefix}/javascripts/vendor/modernizr.js"}' type='text/javascript'></script>
-}
 
 @banner = {
     <div class="govuk-phase-banner">
@@ -41,14 +39,6 @@
   maybeUser.map { user =>
     Html(s"""<span id="username" class="govuk-phase-banner__content user-name">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
   }
-}
-
-@bodyEndDefault = {
-    <div id="global-app-error" class="app-error hidden"></div>
-
-    <script type="text/javascript">var ssoUrl = "";</script>
-    <script src="@{s"${appConfig.assetsPrefix}/javascripts/application.min.js"}" type="text/javascript"></script>
-    <script language="JavaScript" type="application/javascript" src="@routes.Assets.versioned("javascripts/nrs.js")"></script>
 }
 
 @maybeBackLink = @{
@@ -77,7 +67,7 @@
 
 @govukLayout(
     pageTitle = Some(pageTitle),
-    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = Some(headBlock))),
+    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = maybeHeadBlock)),
     headerBlock = Some(nrsHeaderBlock),
     scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get)),
     beforeContentBlock = None,
@@ -85,6 +75,6 @@
     mainContentLayout = maybeMainContentLayout,
     assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url),
     cspNonce = CSPNonce.get,
-    bodyEndBlock = Some(bodyEndDefault)
+    bodyEndBlock = maybeBodyEndBlock
 )(contentBlock)
 

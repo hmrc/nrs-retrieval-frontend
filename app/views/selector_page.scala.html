@@ -35,34 +35,7 @@
   appConfig.notableEvents.keys.map(key => RadioParams(key, appConfig.notableEvents(key).displayName)).toList.sortBy(_.label)
 }
 
-@errorSummary = {
-    @if(selectorForm.hasErrors) {
-        <div class="error-summary" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-heading">@Messages("generic.error")</h2>
-            <ul class="error-summary-list">
-
-            @for((error, index) <- selectorForm.errors.zipWithIndex) {
-                <li>
-                    <a id="@{
-                        s"error-message-$index"
-                    }" href=@{
-                        "#" + error.key + "-inline-error"
-                    }>
-                    @{
-                        Messages(error.key + "." + error.message)
-                    }
-                    </a>
-                </li>
-            }
-
-            </ul>
-        </div>
-    }
-}
-
 @layout(pageTitle = title, maybeUser = maybeUser, maybeBackButtonUrl=Some(routes.StartController.showStartPage) ) {
-  @errorSummary
-
   @formHelper(action = routes.SelectorController.submitSelectorPage(), 'class -> "form", 'novalidate -> "") {
     @govukRadios(
         Radios(

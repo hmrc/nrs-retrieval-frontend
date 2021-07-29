@@ -60,7 +60,7 @@ class search_pageSpec extends GuiceAppSpec with SearchFixture{
 
     "have the correct page header" in new SearchPageViewFixture {
       val view: HtmlFormat.Appendable = searchPage(searchForm, None, Some(Seq.empty[SearchResult]))
-      doc.getElementById("pageHeader").text() mustBe Messages(s"search.page.vat-return.header.lbl")
+      doc.getElementById("pageHeader").text() mustBe "Search for VAT returns"
     }
   }
 

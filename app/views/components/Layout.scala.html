@@ -39,7 +39,7 @@
 
 @maybeUserNameSpan = @{
   maybeUser.map { user =>
-    Html(s"""<span id="username" class="govuk-phase-banner__content user-name">Welcome <strong>${user.userName}</strong></span>""")
+    Html(s"""<span id="username" class="govuk-phase-banner__content user-name">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
   }
 }
 

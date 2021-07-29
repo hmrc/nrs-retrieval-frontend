@@ -1,81 +1,42 @@
 service.name=Search the Non-Repudiation Store
-service.name.lbl=Search the Non-Repudiation Store
 
 generic.error=There is a problem
 generic.errorPrefix=Error:
 
 ################################## General #######################################################
-years.lbl=years
-page.previous.lbl=Previous page
-page.next.lbl=Next page
 button.continue.lbl=Continue
-link.back=Back
 site.back=Back
+site.welcome=Welcome
 
 ################################## Start Page ####################################################
 start.page.header.lbl=Search the Non-Repudiation Store
-start.page.title.lbl=Start
 start.text.one.lbl=This service provides signed submissions made to HMRC.
-start.text.two.lbl=Using this service, you can:
 start.text.two.option.one.lbl=search for a submission, such as a VAT return
 start.text.two.option.two.lbl=retrieve and download a signed copy of the submission
-start.text.three.lbl=Submissions are held in encrypted long term storage, retrieval may take up to 5 minutes.
 start.button.start.lbl=Start now
 
 ################################## Selector Page ####################################################
 selector.page.header.lbl=What type of digital submission would you like to search for?
-selector.page.vat-return.lbl=VAT return
-selector.page.error.required=Please select a type of digital submission to search for
-notableEventType.error.required=Please select a type of digital submission to search for
-
-################################## Service Scope Table ###########################################
-service.scope.summary.lbl=Check storage dates, submission types and how you search for them
-service.scope.summary.tax.service.lbl=Tax service
-service.scope.summary.submission.type.lbl=Submission type
-service.scope.summary.search.by.lbl=Search by
-service.scope.summary.stored.from.lbl=Stored from
-service.scope.summary.stored.for.lbl=Stored for
-service.scope.footer.lbl=More services will be added in the future.
 
 ################################## Search Page ###################################################
-search.page.header.lbl=Search for digital submissions
 search.page.dynamic.header.lbl=Search for {0}s
-search.page.vat-return.header.lbl=Search for VAT returns
-search.page.title.lbl=Search
-enter-vrn.lbl=Enter a VAT Registration Number (VRN)
 search.page.searchkey.lbl=Enter a {0}
-search.page.vat-return.lbl=Enter a VAT Registration Number (VRN)
 search.page.hint=Retrieval from long term storage takes up to 5 minutes
 search.page.results=Results
 search.button.search.lbl=Search
-search.button.refresh.lbl=Refresh
 search.page.stored.info=You can search for records stored from {0} onwards. The records are stored for {1}.
 search.page.results.info=We found {0} results for {1}: "{2}"
 
 ################################## Search Results ################################################
-search.results.notfound.lbl=No results found
 search.results.notfoundfor.lbl=No results found for "{0}"
-search.results.check.lbl=Check which submission types are stored
-search.results.submitted.lbl=Received at
 search.results.filename.lbl=Filename
-search.results.results.lbl=results
 search.results.retrieve.lbl=Retrieve
 search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieving {0}
 search.results.retrieval.info=(this may take up to 5 minutes)
-search.results.error.summary.lbl=There's a problem
+search.results.error.summary.lbl=There''s a problem
 search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact <a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.
-
-################################## Error Page 500 ####################################################
-global.error.InternalServerError500.title=Service unavailable
-global.error.InternalServerError500.heading=Service unavailable
-global.error.InternalServerError500.message=You will be able to use the service later.
-
-################################## Error Page 400 ####################################################
-global.error.InternalServerError400.title=Service unavailable
-global.error.InternalServerError400.heading=Service unavailable
-global.error.InternalServerError400.message=You will be able to use the service later.
 
 ################################## Error Page ####################################################
 error.page.title=Service unavailable
@@ -86,9 +47,7 @@ error.page.message=You will be able to use the service later.
 test-only.validate-download.page.header=Test-only validate download
 test-only.validate-download.page.info=Validate a submission download
 test-only.validate-download.form.vaultName=Vault name
-test-only.validate-download.form.vaultName.error=Enter a vault name
 test-only.validate-download.form.archiveId=Archive id
-test-only.validate-download.form.archiveId.error=Enter an archive id
 test-only.validate-download.form.submit=Submit
 test-only.validate-download.results.title=Results
 test-only.validate-download.results.status=Status

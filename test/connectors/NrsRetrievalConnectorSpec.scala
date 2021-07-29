@@ -28,11 +28,10 @@ import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Environment
 import play.api.libs.ws.{WSClient, WSResponse}
 import support.UnitSpec
-import support.fixtures.{Infrastructure, NrsSearchFixture}
+import support.fixtures.NrsSearchFixture
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
@@ -40,8 +39,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 import javax.inject.Provider
 import scala.concurrent.Future
 
-class NrsRetrievalConnectorSpec extends UnitSpec
-  with MockitoSugar with NrsSearchFixture with Infrastructure with BeforeAndAfterEach {
+class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with BeforeAndAfterEach {
   override protected def beforeEach(): Unit = {
     reset(mockAuditConnector)
     reset(mockAuditable)
@@ -54,6 +52,8 @@ class NrsRetrievalConnectorSpec extends UnitSpec
   private val mockAuditConnector = mock[AuditConnector]
   private val mockAuditable = mock[Auditable]
   private val mockWSClient = mock[WSClient]
+  private val mockAppConfig = mock[AppConfig]
+
   when(mockHttpResponse.body).thenReturn("Some Text")
 
   private val testModule = new AbstractModule {

@@ -16,67 +16,39 @@
 
 package actors
 
-import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
-import akka.testkit.{ImplicitSender, TestKit}
-import akka.util.Timeout
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.matchers.should._
-import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status.OK
-import support.fixtures.Infrastructure
 import uk.gov.hmrc.http.HttpResponse
 
-import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
-  with AnyWordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
-
-  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-
-  val testVaultId: String = "1"
-  val testArchiveId: String = "1"
-
-  val pollingActor: ActorRef =
-    system.actorOf(Props(new PollingActor(
-      testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
-
-  override def afterAll {
-    TestKit.shutdownActorSystem(system)
-  }
+class PollingActorSpec() extends ActorSpec {
+  private val statusMessage = StatusMessage(testVaultId, testArchiveId)
 
   "A polling actor in poll mode" must {
     "send a PollingMessage in response to a StatusMessage" in {
       pollingActor ! RestartMessage
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(PollingMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(PollingMessage)
     }
+
     "change to complete mode in response to a CompleteMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(CompleteMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(CompleteMessage)
     }
+
     "change to failed mode in response to a FailedMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! FailedMessage
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(FailedMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(FailedMessage)
     }
+
     "send a PollingMessage in response to a RestartMessage" in {
       pollingActor ! RestartMessage
-      Await.result(
-        ask(pollingActor, RestartMessage).mapTo[ActorMessage]
-        , 5 seconds) should be(PollingMessage)
+      Await.result(ask(pollingActor, RestartMessage).mapTo[ActorMessage], defaultTimeout) should be(PollingMessage)
     }
   }
 
@@ -84,10 +56,9 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     "send a CompleteMessage in response to a StatusMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(CompleteMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(CompleteMessage)
     }
+
     "change to poll mode in response to a RestartMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! CompleteMessage
@@ -98,9 +69,7 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
 
       when(mockNrsRetrievalConnector.statusSubmissionBundle(any(), any())(any())).thenReturn(Future(mockHttpResponse))
 
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 30 seconds) should be(PollingMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], 30 seconds) should be(PollingMessage)
     }
   }
 
@@ -108,17 +77,14 @@ class PollingActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSen
     "send a FailedMessage in response to a StatusMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! FailedMessage
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(FailedMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(FailedMessage)
     }
+
     "change to poll mode in response to a RestartMessage" in {
       pollingActor ! RestartMessage
       pollingActor ! FailedMessage
       pollingActor ! RestartMessage
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(PollingMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(PollingMessage)
     }
   }
 }

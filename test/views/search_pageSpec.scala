@@ -32,11 +32,9 @@ package views
  * limitations under the License.
  */
 
-import config.AppConfig
 import controllers.FormMappings
 import models.SearchResult
 import org.scalatest.matchers.must.Matchers._
-import play.api.i18n.Messages
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -46,9 +44,7 @@ import support.fixtures.{SearchFixture, ViewFixture}
 
 class search_pageSpec extends GuiceAppSpec with SearchFixture{
 
-  implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-
-  private val searchPage = fakeApplication.injector.instanceOf[views.html.search_page]
+  private val searchPage = injector.instanceOf[views.html.search_page]
   private val jsonBody = Json.parse("""{"searchKeyName_0": "vrn", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
   private val searchForm = FormMappings.searchForm.bind(jsonBody, Int.MaxValue)
 

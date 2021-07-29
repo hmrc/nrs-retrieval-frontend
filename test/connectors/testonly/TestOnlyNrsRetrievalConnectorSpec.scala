@@ -22,15 +22,12 @@ import models.AuthorisedUser
 import models.testonly.ValidateDownloadResult
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status
 import play.api.libs.ws.WSResponse
 import support.UnitSpec
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with Status {
+class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
   private val nrsConnector = mock[NrsRetrievalConnector]
   private val connector = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector)
   private val aVaultName = "vaultName"
@@ -39,18 +36,16 @@ class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec with MockitoSugar with 
   private val wsResponse = mock[WSResponse]
   private val expectedResult = ValidateDownloadResult(OK, 0, Seq.empty, Seq.empty)
 
-  private implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-
   "validateDownload" should {
     "delegate to the nrsConnector and transform the result" in {
-      when(nrsConnector.getSubmissionBundle(aVaultName, anArchiveId, user)(headerCarrier)).thenReturn(Future successful wsResponse)
+      when(nrsConnector.getSubmissionBundle(aVaultName, anArchiveId, user)(hc)).thenReturn(Future successful wsResponse)
       when(wsResponse.status).thenReturn(OK)
       when(wsResponse.headers).thenAnswer(new Returns(Map.empty))
       when(wsResponse.bodyAsBytes).thenReturn(ByteString.empty)
 
-      await(connector.validateDownload(aVaultName, anArchiveId, user )(headerCarrier)) shouldBe expectedResult
+      await(connector.validateDownload(aVaultName, anArchiveId, user )(hc)) shouldBe expectedResult
 
-      verify(nrsConnector).getSubmissionBundle(aVaultName, anArchiveId, user)(headerCarrier)
+      verify(nrsConnector).getSubmissionBundle(aVaultName, anArchiveId, user)(hc)
     }
   }
 }

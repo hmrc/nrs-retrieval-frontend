@@ -25,17 +25,16 @@ import org.jsoup.Jsoup
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 
 import scala.concurrent.Future
 
-class ValidateDownloadControllerSpec extends ControllerSpec with MockitoSugar {
+class ValidateDownloadControllerSpec extends ControllerSpec {
   private val connector = mock[TestOnlyNrsRetrievalConnector]
 
-  private lazy val controller =
+  private val controller =
     new ValidateDownloadController(
       stubMessagesControllerComponents(),
       mockAuthConnector,

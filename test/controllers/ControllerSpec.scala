@@ -16,31 +16,16 @@
 
 package controllers
 
-import config.AppConfig
-import connectors.NrsRetrievalConnector
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status
 import play.api.inject.Injector
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import play.api.{Configuration, Environment}
 import support.GuiceAppSpec
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import views.html.error_template
 
-trait ControllerSpec extends GuiceAppSpec with MockitoSugar with StubControllerComponentsFactory with Status {
-
+trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val postRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
-
-  private val env = Environment.simple()
-  private val configuration = Configuration.load(env)
-
-  implicit val appConfig: AppConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
-
-  lazy val injector: Injector = fakeApplication.injector
-  lazy val error_template: error_template = injector.instanceOf[error_template]
-  lazy val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
-  lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val error_template: error_template = injector.instanceOf[error_template]
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
 }

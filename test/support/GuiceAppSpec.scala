@@ -17,37 +17,37 @@
 package support
 
 import connectors.NrsRetrievalConnector
+import org.scalatest.Suite
+import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.bind
-import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.inject.{Injector, bind}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.typedmap.TypedKey
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
 import play.filters.csrf.{CSRFConfigProvider, CSRFFilter}
 
-class GuiceAppSpec extends BaseSpec {
-
-  protected val bindModules: Seq[GuiceableModule] = Seq()
-  private val additionalConfig = Map(
-    "google-analytics.host" -> "host",
-    "google-analytics.token" -> "aToken")
-
-  val mockNrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
+class GuiceAppSpec extends UnitSpec with GuiceOneAppPerSuite with PatienceConfiguration { this: Suite =>
+  val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 
   implicit override lazy val app: Application = {
-    new GuiceApplicationBuilder().configure(additionalConfig)
-      .bindings(bindModules: _*).in(Mode.Test)
-      .overrides(bind[NrsRetrievalConnector].toInstance(mockNrsRetrievalConnector))
+    new GuiceApplicationBuilder().configure(Map(
+      "google-analytics.host" -> "host",
+      "google-analytics.token" -> "aToken"))
+      .bindings(Seq(): _*).in(Mode.Test)
+      .overrides(bind[NrsRetrievalConnector].toInstance(nrsRetrievalConnector))
       .build()
   }
 
-  implicit val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val injector: Injector = app.injector
+
+  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
   implicit val messages: Messages = messagesApi.preferred(FakeRequest())
 
-
   def addToken[T](fakeRequest: FakeRequest[T]): FakeRequest[T] = {
-    val csrfConfig = app.injector.instanceOf[CSRFConfigProvider].get
-    val csrfFilter = app.injector.instanceOf[CSRFFilter]
+    val csrfConfig = injector.instanceOf[CSRFConfigProvider].get
+    val csrfFilter = injector.instanceOf[CSRFFilter]
     val token = csrfFilter.tokenProvider.generateToken
 
     fakeRequest

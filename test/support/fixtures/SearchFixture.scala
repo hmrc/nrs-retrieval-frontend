@@ -16,27 +16,10 @@
 
 package support.fixtures
 
-import config.AppConfig
-import models.{SearchResult, SearchResultUtils}
-import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import models.SearchResult
 
 trait SearchFixture extends NrSubmissionId {
-
-  private val env = Environment.simple()
-  private val configuration = Configuration.load(env)
-  private val appConfig = new AppConfig(configuration, env, new ServicesConfig(configuration))
-
-  val searchResultUtils: SearchResultUtils = new SearchResultUtils(appConfig)
-
-  val searchFormJson: JsValue = Json.parse("""{"searchText":"aVal"}""")
-
-  val fileSize = 123456L
   val vatSearchResult: SearchResult =
     SearchResult("VAT return", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
-  val vatRegSearchResult: SearchResult =
-    SearchResult("VAT registration", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None)
-
 }
 

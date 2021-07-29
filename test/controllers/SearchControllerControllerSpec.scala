@@ -17,6 +17,7 @@
 package controllers
 
 import akka.actor.ActorRef
+import models.SearchResultUtils
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.AnyContentAsJson
@@ -31,11 +32,11 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
     getRequest.withJsonBody(
       parse("""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}"""))
 
-  private lazy val controller = new SearchController(
+  private val controller = new SearchController(
     mock[ActorRef],
     mockAuthConnector,
     nrsRetrievalConnector,
-    searchResultUtils,
+    new SearchResultUtils(appConfig),
     stubMessagesControllerComponents(),
     injector.instanceOf[views.html.search_page],
     error_template)

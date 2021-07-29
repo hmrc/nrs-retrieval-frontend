@@ -19,7 +19,7 @@ package controllers
 import play.api.test.Helpers._
 
 class StartControllerControllerSpec extends ControllerSpec {
-  private lazy val controller =
+  private val controller =
     new StartController(
       mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[views.html.start_page], error_template)
 

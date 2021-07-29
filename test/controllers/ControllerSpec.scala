@@ -16,7 +16,6 @@
 
 package controllers
 
-import play.api.inject.Injector
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import support.GuiceAppSpec
@@ -26,6 +25,7 @@ import views.html.error_template
 trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val postRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
-  val error_template: error_template = injector.instanceOf[error_template]
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
+
+  lazy val error_template: error_template = injector.instanceOf[error_template]
 }

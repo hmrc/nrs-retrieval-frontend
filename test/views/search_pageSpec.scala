@@ -43,8 +43,8 @@ import support.GuiceAppSpec
 import support.fixtures.{SearchFixture, ViewFixture}
 
 class search_pageSpec extends GuiceAppSpec with SearchFixture{
+  private lazy val searchPage = injector.instanceOf[views.html.search_page]
 
-  private val searchPage = injector.instanceOf[views.html.search_page]
   private val jsonBody = Json.parse("""{"searchKeyName_0": "vrn", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
   private val searchForm = FormMappings.searchForm.bind(jsonBody, Int.MaxValue)
 

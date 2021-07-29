@@ -40,10 +40,10 @@ class GuiceAppSpec extends UnitSpec with GuiceOneAppPerSuite with PatienceConfig
       .build()
   }
 
-  val injector: Injector = app.injector
+  lazy val injector: Injector = app.injector
 
-  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(FakeRequest())
+  implicit lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+  implicit lazy val messages: Messages = messagesApi.preferred(FakeRequest())
 
   def addToken[T](fakeRequest: FakeRequest[T]): FakeRequest[T] = {
     val csrfConfig = injector.instanceOf[CSRFConfigProvider].get

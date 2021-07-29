@@ -32,7 +32,7 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
     getRequest.withJsonBody(
       parse("""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}"""))
 
-  private val controller = new SearchController(
+  private lazy val controller = new SearchController(
     mock[ActorRef],
     mockAuthConnector,
     nrsRetrievalConnector,

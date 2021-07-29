@@ -16,7 +16,6 @@
 
 package controllers.testonly
 
-import akka.stream.Materializer
 import connectors.testonly.TestOnlyNrsRetrievalConnector
 import controllers.ControllerSpec
 import controllers.testonly.FormMappings.{archiveId, vaultName}
@@ -34,7 +33,7 @@ import scala.concurrent.Future
 class ValidateDownloadControllerSpec extends ControllerSpec {
   private val connector = mock[TestOnlyNrsRetrievalConnector]
 
-  private val controller =
+  private lazy val controller =
     new ValidateDownloadController(
       stubMessagesControllerComponents(),
       mockAuthConnector,
@@ -42,8 +41,6 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
       connector,
       injector.instanceOf[views.html.testonly.validate_download_page]
     )
-
-  private implicit lazy val materializer: Materializer = injector.instanceOf[Materializer]
 
   private def validateResponse(eventualResult: Future[Result]) = {
     val content = Jsoup.parse(contentAsString(eventualResult))

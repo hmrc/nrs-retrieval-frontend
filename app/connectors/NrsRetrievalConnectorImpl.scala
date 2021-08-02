@@ -23,6 +23,7 @@ import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
 import play.api.Logger
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global

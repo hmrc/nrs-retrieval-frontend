@@ -19,7 +19,12 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import views.html.components._
 
-@this(layout: Layout, formHelper: FormWithCSRF, p: Paragraph, textInput: TextInput, button: components.Button)
+@this(layout: Layout,
+        formHelper: FormWithCSRF,
+        p: Paragraph,
+        textInput: TextInput,
+        button: components.Button,
+        searchResultsPanel: SearchResultsPanel)
 
 @(searchForm: Form[SearchQuery], maybeUser: Option[AuthorisedUser] = None, maybeResults: Option[Seq[SearchResult]])(
         implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -73,6 +78,6 @@
     }
 
     @maybeResults.fold(Html("")){ results =>
-      @search_results(searchForm, results)
+      @searchResultsPanel(searchForm, results)
     }
 }

@@ -29,15 +29,17 @@
 
 
 @banner = {
-    <div class="govuk-phase-banner">
-        <p class="govuk-phase-banner__content">BETA</p>
-        @maybeUserNameSpan
-    </div>
+  <div>
+      @maybeUserNameSpan
+  </div>
+  <div>
+    @maybeBackLink
+  </div>
 }
 
 @maybeUserNameSpan = @{
   maybeUser.map { user =>
-    Html(s"""<span id="username" class="govuk-phase-banner__content user-name">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
+    Html(s"""<span id="username" class=user-name">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
   }
 }
 
@@ -60,7 +62,6 @@
 
 @contentBlock() = {
   @banner
-  @maybeBackLink
   @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
   @content
 }

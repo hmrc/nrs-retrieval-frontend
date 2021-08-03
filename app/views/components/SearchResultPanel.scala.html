@@ -33,15 +33,16 @@
       @Messages("search.results.error.summary.lbl")
     </h2>
     <p>
-      <span id ="retrieval-failed-@index" class="retrieval-failed" aria-hidden="true">
+      <span id ="retrieval-failed-@index" class="retrieval-failed govuk-body" aria-hidden="true">
         @Text(s"${Messages("search.results.cannot.retrieve.lbl")} ${searchResult.linkText} $timeSubmitted").asHtml
       </span>
-      <span class="retrieval-incomplete" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
+      <span class="retrieval-incomplete govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
         @Text(s"${Messages("search.results.retrieval.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
         <br>
         @Text(s"${Messages("search.results.retrieval.info")}").asHtml
       </span>
-      <a class="retrieval-complete button--secondary govuk-button"
+      <a id="download-button-@index"
+         class="retrieval-complete govuk-button govuk-button--secondary"
          role="button"
          aria-hidden="true"
          href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
@@ -55,7 +56,7 @@
       </a>
     </p>
     @p(content = Text(s"${Messages("search.results.filename.lbl")}: ${searchResult.fileDetails}"))
-    <span class="retrieval-failed" aria-hidden="true">
+    <span class="retrieval-failed govuk-body" aria-hidden="true">
         @p(content = Text(Messages("search.results.error.action.message.lbl")))
         @Html("""<a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>""")
     </span>

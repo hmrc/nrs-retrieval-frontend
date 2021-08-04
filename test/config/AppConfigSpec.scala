@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package controllers
+package config
 
-import play.api.test.Helpers._
+import support.GuiceAppSpec
 
-class StartControllerControllerSpec extends ControllerSpec {
-  private lazy val controller =
-    new StartController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[views.html.start_page], error_template)
-
-  "GET /" should {
-    "return 200" in {
-      val result = controller.showStartPage(getRequest)
-      status(result) shouldBe OK
+class AppConfigSpec extends GuiceAppSpec{
+  "appConfig" should {
+    "specify the correct notable event types" in {
+      appConfig.notableEvents.keySet shouldBe Set(
+        "ppt-subscription",
+        "itsa-annual-adjustment",
+        "itsa-crystallisation",
+        "vat-registration",
+        "interest-restriction-return",
+        "vat-return-ui",
+        "itsa-eops",
+        "entry-declaration",
+        "vat-return")
     }
   }
 }

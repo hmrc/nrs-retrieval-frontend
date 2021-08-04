@@ -31,10 +31,11 @@ import scala.concurrent.{Await, Future}
 trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status {
   implicit val defaultTimeout: FiniteDuration = 5 seconds
 
-  private val environment: Environment = Environment.simple()
+  val environment: Environment = Environment.simple()
+  val configuration: Configuration = Configuration.load(environment)
+  val servicesConfig = new ServicesConfig(configuration)
 
-  implicit val appConfig: AppConfig =
-    new AppConfig(Configuration.load(environment), environment, new ServicesConfig(Configuration.load(environment)))
+  implicit val appConfig: AppConfig = new AppConfig(configuration, environment, servicesConfig)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

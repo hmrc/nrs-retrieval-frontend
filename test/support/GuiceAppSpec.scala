@@ -17,6 +17,7 @@
 package support
 
 import connectors.NrsRetrievalConnector
+import models.NotableEvent
 import org.scalatest.Suite
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -27,6 +28,8 @@ import play.api.libs.typedmap.TypedKey
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
 import play.filters.csrf.{CSRFConfigProvider, CSRFFilter}
+
+import scala.collection.immutable
 
 class GuiceAppSpec extends UnitSpec with GuiceOneAppPerSuite with PatienceConfiguration { this: Suite =>
   val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
@@ -44,6 +47,9 @@ class GuiceAppSpec extends UnitSpec with GuiceOneAppPerSuite with PatienceConfig
 
   implicit lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
   implicit lazy val messages: Messages = messagesApi.preferred(FakeRequest())
+
+  lazy val indexedNotableEvents: immutable.Seq[(NotableEvent, Int)] =
+    appConfig.notableEvents.values.toList.sortBy(_.displayName).zipWithIndex
 
   def addToken[T](fakeRequest: FakeRequest[T]): FakeRequest[T] = {
     val csrfConfig = injector.instanceOf[CSRFConfigProvider].get

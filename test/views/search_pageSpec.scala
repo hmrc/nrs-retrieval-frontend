@@ -16,88 +16,87 @@
 
 package views
 
-/*
- * Copyright 2018 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import controllers.FormMappings
-import models.SearchResult
+import controllers.FormMappings.searchForm
+import models.{NotableEvent, SearchResult}
+import org.jsoup.nodes.{Document, Element}
+import org.jsoup.select.Elements
 import org.scalatest.matchers.must.Matchers._
-import play.api.libs.json.Json
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
+import play.api.libs.json.Json.parse
 import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
-import support.fixtures.{SearchFixture, ViewFixture}
+import support.fixtures.SearchFixture
+import views.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered, someUser}
+import views.html.search_page
 
 class search_pageSpec extends GuiceAppSpec with SearchFixture{
-  private lazy val searchPage = injector.instanceOf[views.html.search_page]
+  private lazy val searchPage = injector.instanceOf[search_page]
 
-  private val jsonBody = Json.parse("""{"searchKeyName_0": "vrn", "searchKeyValue_0": "someValue", "notableEventType": "vat-return"}""")
-  private val searchForm = FormMappings.searchForm.bind(jsonBody, Int.MaxValue)
+  private def notFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("notFound")).isDefined
+  private def resultsFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("resultsFound")).isDefined
 
-  "search page with a valid form only" should {
-    "have a matching page title and header" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, None)
-      doc.title mustBe doc.getElementById("pageHeader").text()
+  val searchKeyValue = "searchKeyValue"
+
+  indexedNotableEvents.foreach{ case (notableEvent: NotableEvent, _ ) =>
+    val searchKeyName = notableEvent.searchKeys.head.name
+    val searchPageHeadingText = s"Search for ${notableEvent.displayName}s"
+    val searchResultsTitleText = s"Results - $searchPageHeadingText"
+
+    val formJson =
+      s"""{"searchKeyName_0": "$searchKeyName", "searchKeyValue_0": "$searchKeyValue", "notableEventType": "${notableEvent.name}"}"""
+
+    val boundForm = searchForm.bind(parse(formJson), Int.MaxValue)
+
+    def ensureThePageIsRendered(doc: Document, titleText: String) = {
+      ensureCommonPageElementsAreRendered(
+        doc = doc,
+        headerText = searchPageHeadingText,
+        titleText = titleText,
+        maybeBackLinkCall = Some(controllers.routes.SelectorController.showSelectorPage()))
+
+      val notableEventTypeElement: Elements = elementByName(doc, "notableEventType")
+      val searchKeyNameElement: Elements = elementByName(doc, "searchKeyName_0")
+      val searchKeyInput: Element =  doc.getElementById("searchKeyValue_0")
+      val searchButton = elementByName(doc, "searchButton")
+
+      notableEventTypeElement.`val`() mustBe notableEvent.name
+      notableEventTypeElement.attr("type") mustBe "hidden"
+
+      searchKeyNameElement.`val`() mustBe searchKeyName
+      searchKeyNameElement.attr("type") mustBe "hidden"
+
+      searchKeyInput.`val`() mustBe searchKeyValue
+      searchKeyInput.attr("type") mustBe "text"
+
+      searchButton.attr("type") mustBe "submit"
+      searchButton.text() mustBe "Search"
     }
 
-    "have the correct page header" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, Some(Seq.empty[SearchResult]))
-      doc.getElementById("pageHeader").text() mustBe "Search for VAT returns"
+    s"the search page for notableEventType [${notableEvent.name}]" should {
+      "render correctly" when {
+        "no search was made" in new ViewSpec {
+          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, None)
+
+          ensureThePageIsRendered(doc, searchPageHeadingText)
+          notFoundPanelIsDisplayed(doc) mustBe false
+          resultsFoundPanelIsDisplayed(doc) mustBe false
+        }
+
+        "search results were not found" in new ViewSpec {
+          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, Some(Seq.empty[SearchResult]))
+
+          ensureThePageIsRendered(doc, searchResultsTitleText)
+          notFoundPanelIsDisplayed(doc) mustBe true
+          resultsFoundPanelIsDisplayed(doc) mustBe false
+        }
+
+        "search results were found" in new ViewSpec {
+          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, Some(Seq(vatSearchResult)))
+
+          ensureThePageIsRendered(doc, searchResultsTitleText)
+          notFoundPanelIsDisplayed(doc) mustBe false
+          resultsFoundPanelIsDisplayed(doc) mustBe true
+        }
+      }
     }
   }
-
-  "search page with a valid form and no results" should {
-    "not display the not found panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, None)
-      Option(doc.getElementById("notFound")).isDefined mustBe false
-    }
-
-    "not display the results panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, None)
-      Option(doc.getElementById("resultsFound")).isDefined mustBe false
-    }
-  }
-
-  "search page with a valid form and an empty results" should {
-    "display the not found panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, Some(Seq.empty[SearchResult]))
-      Option(doc.getElementById("notFound")).isDefined mustBe true
-    }
-
-    "not display the results panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, Some(Seq.empty[SearchResult]))
-      Option(doc.getElementById("resultsFound")).isDefined mustBe false
-    }
-  }
-
-  "search page with a valid form and results" should {
-    "not display the not found panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, Some(Seq(vatSearchResult)))
-      Option(doc.getElementById("notFound")).isDefined mustBe false
-    }
-
-    "display the results panel" in new SearchPageViewFixture {
-      val view: HtmlFormat.Appendable = searchPage(searchForm, None, Some(Seq(vatSearchResult)))
-      Option(doc.getElementById("resultsFound")).isDefined mustBe true
-    }
-  }
-
-  trait SearchPageViewFixture extends ViewFixture {
-    implicit val requestWithToken: FakeRequest[AnyContentAsEmpty.type] = addToken(request)
-  }
-
 }

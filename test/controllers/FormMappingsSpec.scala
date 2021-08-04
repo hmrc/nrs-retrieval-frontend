@@ -23,27 +23,13 @@ import support.UnitSpec
 import java.lang.Integer.MAX_VALUE
 
 class FormMappingsSpec extends UnitSpec {
-  "searchForm for IRR" should {
-    "return no errors for IRR valid data" in {
-      val postData = Json.obj("searchText" -> "someSearchText", "notableEventType" -> "interest-restriction-return")
-      val validatedForm = searchForm.bind(postData, MAX_VALUE)
-      validatedForm.errors shouldBe empty
-    }
-  }
-
-  "searchForm for PPT" should {
-    "return no errors for IRR valid data" in {
-      val postData = Json.obj("searchText" -> "someSearchText", "notableEventType" -> "ppt-subscription")
-      val validatedForm = searchForm.bind(postData, MAX_VALUE)
-      validatedForm.errors shouldBe empty
-    }
-  }
-
-  "searchForm" should {
-    "return no errors for valid data" in {
-      val postData = Json.obj("searchText" -> "someSearchText", "notableEventType" -> "vat-return")
-      val validatedForm = searchForm.bind(postData, MAX_VALUE)
-      validatedForm.errors shouldBe empty
+  appConfig.notableEvents.foreach { notableEvent =>
+    "searchForm" should {
+      s"bind for for ${notableEvent._1}" in {
+        val postData = Json.obj("searchText" -> "someSearchText", "notableEventType" -> notableEvent._2.name)
+        val validatedForm = searchForm.bind(postData, MAX_VALUE)
+        validatedForm.errors shouldBe empty
+      }
     }
   }
 }

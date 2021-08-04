@@ -14,13 +14,7 @@
  * limitations under the License.
  *@
 
-@(userName: Option[Html])
+@this()
 
-<div class="beta-banner>
-    <p><strong class="phase-tag">BETA</strong></p>
-
-    @if(userName) {
-        <span id="username" class="user-name">Welcome <strong>@userName</strong></span>
-    }
-
-</div>
+@(id: String, content: Content)
+<h1 id="@{id}" class="govuk-heading-xl">@content.asHtml</h1>

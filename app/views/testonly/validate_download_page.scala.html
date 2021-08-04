@@ -18,70 +18,38 @@
 @import controllers.testonly
 @import controllers.testonly.FormMappings._
 @import models.testonly.{ValidateDownloadRequest, ValidateDownloadResult}
-@import views.helpers._
-@import views.html.helpers._
+@import views.html.components._
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
-@this(mainTemplate: views.html.main_template, formHelper: FormWithCSRF)
+@this(layout:Layout, formHelper: FormWithCSRF, p: Paragraph, textInput: TextInput, button: components.Button, h1: Heading1)
 
 @(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@pageTitle = @{
-    Messages("test-only.validate-download.page.header")
-}
-
-@mainTemplate(title = pageTitle) {
-    <h1 id="pageHeader">
-      @Messages("test-only.validate-download.page.header")
-    </h1>
-
-    <p>
-      @Messages("test-only.validate-download.page.info")
-    </p>
+@layout(pageTitle = Messages("test-only.validate-download.page.header"),
+        maybePageHeader = Some(Messages("test-only.validate-download.page.header"))) {
+    @p(content = Text(Messages("test-only.validate-download.page.info")))
 
     @formHelper(testonly.routes.ValidateDownloadController.submitValidateDownload, 'class -> "form js-form") {
-        @TextInput(
-            TextInputParams(
-                value=form(vaultName).value,
-                name= vaultName,
-                label=Messages("test-only.validate-download.form.vaultName"),
-                error=Messages("test-only.validate-download.form.vaultName.error")
-            )
-        )
-
-        @TextInput(
-            TextInputParams(
-                value=form(archiveId).value,
-                name=archiveId,
-                label=Messages("test-only.validate-download.form.archiveId"),
-                error=Messages("test-only.validate-download.form.archiveId.error")
-            )
-        )
-
-        <div class="form-group">
-            <button id="submitButton" type="submit" name="submitButton" class="button">
-              @Messages("test-only.validate-download.form.submit")
-            </button>
-        </div>
+        @textInput(Messages("test-only.validate-download.form.vaultName"), form(vaultName))
+        @textInput(Messages("test-only.validate-download.form.archiveId"), form(archiveId))
+        @button(name = "submitButton", content = messages("test-only.validate-download.form.submit"), inputType = "submit")
     }
 
     @maybeResults.fold { @Html("") } { result =>
-        <h1 id="resultsHeader">
-            @Messages("test-only.validate-download.results.title")
-        </h1>
+        @h1(id="resultsHeader", content=Text(Messages("test-only.validate-download.results.title")))
 
         <table>
             <tr>
-                <td>@Messages("test-only.validate-download.results.status")</td>
-                <td id="status">@{result.status}</td>
+                <td class="govuk-body">@Messages("test-only.validate-download.results.status")</td>
+                <td id="status" class="govuk-body">@{result.status}</td>
             </tr>
             <tr>
-                <td>@Messages("test-only.validate-download.results.numberOfZippedBytes")</td>
-                <td id="zipSize">@{result.zipSize}</td>
+                <td class="govuk-body">@Messages("test-only.validate-download.results.numberOfZippedBytes")</td>
+                <td id="zipSize" class="govuk-body">@{result.zipSize}</td>
             </tr>
             <tr>
-                <td>@Messages("test-only.validate-download.results.numberOfZippedFiles")</td>
-                <td id="numberOfZippedFiles">@{result.files.size}</td>
+                <td class="govuk-body">@Messages("test-only.validate-download.results.numberOfZippedFiles")</td>
+                <td id="numberOfZippedFiles" class="govuk-body">@{result.files.size}</td>
             </tr>
         </table>
 
@@ -91,12 +59,12 @@
         <table>
             <thead>
                 <tr>
-                    <td colspan="2">@Messages("test-only.validate-download.results.files")</td>
+                    <td colspan="2" class="govuk-body">@Messages("test-only.validate-download.results.files")</td>
                 </tr>
             </thead>
             @result.files.map{ fileName =>
                 <tr>
-                    <td id ="@fileName">@fileName</td>
+                    <td id ="@fileName" class="govuk-body">@fileName</td>
                 </tr>
             }
         </table>
@@ -107,13 +75,13 @@
         <table>
             <thead>
                 <tr>
-                    <td colspan="2">@Messages("test-only.validate-download.results.headers")</td>
+                    <td colspan="2" class="govuk-body">@Messages("test-only.validate-download.results.headers")</td>
                 </tr>
             </thead>
             @result.headers.map{ header =>
                 <tr>
-                    <td>@header._1</td>
-                    <td id="@header._1">@header._2</td>
+                    <td class="govuk-body">@header._1</td>
+                    <td id="@header._1" class="govuk-body">@header._2</td>
                 </tr>
             }
         </table>

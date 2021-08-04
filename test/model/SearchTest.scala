@@ -16,13 +16,14 @@
 
 package model
 
+import models.SearchResultUtils
 import support.UnitSpec
 import support.fixtures.{NrsSearchFixture, SearchFixture}
 
 class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
   "fromNrsSearchResult" should {
     "create a SearchResult from an NrsSearchResult based on notable event config " in {
-      searchResultUtils.fromNrsSearchResult(nrsVatSearchResult) shouldBe vatSearchResult
+      new SearchResultUtils(appConfig).fromNrsSearchResult(nrsVatSearchResult) shouldBe vatSearchResult
     }
   }
 

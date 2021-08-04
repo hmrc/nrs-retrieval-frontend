@@ -16,99 +16,68 @@
 
 package actors
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.Props
 import akka.pattern.ask
-import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import akka.util.Timeout
+import akka.testkit.TestActorRef
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status
-import support.fixtures.Infrastructure
 import uk.gov.hmrc.http.HttpResponse
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-// todo : use unit spec in line with our other tests
-class StatusCheckActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
-  with AnyWordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
+class StatusCheckActorSpec() extends ActorSpec {
+  private val checkStatusActor =
+    TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
+  private val mockRetrievalRequestHttpResponse = mock[HttpResponse]
+  private val statusMessage = StatusMessage(testVaultId, testArchiveId)
+  private val ONE_SECOND = 1000
 
-  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-
-  private val testVaultId: String = "1"
-  private val testArchiveId: String = "1"
-
-  private val pollingActor =
-    system.actorOf(Props(new PollingActor(
-      testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)), s"pollingActor_${testArchiveId}_$testArchiveId")
-
-  private val checkStatusActor = TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
-
-
-  override def afterAll {
-    TestKit.shutdownActorSystem(system)
-  }
+  // sleep to allow all oof the async ops to catch up
+  private def sleep(): Unit = Thread.sleep(ONE_SECOND)
 
   "A check status actor when the retrieval is complete" must {
     "send an CompleteMessage to the polling actor" in {
-      val mockRetrievalRequestHttpResponse = mock[HttpResponse]
-      when(mockRetrievalRequestHttpResponse.status).thenReturn(Status.OK)
+      when(mockRetrievalRequestHttpResponse.status).thenReturn(OK)
       when(mockNrsRetrievalConnector.statusSubmissionBundle(any(), any())(any()))
         .thenReturn(Future.successful(mockRetrievalRequestHttpResponse))
 
       pollingActor ! RestartMessage
+      checkStatusActor ! statusMessage
 
-      checkStatusActor ! StatusMessage(testVaultId, testArchiveId)
+      sleep()
 
-      Thread.sleep(1000) // sleep to allow all oof the asynch ops to catch up
-
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(CompleteMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(CompleteMessage)
     }
   }
 
   "A check status actor when the retrieval is failed" must {
     "send an FailedMessage to the polling actor" in {
-      val mockRetrievalRequestHttpResponse = mock[HttpResponse]
-      when(mockRetrievalRequestHttpResponse.status).thenReturn(Status.BAD_REQUEST)
+      when(mockRetrievalRequestHttpResponse.status).thenReturn(BAD_REQUEST)
       when(mockNrsRetrievalConnector.statusSubmissionBundle(any(), any())(any()))
         .thenReturn(Future.successful(mockRetrievalRequestHttpResponse))
 
       pollingActor ! RestartMessage
+      checkStatusActor ! statusMessage
 
-      checkStatusActor ! StatusMessage(testVaultId, testArchiveId)
+      sleep()
 
-      Thread.sleep(1000) // sleep to allow all oof the asynch ops to catch up
-
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(FailedMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(FailedMessage)
     }
   }
 
   "A check status actor when the retrieval is in progress" must {
     "send an FailedMessage to the polling actor" in {
       val mockRetrievalRequestHttpResponse = mock[HttpResponse]
-      when(mockRetrievalRequestHttpResponse.status).thenReturn(Status.NOT_FOUND)
+      when(mockRetrievalRequestHttpResponse.status).thenReturn(NOT_FOUND)
       when(mockNrsRetrievalConnector.statusSubmissionBundle(any(), any())(any()))
         .thenReturn(Future.successful(mockRetrievalRequestHttpResponse))
 
       pollingActor ! RestartMessage
+      checkStatusActor ! statusMessage
 
-      checkStatusActor ! StatusMessage(testVaultId, testArchiveId)
+      sleep()
 
-      Thread.sleep(1000) // sleep to allow all oof the asynch ops to catch up
-
-      Await.result(
-        ask(pollingActor, StatusMessage(testVaultId, testArchiveId)).mapTo[ActorMessage]
-        , 5 seconds) should be(PollingMessage)
+      Await.result(ask(pollingActor, statusMessage).mapTo[ActorMessage], defaultTimeout) should be(PollingMessage)
     }
   }
-
 }

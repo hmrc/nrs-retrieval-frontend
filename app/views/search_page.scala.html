@@ -17,14 +17,17 @@
 @import config.AppConfig
 @import models.AuthorisedUser
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import views.html.components._
 
-@this(mainTemplate: views.html.main_template, formHelper: FormWithCSRF)
+@this(layout: Layout,
+        formHelper: FormWithCSRF,
+        p: Paragraph,
+        textInput: TextInput,
+        button: components.Button,
+        searchResultsPanel: SearchResultsPanel)
 
-@(searchForm: Form[SearchQuery], user: Option[AuthorisedUser] = None, results: Option[Seq[SearchResult]])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@userName = @{
-    user.map(u => Html(u.userName))
-}
+@(searchForm: Form[SearchQuery], maybeUser: Option[AuthorisedUser] = None, maybeResults: Option[Seq[SearchResult]])(
+        implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @notableEventType = @{searchForm.get.notableEventType}
 
@@ -32,45 +35,49 @@
   appConfig.notableEvents(notableEventType)
 }
 
-@title = @{
-  Messages(s"search.page.dynamic.header.lbl", notableEvent.displayName)
+@pageHeader = @{
+    Messages(s"search.page.dynamic.header.lbl", notableEvent.displayName)
 }
 
 @pageTitle = @{
-  if (results.isDefined) {
-    Messages("search.page.results") + " - " + title
-  } else {
-    title
-  }
+    if (maybeResults.isDefined) s"${Messages("search.page.results")} - $pageHeader" else pageHeader
 }
 
-@mainTemplate(title = pageTitle, userName = userName) {
+@* this is required to correctly render the dynamic elements on the page*@
+@headBlock = {
+    <link href='@routes.Assets.versioned("/stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+}
 
-    <a id="back" class="back-link" href="@routes.SelectorController.showSelectorPage()">@Messages("link.back")</a>
+@* these are required to correctly render the dynamic elements on the page*@
+@bodyEndBlock = {
+    <script src="@{s"${appConfig.assetsPrefix}/javascripts/application.min.js"}" type="text/javascript"></script>
+    <script language="JavaScript" type="application/javascript" src="@routes.Assets.versioned("javascripts/nrs.js")"></script>
+}
 
-    <h1 id="pageHeader">
-      @title
-    </h1>
+@layout(
+    pageTitle = pageTitle,
+    maybePageHeader = Some(pageHeader),
+    maybeUser = maybeUser,
+    maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage()),
+    maybeHeadBlock = Some(headBlock),
+    maybeBodyEndBlock = Some(bodyEndBlock),
+) {
+    @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
+    @p(content = Text(Messages("search.page.hint")))
 
-    <p>
-      @Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)
-    </p>
+    @formHelper(action = routes.SearchController.submitSearchPage(notableEventType), 'class -> "form js-form") {
+        <input type="hidden" name="notableEventType" value="@{notableEventType}">
 
-    <p>
-      @Messages("search.page.hint")
-    </p>
+        @for((searchKey, index) <- appConfig.notableEvents(notableEventType).searchKeys.zipWithIndex){
+            <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
 
-    @formHelper(
-        action = routes.SearchController.submitSearchPage(notableEventType),
-        'class -> "form js-form") {
+            @textInput(Messages(s"search.page.searchkey.lbl", searchKey.label), searchForm(s"searchKeyValue_$index"))
+        }
 
-      <input type="hidden" name="notableEventType" value="@{notableEventType}">
-
-      @search_query(searchForm, notableEventType)
-
+        @button(name = "searchButton", content = messages("search.button.search.lbl"), inputType = "submit")
     }
 
-    @if(results.isDefined) {
-      @search_results(searchForm, results.getOrElse(Seq.empty[SearchResult]))
+    @maybeResults.fold(Html("")){ results =>
+      @searchResultsPanel(searchForm, results)
     }
 }

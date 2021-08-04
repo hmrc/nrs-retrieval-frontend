@@ -16,6 +16,7 @@
 
 package http
 
+import uk.gov.hmrc.http.HttpReads.Implicits
 import uk.gov.hmrc.http.HttpVerbs.{HEAD => HEAD_VERB}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
@@ -30,7 +31,7 @@ trait HeadHttpTransport {
 }
 
 trait CoreHead {
-  def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A]
+  def HEAD(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 }
 
 trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
@@ -41,11 +42,11 @@ trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
 }
 
 trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks {
-  override def HEAD[A](url: String, headers: Seq[(String, String)])(implicit rds: HttpReads[A], hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
+  override def HEAD(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     withTracing(HEAD_VERB, url) {
       val httpResponse = doHead(url, headers)
       executeHooks(HEAD_VERB, new URL(url), headers, None, httpResponse)
-      mapErrors(HEAD_VERB, url, httpResponse).map(response => rds.read(HEAD_VERB, url, response))
+      mapErrors(HEAD_VERB, url, httpResponse).map(response => Implicits.readRaw.read(HEAD_VERB, url, response))
     }
 }
 

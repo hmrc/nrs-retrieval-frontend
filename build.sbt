@@ -17,7 +17,6 @@ lazy val scoverageSettings = {
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.7.0",
-  "uk.gov.hmrc"       %% "play-frontend-govuk"        % "0.80.0-play-28",
   "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "0.84.0-play-28",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
 )
@@ -59,6 +58,14 @@ lazy val root = (project in file("."))
     scalacOptions += "-P:silencer:pathFilters=target/.*",
     publishingSettings,
     scoverageSettings)
+  .settings(
+    TwirlKeys.templateImports ++= Seq(
+      "uk.gov.hmrc.govukfrontend.views.html.components._",
+      "uk.gov.hmrc.govukfrontend.views.html.helpers._",
+      "uk.gov.hmrc.hmrcfrontend.views.html.components._",
+      "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
+    )
+  )
   .settings(defaultSettings(): _*)
   .settings(integrationTestSettings())
   .configs(IntegrationTest)

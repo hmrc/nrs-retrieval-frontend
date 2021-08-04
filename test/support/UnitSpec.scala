@@ -16,14 +16,27 @@
 
 package support
 
+import config.AppConfig
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.http.Status
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.{Await, Future}
 
-class UnitSpec extends AnyWordSpec with Matchers {
+trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status {
   implicit val defaultTimeout: FiniteDuration = 5 seconds
+
+  private val environment: Environment = Environment.simple()
+
+  implicit val appConfig: AppConfig =
+    new AppConfig(Configuration.load(environment), environment, new ServicesConfig(Configuration.load(environment)))
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 }

@@ -17,8 +17,9 @@
 package controllers
 
 import models._
-import play.api.data.{Form, Mapping}
-import play.api.data.Forms.{longNumber, mapping, optional, text}
+import play.api.data.Forms.{longNumber, mapping, of, optional, text}
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError, Mapping}
 
 object FormMappings {
 
@@ -38,8 +39,18 @@ object FormMappings {
       "notableEventType" -> text
     )(SearchQuery.apply)(SearchQuery.unapply))
 
+  private val selectorFormatter: Formatter[String] = new Formatter[String] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] =
+      data.get(key) match {
+        case None | Some("") => Left(Seq(FormError(key, "search.page.error.searchkey.required")))
+        case Some(s)         => Right(s)
+      }
+
+    override def unbind(key: String, value: String): Map[String, String] =
+      Map(key -> value)
+  }
+
   val selectorForm: Form[Selector] = Form(
-    mapping(
-      "notableEventType" -> text
-    )(Selector.apply)(Selector.unapply))
+    mapping("notableEventType" -> of(selectorFormatter))(Selector.apply)(Selector.unapply)
+  )
 }

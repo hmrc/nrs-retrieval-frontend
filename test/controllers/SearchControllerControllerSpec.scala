@@ -17,6 +17,7 @@
 package controllers
 
 import akka.actor.ActorRef
+import models.SearchResultUtils
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.AnyContentAsJson
@@ -35,7 +36,7 @@ class SearchControllerControllerSpec extends ControllerSpec with SearchFixture w
     mock[ActorRef],
     mockAuthConnector,
     nrsRetrievalConnector,
-    searchResultUtils,
+    new SearchResultUtils(appConfig),
     stubMessagesControllerComponents(),
     injector.instanceOf[views.html.search_page],
     error_template)

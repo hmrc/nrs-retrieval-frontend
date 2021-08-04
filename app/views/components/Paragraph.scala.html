@@ -14,23 +14,7 @@
  * limitations under the License.
  *@
 
-@(form: Form[_])(implicit message: Messages)
+@this()
 
-@if(form.hasErrors) {
-  <div class="error-summary" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
-    <h2 class="heading-medium error-summary-heading" id="error-summary-heading">@Messages("generic.error")</h2>
-    <ul class="error-summary-list">
-
-    @for(error <- form.errors) {
-      <li>
-        <a href=@{
-          "#" + error.key + "-inline-error"
-        }>
-        @{Messages(error.key + "." + error.message)}
-        </a>
-      </li>
-    }
-
-    </ul>
-  </div>
-}
+@(content: Content)
+<p class="govuk-body">@content.asHtml</p>

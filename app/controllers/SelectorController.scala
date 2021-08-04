@@ -16,7 +16,6 @@
 
 package controllers
 
-import akka.actor.ActorSystem
 import config.AppConfig
 import controllers.FormMappings._
 import play.api.Logger
@@ -35,7 +34,7 @@ class SelectorController @Inject()(val authConnector: AuthConnector,
                                    override val controllerComponents: MessagesControllerComponents,
                                    val selectorPage: selector_page,
                                    override val errorPage: error_template)
-                                  (implicit val appConfig: AppConfig, system: ActorSystem)
+                                  (implicit val appConfig: AppConfig)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

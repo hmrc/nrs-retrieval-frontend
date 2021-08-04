@@ -14,13 +14,9 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
-@import views.html.components._
+@this(govukButton: GovukButton)
 
-@this(layout:Layout, p: Paragraph)
-
-@(title: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@layout(pageTitle = title, maybePageHeader = Some(heading)){
-  @p(content = Text(message))
-}
+@(name: String, content: String, inputType: String)
+@govukButton(
+ Button(name = Some(name), content = Text(content), inputType = Some(inputType), preventDoubleClick = true)
+)

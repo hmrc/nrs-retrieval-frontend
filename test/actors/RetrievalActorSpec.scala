@@ -16,45 +16,25 @@
 
 package actors
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, Props}
 import akka.pattern.ask
-import akka.testkit.{ImplicitSender, TestActors, TestKit}
-import akka.util.Timeout
+import akka.testkit.TestActors.echoActorProps
 import models.AuthorisedUser
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status._
-import support.fixtures.Infrastructure
 import uk.gov.hmrc.http.HttpResponse
 
-import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
-  with AnyWordSpecLike with Matchers with BeforeAndAfterAll with MockitoSugar with Infrastructure {
-
-  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
-
-  private val testVaultId: String = "1"
-  private val testArchiveId: String = "1"
-  private val testUser = AuthorisedUser("aUser", "anAuthProviderId")
-
-  override def afterAll {
-    TestKit.shutdownActorSystem(system)
-  }
+class RetrievalActorSpec() extends ActorSpec {
 
   "A retrieval actor" must {
+    val testUser = AuthorisedUser("aUser", "anAuthProviderId")
+    val echo = system.actorOf(echoActorProps)
+    val mockPollingActorService = mock[ActorService]
 
     "submit a retrieval request on receiving a SubmitRequest message" in {
-      val echo = system.actorOf(TestActors.echoActorProps)
-
-      val mockPollingActorService = mock[ActorService]
       when(mockPollingActorService.pollingActorExists(any(), any())(any(), any())).thenReturn(Future(true))
       when(mockPollingActorService.pollingActor(any(), any())(any(), any())).thenReturn(Future.successful(echo))
 
@@ -62,28 +42,27 @@ class RetrievalActorSpec() extends TestKit(ActorSystem("MySpec")) with ImplicitS
       when(mockNrsRetrievalConnector.submitRetrievalRequest(any(), any(), any())(any())).thenReturn(Future(mockHttpResponse))
       when(mockHttpResponse.status).thenReturn(ACCEPTED)
 
-      val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
+      val retrievalActor: ActorRef =
+        system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
 
       Await.result(
         Await.result(
           ask(retrievalActor, SubmitMessage(testVaultId, testArchiveId, hc, testUser)).mapTo[Future[ActorMessage]]
-          , 5 seconds)
-        , 5 seconds) should be(PollingMessage)
+          , defaultTimeout)
+        , defaultTimeout) should be(PollingMessage)
     }
 
     "respond to an IsComplete message with a CompleteMessage when polling has completed" in {
-      val echo = system.actorOf(TestActors.echoActorProps)
-
-      val mockPollingActorService = mock[ActorService]
       when(mockPollingActorService.eventualPollingActor(any(), any())(any(), any())).thenReturn(Future.successful(echo))
 
-      val retrievalActor: ActorRef = system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
+      val retrievalActor: ActorRef =
+        system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
 
       Await.result(
         Await.result(
           ask(retrievalActor, IsCompleteMessage(testVaultId, testArchiveId)).mapTo[Future[ActorMessage]]
-          , 5 seconds)
-        , 5 seconds) should be(IsCompleteMessage(testVaultId, testArchiveId))
+          , defaultTimeout)
+        , defaultTimeout) should be(IsCompleteMessage(testVaultId, testArchiveId))
     }
   }
 }

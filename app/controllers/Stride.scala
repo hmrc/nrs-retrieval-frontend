@@ -60,6 +60,10 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
           } else {
             Future successful Ok(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${enrolments.enrolments.map(_.key)}"))
           }
+        case None ~ _ ~ _ =>
+          Future successful Ok(errorPage(notAuthorised, notAuthorised, s"User credentials not found"))
+        case _ ~ _ ~ None =>
+          Future successful Ok(errorPage(notAuthorised, notAuthorised, s"User name not found"))
       }.recover {
         case _: NoActiveSession =>
           logger.debug(s"$actionName - NoActiveSession")

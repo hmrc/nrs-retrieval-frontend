@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package views.helpers
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import play.api.data.Field
 
-case class TextInputParams(
-                            name: String,
-                            context: Option[String] = None,
-                            hiddenNested: Boolean = false,
-                            value: Option[String] = None,
-                            label: String,
-                            hintText: Option[String] = None,
-                            error: String,
-                            hasErrors: Boolean = false,
-                            labelAsHeading: Boolean = false
-                          )
+@this(govukInput: GovukInput)
+
+@(content: String, field: Field)(implicit messages: Messages)
+
+@govukInput(
+ Input(
+  inputType = "text", classes = "govuk-input--width-20", label = Label(classes = "", content = Text(content))
+ ).withFormField(field)
+)

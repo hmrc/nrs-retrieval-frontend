@@ -19,12 +19,10 @@ package config
 import models.audit.NonRepudiationStoreSearch
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import support.UnitSpec
-import support.fixtures.Infrastructure
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 
-class AuditableSpec extends UnitSpec with MockitoSugar with Infrastructure {
+class AuditableSpec extends UnitSpec {
   private val appName = "TestAppName"
   private val mockAudit: Audit = mock[Audit]
   private val auditable = new Auditable(appName, mockAudit)

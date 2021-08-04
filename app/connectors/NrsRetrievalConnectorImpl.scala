@@ -22,8 +22,8 @@ import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, N
 import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
 import play.api.Logger
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -56,6 +56,8 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
   }
 
   override def submitRetrievalRequest(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+
     logger.info(s"Submit a retrieval request for vault: $vaultName, archive: $archiveId")
 
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"

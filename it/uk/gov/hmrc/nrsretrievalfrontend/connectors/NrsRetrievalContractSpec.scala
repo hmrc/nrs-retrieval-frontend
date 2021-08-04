@@ -161,20 +161,12 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
       }
     }
 
-    "fail" when {
-      "the retrieval service returns NOT_FOUND" in {
-        givenPostSubmissionBundlesRetrievalRequestsReturns(NOT_FOUND)
-        aNotFoundErrorShouldBeThrownBy(submitRetrievalRequest)
-      }
-
-      "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-        givenPostSubmissionBundlesRetrievalRequestsReturns(INTERNAL_SERVER_ERROR)
-        anInternalServerErrorShouldBeThrownBy(submitRetrievalRequest)
-      }
-
-      "the retrieval service returns BAD_GATEWAY" in {
-        givenPostSubmissionBundlesRetrievalRequestsReturns(BAD_GATEWAY)
-        aBadGatewayErrorShouldBeThrownBy(submitRetrievalRequest)
+    Seq(NOT_FOUND, INTERNAL_SERVER_ERROR, BAD_GATEWAY).foreach { status =>
+      s"return $status" when {
+        s"the retrieval service returns $status" in {
+          givenPostSubmissionBundlesRetrievalRequestsReturns(status)
+          submitRetrievalRequest().status shouldBe status
+        }
       }
     }
   }
@@ -196,20 +188,12 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
       }
     }
 
-    "fail" when {
-      "the retrieval service returns NOT_FOUND" in {
-        givenHeadSubmissionBundlesReturns(NOT_FOUND)
-        aNotFoundErrorShouldBeThrownBy(statusSubmissionBundle)
-      }
-
-      "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-        givenHeadSubmissionBundlesReturns(INTERNAL_SERVER_ERROR)
-        anInternalServerErrorShouldBeThrownBy(statusSubmissionBundle)
-      }
-
-      "the retrieval service returns BAD_GATEWAY" in {
-        givenHeadSubmissionBundlesReturns(BAD_GATEWAY)
-        aBadGatewayErrorShouldBeThrownBy(statusSubmissionBundle)
+    Seq(NOT_FOUND, INTERNAL_SERVER_ERROR, BAD_GATEWAY).foreach { status =>
+      s"return $status" when {
+        s"the retrieval service returns $status" in {
+          givenHeadSubmissionBundlesReturns(status)
+          statusSubmissionBundle().status shouldBe status
+        }
       }
     }
   }

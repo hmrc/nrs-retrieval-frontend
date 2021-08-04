@@ -170,7 +170,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
   "statusSubmissionBundle" should {
     "make a head call to /submission-bundles" in {
-      when(mockWsHttp.HEAD[Any](any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockWsHttp.HEAD(any(), expectedExtraHeaders)(any(), any())).thenReturn(Future.successful(mockHttpResponse))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
       await(connector.statusSubmissionBundle(testAuditId, testArchiveId)).body should be ("Some Text")
       verify(mockAuditable, times(0)).sendDataEvent(any[NonRepudiationStoreDownload])(any())

@@ -28,13 +28,18 @@ import java.util.zip.{ZipEntry, ZipOutputStream}
 object NrsRetrievalStubs {
   val vaultName = "vaultName"
   val archiveId = "archiveId"
+  val vatReturn = "vat-return"
+  val vrn = "vrn"
+  val validVrn = "validVrn"
+
   val notableEventType = "notableEventType"
   val searchKeyName = "searchKeyName_0"
   val searchKeyValue = "searchKeyValue_0"
+
   val submissionId = "604958ae-973a-4554-9e4b-fed3025dd845"
   val datetime = "Tue, 13 Jul 2021 12:36:51 GMT"
 
-  val searchQuery: SearchQuery = SearchQuery(Some(searchKeyName), Some(searchKeyValue), notableEventType)
+  val searchQuery: SearchQuery = SearchQuery(Some(vrn), Some(validVrn), vatReturn)
 
   private val xApiKeyHeader = "X-API-Key"
   private val xApiKey = "validKey"

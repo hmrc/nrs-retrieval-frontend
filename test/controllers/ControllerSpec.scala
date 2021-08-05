@@ -16,16 +16,65 @@
 
 package controllers
 
-import play.api.mvc.AnyContentAsEmpty
+import config.AppConfig
+import org.jsoup.Jsoup.parse
+import org.jsoup.nodes.Document
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
+import org.mockito.internal.stubbing.answers.Returns
+import org.mockito.stubbing.OngoingStubbing
+import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.test.Helpers.{contentAsString, status, _}
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
+import play.api.{Configuration, Environment}
 import support.GuiceAppSpec
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Name}
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, retrieve}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import views.html.error_template
+
+import scala.concurrent.Future
 
 trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
-  val postRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
+  val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val authEnabledAppConfig: AuthEnabledAppConfig = new AuthEnabledAppConfig(configuration, environment, servicesConfig)
 
   lazy val error_template: error_template = injector.instanceOf[error_template]
+
+  def givenTheRequestIsAuthorised(): OngoingStubbing[Future[Nothing]] =
+    when(mockAuthConnector.authorise(any(), any())(any(), any())).thenAnswer(
+      new Returns(
+        Future.successful(
+          retrieve.~(
+            retrieve.~(
+              Some(Credentials("providerId", "providerType")),
+              Enrolments(Set(Enrolment("nrs_digital_investigator", Seq.empty, "state")))),
+            Some(Name(Some("Terry"), Some("Test")))
+          )
+        )
+      )
+    )
+
+  def givenTheRequestIsUnauthorised(): OngoingStubbing[Future[Nothing]] =
+    when(mockAuthConnector.authorise(any(), any())(any(), any()))
+      .thenAnswer(new Returns(Future.successful(EmptyRetrieval)))
+
+  def aPageShouldBeRendered(eventualResult: Future[Result], pageHeader: String): Document = {
+    val content = parse(contentAsString(eventualResult))
+    status(eventualResult) shouldBe OK
+    content.getElementById("pageHeader").text() shouldBe pageHeader
+    content
+  }
+
+  def theNotAuthorisedPageShouldBeRendered(eventualResult: Future[Result]): Document =
+    aPageShouldBeRendered(eventualResult,"Not authorised" )
+
+}
+
+class AuthEnabledAppConfig(runModeConfiguration: Configuration, environment: Environment, servicesConfig: ServicesConfig)
+  extends AppConfig(runModeConfiguration, environment, servicesConfig) {
+
+  override lazy val strideAuth: Boolean = true
 }

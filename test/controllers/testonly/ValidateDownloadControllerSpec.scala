@@ -79,7 +79,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
         .thenReturn(Future successful ValidateDownloadResult(OK, zipSize, files, Seq(header1, header2)))
 
       val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        postRequest.withFormUrlEncodedBody((vaultName, aVaultName), (archiveId, anArchiveId))
+        emptyPostRequest.withFormUrlEncodedBody((vaultName, aVaultName), (archiveId, anArchiveId))
 
       val eventualResult = controller.submitValidateDownload(request)
       val content = validateResponse(eventualResult)

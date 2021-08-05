@@ -16,17 +16,20 @@
 
 package controllers
 
-import play.api.test.Helpers._
+import controllers.FormMappings.searchForm
+import play.api.libs.json.Json
+import support.UnitSpec
 
-class StartControllerControllerSpec extends ControllerSpec {
-  private lazy val controller =
-    new StartController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[views.html.start_page], error_template)
+import java.lang.Integer.MAX_VALUE
 
-  "GET /" should {
-    "return 200" in {
-      val result = controller.showStartPage(getRequest)
-      status(result) shouldBe OK
+class FormMappingsSpec extends UnitSpec {
+  appConfig.notableEvents.foreach { notableEvent =>
+    "searchForm" should {
+      s"bind for for ${notableEvent._1}" in {
+        val postData = Json.obj("searchText" -> "someSearchText", "notableEventType" -> notableEvent._2.name)
+        val validatedForm = searchForm.bind(postData, MAX_VALUE)
+        validatedForm.errors shouldBe empty
+      }
     }
   }
 }

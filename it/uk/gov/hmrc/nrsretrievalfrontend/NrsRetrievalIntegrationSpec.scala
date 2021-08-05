@@ -16,13 +16,92 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend
 
+import models.NrsSearchResult
+import org.jsoup.Jsoup.parse
+import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
+import scala.concurrent.Future
 
 class NrsRetrievalIntegrationSpec extends IntegrationSpec {
-  "GET /download/:vaultId/:archiveId" should {
+  private val selectUrl = s"$serviceRoot/select"
+  private val searchUrl = s"$serviceRoot/search"
+  private val vatReturnSearchUrl = s"$searchUrl/$vatReturn"
+
+  private val startPageHeading = "Search the Non-Repudiation Store"
+  private val searchPageHeading = "Search for VAT returns"
+
+  private def assertPageIsRendered(eventualResponse: Future[WSResponse], pageHeader: String) = {
+    val response = eventualResponse.futureValue
+    val document = parse(response.body)
+
+    response.status shouldBe OK
+    document.getElementById("pageHeader").text() shouldBe pageHeader
+
+    document
+  }
+
+  "GET /nrs-retrieval/start" should {
+    "display the start page" in {
+      assertPageIsRendered(
+        wsClient.url(s"$serviceRoot/start").get, startPageHeading)
+    }
+  }
+
+  "GET /nrs-retrieval/select" should {
+    "display the select page" in {
+      assertPageIsRendered(
+        wsClient.url(s"$serviceRoot/select").get, "What type of digital submission would you like to search for?")
+    }
+  }
+
+  "POST /nrs-retrieval/select" should {
+    "redirect to the search page" in {
+      assertPageIsRendered(
+        wsClient.url(selectUrl).post(Map[String, Seq[String]](notableEventType -> Seq(vatReturn))),
+        searchPageHeading)
+    }
+  }
+
+  "GET /nrs-retrieval/search" should {
+
+    "redirect to the start page" when {
+      "no notable event type is provided" in {
+        assertPageIsRendered(wsClient.url(searchUrl).get, startPageHeading)
+      }
+    }
+
+    "display the search page" when {
+      "a notable event type is provided" in {
+        assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get, searchPageHeading)
+      }
+    }
+  }
+
+  "POST /nrs-retrieval/search" should {
+    "perform a search and display the results panel" in {
+      givenSearchReturns(OK, Seq.empty[NrsSearchResult])
+
+      val document = assertPageIsRendered(
+        wsClient.url(vatReturnSearchUrl).post(
+          Map[String, Seq[String]](
+            searchKeyName -> Seq(vrn),
+            searchKeyValue -> Seq(validVrn),
+            notableEventType -> Seq(vatReturn)
+          )
+        ),
+        searchPageHeading
+      )
+
+      document.getElementById("notFound").text() shouldBe """No results found for "validVrn""""
+
+      verifySearchWithXApiKeyHeader()
+    }
+  }
+
+  "GET /nrs-retrieval/download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
       givenGetSubmissionBundlesReturns(OK)
       val response = wsClient.url(s"$serviceRoot/download/$vaultName/$archiveId").get.futureValue
@@ -46,29 +125,11 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     }
   }
 
-  "GET /retrieve/:vaultId/:archiveId" should {
+  "GET /nrs-retrieval/retrieve/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
       wsClient.url(s"$serviceRoot/retrieve/$vaultName/$archiveId").get.futureValue.status shouldBe ACCEPTED
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
-    }
-  }
-
-  "POST /retrieve/search/:notableEventType" should {
-    "pass the X-API-HEADER to the nrs-retrieval backend" in {
-      givenSearchReturns(OK)
-
-      wsClient.url(s"$serviceRoot/search/$notableEventType")
-        .post(
-          Map[String, Seq[String]](
-            searchKeyName -> Seq(searchKeyName),
-            searchKeyValue -> Seq(searchKeyValue),
-            notableEventType -> Seq(notableEventType)
-          )
-        )
-        .futureValue.status shouldBe OK
-
-      verifySearchWithXApiKeyHeader()
     }
   }
 }

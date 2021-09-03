@@ -92,21 +92,21 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
     "make a get call to /submission-metadata returning data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any(), any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.search(searchQuery, testUser)).size shouldBe 1
+      await(connector.search(searchQuery, testUser, crossKeySearch = false)).size shouldBe 1
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
     "make a get call to /submission-metadata with parameters returning no data" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any(), any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.failed(new Throwable("404")))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      await(connector.search(searchQuery, testUser)).size shouldBe 0
+      await(connector.search(searchQuery, testUser, crossKeySearch = false)).size shouldBe 0
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
     "make a get call to /submission-metadata with parameters resulting in a failure" in {
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any(), any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.failed(new Throwable("401")))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
-      a[Throwable] should be thrownBy await(connector.search(searchQuery, testUser))
+      a[Throwable] should be thrownBy await(connector.search(searchQuery, testUser, crossKeySearch = false))
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
@@ -121,7 +121,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
           }
         }
       })
-      await(connector.search(searchQuery, testUser)).head.nrSubmissionId shouldBe nrSubmissionId
+      await(connector.search(searchQuery, testUser, crossKeySearch = false)).head.nrSubmissionId shouldBe nrSubmissionId
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])(any())
     }
 
@@ -136,7 +136,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
       when(mockWsHttp.GET[Seq[NrsSearchResult]](any(), any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
       when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])(any())).thenReturn(Future.successful(()))
-      await(connector.search(searchQuery, testUser)).size shouldBe 1
+      await(connector.search(searchQuery, testUser, crossKeySearch = false)).size shouldBe 1
       verify(mockAuditable, times(1)).sendDataEvent(searchAudit)(hc)
     }
 

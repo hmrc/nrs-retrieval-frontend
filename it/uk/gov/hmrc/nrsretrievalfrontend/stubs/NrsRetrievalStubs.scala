@@ -26,8 +26,6 @@ import java.nio.charset.Charset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
 object NrsRetrievalStubs {
-  val vaultName = "vaultName"
-  val archiveId = "archiveId"
   val vatReturn = "vat-return"
   val vrn = "vrn"
   val validVrn = "validVrn"
@@ -45,7 +43,7 @@ object NrsRetrievalStubs {
   private val xApiKey = "validKey"
   private val retrievalPath = "/nrs-retrieval"
   private val searchPath = s"$retrievalPath/submission-metadata?${searchQuery.searchText}"
-  private val submissionBundlesPath = s"$retrievalPath/submission-bundles/$vaultName/$archiveId"
+  private val submissionBundlesPath = s"$retrievalPath/submission-bundles/$vatReturn/$vrn"
   private val submissionBundlesRetrievalRequestsPath = s"$submissionBundlesPath/retrieval-requests"
   private val equalToXApiKey = new EqualToPattern(xApiKey)
 

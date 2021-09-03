@@ -21,7 +21,7 @@ import models._
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
@@ -47,13 +47,8 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   private def aBadGatewayErrorShouldBeThrownBy[T](request: () => T): Assertion =
     anUpstreamErrorResponseShouldBeThrownBy(request, BAD_GATEWAY)
 
-  private def aNotFoundErrorShouldBeThrownBy[T](request: () => T): Assertion =
-    intercept[Exception] {
-      request()
-    }.getCause.asInstanceOf[HttpException].responseCode shouldBe NOT_FOUND
-
   "search" should {
-    def search(): Seq[NrsSearchResult] = connector.search(searchQuery, authorisedUser).futureValue
+    def search(): Seq[NrsSearchResult] = connector.search(searchQuery, authorisedUser, crossKeySearch = false).futureValue
 
     "return a sequence of results" when {
       val results =
@@ -69,7 +64,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
             "nrSubmissionId",
             Bundle ("fileType", 1),
             LocalDate.now(),
-            Glacier(vaultName, archiveId)
+            Glacier(vatReturn, vrn)
           )
         )
 
@@ -117,7 +112,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "getSubmissionBundle" should {
-    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vaultName, archiveId, authorisedUser).futureValue
+    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vatReturn, vrn, authorisedUser).futureValue
 
     // the backend only returns OK here, to do fix under NONPR-2082
     "return OK" when {
@@ -145,7 +140,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
 
   "submitRetrievalRequest" should {
     def submitRetrievalRequest(): HttpResponse =
-      connector.submitRetrievalRequest(vaultName, archiveId, authorisedUser).futureValue
+      connector.submitRetrievalRequest(vatReturn, vrn, authorisedUser).futureValue
 
     "return OK" when {
       "the retrieval service returns OK" in {
@@ -172,7 +167,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "statusSubmissionBundle" should {
-    def statusSubmissionBundle(): HttpResponse = connector.statusSubmissionBundle(vaultName, archiveId).futureValue
+    def statusSubmissionBundle(): HttpResponse = connector.statusSubmissionBundle(vatReturn, vrn).futureValue
 
     "return OK" when {
       "the retrieval service returns OK" in {

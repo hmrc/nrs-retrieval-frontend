@@ -23,7 +23,7 @@ import scala.concurrent.Future
 
 trait NrsRetrievalConnector {
 
-  def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]]
+  def search(query: SearchQuery, user: AuthorisedUser, crossKeySearch: Boolean)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]]
 
   def submitRetrievalRequest(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[HttpResponse]
 

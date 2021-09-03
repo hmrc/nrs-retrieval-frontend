@@ -91,7 +91,9 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   }
 
   private def doSearch(search: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier) = {
-    nrsRetrievalConnector.search(search, user)
+    val crossKeySearch = appConfig.notableEvents.get(search.notableEventType).fold(false)(_.crossKeySearch)
+
+    nrsRetrievalConnector.search(search, user, crossKeySearch)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
   }
 

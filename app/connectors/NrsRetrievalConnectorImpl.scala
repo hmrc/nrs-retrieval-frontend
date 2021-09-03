@@ -36,10 +36,11 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
 
   private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
-  override def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
+  override def search(query: SearchQuery, user: AuthorisedUser, crossKeySearch: Boolean)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
     logger.info(s"Search for ${query.searchText}")
 
-    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
+    val basePath = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
+    val path = if (crossKeySearch) s"$basePath&crossKeySearch=true" else basePath
 
     for{
       get <- http.GET[Seq[NrsSearchResult]](path, Seq.empty, extraHeaders)
@@ -77,7 +78,8 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     http.HEAD(path, extraHeaders)
   }
 
-  override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
+  override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)
+                                  (implicit hc: HeaderCarrier): Future[WSResponse] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")

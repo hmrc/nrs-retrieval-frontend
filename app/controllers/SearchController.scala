@@ -77,7 +77,6 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
           Future.successful(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
-          logger.info(s"Do search for submitted search query ${search.searchText}")
           doSearch(search, user).map { results =>
             logger.info(s"Form $results")
             Ok(searchPage(searchForm.bindFromRequest, Some(user), Some(results)))
@@ -92,6 +91,8 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   private def doSearch(search: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier) = {
     val crossKeySearch = appConfig.notableEvents.get(search.notableEventType).fold(false)(_.crossKeySearch)
+
+    logger.info(s"Do search for submitted search query ${search.searchText(crossKeySearch)}")
 
     nrsRetrievalConnector.search(search, user, crossKeySearch)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))

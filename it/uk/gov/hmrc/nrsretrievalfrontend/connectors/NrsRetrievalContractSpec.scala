@@ -47,66 +47,73 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   private def aBadGatewayErrorShouldBeThrownBy[T](request: () => T): Assertion =
     anUpstreamErrorResponseShouldBeThrownBy(request, BAD_GATEWAY)
 
-  "search" should {
-    def search(): Seq[NrsSearchResult] = connector.search(searchQuery, authorisedUser, crossKeySearch = false).futureValue
+  val crossKeySearch = false
 
-    "return a sequence of results" when {
-      val results =
-        Seq(
-          NrsSearchResult(
-            "businessId",
-            "notableEvent",
-            "payloadContentType",
-            ZonedDateTime.now(),
-            None,
-            "userAuthToken",
-            None,
-            "nrSubmissionId",
-            Bundle ("fileType", 1),
-            LocalDate.now(),
-            Glacier(vatReturn, vrn)
+  Seq(
+    (vatReturnSearchQuery, vatReturnSearchText, false),
+    (vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (query, queryText, crossKeySearch) =>
+
+    def search(): Seq[NrsSearchResult] = connector.search(query, authorisedUser, crossKeySearch).futureValue
+
+    s"a ${if (crossKeySearch) "cross key" else "standard"} search" should {
+      "return a sequence of results" when {
+        val results =
+          Seq(
+            NrsSearchResult(
+              "businessId",
+              "notableEvent",
+              "payloadContentType",
+              ZonedDateTime.now(),
+              None,
+              "userAuthToken",
+              None,
+              "nrSubmissionId",
+              Bundle("fileType", 1),
+              LocalDate.now(),
+              Glacier(vatReturn, vrn)
+            )
           )
-        )
 
-      "the retrieval service returns OK with results" in {
-        givenSearchReturns(OK, results)
-        search() shouldBe results
+        "the retrieval service returns OK with results" in {
+          givenSearchReturns(queryText, OK, results)
+          search() shouldBe results
+        }
+
+        "the retrieval service returns ACCEPTED with results" in {
+          givenSearchReturns(queryText, ACCEPTED, results)
+          search() shouldBe results
+        }
       }
 
-      "the retrieval service returns ACCEPTED with results" in {
-        givenSearchReturns(ACCEPTED, results)
-        search() shouldBe results
-      }
-    }
+      "return an empty sequence" when {
+        val emptyResults = Seq.empty
 
-    "return an empty sequence" when {
-      val emptyResults = Seq.empty
+        "the retrieval service returns OK with empty results" in {
+          givenSearchReturns(queryText, OK, emptyResults)
+          search() shouldBe emptyResults
+        }
 
-      "the retrieval service returns OK with empty results" in {
-        givenSearchReturns(OK, emptyResults)
-        search() shouldBe emptyResults
-      }
+        "the retrieval service returns ACCEPTED with empty results" in {
+          givenSearchReturns(queryText, ACCEPTED, emptyResults)
+          search() shouldBe emptyResults
+        }
 
-      "the retrieval service returns ACCEPTED with empty results" in {
-        givenSearchReturns(ACCEPTED, emptyResults)
-        search() shouldBe emptyResults
-      }
-
-      "the retrieval service returns NOT_FOUND" in {
-        givenSearchReturns(NOT_FOUND)
-        search() shouldBe emptyResults
-      }
-    }
-
-    "fail" when {
-      "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-        givenSearchReturns(INTERNAL_SERVER_ERROR)
-        anInternalServerErrorShouldBeThrownBy(search)
+        "the retrieval service returns NOT_FOUND" in {
+          givenSearchReturns(queryText, NOT_FOUND)
+          search() shouldBe emptyResults
+        }
       }
 
-      "the retrieval service returns BAD_GATEWAY" in {
-        givenSearchReturns(BAD_GATEWAY)
-        aBadGatewayErrorShouldBeThrownBy(search)
+      "fail" when {
+        "the retrieval service returns INTERNAL_SERVER_ERROR" in {
+          givenSearchReturns(queryText, INTERNAL_SERVER_ERROR)
+          anInternalServerErrorShouldBeThrownBy(search)
+        }
+
+        "the retrieval service returns BAD_GATEWAY" in {
+          givenSearchReturns(queryText, BAD_GATEWAY)
+          aBadGatewayErrorShouldBeThrownBy(search)
+        }
       }
     }
   }

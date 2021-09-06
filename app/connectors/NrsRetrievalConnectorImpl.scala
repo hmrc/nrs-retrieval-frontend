@@ -37,10 +37,10 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
   private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
   override def search(query: SearchQuery, user: AuthorisedUser, crossKeySearch: Boolean)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
-    logger.info(s"Search for ${query.searchText}")
+    val queryString = query.searchText(crossKeySearch)
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?$queryString"
 
-    val basePath = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
-    val path = if (crossKeySearch) s"$basePath&crossKeySearch=true" else basePath
+    logger.info(s"Search for $queryString")
 
     for{
       get <- http.GET[Seq[NrsSearchResult]](path, Seq.empty, extraHeaders)
@@ -48,11 +48,11 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
           case e if e.getMessage.contains("401") =>
-            auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, "Unauthorized", path))
+            auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, queryString, "Unauthorized", path))
             throw e
         }
       _ <- auditable.sendDataEvent(
-        NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryString, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
     } yield get
   }
 

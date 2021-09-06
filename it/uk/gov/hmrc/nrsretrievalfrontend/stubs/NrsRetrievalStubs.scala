@@ -18,45 +18,32 @@ package uk.gov.hmrc.nrsretrievalfrontend.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import models.{NrsSearchResult, SearchQuery}
+import models.NrsSearchResult
 import play.api.libs.json.Json.toJson
+import uk.gov.hmrc.nrsretrievalfrontend.Fixture
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-object NrsRetrievalStubs {
-  val vatReturn = "vat-return"
-  val vrn = "vrn"
-  val validVrn = "validVrn"
-
-  val notableEventType = "notableEventType"
-  val searchKeyName = "searchKeyName_0"
-  val searchKeyValue = "searchKeyValue_0"
-
-  val submissionId = "604958ae-973a-4554-9e4b-fed3025dd845"
-  val datetime = "Tue, 13 Jul 2021 12:36:51 GMT"
-
-  val searchQuery: SearchQuery = SearchQuery(Some(vrn), Some(validVrn), vatReturn)
-
-  private val xApiKeyHeader = "X-API-Key"
-  private val xApiKey = "validKey"
+object NrsRetrievalStubs extends Fixture {
   private val retrievalPath = "/nrs-retrieval"
-  private val searchPath = s"$retrievalPath/submission-metadata?${searchQuery.searchText}"
   private val submissionBundlesPath = s"$retrievalPath/submission-bundles/$vatReturn/$vrn"
   private val submissionBundlesRetrievalRequestsPath = s"$submissionBundlesPath/retrieval-requests"
   private val equalToXApiKey = new EqualToPattern(xApiKey)
 
-  def givenSearchReturns(status: Int, results: Seq[NrsSearchResult]): StubMapping =
-    stubFor(get(urlEqualTo(s"$retrievalPath/submission-metadata?${searchQuery.searchText}"))
-      .withHeader(xApiKeyHeader, equalToXApiKey)
-      .willReturn(aResponse().withStatus(status).withBody(toJson(results).toString())))
+  private def searchPathUrl(searchText: String) = urlEqualTo(s"$retrievalPath/submission-metadata?$searchText")
 
-  def givenSearchReturns(status: Int): StubMapping =
-    stubFor(get(urlEqualTo(searchPath)).withHeader(xApiKeyHeader, equalToXApiKey).willReturn(aResponse().withStatus(status)))
+  private def searchRequest(searchText: String) = get(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey)
 
-  def verifySearchWithXApiKeyHeader(): Unit =
-    verify(getRequestedFor(urlEqualTo(searchPath)).withHeader(xApiKeyHeader, equalToXApiKey))
+  def givenSearchReturns(searchText: String, status: Int, results: Seq[NrsSearchResult]): StubMapping =
+    stubFor(searchRequest(searchText).willReturn(aResponse().withStatus(status).withBody(toJson(results).toString())))
+
+  def givenSearchReturns(searchText: String, status: Int): StubMapping =
+    stubFor(searchRequest(searchText).willReturn(aResponse().withStatus(status)))
+
+  def verifySearchWithXApiKeyHeader(searchText: String): Unit =
+    verify(getRequestedFor(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey))
 
   def givenGetSubmissionBundlesReturns(status: Int): StubMapping = {
     val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())

@@ -35,8 +35,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   private def loadFromConfig(config: Configuration, key: String) =
     config.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key")).replace("_", " ")
 
-  private def loadOptionalConfig(config: Configuration, key: String) = config.getOptional[String](key)
-
   private def loadConfigWithDefault(key: String, default: String) = runModeConfiguration.getOptional[String](key).getOrElse(default)
 
   private val contactHost = runModeConfiguration.getOptional[String](s"contact-frontend.host").getOrElse("")
@@ -79,7 +77,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
           SearchKey(
             loadFromConfig(searchKeyConfiguration, "name"), loadFromConfig(searchKeyConfiguration, "label"))
         },
-        crossKeySearch = loadOptionalConfig(clientConfiguration, "crossKeySearch").getOrElse("") == "true"
+        crossKeySearch = clientConfiguration.getOptional[String]("crossKeySearch").getOrElse("") == "true"
       )
     }.map(nE => nE.name -> nE).toMap
 

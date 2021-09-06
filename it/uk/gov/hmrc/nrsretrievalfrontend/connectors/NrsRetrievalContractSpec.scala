@@ -47,8 +47,6 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   private def aBadGatewayErrorShouldBeThrownBy[T](request: () => T): Assertion =
     anUpstreamErrorResponseShouldBeThrownBy(request, BAD_GATEWAY)
 
-  val crossKeySearch = false
-
   Seq(
     (vatReturnSearchQuery, vatReturnSearchText, false),
     (vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (query, queryText, crossKeySearch) =>

@@ -76,7 +76,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
           SearchKey(
             loadFromConfig(searchKeyConfiguration, "name"), loadFromConfig(searchKeyConfiguration, "label"))
-        }
+        },
+        crossKeySearch = clientConfiguration.getOptional[String]("crossKeySearch").getOrElse("") == "true"
       )
     }.map(nE => nE.name -> nE).toMap
 

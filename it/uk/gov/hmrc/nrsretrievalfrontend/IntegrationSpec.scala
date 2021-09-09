@@ -34,7 +34,8 @@ trait IntegrationSpec extends AnyWordSpec
   with GuiceOneServerPerSuite
   with WireMockSupport
   with IntegrationPatience
-  with BeforeAndAfterEach {
+  with BeforeAndAfterEach
+  with Fixture {
   override def beforeEach(): Unit = WireMock.reset()
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configuration).build()

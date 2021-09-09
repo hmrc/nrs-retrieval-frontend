@@ -21,7 +21,7 @@ import models._
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
@@ -47,77 +47,77 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   private def aBadGatewayErrorShouldBeThrownBy[T](request: () => T): Assertion =
     anUpstreamErrorResponseShouldBeThrownBy(request, BAD_GATEWAY)
 
-  private def aNotFoundErrorShouldBeThrownBy[T](request: () => T): Assertion =
-    intercept[Exception] {
-      request()
-    }.getCause.asInstanceOf[HttpException].responseCode shouldBe NOT_FOUND
+  Seq(
+    (vatReturnSearchQuery, vatReturnSearchText, false),
+    (vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (query, queryText, crossKeySearch) =>
 
-  "search" should {
-    def search(): Seq[NrsSearchResult] = connector.search(searchQuery, authorisedUser).futureValue
+    def search(): Seq[NrsSearchResult] = connector.search(query, authorisedUser, crossKeySearch).futureValue
 
-    "return a sequence of results" when {
-      val results =
-        Seq(
-          NrsSearchResult(
-            "businessId",
-            "notableEvent",
-            "payloadContentType",
-            ZonedDateTime.now(),
-            None,
-            "userAuthToken",
-            None,
-            "nrSubmissionId",
-            Bundle ("fileType", 1),
-            LocalDate.now(),
-            Glacier(vaultName, archiveId)
+    s"a ${if (crossKeySearch) "cross key" else "standard"} search" should {
+      "return a sequence of results" when {
+        val results =
+          Seq(
+            NrsSearchResult(
+              "businessId",
+              "notableEvent",
+              "payloadContentType",
+              ZonedDateTime.now(),
+              None,
+              "userAuthToken",
+              None,
+              "nrSubmissionId",
+              Bundle("fileType", 1),
+              LocalDate.now(),
+              Glacier(vatReturn, vrn)
+            )
           )
-        )
 
-      "the retrieval service returns OK with results" in {
-        givenSearchReturns(OK, results)
-        search() shouldBe results
+        "the retrieval service returns OK with results" in {
+          givenSearchReturns(queryText, OK, results)
+          search() shouldBe results
+        }
+
+        "the retrieval service returns ACCEPTED with results" in {
+          givenSearchReturns(queryText, ACCEPTED, results)
+          search() shouldBe results
+        }
       }
 
-      "the retrieval service returns ACCEPTED with results" in {
-        givenSearchReturns(ACCEPTED, results)
-        search() shouldBe results
-      }
-    }
+      "return an empty sequence" when {
+        val emptyResults = Seq.empty
 
-    "return an empty sequence" when {
-      val emptyResults = Seq.empty
+        "the retrieval service returns OK with empty results" in {
+          givenSearchReturns(queryText, OK, emptyResults)
+          search() shouldBe emptyResults
+        }
 
-      "the retrieval service returns OK with empty results" in {
-        givenSearchReturns(OK, emptyResults)
-        search() shouldBe emptyResults
-      }
+        "the retrieval service returns ACCEPTED with empty results" in {
+          givenSearchReturns(queryText, ACCEPTED, emptyResults)
+          search() shouldBe emptyResults
+        }
 
-      "the retrieval service returns ACCEPTED with empty results" in {
-        givenSearchReturns(ACCEPTED, emptyResults)
-        search() shouldBe emptyResults
-      }
-
-      "the retrieval service returns NOT_FOUND" in {
-        givenSearchReturns(NOT_FOUND)
-        search() shouldBe emptyResults
-      }
-    }
-
-    "fail" when {
-      "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-        givenSearchReturns(INTERNAL_SERVER_ERROR)
-        anInternalServerErrorShouldBeThrownBy(search)
+        "the retrieval service returns NOT_FOUND" in {
+          givenSearchReturns(queryText, NOT_FOUND)
+          search() shouldBe emptyResults
+        }
       }
 
-      "the retrieval service returns BAD_GATEWAY" in {
-        givenSearchReturns(BAD_GATEWAY)
-        aBadGatewayErrorShouldBeThrownBy(search)
+      "fail" when {
+        "the retrieval service returns INTERNAL_SERVER_ERROR" in {
+          givenSearchReturns(queryText, INTERNAL_SERVER_ERROR)
+          anInternalServerErrorShouldBeThrownBy(search)
+        }
+
+        "the retrieval service returns BAD_GATEWAY" in {
+          givenSearchReturns(queryText, BAD_GATEWAY)
+          aBadGatewayErrorShouldBeThrownBy(search)
+        }
       }
     }
   }
 
   "getSubmissionBundle" should {
-    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vaultName, archiveId, authorisedUser).futureValue
+    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vatReturn, vrn, authorisedUser).futureValue
 
     // the backend only returns OK here, to do fix under NONPR-2082
     "return OK" when {
@@ -145,7 +145,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
 
   "submitRetrievalRequest" should {
     def submitRetrievalRequest(): HttpResponse =
-      connector.submitRetrievalRequest(vaultName, archiveId, authorisedUser).futureValue
+      connector.submitRetrievalRequest(vatReturn, vrn, authorisedUser).futureValue
 
     "return OK" when {
       "the retrieval service returns OK" in {
@@ -172,7 +172,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "statusSubmissionBundle" should {
-    def statusSubmissionBundle(): HttpResponse = connector.statusSubmissionBundle(vaultName, archiveId).futureValue
+    def statusSubmissionBundle(): HttpResponse = connector.statusSubmissionBundle(vatReturn, vrn).futureValue
 
     "return OK" when {
       "the retrieval service returns OK" in {

@@ -19,7 +19,11 @@ package models
 import play.api.libs.json.{Json, OFormat}
 
 case class SearchQuery(searchKeyName_0: Option[String], searchKeyValue_0: Option[String], notableEventType: String) {
-  def searchText = s"notableEvent=${notableEventType}&${searchKeyName_0.getOrElse("")}=${searchKeyValue_0.getOrElse("")}"
+  def searchText(crossKeySearch: Boolean): String = {
+    val baseSearchText = s"notableEvent=$notableEventType&${searchKeyName_0.getOrElse("")}=${searchKeyValue_0.getOrElse("")}"
+
+    if (crossKeySearch) s"$baseSearchText&crossKeySearch=true" else baseSearchText
+  }
 }
 
 object SearchQuery {

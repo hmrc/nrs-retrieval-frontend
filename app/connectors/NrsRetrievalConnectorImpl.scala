@@ -36,10 +36,11 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
 
   private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
-  override def search(query: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
-    logger.info(s"Search for ${query.searchText}")
+  override def search(query: SearchQuery, user: AuthorisedUser, crossKeySearch: Boolean)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
+    val queryString = query.searchText(crossKeySearch)
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?$queryString"
 
-    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?${query.searchText}"
+    logger.info(s"Search for $queryString")
 
     for{
       get <- http.GET[Seq[NrsSearchResult]](path, Seq.empty, extraHeaders)
@@ -47,11 +48,11 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
           case e if e.getMessage.contains("401") =>
-            auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, "Unauthorized", path))
+            auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, queryString, "Unauthorized", path))
             throw e
         }
       _ <- auditable.sendDataEvent(
-        NonRepudiationStoreSearch(user.authProviderId, user.userName, query.searchText, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryString, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
     } yield get
   }
 
@@ -77,7 +78,8 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     http.HEAD(path, extraHeaders)
   }
 
-  override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[WSResponse] = {
+  override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)
+                                  (implicit hc: HeaderCarrier): Future[WSResponse] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")

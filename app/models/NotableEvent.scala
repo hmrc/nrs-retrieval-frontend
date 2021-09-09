@@ -31,5 +31,6 @@ case class NotableEvent(
                          displayName: String,
                          storedFrom: String,
                          storedFor: String,
-                         searchKeys: Seq[SearchKey]
+                         searchKeys: Seq[SearchKey],
+                         crossKeySearch: Boolean
                        )

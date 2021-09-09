@@ -20,6 +20,7 @@ import akka.actor.ActorRef
 import akka.util.ByteString
 import config.AppConfig
 import models.SearchResultUtils
+import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
@@ -115,7 +116,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
           .withFormUrlEncodedBody(("notableEventType", notableEventType), ("searchText", "someSearchText"))
 
       def givenTheSearchSucceeds() =
-        when(nrsRetrievalConnector.search(any(), any())(any()))
+        when(nrsRetrievalConnector.search(any(), any(), Matchers.eq(notableEvent.crossKeySearch))(any()))
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
 
       def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result]) = {
@@ -150,7 +151,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
                 .withFormUrlEncodedBody(("notableEventType", notableEventType))))
 
           def givenTheSearchSucceedsWithNoResults() =
-            when(nrsRetrievalConnector.search(any(), any())(any()))
+            when(nrsRetrievalConnector.search(any(), any(), any())(any()))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
           def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result]) = {
@@ -173,8 +174,8 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
   }
 
   "download" should {
-    val vaultName = "vaultName"
-    val archiveId = "archiveId"
+    val vaultName = "vat-return"
+    val archiveId = "vrn"
 
     "return 200 and a byte stream" when {
       def givenTheDownloadSucceeds() = {

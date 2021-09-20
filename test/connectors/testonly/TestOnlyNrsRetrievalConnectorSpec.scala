@@ -24,12 +24,14 @@ import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.libs.ws.WSResponse
 import support.UnitSpec
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.Future
 
 class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
   private val nrsConnector = mock[NrsRetrievalConnector]
-  private val connector = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector)
+  private val httpClient = mock[HttpClient]
+  private val connector = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector, httpClient)
   private val aVaultName = "vaultName"
   private val anArchiveId = "archiveId"
   private val user = AuthorisedUser("", "")

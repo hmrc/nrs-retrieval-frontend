@@ -57,3 +57,10 @@ test-only.validate-download.results.numberOfZippedBytes=Number of zipped bytes
 test-only.validate-download.results.numberOfZippedFiles=Number of zipped files
 test-only.validate-download.results.files=Files
 test-only.validate-download.results.headers=Headers
+
+################################## Test-only Check Authorisation Page ####################################################
+test-only.check-authorisation.page.header=Test-only check authorisation
+test-only.check-authorisation.page.info=The nrs-retrieval service has determined that your session is:
+test-only.check-authorisation.status.200=Authenticated in Stride and authorised for NRS with the nrs_digital_investigator enrolment.
+test-only.check-authorisation.status.403=Authenticated in Stride but not authorised for NRS with the nrs_digital_investigator enrolment.
+test-only.check-authorisation.status.401=Not authenticated in Stride.

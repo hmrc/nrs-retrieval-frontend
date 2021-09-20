@@ -16,18 +16,26 @@
 
 package connectors.testonly
 
+import config.AppConfig
 import connectors.NrsRetrievalConnector
 import models.AuthorisedUser
 import models.testonly.ValidateDownloadResult
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class TestOnlyNrsRetrievalConnectorImpl @Inject()(nrsRetrievalConnector: NrsRetrievalConnector) extends TestOnlyNrsRetrievalConnector{
+class TestOnlyNrsRetrievalConnectorImpl @Inject()(nrsRetrievalConnector: NrsRetrievalConnector, http: HttpClient)
+                                                 (implicit val appConfig: AppConfig)
+  extends TestOnlyNrsRetrievalConnector {
+
   override def validateDownload(vaultName: String, archiveId: String, user: AuthorisedUser)
                                (implicit hc: HeaderCarrier): Future[ValidateDownloadResult] =
     nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map(response => ValidateDownloadResult(response))
+
+  override def checkAuthorisation()(implicit hc: HeaderCarrier): Future[Boolean] =
+    http.GET[Boolean](s"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation")
 }

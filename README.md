@@ -31,13 +31,37 @@ You should then be able to start the application using:
 
 ### Test-only endpoints
 
-There is a test-only page that can be used to validate the download functionality and the contents of an available 
-zip to download.
+To use the test-only endpoints, run the service using the `./run-with-test-only-endpoints.sh` script.
 
-To use this, run the service using the `./run-with-test-only-endpoints.sh` script. 
 
-Navigate to
+`GET  /nrs-retrieval/test-only/validate-download`
 
-  `GET  /nrs-retrieval/test-only/validate-download`
+This test-only endpoint serves an HTML page that can be used to validate the contents of an available zip to download.
 
-and enter the archive name and vault id of the download to verify.
+To use, submit the archive name and vault id of the download to verify.
+
+
+`GET  /nrs-retrieval/test-only/check-authorisation`
+
+This test-only endpoint serves an HTML page that can be used to demonstrate that the backend `nrs-retrieval` service can be integrated with stride auth.
+
+It was added as part of a spike to show whether we can add security in depth to `nrs-retrieval` and we anticipate that once this is done the endpoint will be removed.
+
+The endpoint functions as follows:
+
+    Given I am a user authenticated via Stride with the enrolment nrs_digital_investigator
+    When I navigate to /nrs-retrieval/test-only/check-authorisation
+    Then a call is made to the nrs-retrieval endpoint /test-only/check-authorisation
+    And content is served which shows that nrs-retrieval has deduced that I am authenticated via Stride and authorised for NRS
+
+    Given I am a user not authenticated via Stride
+    When I navigate to /nrs-retrieval/test-only/check-authorisation
+    Then a call is made to the nrs-retrieval endpoint /test-only/check-authorisation
+    And content is served which shows that nrs-retrieval has deduced that I am not authenticated via Stride
+
+    Given I am a user authenticated via Stride but without the enrolment nrs_digital_investigator
+    When I navigate to /nrs-retrieval/test-only/check-authorisation
+    Then a call is made to the nrs-retrieval endpoint /test-only/check-authorisation
+    And content is served which shows that nrs-retrieval has deduced that I am authenticated in Stride but not authorised for NRS
+
+

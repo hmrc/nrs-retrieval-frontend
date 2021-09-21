@@ -16,5 +16,5 @@
 
 @this()
 
-@(content: Content)
-<p class="govuk-body">@content.asHtml</p>
+@(content: Content, id: String = "")
+<p id = "@{id}" class="govuk-body">@content.asHtml</p>

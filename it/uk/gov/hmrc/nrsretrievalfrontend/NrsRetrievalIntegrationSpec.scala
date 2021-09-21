@@ -68,7 +68,6 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   }
 
   "GET /nrs-retrieval/search" should {
-
     "redirect to the start page" when {
       "no notable event type is provided" in {
         assertPageIsRendered(wsClient.url(searchUrl).get, startPageHeading)
@@ -76,8 +75,18 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     }
 
     "display the search page" when {
-      "a notable event type is provided" in {
-        assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get, vatReturnSearchPageHeading)
+      "a vat return is provided" in {
+        val document = assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get, vatReturnSearchPageHeading)
+        Option(document.getElementById("search-page-vat-registration-searchkey-info")) shouldBe None
+        Option(document.getElementById("vat-registration-multiple-search-key-detail-list-0")) shouldBe None
+        Option(document.getElementById("vat-registration-multiple-search-key-detail-list-1")) shouldBe None
+      }
+
+      "a non vat registration is provided" in {
+        val document = assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).get, vatRegistrationSearchPageHeading)
+        document.getElementById("search-page-vat-registration-searchkey-info").`val`() shouldBe "For VAT registrations submitted:"
+        document.getElementById("vat-registration-multiple-search-key-detail-list-0").`val`() shouldBe "before 31 Oct 2021 - provide a postcode"
+        document.getElementById("vat-registration-multiple-search-key-detail-list-1").`val`() shouldBe "after 31 Oct 2021 - provide a Form Bundle ID"
       }
     }
   }

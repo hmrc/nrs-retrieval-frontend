@@ -65,16 +65,14 @@
     @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
 
     @if(notableEventType == "vat-registration") {
-        @p(id = "search-page-vat-registration-searchkey-info", content = Text(Messages("search.page.vat-registration.searchkey.detail.info=")))
+      <div id = "vat-registration-additional-info">
+        @p(content = Text(Messages("search.page.vat-registration.searchkey.detail.info=")))
 
         <ul class="govuk-list govuk-list--bullet">
-            <li id="vat-registration-multiple-search-key-detail-list-0">
-              @messages("search.page.vat-registration.searchkey.detail.list.0")
-            </li>
-            <li id="vat-registration-multiple-search-key-detail-list-1">
-              @messages("search.page.vat-registration.searchkey.detail.list.1")
-            </li>
+            <li>@messages("search.page.vat-registration.searchkey.detail.list.0")</li>
+            <li>@messages("search.page.vat-registration.searchkey.detail.list.1")</li>
         </ul>
+      </div>
     }
 
     @p(content = Text(Messages("search.page.hint")))

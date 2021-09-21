@@ -20,6 +20,7 @@ import akka.util.ByteString
 import connectors.NrsRetrievalConnector
 import models.AuthorisedUser
 import models.testonly.ValidateDownloadResult
+import org.mockito.Matchers.{any, endsWith}
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.libs.ws.WSResponse
@@ -48,6 +49,15 @@ class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
       await(connector.validateDownload(aVaultName, anArchiveId, user )(hc)) shouldBe expectedResult
 
       verify(nrsConnector).getSubmissionBundle(aVaultName, anArchiveId, user)(hc)
+    }
+  }
+
+  "checkAuthorisation" should {
+    "delegate to the nrs-retrieval endpoint /test-only/check-authorisation" in {
+      when(httpClient.GET(endsWith("/test-only/check-authorisation"), any(), any())(any(), any(), any()))
+        .thenAnswer(new Returns(Future.successful(true)))
+
+      await(connector.checkAuthorisation()) shouldBe true
     }
   }
 }

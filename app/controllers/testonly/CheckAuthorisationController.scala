@@ -22,6 +22,7 @@ import controllers.Stride
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.error_template
 import views.html.testonly.check_authorisation_page
@@ -42,8 +43,11 @@ class CheckAuthorisationController @Inject()(override val controllerComponents: 
   override val strideRoles: Set[String] = appConfig.nrsStrideRoles
 
   val checkAuthorisation: Action[AnyContent] = Action.async { implicit request =>
-      connector.checkAuthorisation().map { status =>
-        Ok(checkAuthorisationPage(s"test-only.check-authorisation.status.200"))
+      connector.checkAuthorisation().map { _ =>
+        Ok(checkAuthorisationPage("test-only.check-authorisation.status.200"))
+      }.recover {
+        case e: UpstreamErrorResponse =>
+          Ok(checkAuthorisationPage(s"test-only.check-authorisation.status.${e.statusCode}"))
       }
   }
 }

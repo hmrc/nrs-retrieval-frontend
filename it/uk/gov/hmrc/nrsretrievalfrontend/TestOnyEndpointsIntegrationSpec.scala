@@ -3,6 +3,9 @@ package uk.gov.hmrc.nrsretrievalfrontend
 import play.api.libs.ws.WSResponse
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
+  def checkAuthorisationRequest(): WSResponse =
+    wsClient.url(s"$serviceRoot/test-only/check-authorisation").get.futureValue
+
   def validateDownloadGetRequest(): WSResponse =
     wsClient.url(s"$serviceRoot/test-only/validate-download").get.futureValue
 
@@ -20,6 +23,14 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
     response.status shouldBe OK
     response.contentType shouldBe "text/html; charset=UTF-8"
     response.body.contains("Test-only validate download") shouldBe true
+  }
+
+  "GET /nrs-retrieval/test-only/check-authorisation" should {
+    "display the check-authorisation page" when {
+      "the default router is used" in {
+        checkAuthorisationRequest().body should include("Test-only check authorisation")
+      }
+    }
   }
 
   "GET /nrs-retrieval/test-only/validate-download" should {
@@ -41,6 +52,14 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
 
 class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
   override val configuration: Map[String, Any] = defaultConfiguration
+
+  "GET /nrs-retrieval/test-only/check-authorisation" should {
+    "return NOT_FOUND" when {
+      "the default router is used" in {
+        checkAuthorisationRequest().status shouldBe NOT_FOUND
+      }
+    }
+  }
 
   "GET /nrs-retrieval/test-only/validate-download" should {
     "return NOT_FOUND" when {

@@ -24,4 +24,6 @@ import scala.concurrent.Future
 
 trait TestOnlyNrsRetrievalConnector {
   def validateDownload(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[ValidateDownloadResult]
+
+  def checkAuthorisation()(implicit hc: HeaderCarrier): Future[Boolean]
 }

@@ -63,6 +63,18 @@
     maybeBodyEndBlock = Some(bodyEndBlock),
 ) {
     @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
+
+    @if(notableEventType == "vat-registration") {
+      <div id = "vat-registration-additional-info">
+        @p(content = Text(Messages("search.page.vat-registration.searchkey.detail.info")))
+
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@messages("search.page.vat-registration.searchkey.detail.list.0")</li>
+            <li>@messages("search.page.vat-registration.searchkey.detail.list.1")</li>
+        </ul>
+      </div>
+    }
+
     @p(content = Text(Messages("search.page.hint")))
 
     @formHelper(action = routes.SearchController.submitSearchPage(notableEventType), 'class -> "form js-form") {

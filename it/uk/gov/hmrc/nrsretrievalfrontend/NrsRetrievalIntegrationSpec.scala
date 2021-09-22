@@ -68,7 +68,6 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   }
 
   "GET /nrs-retrieval/search" should {
-
     "redirect to the start page" when {
       "no notable event type is provided" in {
         assertPageIsRendered(wsClient.url(searchUrl).get, startPageHeading)
@@ -76,8 +75,14 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     }
 
     "display the search page" when {
-      "a notable event type is provided" in {
-        assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get, vatReturnSearchPageHeading)
+      "a vat return is provided" in {
+        val document = assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get, vatReturnSearchPageHeading)
+        Option(document.getElementById("vat-registration-additional-info")).isEmpty shouldBe true
+      }
+
+      "a non vat registration is provided" in {
+        val document = assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).get, vatRegistrationSearchPageHeading)
+        Option(document.getElementById("vat-registration-additional-info").id()).isDefined shouldBe true
       }
     }
   }

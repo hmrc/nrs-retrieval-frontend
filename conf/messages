@@ -26,8 +26,8 @@ search.page.results=Results
 search.button.search.lbl=Search
 search.page.stored.info=You can search for records stored from {0} onwards. The records are stored for {1}.
 search.page.vat-registration.searchkey.detail.info=For VAT registrations submitted:
-search.page.vat-registration.searchkey.detail.list.0=before 31 Oct 2021 - provide a Post Code
-search.page.vat-registration.searchkey.detail.list.1=after 31 Oct 2021 - provide a Form Bundle ID
+search.page.vat-registration.searchkey.detail.list.0=before 31 Aug 2021 - provide a Post Code
+search.page.vat-registration.searchkey.detail.list.1=after 31 Aug 2021 - provide a Form Bundle ID
 search.page.results.info=We found {0} results for {1}: "{2}"
 search.page.error.searchkey.required=Please select a type of digital submission to search for
 

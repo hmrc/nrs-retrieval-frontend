@@ -27,6 +27,7 @@ class AppConfigSpec extends GuiceAppSpec{
         "itsa-crystallisation",
         "itsa-cgt-disposal",
         "itsa-cgt-disposal-ppd",
+        "itsa-cgt-disposal-other",
         "vat-registration",
         "interest-restriction-return",
         "vat-return-ui",

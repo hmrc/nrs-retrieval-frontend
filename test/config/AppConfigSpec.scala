@@ -33,6 +33,9 @@ class AppConfigSpec extends GuiceAppSpec{
         "vat-return-ui",
         "itsa-eops",
         "entry-declaration",
+        "trs-registration",
+        "trs-update-taxable",
+        "trs-update-non-taxable",
         "vat-return")
     }
   }

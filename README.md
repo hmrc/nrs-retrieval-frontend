@@ -64,4 +64,3 @@ The endpoint functions as follows:
     Then a call is made to the nrs-retrieval endpoint /test-only/check-authorisation
     And content is served which shows that nrs-retrieval has deduced that I am authenticated via Stride but not authorised for NRS
 
-

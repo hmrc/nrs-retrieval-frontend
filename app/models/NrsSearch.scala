@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.time.ZonedDateTime
 
 import org.joda.time.LocalDate
 import play.api.libs.json._
-import play.api.libs.json.JodaWrites._
-import play.api.libs.json.JodaReads._
 
 case class HeaderData(govClientPublicIP: String, govClientPublicPort: String)
 

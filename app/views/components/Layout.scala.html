@@ -66,11 +66,15 @@
   @content
 }
 
+@addedScripts = {
+    <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
+}
+
 @govukLayout(
     pageTitle = Some(pageTitle),
     headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = maybeHeadBlock)),
     headerBlock = Some(nrsHeaderBlock),
-    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get)),
+    scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(addedScripts), nonce = CSPNonce.get)),
     beforeContentBlock = None,
     footerBlock = Some(hmrcStandardFooter()),
     mainContentLayout = maybeMainContentLayout,

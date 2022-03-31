@@ -1,124 +1,92 @@
-/* global jQuery */
-/* global GOVUK */
-(function ($) {
 
-  // Use GOV.UK shim-links-with-button-role.js to trigger a link styled to look like a button,
-  // with role="button" when the space key is pressed.
-  GOVUK.shimLinksWithButtonRole.init()
+var timeout = 100;
+var path = '/nrs-retrieval/';
 
-  var $errorSummary = $('.error-summary');
+function checkStatus(index, vaultName, archiveId) {
+  const xmlhttp = http(index, vaultName, archiveId);
+  xmlhttp.open("GET", path + 'status/' + vaultName + '/' + archiveId);
+  xmlhttp.timeout = timeout;
+  xmlhttp.send();
+  timeout = Math.min(timeout * 2, 5000)
+}
 
-  if ($errorSummary.length) {
-    // summary focusing
-    $errorSummary.focus();
-    $('.error-summary-list li a').each(function (i, item) {
-      var $link = $(item);
-      // error focusing
-      $link.on('click', function () {
-        var target = $(this).attr('href').slice(1);
-        window.setTimeout(function () {
-          $('#' + target)
-            .parent()
-            .find('input.form-control-error')
-            .first()
-            .focus()
-        }, 200)
-      })
+function http(index, vaultName, archiveId) {
+  const xmlhttp = new XMLHttpRequest();
 
-    })
-  }
-
-  var timeout = 100
-  var path = '/nrs-retrieval/';
-
-  var NrsAjax = {
-    http: function (index, vaultName, archiveId) {
-      var xmlhttp = new XMLHttpRequest();
-      xmlhttp.onload = function (e) {
-        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-          setStatus(index, this.response)
-        } else if (xmlhttp.status === 500) {
-          showServerError(index)
-        } else {
-          setTimeout(function () {
-            NrsAjax.checkStatus(index, vaultName, archiveId)
-          }, timeout)
-        }
-      };
-      xmlhttp.ontimeout = function () {
-        NrsAjax.checkStatus(index, vaultName, archiveId);
-      };
-      return xmlhttp;
-    },
-    checkStatus: function (index, vaultName, archiveId) {
-      var xmlhttp = this.http(index, vaultName, archiveId);
-      xmlhttp.open("GET", path + 'status/' + vaultName + '/' + archiveId);
-      xmlhttp.timeout = timeout;
-      xmlhttp.send();
-      timeout = Math.min(timeout * 2, 5000)
-    },
-    doRetrieve: function (index, vaultName, archiveId) {
-      timeout = 250
-      setStatus(index, 'retrieval-incomplete')
-      var xmlhttp = this.http(index, vaultName, archiveId);
-      xmlhttp.open("GET", path + 'retrieve/' + vaultName + '/' + archiveId);
-      xmlhttp.timeout = timeout;
-      xmlhttp.send();
+  xmlhttp.onload = function (e) {
+    if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+      setStatus(index, this.response)
+    } else if (xmlhttp.status === 500) {
+      setStatus(index, 'Failed')
+    } else {
+      setTimeout(function () {
+        checkStatus(index, vaultName, archiveId)
+      }, timeout)
     }
   };
 
-  function showServerError(index) {
-    var $target = $('#retrieve' + index)
-    $target.find('.error-message').remove()
-    $target.prepend('<span class="error-message">Server is returning error HTTP 500</span>')
+  xmlhttp.ontimeout = function () {
+    checkStatus(index, vaultName, archiveId);
+  };
+
+  return xmlhttp;
+}
+
+function show(item) {
+  item.setAttribute("aria-hidden", false)
+}
+
+function setStatus(index, status) {
+  var resultRetrieveElement = document.getElementById('result-retrieve-' + index)
+  var retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
+  var retrievalCompleteElement = document.getElementById('download-button-' + index)
+  var startRetrievalElement = document.getElementById('start-retrieval-' + index)
+
+  switch (status) {
+    case 'Complete':
+      resultRetrieveElement.setAttribute("aria-busy", false)
+      resultRetrieveElement.classList.add("retrieval-complete");
+      resultRetrieveElement.classList.remove("retrieval-incomplete");
+
+      retrievalCompleteElement.setAttribute("aria-hidden", false)
+
+      retrievalIncompleteElement.setAttribute("aria-hidden", true)
+
+      break;
+    case 'Failed':
+      resultRetrieveElement.setAttribute("aria-busy", false)
+      resultRetrieveElement.classList.add("retrieval-failed");
+      resultRetrieveElement.classList.remove("retrieval-incomplete");
+
+      retrievalIncompleteElement.setAttribute("aria-hidden", true)
+
+      document.getElementsByClassName("retrieval-failed").forEach(show())
+
+      break;
+    default:
+      resultRetrieveElement.setAttribute("aria-busy", true)
+      resultRetrieveElement.classList.add("retrieval-incomplete");
+
+      retrievalIncompleteElement.setAttribute("aria-hidden", false)
+
+      startRetrievalElement.setAttribute("aria-hidden", true)
   }
+}
 
-  function setStatus(index, status) {
-    var $target = $('#retrieve' + index).find('.result-retrieve')
-    switch (status) {
-      case 'Complete':
-        $target
-          .attr('aria-busy', false)
-          .toggleClass('retrieval-incomplete retrieval-complete')
-          .find('.retrieval-complete')
-            .attr('aria-hidden', false)
-            .end()
-          .find('.retrieval-incomplete, .start-retrieval')
-            .attr('aria-hidden', true)
-        break;
-      case 'Failed':
-        $target
-          .attr('aria-busy', false)
-          .toggleClass('retrieval-incomplete retrieval-failed')
-          .find('.retrieval-failed')
-            .attr('aria-hidden', false)
-            .end()
-          .find('.retrieval-incomplete, .start-retrieval')
-            .attr('aria-hidden', true)
-        break;
-      default:
-        $target
-          .attr('aria-busy', true)
-          .addClass('retrieval-incomplete')
-          .find('.retrieval-incomplete')
-            .attr('aria-hidden', false)
-            .end()
-          .find('.start-retrieval')
-            .attr('aria-hidden', true)
-    }
-  }
+function doRetrieve(index, vaultName, archiveId) {
+  setStatus(index, 'retrieval-incomplete')
+  var xmlhttp = http(index, vaultName, archiveId);
 
-  // attach listeners to retrieval events
-  $('a.start-retrieval').on('click', function (e) {
-    e.preventDefault()
-    var data = $(e.currentTarget).data()
-    NrsAjax.doRetrieve(data.index, data.vaultId, data.archiveId)
-  })
+  xmlhttp.open("GET", path + 'retrieve/' + vaultName + '/' + archiveId);
+  xmlhttp.timeout = timeout;
+  xmlhttp.send();
+}
 
-  var $resultsInfo = $('h2[role="alert"]');
+function startRetrieval(startRetrievalElement) {
+  var dataIndex = startRetrievalElement.getAttribute("data-index")
+  var dataVaultId = startRetrievalElement.getAttribute("data-vault-id")
+  var dataArchiveId = startRetrievalElement.getAttribute("data-archive-id")
 
-  if ($resultsInfo.length) {
-    $resultsInfo.focus()
-  }
+  doRetrieve(dataIndex, dataVaultId, dataArchiveId)
+}
 
-})(jQuery);

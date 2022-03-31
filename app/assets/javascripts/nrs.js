@@ -1,10 +1,18 @@
 
 var timeout = 100;
-var path = '/nrs-retrieval/';
+
+const path = '/nrs-retrieval/';
+const retrievalCompleteClass = "retrieval-complete"
+const retrievalIncompleteClass = "retrieval-incomplete"
+const retrievalFailedClass = "retrieval-failed"
+const statusComplete = "Complete"
+const statusIncomplete = "Incomplete"
+const statusFailed = "Failed"
+const get = "GET"
 
 function checkStatus(index, vaultName, archiveId) {
   const xmlhttp = http(index, vaultName, archiveId);
-  xmlhttp.open("GET", path + 'status/' + vaultName + '/' + archiveId);
+  xmlhttp.open(get, path + 'status/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
   timeout = Math.min(timeout * 2, 5000)
@@ -17,7 +25,7 @@ function http(index, vaultName, archiveId) {
     if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
       setStatus(index, this.response)
     } else if (xmlhttp.status === 500) {
-      setStatus(index, 'Failed')
+      setStatus(index, statusFailed)
     } else {
       setTimeout(function () {
         checkStatus(index, vaultName, archiveId)
@@ -32,60 +40,66 @@ function http(index, vaultName, archiveId) {
   return xmlhttp;
 }
 
-function show(item) {
-  item.setAttribute("aria-hidden", false)
+function hide(element) {
+  element.setAttribute("aria-hidden", true)
+}
+
+function show(element) {
+  element.setAttribute("aria-hidden", false)
+}
+
+function busy(element, isBusy) {
+  element.setAttribute("aria-busy", isBusy)
 }
 
 function setStatus(index, status) {
-  var resultRetrieveElement = document.getElementById('result-retrieve-' + index)
-  var retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
-  var retrievalCompleteElement = document.getElementById('download-button-' + index)
-  var startRetrievalElement = document.getElementById('start-retrieval-' + index)
+  const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
+  const retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
+  const retrievalCompleteElement = document.getElementById('download-button-' + index)
+  const startRetrievalElement = document.getElementById('start-retrieval-' + index)
 
   switch (status) {
-    case 'Complete':
-      resultRetrieveElement.setAttribute("aria-busy", false)
-      resultRetrieveElement.classList.add("retrieval-complete");
-      resultRetrieveElement.classList.remove("retrieval-incomplete");
+    case statusComplete:
+      busy(resultRetrieveElement, false)
+      resultRetrieveElement.classList.add(retrievalCompleteClass);
+      resultRetrieveElement.classList.remove(retrievalIncompleteClass);
 
-      retrievalCompleteElement.setAttribute("aria-hidden", false)
-
-      retrievalIncompleteElement.setAttribute("aria-hidden", true)
+      hide(retrievalIncompleteElement)
+      show(retrievalCompleteElement)
 
       break;
-    case 'Failed':
-      resultRetrieveElement.setAttribute("aria-busy", false)
-      resultRetrieveElement.classList.add("retrieval-failed");
-      resultRetrieveElement.classList.remove("retrieval-incomplete");
+    case statusFailed:
+      busy(resultRetrieveElement, false)
+      resultRetrieveElement.classList.add(retrievalFailedClass);
+      resultRetrieveElement.classList.remove(retrievalIncompleteClass);
 
-      retrievalIncompleteElement.setAttribute("aria-hidden", true)
+      hide(retrievalIncompleteElement)
 
-      document.getElementsByClassName("retrieval-failed").forEach(show())
+      document.getElementsByClassName(retrievalFailedClass).forEach(show())
 
       break;
     default:
-      resultRetrieveElement.setAttribute("aria-busy", true)
-      resultRetrieveElement.classList.add("retrieval-incomplete");
+      busy(resultRetrieveElement, true)
+      resultRetrieveElement.classList.add(retrievalIncompleteClass);
 
-      retrievalIncompleteElement.setAttribute("aria-hidden", false)
-
-      startRetrievalElement.setAttribute("aria-hidden", true)
+      hide(startRetrievalElement)
+      show(retrievalIncompleteElement)
   }
 }
 
 function doRetrieve(index, vaultName, archiveId) {
-  setStatus(index, 'retrieval-incomplete')
-  var xmlhttp = http(index, vaultName, archiveId);
+  setStatus(index, statusIncomplete)
+  const xmlhttp = http(index, vaultName, archiveId);
 
-  xmlhttp.open("GET", path + 'retrieve/' + vaultName + '/' + archiveId);
+  xmlhttp.open(get, path + 'retrieve/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
 }
 
 function startRetrieval(startRetrievalElement) {
-  var dataIndex = startRetrievalElement.getAttribute("data-index")
-  var dataVaultId = startRetrievalElement.getAttribute("data-vault-id")
-  var dataArchiveId = startRetrievalElement.getAttribute("data-archive-id")
+  const dataIndex = startRetrievalElement.getAttribute("data-index")
+  const dataVaultId = startRetrievalElement.getAttribute("data-vault-id")
+  const dataArchiveId = startRetrievalElement.getAttribute("data-archive-id")
 
   doRetrieve(dataIndex, dataVaultId, dataArchiveId)
 }

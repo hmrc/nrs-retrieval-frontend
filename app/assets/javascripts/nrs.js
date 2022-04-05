@@ -1,18 +1,18 @@
 
 var timeout = 100;
 
-const path = '/nrs-retrieval/';
-const retrievalCompleteClass = "retrieval-complete"
-const retrievalIncompleteClass = "retrieval-incomplete"
-const retrievalFailedClass = "retrieval-failed"
-const statusComplete = "Complete"
-const statusIncomplete = "Incomplete"
-const statusFailed = "Failed"
-const get = "GET"
+const PATH = '/nrs-retrieval/';
+const RETRIEVAL_COMPLETE_CLASS = "retrieval-complete"
+const RETRIEVAL_INCOMPLETE_CLASS = "retrieval-incomplete"
+const RETRIEVAL_FAILED_CLASS = "retrieval-failed"
+const STATUS_COMPLETE = "Complete"
+const STATUS_INCOMPLETE = "Incomplete"
+const STATUS_FAILED = "Failed"
+const GET = "GET"
 
 function checkStatus(index, vaultName, archiveId) {
   const xmlhttp = http(index, vaultName, archiveId);
-  xmlhttp.open(get, path + 'status/' + vaultName + '/' + archiveId);
+  xmlhttp.open(GET, PATH + 'status/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
   timeout = Math.min(timeout * 2, 5000)
@@ -25,7 +25,7 @@ function http(index, vaultName, archiveId) {
     if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
       setStatus(index, this.response)
     } else if (xmlhttp.status === 500) {
-      setStatus(index, statusFailed)
+      setStatus(index, STATUS_FAILED)
     } else {
       setTimeout(function () {
         checkStatus(index, vaultName, archiveId)
@@ -59,28 +59,28 @@ function setStatus(index, status) {
   const startRetrievalElement = document.getElementById('start-retrieval-' + index)
 
   switch (status) {
-    case statusComplete:
+    case STATUS_COMPLETE:
       busy(resultRetrieveElement, false)
-      resultRetrieveElement.classList.add(retrievalCompleteClass);
-      resultRetrieveElement.classList.remove(retrievalIncompleteClass);
+      resultRetrieveElement.classList.add(RETRIEVAL_COMPLETE_CLASS);
+      resultRetrieveElement.classList.remove(RETRIEVAL_INCOMPLETE_CLASS);
 
       hide(retrievalIncompleteElement)
       show(retrievalCompleteElement)
 
       break;
-    case statusFailed:
+    case STATUS_FAILED:
       busy(resultRetrieveElement, false)
-      resultRetrieveElement.classList.add(retrievalFailedClass);
-      resultRetrieveElement.classList.remove(retrievalIncompleteClass);
+      resultRetrieveElement.classList.add(RETRIEVAL_FAILED_CLASS);
+      resultRetrieveElement.classList.remove(RETRIEVAL_INCOMPLETE_CLASS);
 
       hide(retrievalIncompleteElement)
 
-      document.getElementsByClassName(retrievalFailedClass).forEach(show())
+      document.getElementsByClassName(RETRIEVAL_FAILED_CLASS).forEach(show())
 
       break;
     default:
       busy(resultRetrieveElement, true)
-      resultRetrieveElement.classList.add(retrievalIncompleteClass);
+      resultRetrieveElement.classList.add(RETRIEVAL_INCOMPLETE_CLASS);
 
       hide(startRetrievalElement)
       show(retrievalIncompleteElement)
@@ -88,10 +88,10 @@ function setStatus(index, status) {
 }
 
 function doRetrieve(index, vaultName, archiveId) {
-  setStatus(index, statusIncomplete)
+  setStatus(index, STATUS_INCOMPLETE)
   const xmlhttp = http(index, vaultName, archiveId);
 
-  xmlhttp.open(get, path + 'retrieve/' + vaultName + '/' + archiveId);
+  xmlhttp.open(GET, PATH + 'retrieve/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
 }

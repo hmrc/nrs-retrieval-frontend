@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,19 +48,13 @@
     <link href='@routes.Assets.versioned("/stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
 }
 
-@* these are required to correctly render the dynamic elements on the page*@
-@bodyEndBlock = {
-    <script src="@{s"${appConfig.assetsPrefix}/javascripts/application.min.js"}" type="text/javascript"></script>
-    <script language="JavaScript" type="application/javascript" src="@routes.Assets.versioned("javascripts/nrs.js")"></script>
-}
-
 @layout(
     pageTitle = pageTitle,
     maybePageHeader = Some(pageHeader),
     maybeUser = maybeUser,
     maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage()),
     maybeHeadBlock = Some(headBlock),
-    maybeBodyEndBlock = Some(bodyEndBlock),
+    maybeBodyEndBlock = None
 ) {
     @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
 

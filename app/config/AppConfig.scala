@@ -42,7 +42,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   lazy val authUrl: String = servicesConfig.baseUrl("auth")
 
-  lazy val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version")
   lazy val analyticsToken: String = loadConfig(s"google-analytics.token")
   lazy val analyticsHost: String = loadConfig(s"google-analytics.host")
   lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"

@@ -16,9 +16,10 @@ lazy val scoverageSettings = {
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.7.0",
+  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.21.0",
   "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "0.84.0-play-28",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
+  "commons-io"        %  "commons-io"                 % "2.11.0"
 )
 
 def test(scope: String) = Seq(

@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@
 }
 
 <div id="retrieve@index">
-  <div class="result-retrieve" aria-live="polite" aria-busy="false">
-    <h2 class="retrieval-failed error-summary-heading" aria-hidden="true" role="alert" class="govuk-heading-l">
+  <div id="result-retrieve-@index" class="result-retrieve" aria-live="polite" aria-busy="false">
+    <h2 id="results-focus" class="retrieval-failed error-summary-heading" aria-hidden="true" role="alert" class="govuk-heading-l">
       @Messages("search.results.error.summary.lbl")
     </h2>
     <p>
       <span id ="retrieval-failed-@index" class="retrieval-failed govuk-body" aria-hidden="true">
         @Text(s"${Messages("search.results.cannot.retrieve.lbl")} ${searchResult.linkText} $timeSubmitted").asHtml
       </span>
-      <span class="retrieval-incomplete govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
+      <span id="result-incomplete-@index" class="retrieval-incomplete govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
         @Text(s"${Messages("search.results.retrieval.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
         <br>
         @Text(s"${Messages("search.results.retrieval.info")}").asHtml
@@ -48,11 +48,13 @@
          href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
          download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
       </a>
-      <a class="start-retrieval govuk-link"
+      <a id="start-retrieval-@index"
+         class="start-retrieval govuk-link"
          data-index="@{index}"
          data-vault-id="@{searchResult.vaultId}"
          data-archive-id="@{searchResult.archiveId}"
-         href="#">@Messages("search.results.retrieve.lbl") @searchResult.linkText @timeSubmitted
+         onclick="startRetrieval(this)"
+         href="javascript:void(0)">@Messages("search.results.retrieve.lbl") @searchResult.linkText @timeSubmitted
       </a>
     </p>
     @p(content = Text(s"${Messages("search.results.filename.lbl")}: ${searchResult.fileDetails}"))

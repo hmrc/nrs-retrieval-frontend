@@ -17,15 +17,16 @@
 package uk.gov.hmrc.nrsretrievalfrontend
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import controllers.StrideAuthSettings
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
-import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{Binding, Injector, Module}
 import play.api.libs.ws.WSClient
+import play.api.{Application, Configuration, Environment, inject}
 import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
 
 trait IntegrationSpec extends AnyWordSpec
@@ -38,7 +39,18 @@ trait IntegrationSpec extends AnyWordSpec
   with Fixture {
   override def beforeEach(): Unit = WireMock.reset()
 
-  override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configuration).build()
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder(
+      modules =
+        Seq(
+          new Module() {
+            override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+              Seq(inject.bind[StrideAuthSettings].to[StrideAuthIsDisabled])
+          }
+        )
+    )
+    .configure(configuration)
+    .build()
 
   val defaultConfiguration: Map[String, Any] = Map[String, Any](
     "microservice.services.nrs-retrieval.port" -> wireMockPort,
@@ -52,4 +64,8 @@ trait IntegrationSpec extends AnyWordSpec
   lazy val wsClient: WSClient = injector.instanceOf[WSClient]
 
   lazy val serviceRoot = s"http://localhost:$port/nrs-retrieval"
+}
+
+class StrideAuthIsDisabled extends StrideAuthSettings {
+  override val strideAuthEnabled: Boolean = false
 }

@@ -32,20 +32,18 @@ import scala.concurrent.Future
 @Singleton
 class SelectorController @Inject()(val authConnector: AuthConnector,
                                    override val controllerComponents: MessagesControllerComponents,
+                                   override val strideAuthSettings: StrideAuthSettings,
                                    val selectorPage: selector_page,
                                    override val errorPage: error_template)
                                   (implicit val appConfig: AppConfig)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
-  logger.info(s"appConfig: stride.enabled: ${appConfig.strideAuth}")
-  logger.info(s"appConfig: stride.role.name: $strideRoles")
   logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
-  def showSelectorPage: Action[AnyContent] = Action.async { implicit request =>
+  val showSelectorPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Show the selector page", { nrUser =>
       Future.successful(
         Ok(selectorPage(selectorForm, Some(nrUser)))
@@ -53,7 +51,7 @@ class SelectorController @Inject()(val authConnector: AuthConnector,
     })
   }
 
-  def submitSelectorPage: Action[AnyContent] = Action.async { implicit request =>
+  val submitSelectorPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Submit the selector page", { nrUser =>
       selectorForm.bindFromRequest.fold(
         formWithErrors => {

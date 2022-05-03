@@ -45,18 +45,18 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
                                  val nrsRetrievalConnector: NrsRetrievalConnector,
                                  val searchResultUtils: SearchResultUtils,
                                  override val controllerComponents: MessagesControllerComponents,
+                                 override val strideAuthSettings: StrideAuthSettings,
                                  val searchPage: search_page,
                                  override val errorPage: error_template)
                                 (implicit val appConfig: AppConfig)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  def noParameters(): Action[AnyContent] = Action.async { implicit request =>
+  val noParameters: Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"No parameters provided so redirecting to start page on request $request")
     Future(Redirect(routes.StartController.showStartPage()))
   }

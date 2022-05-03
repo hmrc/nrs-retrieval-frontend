@@ -27,27 +27,27 @@ import scala.concurrent.Future
 class SelectorControllerSpec extends ControllerSpec {
   private def selectorController(implicit appConfig: AppConfig) =
     new SelectorController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[selector_page], error_template)
+      mockAuthConnector,
+      stubMessagesControllerComponents(),
+      new StrideAuthSettings(),
+      injector.instanceOf[selector_page],
+      error_template)
 
   "showSelectorPage" should {
     def theSelectorPageShouldBeRendered(eventualResult: Future[Result]) =
       aPageShouldBeRendered(eventualResult, "selector.page.header.lbl")
 
     "return 200 and render the selector page" when {
-      "auth is disabled" in {
-        theSelectorPageShouldBeRendered(selectorController(appConfig).showSelectorPage(getRequest))
-      }
-
-      "auth is enabled and the request is authorised" in {
+      "the request is authorised" in {
         givenTheRequestIsAuthorised()
-        theSelectorPageShouldBeRendered(selectorController(authEnabledAppConfig).showSelectorPage(getRequest))
+        theSelectorPageShouldBeRendered(selectorController(appConfig).showSelectorPage(getRequest))
       }
     }
 
     "return OK and render the error page" when {
-      "auth is enabled and the request is unauthorised" in {
+      "the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
-        theNotAuthorisedPageShouldBeRendered(selectorController(authEnabledAppConfig).showSelectorPage(getRequest))
+        theNotAuthorisedPageShouldBeRendered(selectorController(appConfig).showSelectorPage(getRequest))
       }
     }
   }
@@ -64,15 +64,10 @@ class SelectorControllerSpec extends ControllerSpec {
             Map("Location" -> controllers.routes.SearchController.showSearchPage(notableEventType).url)
         }
 
-        s"auth is disabled and the notable event type $notableEventType is selected" in {
-          theRequestShouldBeRedirectedToTheSearchPage(
-            selectorController(appConfig).submitSelectorPage(postRequestWithNotableEventType))
-        }
-
-        s"auth is enabled and the request is authorised and the notable event type $notableEventType is selected" in {
+        s"and the request is authorised and the notable event type $notableEventType is selected" in {
           givenTheRequestIsAuthorised()
           theRequestShouldBeRedirectedToTheSearchPage(
-            selectorController(authEnabledAppConfig).submitSelectorPage(postRequestWithNotableEventType))
+            selectorController(appConfig).submitSelectorPage(postRequestWithNotableEventType))
         }
       }
     }
@@ -81,22 +76,17 @@ class SelectorControllerSpec extends ControllerSpec {
       def theSelectorPageShouldBeRenderedWithAnErrorMessage(eventualResult: Future[Result]) =
         aPageShouldBeRendered(eventualResult, "generic.errorPrefix selector.page.header.lbl")
 
-      "auth is disabled and no notable event type is selected" in {
-        theSelectorPageShouldBeRenderedWithAnErrorMessage(
-          selectorController(appConfig).submitSelectorPage(emptyPostRequest))
-      }
-
-      "auth is enabled and the request is authorised and no notable event type is selected" in {
+      "and the request is authorised and no notable event type is selected" in {
         givenTheRequestIsAuthorised()
         theSelectorPageShouldBeRenderedWithAnErrorMessage(
-          selectorController(authEnabledAppConfig).submitSelectorPage(emptyPostRequest))
+          selectorController(appConfig).submitSelectorPage(emptyPostRequest))
       }
     }
 
     "return OK and render the error page" when {
-      "auth is enabled and the request is unauthorised" in {
+      "and the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
-        theNotAuthorisedPageShouldBeRendered(selectorController(authEnabledAppConfig).submitSelectorPage(emptyPostRequest))
+        theNotAuthorisedPageShouldBeRendered(selectorController(appConfig).submitSelectorPage(emptyPostRequest))
       }
     }
   }

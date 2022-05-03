@@ -31,27 +31,23 @@ import scala.concurrent.Future
 @Singleton
 class StartController @Inject()(val authConnector: AuthConnector,
                                 override val controllerComponents: MessagesControllerComponents,
+                                override val strideAuthSettings: StrideAuthSettings,
                                 val startPage: start_page,
                                 override val errorPage: error_template)
                                (implicit val appConfig: AppConfig) extends FrontendController(controllerComponents)
   with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
-  logger.info(s"appConfig: stride.enabled: ${appConfig.strideAuth}")
-  logger.info(s"appConfig: stride.role.name: $strideRoles")
   logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
-  def showStartPage: Action[AnyContent] = Action.async { implicit request =>
+  val showStartPage: Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"S=how start page")
     authWithStride("Show the start page", { _ =>
       Future.successful(
         Ok(startPage())
       )
     })
-
   }
-
 }

@@ -18,7 +18,7 @@ package controllers.testonly
 
 import config.AppConfig
 import connectors.testonly.TestOnlyNrsRetrievalConnector
-import controllers.Stride
+import controllers.{Stride, StrideAuthSettings}
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -33,6 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class CheckAuthorisationController @Inject()(override val controllerComponents: MessagesControllerComponents,
                                              override val authConnector: AuthConnector,
+                                             override val strideAuthSettings: StrideAuthSettings,
                                              override val errorPage: error_template,
                                              connector: TestOnlyNrsRetrievalConnector,
                                              checkAuthorisationPage: check_authorisation_page)
@@ -40,7 +41,6 @@ class CheckAuthorisationController @Inject()(override val controllerComponents: 
   extends FrontendController(controllerComponents) with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
 
   val checkAuthorisation: Action[AnyContent] = Action.async { implicit request =>
       connector.checkAuthorisation().map { _ =>

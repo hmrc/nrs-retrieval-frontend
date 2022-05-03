@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import org.jsoup.Jsoup.parse
 import org.jsoup.nodes.Document
 import org.mockito.Matchers.any
@@ -26,11 +25,9 @@ import org.mockito.stubbing.OngoingStubbing
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers.{contentAsString, status, _}
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import play.api.{Configuration, Environment}
 import support.GuiceAppSpec
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Name}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, retrieve}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import views.html.error_template
 
 import scala.concurrent.Future
@@ -39,7 +36,6 @@ trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val authEnabledAppConfig: AuthEnabledAppConfig = new AuthEnabledAppConfig(configuration, environment, servicesConfig)
 
   lazy val error_template: error_template = injector.instanceOf[error_template]
 
@@ -70,11 +66,4 @@ trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
 
   def theNotAuthorisedPageShouldBeRendered(eventualResult: Future[Result]): Document =
     aPageShouldBeRendered(eventualResult,"Not authorised" )
-
-}
-
-class AuthEnabledAppConfig(runModeConfiguration: Configuration, environment: Environment, servicesConfig: ServicesConfig)
-  extends AppConfig(runModeConfiguration, environment, servicesConfig) {
-
-  override lazy val strideAuth: Boolean = true
 }

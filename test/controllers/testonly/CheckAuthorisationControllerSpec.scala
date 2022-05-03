@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import connectors.testonly.TestOnlyNrsRetrievalConnector
-import controllers.ControllerSpec
+import controllers.{ControllerSpec, StrideAuthSettings}
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
@@ -33,6 +33,7 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
     new CheckAuthorisationController(
       stubMessagesControllerComponents(),
       mockAuthConnector,
+      new StrideAuthSettings(),
       error_template,
       connector,
       injector.instanceOf[views.html.testonly.check_authorisation_page]

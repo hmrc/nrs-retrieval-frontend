@@ -82,9 +82,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   Logger.of(classOf[AppConfig]).info(s"Notable events available $notableEvents")
 
-  lazy val nrsStrideRoles: Set[String] = runModeConfiguration.underlying.getStringList("stride.role.names").asScala.toSet
-  lazy val strideAuth: Boolean = runModeConfiguration.getOptional[Boolean]("stride.enabled").getOrElse(false)
   lazy val authHost: String = runModeConfiguration.getOptional[String](s"microservice.services.auth.host").getOrElse("none-authHost")
   lazy val authPort: Int = runModeConfiguration.getOptional[Int](s"microservice.services.auth.port").getOrElse(-1)
-
 }

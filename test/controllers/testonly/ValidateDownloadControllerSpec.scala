@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import connectors.testonly.TestOnlyNrsRetrievalConnector
-import controllers.ControllerSpec
+import controllers.{ControllerSpec, StrideAuthSettings}
 import controllers.testonly.FormMappings.{archiveId, vaultName}
 import models.testonly.ValidateDownloadResult
 import org.jsoup.Jsoup
@@ -37,6 +37,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
     new ValidateDownloadController(
       stubMessagesControllerComponents(),
       mockAuthConnector,
+      new StrideAuthSettings(),
       error_template,
       connector,
       injector.instanceOf[views.html.testonly.validate_download_page]
@@ -60,6 +61,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
 
   "showValidateDownload" should {
     "display the validate download page" in {
+      givenTheRequestIsAuthorised()
       validateResponse(controller.showValidateDownload(getRequest))
     }
   }
@@ -74,6 +76,8 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
       val files = Seq(file1, file2)
       val header1 = ("header1", "h1")
       val header2 = ("header2", "h2")
+
+      givenTheRequestIsAuthorised()
 
       when(connector.validateDownload(Matchers.eq(aVaultName), Matchers.eq(anArchiveId), any())(any()))
         .thenReturn(Future successful ValidateDownloadResult(OK, zipSize, files, Seq(header1, header2)))

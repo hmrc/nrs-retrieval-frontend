@@ -25,27 +25,26 @@ import scala.concurrent.Future
 class StartControllerSpec extends ControllerSpec {
   private def startController(implicit appConfig: AppConfig) =
     new StartController(
-      mockAuthConnector, stubMessagesControllerComponents(), injector.instanceOf[start_page], error_template)
+      mockAuthConnector,
+      stubMessagesControllerComponents(),
+      new StrideAuthSettings(),
+      injector.instanceOf[start_page], error_template)
 
   "showStartPage" should {
     "return 200 and render the start page" when {
       def theStartPageShouldBeRendered(eventualResult: Future[Result]) =
         aPageShouldBeRendered(eventualResult, "start.page.header.lbl")
 
-      "auth is disabled" in {
-        theStartPageShouldBeRendered(startController(appConfig).showStartPage(getRequest))
-      }
-
-      "auth is enabled and the request is authorised" in {
+      "the request is authorised" in {
         givenTheRequestIsAuthorised()
-        theStartPageShouldBeRendered(startController(authEnabledAppConfig).showStartPage(getRequest))
+        theStartPageShouldBeRendered(startController(appConfig).showStartPage(getRequest))
       }
     }
 
     "return OK and render the error page" when {
-      "auth is enabled and the request is unauthorised" in {
+      "the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
-        theNotAuthorisedPageShouldBeRendered(startController(authEnabledAppConfig).showStartPage(getRequest))
+        theNotAuthorisedPageShouldBeRendered(startController(appConfig).showStartPage(getRequest))
       }
     }
   }

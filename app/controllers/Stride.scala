@@ -30,20 +30,21 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.error_template
 
+import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseController with I18nSupport {
-  val strideRoles: Set[String]
   val logger: Logger
   val appConfig: AppConfig
   val config: Configuration = appConfig.runModeConfiguration
   val env: Environment = appConfig.environment
   val authConnector: AuthConnector
   val errorPage: error_template
+  val strideAuthSettings: StrideAuthSettings
 
   def authWithStride(actionName: String, f: AuthorisedUser => Future[Result])
                     (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext, conf: AppConfig): Future[Result] =
-    if (appConfig.strideAuth) {
+    if (strideAuthSettings.strideAuthEnabled) {
       logger.info(s"Verify stride authorisation")
 
       val notAuthorised = "Not authorised"
@@ -53,7 +54,7 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
           logger.debug(s"$actionName - authorised, enrolments=$enrolments")
 
           val userRoles = enrolments.enrolments.map(_.key)
-          val userHasOneOrMoreRequiredRoles = appConfig.nrsStrideRoles.intersect(userRoles).nonEmpty
+          val userHasOneOrMoreRequiredRoles = strideAuthSettings.strideRoles.intersect(userRoles).nonEmpty
 
           if (userHasOneOrMoreRequiredRoles) {
             f(AuthorisedUser((userName.name.toList ++ userName.lastName.toList).mkString(" "), userCredentials.providerId))
@@ -80,3 +81,10 @@ trait Stride extends AuthorisedFunctions with AuthRedirects with FrontendBaseCon
       f(AuthorisedUser("Auth disabled", "Auth disabled"))
     }
 }
+
+@Singleton
+class StrideAuthSettings {
+  val strideAuthEnabled: Boolean = true
+  val strideRoles: Set[String] = Set("nrs digital investigator", "nrs_digital_investigator")
+}
+

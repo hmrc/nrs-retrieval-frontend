@@ -18,7 +18,6 @@ package controllers
 
 import akka.actor.ActorRef
 import akka.util.ByteString
-import config.AppConfig
 import models.SearchResultUtils
 import org.mockito.Matchers
 import org.mockito.Matchers.any
@@ -34,14 +33,16 @@ import support.fixtures.{NrsSearchFixture, SearchFixture}
 import scala.concurrent.Future
 
 class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
-  private def controller(implicit appConfig: AppConfig) = new SearchController(
-    mock[ActorRef],
-    mockAuthConnector,
-    nrsRetrievalConnector,
-    new SearchResultUtils(appConfig),
-    stubMessagesControllerComponents(),
-    injector.instanceOf[views.html.search_page],
-    error_template)
+  private val controller =
+    new SearchController(
+      mock[ActorRef],
+      mockAuthConnector,
+      nrsRetrievalConnector,
+      new SearchResultUtils(appConfig),
+      stubMessagesControllerComponents(),
+      new StrideAuthSettings(),
+      injector.instanceOf[views.html.search_page],
+      error_template)
 
   private def theSearchPageShouldBeRenderedWithoutResults(eventualResult: Future[Result]) = {
     val content = aPageShouldBeRendered(eventualResult, "search.page.dynamic.header.lbl")
@@ -49,9 +50,6 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
     Option(content.getElementById("notFound")).isDefined shouldBe false
     Option(content.getElementById("resultsFound")).isDefined shouldBe false
   }
-
-  private val authDisabledController = controller(appConfig)
-  private val authEnabledController = controller(authEnabledAppConfig)
 
   private def getRequestWithJsonBody(notableEventType: String) =
     getRequest.withJsonBody(
@@ -62,24 +60,19 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
       val notableEventType = notableEvent.name
 
       "return 200 and render the search page" when {
-        s"$notableEventType is specified and auth is disabled" in {
-          theSearchPageShouldBeRenderedWithoutResults(
-            authDisabledController.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)))
-        }
-
-        s"$notableEventType is specified and auth is enabled and the request is authorised" in {
+        s"$notableEventType is specified and and the request is authorised" in {
           givenTheRequestIsAuthorised()
           theSearchPageShouldBeRenderedWithoutResults(
-            authEnabledController.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)))
+            controller.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)))
         }
       }
     }
 
     "return OK and render the error page" when {
-      "auth is enabled and the request is unauthorised" in {
+      "and the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
         theNotAuthorisedPageShouldBeRendered(
-          authEnabledController.showSearchPage("vatReturn")(getRequestWithJsonBody("vatReturn")))
+          controller.showSearchPage("vatReturn")(getRequestWithJsonBody("vatReturn")))
       }
     }
   }
@@ -91,18 +84,14 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         headers(eventualResult) shouldBe Map("Location" -> controllers.routes.StartController.showStartPage().url)
       }
 
-      "auth is disabled" in {
-        theRequestShouldBeRedirectedToTheStartPage(authDisabledController.noParameters()(getRequest))
-      }
-
-      "auth is enabled and the request is authorised" in {
+      "and the request is authorised" in {
         givenTheRequestIsAuthorised()
-        theRequestShouldBeRedirectedToTheStartPage(authEnabledController.noParameters()(getRequest))
+        theRequestShouldBeRedirectedToTheStartPage(controller.noParameters()(getRequest))
       }
 
-      "auth is enabled and the request is unauthorised" in {
+      "and the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
-        theRequestShouldBeRedirectedToTheStartPage(authEnabledController.noParameters()(getRequest))
+        theRequestShouldBeRedirectedToTheStartPage(controller.noParameters()(getRequest))
       }
     }
   }
@@ -127,26 +116,19 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
       }
 
       "perform a search and render the results" when {
-        s"auth is disabled and a $notableEventType search is submitted" in {
-          givenTheSearchSucceeds()
-
-          theSearchPageShouldBeRenderedWithResults(
-            authDisabledController.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText))
-        }
-
-        s"auth is enabled and the request is authorised and a $notableEventType search is submitted" in {
+        s"and the request is authorised and a $notableEventType search is submitted" in {
           givenTheRequestIsAuthorised()
           givenTheSearchSucceeds()
 
           theSearchPageShouldBeRenderedWithResults(
-            authEnabledController.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText))
+            controller.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText))
         }
 
         s"a $notableEventType search is submitted with no search text" in {
           givenTheSearchSucceedsWithNoResults()
 
           theSearchPageShouldBeRenderedWithEmptyResults(
-            authDisabledController
+            controller
               .submitSearchPage(notableEventType)(FakeRequest("POST", "/")
                 .withFormUrlEncodedBody(("notableEventType", notableEventType))))
 
@@ -165,10 +147,10 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
     }
 
     "return OK and render the error page" when {
-      "auth is enabled and the request is unauthorised" in {
+      "and the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
         theNotAuthorisedPageShouldBeRendered(
-          authEnabledController.submitSearchPage("vatReturn")(emptyPostRequest))
+          controller.submitSearchPage("vatReturn")(emptyPostRequest))
       }
     }
   }
@@ -192,22 +174,17 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         contentAsString(eventualResponse) shouldBe "Some zipped bytes"
       }
 
-      "auth is disabled" in {
-        givenTheDownloadSucceeds()
-        theDownloadedBytesShouldBeReturned(authDisabledController.download(vaultName, archiveId)(getRequest))
-      }
-
-      "auth is enabled and the request is authorised" in {
+      "and the request is authorised" in {
         givenTheRequestIsAuthorised()
         givenTheDownloadSucceeds()
-        theDownloadedBytesShouldBeReturned(authEnabledController.download(vaultName, archiveId)(getRequest))
+        theDownloadedBytesShouldBeReturned(controller.download(vaultName, archiveId)(getRequest))
       }
     }
 
     "return OK and render the error page" when {
-      "auth is enabled and the request is unauthorised" in {
+      "and the request is unauthorised" in {
         givenTheRequestIsUnauthorised()
-        theNotAuthorisedPageShouldBeRendered(authEnabledController.download(vaultName, archiveId)(getRequest))
+        theNotAuthorisedPageShouldBeRendered(controller.download(vaultName, archiveId)(getRequest))
       }
     }
   }

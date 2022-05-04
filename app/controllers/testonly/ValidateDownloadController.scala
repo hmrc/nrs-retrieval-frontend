@@ -18,7 +18,7 @@ package controllers.testonly
 
 import config.AppConfig
 import connectors.testonly.TestOnlyNrsRetrievalConnector
-import controllers.Stride
+import controllers.{Stride, StrideAuthSettings}
 import controllers.testonly.FormMappings.validateDownloadForm
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, RequestHeader}
@@ -35,6 +35,7 @@ import scala.concurrent.Future
 @Singleton
 class ValidateDownloadController @Inject()(override val controllerComponents: MessagesControllerComponents,
                                            override val authConnector: AuthConnector,
+                                           override val strideAuthSettings: StrideAuthSettings,
                                            override val errorPage: error_template,
                                            connector: TestOnlyNrsRetrievalConnector,
                                            validateDownloadPage: validate_download_page)
@@ -42,12 +43,11 @@ class ValidateDownloadController @Inject()(override val controllerComponents: Me
   extends FrontendController(controllerComponents) with Stride {
 
   override val logger: Logger = Logger(this.getClass)
-  override val strideRoles: Set[String] = appConfig.nrsStrideRoles
 
   private val authAction = "Validate download"
 
-  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier = super.hc
-    .withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
+  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
+    super.hc.withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   val showValidateDownload: Action[AnyContent] = Action.async { implicit request =>
     authWithStride(

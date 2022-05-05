@@ -33,16 +33,16 @@ trait ActorService {
   val logger: Logger = Logger(this.getClass)
 
   def startPollingActor(vaultId: String, archiveId: String)
-    (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef = ???
+    (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): ActorRef
 
   def eventualPollingActor(vaultId: String, archiveId: String)
-                          (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
+                          (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef]
 
   def pollingActor(vaultId: String, archiveId: String)
-                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef] = ???
+                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[ActorRef]
 
   def pollingActorExists(vaultId: String, archiveId: String)
-                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean] = ???
+                  (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean]
 }
 
 class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {

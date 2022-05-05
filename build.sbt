@@ -14,8 +14,6 @@ lazy val scoverageSettings = {
   )
 }
 
-val akkaVersion = "2.6.19"
-
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.24.0",
@@ -29,14 +27,10 @@ def test(scope: String) = Seq(
   "org.scalatest" %% "scalatest" % "3.2.9" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-  "org.scalatestplus"      %% "mockito-1-10"           % "3.1.0.0" % Test,
+  "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % Test,
   "org.jsoup" % "jsoup" % "1.13.1" % scope,
   "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
-  "com.typesafe.akka" %% "akka-testkit"               % akkaVersion,
-  "com.typesafe.akka" %% "akka-stream"                % akkaVersion,
-  "com.typesafe.akka" %% "akka-slf4j"                 % akkaVersion,
-  "com.typesafe.akka" %% "akka-actor-typed"           % akkaVersion,
-  "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.19" % scope,
 )
 
 lazy val appName: String = "nrs-retrieval-frontend"

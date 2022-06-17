@@ -27,11 +27,23 @@ import org.mockito.Mockito._
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
+import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorMessage, GovukHint, GovukInput, GovukLabel}
+import views.html.components.{Button, Heading1, Paragraph, TextInput}
+import views.html.testonly.validate_download_page
 
 import scala.concurrent.Future
 
 class ValidateDownloadControllerSpec extends ControllerSpec {
   private val connector = mock[TestOnlyNrsRetrievalConnector]
+
+  val validateDownloadPage = new validate_download_page(
+    layout,
+    new FormWithCSRF,
+    new Paragraph,
+    new TextInput(new GovukInput(new GovukErrorMessage, new GovukHint, new GovukLabel)),
+    new Button(new GovukButton),
+    new Heading1
+  )
 
   private lazy val controller =
     new ValidateDownloadController(
@@ -40,17 +52,17 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
       new StrideAuthSettings(),
       error_template,
       connector,
-      injector.instanceOf[views.html.testonly.validate_download_page]
+      validateDownloadPage
     )
 
   private def validateResponse(eventualResult: Future[Result]) = {
     val content = Jsoup.parse(contentAsString(eventualResult))
 
     status(eventualResult) shouldBe OK
-    content.getElementById("pageHeader").text() shouldBe "test-only.validate-download.page.header"
+    content.getElementById("pageHeader").text() shouldBe messages("test-only.validate-download.page.header")
     content.getElementById("vaultName").tag().getName shouldBe "input"
     content.getElementById("archiveId").tag().getName shouldBe "input"
-    content.getElementsByAttributeValue("name", "submitButton").text() shouldBe "test-only.validate-download.form.submit"
+    content.getElementsByAttributeValue("name", "submitButton").text() shouldBe messages("test-only.validate-download.form.submit")
 
     val form = content.getElementsByClass("form")
     form.attr("action") shouldBe routes.ValidateDownloadController.submitValidateDownload().url
@@ -88,7 +100,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
       val eventualResult = controller.submitValidateDownload(request)
       val content = validateResponse(eventualResult)
 
-      content.getElementById("resultsHeader").text() shouldBe "test-only.validate-download.results.title"
+      content.getElementById("resultsHeader").text() shouldBe messages("test-only.validate-download.results.title")
       content.getElementById("status").text() shouldBe OK.toString
       content.getElementById("numberOfZippedFiles").text() shouldBe files.size.toString
       content.getElementById(file1).text() shouldBe file1

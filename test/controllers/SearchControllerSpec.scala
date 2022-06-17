@@ -18,21 +18,36 @@ package controllers
 
 import akka.actor.ActorRef
 import akka.util.ByteString
-import models.SearchResultUtils
+import models.{NotableEvent, SearchResultUtils}
 import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
+import play.api.i18n.Messages
 import play.api.libs.json.Json.parse
 import play.api.libs.ws.WSResponse
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{headers, status, _}
 import support.fixtures.{NrsSearchFixture, SearchFixture}
+import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorMessage, GovukHint, GovukInput, GovukLabel}
+import views.html.components.{Button, Paragraph, SearchResultPanel, SearchResultsPanel, TextInput}
+import views.html.search_page
 
 import scala.concurrent.Future
 
 class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
+
+  val searchPage = new search_page(
+    layout,
+    new FormWithCSRF,
+    new Paragraph,
+    new TextInput(new GovukInput(new GovukErrorMessage, new GovukHint, new GovukLabel)),
+    new Button(new GovukButton),
+    new SearchResultsPanel(new SearchResultPanel(new Paragraph))
+  )
+
+
   private val controller =
     new SearchController(
       mock[ActorRef],
@@ -41,11 +56,11 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
       new SearchResultUtils(appConfig),
       stubMessagesControllerComponents(),
       new StrideAuthSettings(),
-      injector.instanceOf[views.html.search_page],
+      searchPage,
       error_template)
 
-  private def theSearchPageShouldBeRenderedWithoutResults(eventualResult: Future[Result]) = {
-    val content = aPageShouldBeRendered(eventualResult, "search.page.dynamic.header.lbl")
+  private def theSearchPageShouldBeRenderedWithoutResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
+    val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.displayName))
 
     Option(content.getElementById("notFound")).isDefined shouldBe false
     Option(content.getElementById("resultsFound")).isDefined shouldBe false
@@ -63,7 +78,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         s"$notableEventType is specified and and the request is authorised" in {
           givenTheRequestIsAuthorised()
           theSearchPageShouldBeRenderedWithoutResults(
-            controller.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)))
+            controller.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)), notableEvent)
         }
       }
     }
@@ -108,8 +123,8 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         when(nrsRetrievalConnector.search(any(), any(), Matchers.eq(notableEvent.crossKeySearch))(any()))
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
 
-      def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result]) = {
-        val content = aPageShouldBeRendered(eventualResult, "search.page.dynamic.header.lbl")
+      def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
+        val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.displayName))
 
         Option(content.getElementById("notFound")).isDefined shouldBe false
         Option(content.getElementById("resultsFound")).isDefined shouldBe true
@@ -121,7 +136,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
           givenTheSearchSucceeds()
 
           theSearchPageShouldBeRenderedWithResults(
-            controller.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText))
+            controller.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText), notableEvent)
         }
 
         s"a $notableEventType search is submitted with no search text" in {
@@ -130,14 +145,14 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
           theSearchPageShouldBeRenderedWithEmptyResults(
             controller
               .submitSearchPage(notableEventType)(FakeRequest("POST", "/")
-                .withFormUrlEncodedBody(("notableEventType", notableEventType))))
+                .withFormUrlEncodedBody(("notableEventType", notableEventType))), notableEvent)
 
           def givenTheSearchSucceedsWithNoResults() =
             when(nrsRetrievalConnector.search(any(), any(), any())(any()))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
-          def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result]) = {
-            val content = aPageShouldBeRendered(eventualResult, "search.page.dynamic.header.lbl")
+          def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
+            val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.displayName))
 
             Option(content.getElementById("notFound")).isDefined shouldBe true
             Option(content.getElementById("resultsFound")).isDefined shouldBe false

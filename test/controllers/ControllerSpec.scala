@@ -28,16 +28,20 @@ import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import support.GuiceAppSpec
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Name}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, retrieve}
+import views.html.components.Paragraph
 import views.html.error_template
 
 import scala.concurrent.Future
 
-trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
+trait ControllerSpec extends GuiceAppSpec {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  lazy val error_template: error_template = injector.instanceOf[error_template]
+  lazy val error_template: error_template = new error_template(
+    layout,
+    new Paragraph
+  )
 
   def givenTheRequestIsAuthorised(): OngoingStubbing[Future[Nothing]] =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenAnswer(

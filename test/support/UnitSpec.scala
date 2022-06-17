@@ -28,14 +28,14 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Await, Future}
 
-trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status {
+trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status with Configs {
   implicit val defaultTimeout: FiniteDuration = 5 seconds
 
-  val environment: Environment = Environment.simple()
-  val configuration: Configuration = Configuration.load(environment)
-  val servicesConfig = new ServicesConfig(configuration)
-
-  implicit val appConfig: AppConfig = new AppConfig(configuration, environment, servicesConfig)
+//  val environment: Environment = Environment.simple()
+//  val configuration: Configuration = Configuration.load(environment)
+//  val servicesConfig = new ServicesConfig(configuration)
+//
+//  implicit val appConfig: AppConfig = new AppConfig(configuration, environment, servicesConfig)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

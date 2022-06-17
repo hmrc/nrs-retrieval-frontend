@@ -48,7 +48,6 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     bind(classOf[TestOnlyNrsRetrievalConnector]).to(classOf[TestOnlyNrsRetrievalConnectorImpl])
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
     bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
-    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
   }
 }
 

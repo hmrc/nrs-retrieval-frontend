@@ -25,11 +25,21 @@ import play.api.libs.json.Json.parse
 import play.twirl.api.HtmlFormat
 import support.GuiceAppSpec
 import support.fixtures.SearchFixture
+import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorMessage, GovukHint, GovukInput, GovukLabel}
 import views.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered, someUser}
+import views.html.components.{Button, Paragraph, SearchResultPanel, SearchResultsPanel, TextInput}
 import views.html.search_page
 
-class search_pageSpec extends GuiceAppSpec with SearchFixture{
-  private lazy val searchPage = injector.instanceOf[search_page]
+class search_pageSpec extends GuiceAppSpec with SearchFixture {
+
+  private lazy val searchPage = new search_page(
+    layout,
+    new FormWithCSRF,
+    new Paragraph,
+    new TextInput(new GovukInput(new GovukErrorMessage, new GovukHint, new GovukLabel)),
+    new Button(new GovukButton),
+    new SearchResultsPanel(new SearchResultPanel(new Paragraph))
+  )
 
   private def notFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("notFound")).isDefined
   private def resultsFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("resultsFound")).isDefined

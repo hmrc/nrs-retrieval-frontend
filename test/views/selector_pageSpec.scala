@@ -22,11 +22,18 @@ import org.scalatest.matchers.must.Matchers._
 import play.api.i18n.Messages
 import play.api.libs.json.Json.parse
 import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorMessage, GovukFieldset, GovukHint, GovukLabel, GovukRadios}
 import views.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered, someUser}
+import views.html.components.Button
 import views.html.selector_page
 
 class selector_pageSpec extends ViewSpec {
-  private lazy val page = injector.instanceOf[selector_page]
+  private lazy val page = new selector_page(
+    layout,
+    new FormWithCSRF,
+    new GovukRadios(new GovukErrorMessage, new GovukFieldset, new GovukHint, new GovukLabel),
+    new Button(new GovukButton)
+  )
 
   override lazy val view: HtmlFormat.Appendable =
     page(selectorForm.bind(parse("""{"notableEventType": "vat-return"}"""), Int.MaxValue), someUser)

@@ -18,22 +18,31 @@ package controllers
 
 import config.AppConfig
 import play.api.mvc.Result
+import views.html.components.Paragraph
 import views.html.start_page
 
 import scala.concurrent.Future
 
 class StartControllerSpec extends ControllerSpec {
+
+  private lazy val startPage = new start_page(
+    layout,
+    new Paragraph
+  )
+
   private def startController(implicit appConfig: AppConfig) =
     new StartController(
       mockAuthConnector,
       stubMessagesControllerComponents(),
       new StrideAuthSettings(),
-      injector.instanceOf[start_page], error_template)
+      startPage,
+      error_template
+    )
 
   "showStartPage" should {
     "return 200 and render the start page" when {
       def theStartPageShouldBeRendered(eventualResult: Future[Result]) =
-        aPageShouldBeRendered(eventualResult, "start.page.header.lbl")
+        aPageShouldBeRendered(eventualResult, messages("start.page.header.lbl"))
 
       "the request is authorised" in {
         givenTheRequestIsAuthorised()

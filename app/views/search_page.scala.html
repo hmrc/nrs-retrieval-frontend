@@ -43,17 +43,11 @@
     if (maybeResults.isDefined) s"${Messages("search.page.results")} - $pageHeader" else pageHeader
 }
 
-@* this is required to correctly render the dynamic elements on the page*@
-@headBlock = {
-    <link href='@routes.Assets.versioned("/stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
-}
-
 @layout(
     pageTitle = pageTitle,
     maybePageHeader = Some(pageHeader),
     maybeUser = maybeUser,
     maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage()),
-    maybeHeadBlock = Some(headBlock),
     maybeBodyEndBlock = None
 ) {
     @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))

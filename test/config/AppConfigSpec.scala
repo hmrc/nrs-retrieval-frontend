@@ -16,9 +16,9 @@
 
 package config
 
-import support.GuiceAppSpec
+import support.BaseUnitSpec
 
-class AppConfigSpec extends GuiceAppSpec{
+class AppConfigSpec extends BaseUnitSpec{
   "appConfig" should {
     "specify the correct notable event types" in {
       appConfig.notableEvents.keySet shouldBe Set(

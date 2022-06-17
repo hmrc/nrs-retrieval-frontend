@@ -25,7 +25,7 @@ import org.mockito.stubbing.OngoingStubbing
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers.{contentAsString, status, _}
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import support.GuiceAppSpec
+import support.BaseUnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Name}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, retrieve}
 import views.html.components.Paragraph
@@ -33,7 +33,7 @@ import views.html.error_template
 
 import scala.concurrent.Future
 
-trait ControllerSpec extends GuiceAppSpec {
+trait ControllerSpec extends BaseUnitSpec {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
   val mockAuthConnector: AuthConnector = mock[AuthConnector]

@@ -25,9 +25,9 @@ import org.scalatest.matchers.must.Matchers._
 import play.api.mvc.{AnyContentAsEmpty, Call, Request}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
-import support.GuiceAppSpec
+import support.BaseUnitSpec
 
-trait ViewSpec extends GuiceAppSpec {
+trait ViewSpec extends BaseUnitSpec {
   implicit val requestWithToken: Request[AnyContentAsEmpty.type] = addToken(FakeRequest())
 
   def view: HtmlFormat.Appendable

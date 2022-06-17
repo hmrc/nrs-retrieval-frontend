@@ -23,14 +23,14 @@ import org.jsoup.select.Elements
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json.parse
 import play.twirl.api.HtmlFormat
-import support.GuiceAppSpec
+import support.BaseUnitSpec
 import support.fixtures.SearchFixture
 import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorMessage, GovukHint, GovukInput, GovukLabel}
 import views.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered, someUser}
 import views.html.components.{Button, Paragraph, SearchResultPanel, SearchResultsPanel, TextInput}
 import views.html.search_page
 
-class search_pageSpec extends GuiceAppSpec with SearchFixture {
+class search_pageSpec extends BaseUnitSpec with SearchFixture {
 
   private lazy val searchPage = new search_page(
     layout,

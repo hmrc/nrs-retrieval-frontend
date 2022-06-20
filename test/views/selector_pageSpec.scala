@@ -46,7 +46,7 @@ class selector_pageSpec extends ViewSpec {
         doc = doc,
         headerText = headerText,
         titleText = headerText,
-        maybeBackLinkCall = Some(controllers.routes.StartController.showStartPage()))
+        maybeBackLinkCall = Some(controllers.routes.StartController.showStartPage))
 
       elementByName(doc, "continueButton").text() mustBe Messages("button.continue.lbl")
 

@@ -65,7 +65,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
     content.getElementsByAttributeValue("name", "submitButton").text() shouldBe messages("test-only.validate-download.form.submit")
 
     val form = content.getElementsByClass("form")
-    form.attr("action") shouldBe routes.ValidateDownloadController.submitValidateDownload().url
+    form.attr("action") shouldBe routes.ValidateDownloadController.submitValidateDownload.url
     form.attr("method") shouldBe "POST"
 
     content

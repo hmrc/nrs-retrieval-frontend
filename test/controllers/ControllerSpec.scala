@@ -24,7 +24,7 @@ import org.mockito.internal.stubbing.answers.Returns
 import org.mockito.stubbing.OngoingStubbing
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers.{contentAsString, status, _}
-import play.api.test.{FakeRequest, StubControllerComponentsFactory}
+import play.api.test.FakeRequest
 import support.BaseUnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Name}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, retrieve}

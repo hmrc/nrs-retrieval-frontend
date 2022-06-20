@@ -10,7 +10,7 @@ lazy val scoverageSettings = {
       ".*BuildInfo.*;prod.Routes;app.Routes;testOnlyDoNotUseInAppConf.Routes;controllers.ExampleController;controllers.testonly.TestOnlyController",
     ScoverageKeys.coverageMinimum := 70.00,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
 }
 
@@ -66,10 +66,10 @@ lazy val root = (project in file("."))
   .settings(integrationTestSettings())
   .configs(IntegrationTest)
   .settings(
-    Keys.fork in IntegrationTest := false,
+    IntegrationTest / Keys.fork := false,
     Defaults.itSettings,
-    unmanagedSourceDirectories in IntegrationTest += baseDirectory(_ / "it").value,
-    parallelExecution in IntegrationTest := false
+    IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
+    IntegrationTest / parallelExecution := false
   )
-  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)

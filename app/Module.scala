@@ -25,12 +25,10 @@ import http.MicroserviceAudit
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.http.ws.WSHttp
 

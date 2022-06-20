@@ -51,12 +51,14 @@ class BaseUnitSpec extends UnitSpec with StubMessageControllerComponents with Pa
       new GovukTemplate(
         new GovukHeader,
         new GovukFooter,
-        new GovukSkipLink
+        new GovukSkipLink,
+        new FixedWidthPageLayout
       ),
       new GovukHeader,
       new GovukFooter,
       new GovukBackLink,
-      new TwoThirdsMainContent
+      new TwoThirdsMainContent,
+      new FixedWidthPageLayout
     ),
     new HmrcInternalHeader(),
     new HmrcStandardFooter(new HmrcFooter, new HmrcFooterItems(new AccessibilityStatementConfig(configuration))),

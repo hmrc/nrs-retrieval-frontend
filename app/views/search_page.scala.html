@@ -47,7 +47,7 @@
     pageTitle = pageTitle,
     maybePageHeader = Some(pageHeader),
     maybeUser = maybeUser,
-    maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage()),
+    maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage),
     maybeBodyEndBlock = None
 ) {
     @p(content = Text(Messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))

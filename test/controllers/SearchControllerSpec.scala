@@ -96,7 +96,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
     "redirect to the selector page" when {
       def theRequestShouldBeRedirectedToTheStartPage(eventualResult: Future[Result]) = {
         status(eventualResult) shouldBe SEE_OTHER
-        headers(eventualResult) shouldBe Map("Location" -> controllers.routes.StartController.showStartPage().url)
+        headers(eventualResult) shouldBe Map("Location" -> controllers.routes.StartController.showStartPage.url)
       }
 
       "and the request is authorised" in {

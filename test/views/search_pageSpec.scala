@@ -61,7 +61,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture {
         doc = doc,
         headerText = searchPageHeadingText,
         titleText = titleText,
-        maybeBackLinkCall = Some(controllers.routes.SelectorController.showSelectorPage()))
+        maybeBackLinkCall = Some(controllers.routes.SelectorController.showSelectorPage))
 
       val notableEventTypeElement: Elements = elementByName(doc, "notableEventType")
       val searchKeyNameElement: Elements = elementByName(doc, "searchKeyName_0")

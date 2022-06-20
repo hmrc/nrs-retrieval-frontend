@@ -20,22 +20,32 @@ import config.AppConfig
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorMessage, GovukFieldset, GovukHint, GovukLabel, GovukRadios}
+import views.html.components.Button
 import views.html.selector_page
 
 import scala.concurrent.Future
 
 class SelectorControllerSpec extends ControllerSpec {
+
+  val selectorPage = new selector_page(
+    layout,
+    new FormWithCSRF,
+    new GovukRadios(new GovukErrorMessage, new GovukFieldset, new GovukHint, new GovukLabel),
+    new Button(new GovukButton)
+  )
+
   private def selectorController(implicit appConfig: AppConfig) =
     new SelectorController(
       mockAuthConnector,
       stubMessagesControllerComponents(),
       new StrideAuthSettings(),
-      injector.instanceOf[selector_page],
+      selectorPage,
       error_template)
 
   "showSelectorPage" should {
     def theSelectorPageShouldBeRendered(eventualResult: Future[Result]) =
-      aPageShouldBeRendered(eventualResult, "selector.page.header.lbl")
+      aPageShouldBeRendered(eventualResult, messages("selector.page.header.lbl"))
 
     "return 200 and render the selector page" when {
       "the request is authorised" in {
@@ -74,7 +84,7 @@ class SelectorControllerSpec extends ControllerSpec {
 
     "return 200 and render the selector page with an error message" when {
       def theSelectorPageShouldBeRenderedWithAnErrorMessage(eventualResult: Future[Result]) =
-        aPageShouldBeRendered(eventualResult, "generic.errorPrefix selector.page.header.lbl")
+        aPageShouldBeRendered(eventualResult, messages("generic.errorPrefix") + " " + messages("selector.page.header.lbl"))
 
       "and the request is authorised and no notable event type is selected" in {
         givenTheRequestIsAuthorised()

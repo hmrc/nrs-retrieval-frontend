@@ -28,7 +28,6 @@
         hmrcInternalHeader: HmrcInternalHeader,
         hmrcStandardFooter: HmrcStandardFooter,
         hmrcHead: HmrcHead,
-        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcScripts: HmrcScripts,
         defaultMainContent: TwoThirdsMainContent,
         h1: Heading1,
@@ -39,7 +38,6 @@
     maybeUser: Option[AuthorisedUser] = None,
     maybeMainContentLayout: Option[Html => Html] = Some(defaultMainContent(_)),
     maybeBackButtonUrl: Option[play.api.mvc.Call] = None,
-    maybeHeadBlock: Option[Html] = None,
     maybeBodyEndBlock: Option[Html] = None
 )(content: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
 
@@ -70,7 +68,7 @@
         params = InternalHeader(
             homepageUrl = "https://www.gov.uk/",
             serviceName = Some(Messages("service.name")),
-            serviceUrl = routes.StartController.showStartPage().url,
+            serviceUrl = routes.StartController.showStartPage.url,
             language = En
         )
     )
@@ -86,9 +84,15 @@
     <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
 }
 
+@optHeadBlock = @{
+    maybeUser.map { _ =>
+        Html(s"""<link href='${routes.Assets.versioned("/stylesheets/main.css")}' media="screen" rel="stylesheet" type="text/css" />""")
+    }
+}
+
 @govukLayout(
     pageTitle = Some(pageTitle),
-    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = maybeHeadBlock)),
+    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = optHeadBlock)),
     headerBlock = Some(nrsHeaderBlock),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(addedScripts), nonce = CSPNonce.get)),
     beforeContentBlock = None,

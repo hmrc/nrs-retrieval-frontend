@@ -24,20 +24,24 @@ import org.mockito.internal.stubbing.answers.Returns
 import org.mockito.stubbing.OngoingStubbing
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers.{contentAsString, status, _}
-import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import support.GuiceAppSpec
+import play.api.test.FakeRequest
+import support.BaseUnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Name}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, retrieve}
+import views.html.components.Paragraph
 import views.html.error_template
 
 import scala.concurrent.Future
 
-trait ControllerSpec extends GuiceAppSpec with StubControllerComponentsFactory {
+trait ControllerSpec extends BaseUnitSpec {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  lazy val error_template: error_template = injector.instanceOf[error_template]
+  lazy val error_template: error_template = new error_template(
+    layout,
+    new Paragraph
+  )
 
   def givenTheRequestIsAuthorised(): OngoingStubbing[Future[Nothing]] =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenAnswer(

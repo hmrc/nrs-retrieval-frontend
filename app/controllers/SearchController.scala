@@ -58,7 +58,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   val noParameters: Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"No parameters provided so redirecting to start page on request $request")
-    Future(Redirect(routes.StartController.showStartPage()))
+    Future(Redirect(routes.StartController.showStartPage))
   }
 
   def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>

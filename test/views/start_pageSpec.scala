@@ -20,10 +20,16 @@ import org.scalatest.matchers.must.Matchers._
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import views.ViewSpec.ensureCommonPageElementsAreRendered
+import views.html.components.Paragraph
 import views.html.start_page
 
 class start_pageSpec extends ViewSpec {
-  private lazy val startPage = injector.instanceOf[start_page]
+
+  private lazy val startPage = new start_page(
+    layout,
+    new Paragraph
+  )
+
   override lazy val view: HtmlFormat.Appendable = startPage()
 
   "start page" should {

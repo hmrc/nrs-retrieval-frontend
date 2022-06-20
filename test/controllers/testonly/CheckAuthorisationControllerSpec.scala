@@ -22,12 +22,22 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.test.Helpers._
+import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorMessage, GovukHint, GovukInput, GovukLabel}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import views.html.components.{Heading1, Paragraph, TextInput}
+import views.html.testonly.check_authorisation_page
 
 import scala.concurrent.Future
 
 class CheckAuthorisationControllerSpec extends ControllerSpec {
   private val connector = mock[TestOnlyNrsRetrievalConnector]
+
+  val checkAuthorisationPage = new check_authorisation_page(
+    layout,
+    new Paragraph,
+    new TextInput(new GovukInput(new GovukErrorMessage, new GovukHint, new GovukLabel)),
+    new Heading1
+  )
 
   private lazy val controller =
     new CheckAuthorisationController(
@@ -36,15 +46,15 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
       new StrideAuthSettings(),
       error_template,
       connector,
-      injector.instanceOf[views.html.testonly.check_authorisation_page]
+      checkAuthorisationPage
     )
 
   "checkAuthorisation" should {
     "confirm that the request is authenticated and authorised" when {
       "the user is authenticated and authorised" in {
-        doAnswer(new Returns(Future successful true)).when(connector).checkAuthorisation()(any())
+        doAnswer(new Returns(Future(true))).when(connector).checkAuthorisation()(any())
 
-        contentAsString(controller.checkAuthorisation(getRequest)) should include("test-only.check-authorisation.status.200")
+        contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.200"))
       }
     }
 
@@ -53,7 +63,7 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
         doAnswer(new Returns(Future failed UpstreamErrorResponse(UNAUTHORIZED.toString, UNAUTHORIZED)))
           .when(connector).checkAuthorisation()(any())
 
-        contentAsString(controller.checkAuthorisation(getRequest)) should include("test-only.check-authorisation.status.401")
+        contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.401"))
       }
     }
 
@@ -62,7 +72,7 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
         doAnswer(new Returns(Future failed UpstreamErrorResponse(FORBIDDEN.toString, FORBIDDEN)))
           .when(connector).checkAuthorisation()(any())
 
-        contentAsString(controller.checkAuthorisation(getRequest)) should include("test-only.check-authorisation.status.403")
+        contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.403"))
       }
     }
   }

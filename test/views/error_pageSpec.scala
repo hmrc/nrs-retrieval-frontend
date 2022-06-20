@@ -19,10 +19,15 @@ package views
 import org.scalatest.matchers.must.Matchers._
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
+import views.html.components.Paragraph
 import views.html.error_template
 
 class error_pageSpec extends ViewSpec {
-  private lazy val page: error_template = injector.instanceOf[error_template]
+
+  private lazy val page = new error_template(
+    layout,
+    new Paragraph
+  )
 
   override lazy val view: HtmlFormat.Appendable = page(
     Messages("global.error.InternalServerError500.title"),

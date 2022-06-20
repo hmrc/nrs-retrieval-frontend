@@ -10,14 +10,14 @@ lazy val scoverageSettings = {
       ".*BuildInfo.*;prod.Routes;app.Routes;testOnlyDoNotUseInAppConf.Routes;controllers.ExampleController;controllers.testonly.TestOnlyController",
     ScoverageKeys.coverageMinimum := 70.00,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
 }
 
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.24.0",
-  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "0.84.0-play-28",
+  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "3.21.0-play-28",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
   "commons-io"        %  "commons-io"                 % "2.11.0"
 )
@@ -58,7 +58,6 @@ lazy val root = (project in file("."))
   .settings(
     TwirlKeys.templateImports ++= Seq(
       "uk.gov.hmrc.govukfrontend.views.html.components._",
-      "uk.gov.hmrc.govukfrontend.views.html.helpers._",
       "uk.gov.hmrc.hmrcfrontend.views.html.components._",
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
     )
@@ -67,10 +66,10 @@ lazy val root = (project in file("."))
   .settings(integrationTestSettings())
   .configs(IntegrationTest)
   .settings(
-    Keys.fork in IntegrationTest := false,
+    IntegrationTest / Keys.fork := false,
     Defaults.itSettings,
-    unmanagedSourceDirectories in IntegrationTest += baseDirectory(_ / "it").value,
-    parallelExecution in IntegrationTest := false
+    IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
+    IntegrationTest / parallelExecution := false
   )
-  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)

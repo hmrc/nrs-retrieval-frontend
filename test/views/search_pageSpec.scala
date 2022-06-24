@@ -29,6 +29,7 @@ import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButto
 import views.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered, someUser}
 import views.html.components.{Button, Paragraph, SearchResultPanel, SearchResultsPanel, TextInput}
 import views.html.search_page
+import scala.concurrent.duration._
 
 class search_pageSpec extends BaseUnitSpec with SearchFixture {
 
@@ -84,7 +85,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture {
     s"the search page for notableEventType [${notableEvent.name}]" should {
       "render correctly" when {
         "no search was made" in new ViewSpec {
-          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, None)
+          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, None, 5.minutes)
 
           ensureThePageIsRendered(doc, searchPageHeadingText)
           notFoundPanelIsDisplayed(doc) mustBe false
@@ -92,7 +93,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture {
         }
 
         "search results were not found" in new ViewSpec {
-          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, Some(Seq.empty[SearchResult]))
+          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, Some(Seq.empty[SearchResult]), 5.minutes)
 
           ensureThePageIsRendered(doc, searchResultsTitleText)
           notFoundPanelIsDisplayed(doc) mustBe true
@@ -100,7 +101,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture {
         }
 
         "search results were found" in new ViewSpec {
-          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, Some(Seq(vatSearchResult)))
+          override val view: HtmlFormat.Appendable = searchPage(boundForm, someUser, Some(Seq(vatSearchResult)), 5.minutes)
 
           ensureThePageIsRendered(doc, searchResultsTitleText)
           notFoundPanelIsDisplayed(doc) mustBe false

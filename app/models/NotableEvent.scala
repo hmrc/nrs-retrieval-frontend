@@ -16,6 +16,8 @@
 
 package models
 
+import scala.concurrent.duration.FiniteDuration
+
 case class SearchKeySubmission(
                       searchKeyName: String,
                       searchKeyValue: Option[String]
@@ -32,5 +34,6 @@ case class NotableEvent(
                          storedFrom: String,
                          storedFor: String,
                          searchKeys: Seq[SearchKey],
+                         estimatedRetrievalTime: FiniteDuration,
                          crossKeySearch: Boolean
                        )

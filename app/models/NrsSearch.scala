@@ -53,6 +53,7 @@ case class NrsSearchResult(
   headerData: Option[JsValue],
   nrSubmissionId: String,
   bundle: Bundle,
+  attachmentIds: Option[List[String]],
   expiryDate: LocalDate,
   glacier: Glacier
 )

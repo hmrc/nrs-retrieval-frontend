@@ -23,15 +23,6 @@ import play.api.data.{Form, FormError, Mapping}
 
 object FormMappings {
 
-  val searchResultMapping: Mapping[SearchResult] = mapping(
-    "notableEventDisplayName" -> text,
-    "fileDetails" -> text,
-    "vaultId" -> text,
-    "archiveId" -> text,
-    "submissionDateEpochMilli" -> longNumber,
-    "retrievalStatus" -> optional(text)
-  )(SearchResult.apply)(SearchResult.unapply)
-
   val searchForm: Form[SearchQuery] = Form(
     mapping(
       "searchKeyName_0" -> optional(text),

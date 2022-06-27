@@ -41,7 +41,10 @@
         <br>
         @Text(s"${Messages("search.results.retrieval.info")}").asHtml
       </span>
-      <a id="download-button-@index"
+        @if(searchResult.hasAttachments) {
+        <img src="@routes.Assets.versioned("images/attachment.png")" alt="contains attachments">
+        }
+        <a id="download-button-@index"
          class="retrieval-complete govuk-button govuk-button--secondary"
          role="button"
          aria-hidden="true"

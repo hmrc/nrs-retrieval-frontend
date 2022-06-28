@@ -23,6 +23,7 @@ class AppConfigSpec extends BaseUnitSpec{
     "specify the correct notable event types" in {
       appConfig.notableEvents.keySet shouldBe Set(
         "ppt-subscription",
+        "ppt-return",
         "itsa-annual-adjustment",
         "itsa-crystallisation",
         "itsa-cgt-disposal",

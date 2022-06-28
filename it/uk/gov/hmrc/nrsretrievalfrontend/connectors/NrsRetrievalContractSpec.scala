@@ -67,6 +67,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
               None,
               "nrSubmissionId",
               Bundle("fileType", 1),
+              None,
               LocalDate.now(),
               Glacier(vatReturn, vrn)
             )

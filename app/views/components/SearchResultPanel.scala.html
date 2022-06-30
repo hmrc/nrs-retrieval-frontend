@@ -18,10 +18,11 @@
 @import models.SearchResult
 @import views.helpers.Utils._
 @import views.html.components._
+@import scala.concurrent.duration.FiniteDuration
 
 @this(p: Paragraph)
 
-@(searchResult: models.SearchResult, index: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: models.SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @timeSubmitted = {
   @formatDisplayDate(searchResult.submissionDateEpochMilli)
@@ -39,7 +40,7 @@
       <span id="result-incomplete-@index" class="retrieval-incomplete govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
         @Text(s"${Messages("search.results.retrieval.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
         <br>
-        @Text(s"${Messages("search.results.retrieval.info")}").asHtml
+        @Text(s"${Messages("search.results.retrieval.info", estimatedRetrievalTime)}").asHtml
       </span>
       <a id="download-button-@index"
          class="retrieval-complete govuk-button govuk-button--secondary"

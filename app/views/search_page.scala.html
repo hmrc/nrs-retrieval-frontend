@@ -85,6 +85,6 @@
     }
 
     @maybeResults.fold(Html("")){ results =>
-      @searchResultsPanel(searchForm, results)
+      @searchResultsPanel(searchForm, results, estimatedRetrievalTime)
     }
 }

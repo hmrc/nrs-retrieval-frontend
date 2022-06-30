@@ -32,11 +32,11 @@ trait NrsSearchFixture extends NrSubmissionId {
 
   val nrsVatSearchResult: NrsSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
     ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Some(Json.parse("{}")), "userAuthToken", headerData,
-    nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
+    nrSubmissionId, bundle, None, LocalDate.parse("1970-01-18"), glacier)
 
   val nrsVatRegSearchResult: NrsSearchResult = NrsSearchResult("businessId", "vat-registration", "payloadContentType",
     ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Some(Json.parse("{}")), "userAuthToken", headerData,
-    nrSubmissionId, bundle, LocalDate.parse("1970-01-18"), glacier)
+    nrSubmissionId, bundle, None, LocalDate.parse("1970-01-18"), glacier)
 
   val searchQuery: SearchQuery = SearchQuery(Some("aName"), Some("aValue"), "aNotableEvent")
 }

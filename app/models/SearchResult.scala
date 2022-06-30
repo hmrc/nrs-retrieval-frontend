@@ -23,12 +23,15 @@ import org.apache.commons.io.FileUtils.byteCountToDisplaySize
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{Json, OFormat}
 
-case class SearchResult( notableEventDisplayName: String,
+case class SearchResult(
+                         notableEventDisplayName: String,
                          fileDetails: String,
                          vaultId: String,
                          archiveId: String,
                          submissionDateEpochMilli: Long,
-                         retrievalStatus: Option[String] = None) {
+                         retrievalStatus: Option[String] = None,
+                         hasAttachments: Boolean
+                       ) {
 
   val linkText: String =
     s"$notableEventDisplayName submitted ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
@@ -43,11 +46,13 @@ class SearchResultUtils @Inject()(appConfig: AppConfig) {
 
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
-      appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
-      filename(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
-      nrsSearchResult.glacier.vaultName,
-      nrsSearchResult.glacier.archiveId,
-      nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli
+      notableEventDisplayName = appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
+      fileDetails = filename(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
+      vaultId = nrsSearchResult.glacier.vaultName,
+      archiveId = nrsSearchResult.glacier.archiveId,
+      submissionDateEpochMilli = nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli,
+      retrievalStatus = None,
+      hasAttachments = nrsSearchResult.attachmentIds.getOrElse(Nil).nonEmpty
     )
 
   private def filename (nrSubmissionId: String, fileType: String, fileSize: Long) =

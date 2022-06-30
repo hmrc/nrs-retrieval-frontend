@@ -43,7 +43,7 @@ class StartController @Inject()(val authConnector: AuthConnector,
   logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
   val showStartPage: Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"S=how start page")
+    logger.info(s"Show start page")
     authWithStride("Show the start page", { _ =>
       Future.successful(
         Ok(startPage())

@@ -42,7 +42,7 @@
         <br>
         @Text(s"${Messages("search.results.retrieval.info", estimatedRetrievalTime)}").asHtml
       </span>
-      <a id="download-button-@index"
+        <a id="download-button-@index"
          class="retrieval-complete govuk-button govuk-button--secondary"
          role="button"
          aria-hidden="true"
@@ -57,6 +57,9 @@
          onclick="startRetrieval(this)"
          href="javascript:void(0)">@Messages("search.results.retrieve.lbl") @searchResult.linkText @timeSubmitted
       </a>
+        @if(searchResult.hasAttachments) {
+            <img class="attachment-image" src="@routes.Assets.versioned("images/attachment.png")" alt="@messages("search.results.attachment.image.fallback")" >
+            }
     </p>
     @p(content = Text(s"${Messages("search.results.filename.lbl")}: ${searchResult.fileDetails}"))
     <span class="retrieval-failed govuk-body" aria-hidden="true">

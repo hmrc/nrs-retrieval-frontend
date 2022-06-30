@@ -42,6 +42,7 @@ search.results.retrieval.info=(this may take up to 5 minutes)
 search.results.error.summary.lbl=There''s a problem
 search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact
 search.results.error.action.message.link=<a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.
+search.results.attachment.image.fallback=contains attachments
 
 ################################## Error Page ####################################################
 error.page.title=Service unavailable

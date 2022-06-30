@@ -17,9 +17,9 @@
 package controllers
 
 import models._
-import play.api.data.Forms.{longNumber, mapping, of, optional, text}
+import play.api.data.Forms.{mapping, of, optional, text}
 import play.api.data.format.Formatter
-import play.api.data.{Form, FormError, Mapping}
+import play.api.data.{Form, FormError}
 
 object FormMappings {
 

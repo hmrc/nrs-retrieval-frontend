@@ -64,7 +64,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Show the search page for notable event $notableEventType")
     authWithStride("Show the search page", { nrUser =>
-      Future(Ok(searchPage(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None)))
+      Future(Ok(searchPage(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None, getEstimatedRetrievalTime(notableEventType))))
     })
   }
 
@@ -74,15 +74,16 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
       searchForm.bindFromRequest.fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-          Future.successful(BadRequest(formWithErrors.errors.toString()))
+          Future(BadRequest(formWithErrors.errors.toString()))
         },
         search => {
           doSearch(search, user).map { results =>
             logger.info(s"Form $results")
-            Ok(searchPage(searchForm.bindFromRequest, Some(user), Some(results)))
-          }.recoverWith { case e =>
-            logger.info(s"SubmitSearchPage $e")
-            Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+            Ok(searchPage(searchForm.bindFromRequest, Some(user), Some(results), getEstimatedRetrievalTime(notableEventType)))
+          }.recover {
+            case e =>
+              logger.info(s"SubmitSearchPage $e")
+              Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message")))
           }
         }
       )
@@ -176,4 +177,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
+
+  private def getEstimatedRetrievalTime(notableEventType: String): FiniteDuration =
+    appConfig.notableEvents.get(notableEventType).fold(5.minutes)(_.estimatedRetrievalTime)
 }

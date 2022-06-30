@@ -16,10 +16,11 @@
 
 @import config.AppConfig
 @import views.html.components._
+@import scala.concurrent.duration.FiniteDuration
 
 @this(searchResultPanel: SearchResultPanel)
 
-@(searchForm: Form[SearchQuery], results: Seq[SearchResult])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchForm: Form[SearchQuery], results: Seq[SearchResult], estimatedRetrievalTime: FiniteDuration)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 <br>
 <div class="divider--top"></div>
@@ -44,7 +45,7 @@
         <div class="results" style="position: relative;">
             <div class="notable-event">
                 @results.zipWithIndex.map { sR =>
-                    @searchResultPanel(sR._1, sR._2.toString)
+                    @searchResultPanel(sR._1, sR._2.toString, estimatedRetrievalTime)
                 }
             </div>
         </div>

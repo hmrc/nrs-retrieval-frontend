@@ -21,7 +21,7 @@ selector.page.header.lbl=What type of digital submission would you like to searc
 ################################## Search Page ###################################################
 search.page.dynamic.header.lbl=Search for {0}s
 search.page.searchkey.lbl=Enter a {0}
-search.page.hint=Retrieval from long term storage takes up to 5 minutes
+search.page.hint=Retrieval from long term storage takes up to {0}
 search.page.results=Results
 search.button.search.lbl=Search
 search.page.stored.info=You can search for records stored from {0} onwards. The records are stored for {1}.
@@ -38,7 +38,7 @@ search.results.retrieve.lbl=Retrieve
 search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieving {0}
-search.results.retrieval.info=(this may take up to 5 minutes)
+search.results.retrieval.info=(this may take up to {0})
 search.results.error.summary.lbl=There''s a problem
 search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact
 search.results.error.action.message.link=<a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.

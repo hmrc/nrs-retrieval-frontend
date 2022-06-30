@@ -66,16 +66,17 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
       val clientConfiguration = Configuration(clientConfig)
 
       NotableEvent(
-        loadFromConfig(clientConfiguration, "notableEvent"),
-        loadFromConfig(clientConfiguration, "displayName"),
-        loadFromConfig(clientConfiguration, "storedFrom"),
-        loadFromConfig(clientConfiguration, "storedFor"),
-        clientConfig.getConfigList("searchKeys").asScala.map{ searchKeyConfig =>
+        name = loadFromConfig(clientConfiguration, "notableEvent"),
+        displayName = loadFromConfig(clientConfiguration, "displayName"),
+        storedFrom = loadFromConfig(clientConfiguration, "storedFrom"),
+        storedFor = loadFromConfig(clientConfiguration, "storedFor"),
+        searchKeys = clientConfig.getConfigList("searchKeys").asScala.map { searchKeyConfig =>
           val searchKeyConfiguration = Configuration(searchKeyConfig)
 
           SearchKey(
             loadFromConfig(searchKeyConfiguration, "name"), loadFromConfig(searchKeyConfiguration, "label"))
         },
+        estimatedRetrievalTime = clientConfiguration.getOptional[FiniteDuration]("estimatedRetrievalTime").getOrElse(5.minutes),
         crossKeySearch = clientConfiguration.getOptional[String]("crossKeySearch").getOrElse("") == "true"
       )
     }.map(nE => nE.name -> nE).toMap

@@ -74,7 +74,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
           val searchKeyConfiguration = Configuration(searchKeyConfig)
 
           SearchKey(
-            loadFromConfig(searchKeyConfiguration, "name"), loadFromConfig(searchKeyConfiguration, "label"))
+            name = loadFromConfig(searchKeyConfiguration, "name"),
+            label = loadFromConfig(searchKeyConfiguration, "label"))
         },
         estimatedRetrievalTime = clientConfiguration.getOptional[FiniteDuration]("estimatedRetrievalTime").getOrElse(5.minutes),
         crossKeySearch = clientConfiguration.getOptional[String]("crossKeySearch").getOrElse("") == "true"

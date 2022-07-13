@@ -24,36 +24,19 @@ import java.time.ZonedDateTime
 
 trait NrsSearchFixture extends NrSubmissionId {
 
+  val headerData: Option[JsValue] = Some(Json.parse("""{"SomeAttribute":"SomeValue"}"""))
 
   val bundle: Bundle = Bundle("zip", 123456)
 
   val glacier: Glacier = Glacier("12345", "1234567890")
 
-  val nrsVatSearchResult: NrsSearchResult = NrsSearchResult(
-    businessId = "businessId",
-    notableEvent = "vat-return",
-    payloadContentType = "payloadContentType",
-    userSubmissionTimestamp = ZonedDateTime.parse("1970-01-18T11:56:13.625Z"),
-    userAuthToken = "userAuthToken",
-    nrSubmissionId = nrSubmissionId,
-    bundle = bundle,
-    attachmentIds = None,
-    expiryDate = LocalDate.parse("1970-01-18"),
-    glacier = glacier
-  )
+  val nrsVatSearchResult: NrsSearchResult = NrsSearchResult("businessId", "vat-return", "payloadContentType",
+    ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Some(Json.parse("{}")), "userAuthToken", headerData,
+    nrSubmissionId, bundle, None, LocalDate.parse("1970-01-18"), glacier)
 
-  val nrsVatRegSearchResult: NrsSearchResult = NrsSearchResult(
-    businessId = "businessId",
-    notableEvent = "vat-registration",
-    payloadContentType = "payloadContentType",
-    userSubmissionTimestamp = ZonedDateTime.parse("1970-01-18T11:56:13.625Z"),
-    userAuthToken = "userAuthToken",
-    nrSubmissionId = nrSubmissionId,
-    bundle = bundle,
-    attachmentIds = None,
-    expiryDate = LocalDate.parse("1970-01-18"),
-    glacier = glacier
-  )
+  val nrsVatRegSearchResult: NrsSearchResult = NrsSearchResult("businessId", "vat-registration", "payloadContentType",
+    ZonedDateTime.parse("1970-01-18T11:56:13.625Z"), Some(Json.parse("{}")), "userAuthToken", headerData,
+    nrSubmissionId, bundle, None, LocalDate.parse("1970-01-18"), glacier)
 
   val searchQuery: SearchQuery = SearchQuery(Some("aName"), Some("aValue"), "aNotableEvent")
 }

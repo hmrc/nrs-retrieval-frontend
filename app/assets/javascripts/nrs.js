@@ -1,5 +1,5 @@
 
-var timeout = 500;
+var timeout = 1000;
 
 const PATH = '/nrs-retrieval/';
 const RETRIEVAL_COMPLETE_CLASS = "retrieval-complete"

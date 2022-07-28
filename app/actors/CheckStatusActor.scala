@@ -41,6 +41,7 @@ class CheckStatusActor(appConfig: AppConfig)(implicit val nrsRetrievalConnector:
     case StatusMessage(vaultId, archiveId) =>
       logger.info(s"CheckStatusActor received StatusMessage($vaultId, $archiveId)")
       nrsRetrievalConnector.statusSubmissionBundle(vaultId, archiveId).map { response =>
+        logger.info(s"CheckStatusActor received response status: ${response.status} body: ${response.body}")
         response.status match {
           case OK =>
             logger.info(s"Retrieval request complete for vault $vaultId, archive $archiveId")

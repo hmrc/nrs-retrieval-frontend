@@ -57,7 +57,8 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
       .flatMap { response =>
         if (response.status == ACCEPTED) {
           pas.pollingActorExists(vaultId, archiveId).flatMap {
-            case true => resetPollingActor(vaultId, archiveId)
+            case true =>
+              resetPollingActor(vaultId, archiveId)
               Future(PollingMessage)
             case _ => pas.pollingActor(vaultId, archiveId).flatMap(aR => aR ? StatusMessage(vaultId, archiveId))
           }
@@ -75,10 +76,10 @@ class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
       .flatMap { pA =>
         (pA ? StatusMessage(vaultId, archiveId)).mapTo[ActorMessage].map {
           case CompleteMessage =>
-            logger.info(s"Send restart message for $vaultId, $archiveId")
+            logger.info(s"Send restart message for $vaultId, $archiveId Complete")
             pA ! RestartMessage
           case FailedMessage =>
-            logger.info(s"Send restart message for $vaultId, $archiveId")
+            logger.info(s"Send restart message for $vaultId, $archiveId Failed")
             pA ! RestartMessage
           case _ => logger.info(s"No restart is required $vaultId, $archiveId")
         }

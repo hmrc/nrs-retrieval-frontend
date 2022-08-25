@@ -8,7 +8,6 @@ This is service provides an interface to the nonrep retrieval backend.
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html")
 
-
 ### Running the application
 
 In order to run the microservice, you must have SBT installed. You should then be able to start the application using:

@@ -27,7 +27,7 @@ import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeadHttpTransport {
-  def doHead(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def doHead(url: String, headers: Seq[(String, String)])(implicit executionContext: ExecutionContext): Future[HttpResponse]
 }
 
 trait CoreHead {
@@ -35,9 +35,8 @@ trait CoreHead {
 }
 
 trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
-  import scala.concurrent.ExecutionContext.Implicits.global
 
-  override def doHead(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  override def doHead(url: String, headers: Seq[(String, String)])(implicit executionContext: ExecutionContext): Future[HttpResponse] =
     buildRequest(url, headers).head().map(WSHttpResponse.apply)
 }
 

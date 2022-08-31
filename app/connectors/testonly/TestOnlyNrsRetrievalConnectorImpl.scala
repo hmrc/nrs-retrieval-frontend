@@ -24,12 +24,11 @@ import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TestOnlyNrsRetrievalConnectorImpl @Inject()(nrsRetrievalConnector: NrsRetrievalConnector, http: HttpClient)
-                                                 (implicit val appConfig: AppConfig)
+                                                 (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends TestOnlyNrsRetrievalConnector {
 
   override def validateDownload(vaultName: String, archiveId: String, user: AuthorisedUser)

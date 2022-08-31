@@ -24,8 +24,7 @@ import connectors.NrsRetrievalConnector
 import play.api.Logger
 
 import java.util.concurrent.TimeUnit
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 
 trait ActorService {
@@ -45,7 +44,7 @@ trait ActorService {
                   (implicit context: ActorContext, nrsRetrievalConnector: NrsRetrievalConnector): Future[Boolean]
 }
 
-class ActorServiceImpl @Inject()(appConfig: AppConfig) extends ActorService {
+class ActorServiceImpl @Inject()(appConfig: AppConfig)(implicit executionContext: ExecutionContext) extends ActorService {
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 

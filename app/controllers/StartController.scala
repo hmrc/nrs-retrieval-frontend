@@ -25,8 +25,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{error_template, start_page}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class StartController @Inject()(val authConnector: AuthConnector,
@@ -34,7 +33,7 @@ class StartController @Inject()(val authConnector: AuthConnector,
                                 override val strideAuthSettings: StrideAuthSettings,
                                 val startPage: start_page,
                                 override val errorPage: error_template)
-                               (implicit val appConfig: AppConfig) extends FrontendController(controllerComponents)
+                               (implicit val appConfig: AppConfig, executionContext: ExecutionContext) extends FrontendController(controllerComponents)
   with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)
@@ -45,7 +44,7 @@ class StartController @Inject()(val authConnector: AuthConnector,
   val showStartPage: Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Show start page")
     authWithStride("Show the start page", { _ =>
-      Future.successful(
+      Future(
         Ok(startPage())
       )
     })

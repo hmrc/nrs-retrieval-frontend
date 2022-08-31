@@ -27,7 +27,7 @@ import scala.concurrent.{Await, Future}
 
 class StatusCheckActorSpec() extends ActorSpec {
   private val checkStatusActor =
-    TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector)), pollingActor.actorRef)
+    TestActorRef[CheckStatusActor](Props(new CheckStatusActor(mockAppConfig)(mockNrsRetrievalConnector, executionContext)), pollingActor.actorRef)
   private val mockRetrievalRequestHttpResponse = mock[HttpResponse]
   private val statusMessage = StatusMessage(testVaultId, testArchiveId)
   private val ONE_SECOND = 1000

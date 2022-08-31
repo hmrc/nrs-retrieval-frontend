@@ -28,7 +28,7 @@ import views.html.error_template
 import views.html.testonly.check_authorisation_page
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class CheckAuthorisationController @Inject()(override val controllerComponents: MessagesControllerComponents,
@@ -37,7 +37,7 @@ class CheckAuthorisationController @Inject()(override val controllerComponents: 
                                              override val errorPage: error_template,
                                              connector: TestOnlyNrsRetrievalConnector,
                                              checkAuthorisationPage: check_authorisation_page)
-                                            (implicit val appConfig: AppConfig)
+                                            (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends FrontendController(controllerComponents) with Stride {
 
   override val logger: Logger = Logger(this.getClass)

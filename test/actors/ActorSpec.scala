@@ -43,7 +43,7 @@ class ActorSpec extends TestKit(ActorSystem("MySpec")) with ImplicitSender with 
   val mockNrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 
   val pollingActor: ActorRef = system.actorOf(
-    Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector)),
+    Props(new PollingActor(testVaultId, testArchiveId, mockAppConfig)(mockNrsRetrievalConnector, executionContext)),
     s"pollingActor_${testArchiveId}_$testArchiveId")
 
   override def afterAll: Unit = shutdownActorSystem(system)

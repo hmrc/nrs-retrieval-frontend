@@ -24,7 +24,6 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
 class RetrievalActorSpec() extends ActorSpec {
@@ -43,7 +42,7 @@ class RetrievalActorSpec() extends ActorSpec {
       when(mockHttpResponse.status).thenReturn(ACCEPTED)
 
       val retrievalActor: ActorRef =
-        system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
+        system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector, executionContext)))
 
       Await.result(
         Await.result(
@@ -56,7 +55,7 @@ class RetrievalActorSpec() extends ActorSpec {
       when(mockPollingActorService.eventualPollingActor(any(), any())(any(), any())).thenReturn(Future.successful(echo))
 
       val retrievalActor: ActorRef =
-        system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector)))
+        system.actorOf(Props(new RetrievalActor(mockAppConfig, mockPollingActorService)(mockNrsRetrievalConnector, executionContext)))
 
       Await.result(
         Await.result(

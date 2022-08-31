@@ -17,18 +17,19 @@
 package config
 
 import com.google.inject.Inject
+
 import javax.inject.Named
 import models.audit.DataEventAuditType
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.Future
-
-class Auditable @Inject()(@Named("appName") val applicationName: String, val audit: Audit){
+class Auditable @Inject()(
+                           @Named("appName") val applicationName: String,
+                           val audit: Audit)(implicit executionContext: ExecutionContext){
 
   private val logger = Logger(this.getClass)
 

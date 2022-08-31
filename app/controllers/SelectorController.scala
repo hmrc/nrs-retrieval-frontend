@@ -26,8 +26,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{error_template, selector_page}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SelectorController @Inject()(val authConnector: AuthConnector,
@@ -35,7 +34,7 @@ class SelectorController @Inject()(val authConnector: AuthConnector,
                                    override val strideAuthSettings: StrideAuthSettings,
                                    val selectorPage: selector_page,
                                    override val errorPage: error_template)
-                                  (implicit val appConfig: AppConfig)
+                                  (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

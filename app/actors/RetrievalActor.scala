@@ -28,12 +28,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 class RetrievalActor @Inject()(appConfig: AppConfig, pas: ActorService)
-                              (implicit nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+                              (implicit nrsRetrievalConnector: NrsRetrievalConnector, executionContext: ExecutionContext) extends Actor {
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 

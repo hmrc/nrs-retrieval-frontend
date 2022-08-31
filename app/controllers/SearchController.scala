@@ -35,8 +35,7 @@ import views.html.{error_template, search_page}
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 @Singleton
@@ -48,7 +47,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
                                  override val strideAuthSettings: StrideAuthSettings,
                                  val searchPage: search_page,
                                  override val errorPage: error_template)
-                                (implicit val appConfig: AppConfig)
+                                (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends FrontendController(controllerComponents) with I18nSupport with Stride {
 
   override val logger: Logger = Logger(this.getClass)

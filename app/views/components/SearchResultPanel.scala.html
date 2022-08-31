@@ -46,6 +46,7 @@
          class="retrieval-complete govuk-button govuk-button--secondary"
          role="button"
          aria-hidden="true"
+         onclick="doDownloadAndDisable(this)"
          href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
          download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
       </a>

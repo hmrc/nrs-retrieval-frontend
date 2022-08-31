@@ -104,3 +104,10 @@ function startRetrieval(startRetrievalElement) {
   doRetrieve(dataIndex, dataVaultId, dataArchiveId)
 }
 
+function doDownloadAndDisable(downloadRetrievalElement) {
+  if (downloadRetrievalElement.hasAttribute("href")) {
+    window.location=button.href
+    downloadRetrievalElement.removeAttribute("href");
+    downloadRetrievalElement.setAttribute("disabled", "true");
+  }
+}

@@ -3,6 +3,7 @@ var timeout = 1000;
 
 const PATH = '/nrs-retrieval/';
 const RETRIEVAL_COMPLETE_CLASS = "retrieval-complete"
+const RETRIEVAL_DOWNLOADING_CLASS = "retrieval-downloading"
 const RETRIEVAL_INCOMPLETE_CLASS = "retrieval-incomplete"
 const RETRIEVAL_FAILED_CLASS = "retrieval-failed"
 const STATUS_COMPLETE = "Complete"
@@ -104,3 +105,15 @@ function startRetrieval(startRetrievalElement) {
   doRetrieve(dataIndex, dataVaultId, dataArchiveId)
 }
 
+function doDownload(downloadRetrievalElement) {
+  console.log("triggered")
+  const dataIndex = downloadRetrievalElement.getAttribute("data-index")
+  const resultRetrieveElement = document.getElementById('result-retrieve-' + dataIndex)
+  const downloadingElement = document.getElementById('download-button-clicked-' + dataIndex)
+
+  resultRetrieveElement.classList.add(RETRIEVAL_DOWNLOADING_CLASS);
+  resultRetrieveElement.classList.remove(RETRIEVAL_COMPLETE_CLASS);
+
+  hide(downloadRetrievalElement)
+  show(downloadingElement)
+}

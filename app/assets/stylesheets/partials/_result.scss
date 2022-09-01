@@ -8,6 +8,9 @@
   .retrieval-incomplete {
     display: none;
   }
+  .download-button-clicked {
+    display: none;
+  }
   .retrieval-complete {
     display: none;
   }
@@ -17,6 +20,9 @@
   &.retrieval-incomplete {
     color: #6F777B;
     .start-retrieval {
+      display: none;
+    }
+    .download-button-clicked {
       display: none;
     }
     .retrieval-incomplete {
@@ -31,6 +37,9 @@
   }
   &.retrieval-complete {
     .start-retrieval {
+      display: none;
+    }
+    .download-button-clicked {
       display: none;
     }
     .retrieval-incomplete {
@@ -53,6 +62,9 @@
     .start-retrieval {
       display: none;
     }
+    .download-button-clicked {
+      display: none;
+    }
     .retrieval-incomplete {
       display: none;
     }
@@ -61,6 +73,23 @@
     }
     .retrieval-failed {
       display: block;
+    }
+  }
+  &.retrieval-downloading {
+    .start-retrieval {
+      display: none;
+    }
+    .download-button-clicked {
+      display: block;
+    }
+    .retrieval-incomplete {
+      display: none;
+    }
+    .retrieval-complete {
+      display: none;
+    }
+    .retrieval-failed {
+      display: none;
     }
   }
 }

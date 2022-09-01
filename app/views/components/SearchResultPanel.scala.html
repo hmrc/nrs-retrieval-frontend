@@ -42,10 +42,17 @@
         <br>
         @Text(s"${Messages("search.results.retrieval.info", estimatedRetrievalTime)}").asHtml
       </span>
+        <span id="download-button-clicked-@index" class="download-button-clicked govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
+            @Text(s"${Messages("search.results.downloaded.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
+            <br>
+            @Text(messages("search.results.download.info")).asHtml
+        </span>
         <a id="download-button-@index"
          class="retrieval-complete govuk-button govuk-button--secondary"
+         data-index="@{index}"
          role="button"
          aria-hidden="true"
+         onclick="doDownload(this)"
          href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
          download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
       </a>

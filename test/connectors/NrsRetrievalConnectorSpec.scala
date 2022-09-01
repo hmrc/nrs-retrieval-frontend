@@ -37,7 +37,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 
 import javax.inject.Provider
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with BeforeAndAfterEach {
   override protected def beforeEach(): Unit = {
@@ -58,6 +58,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
   private val testModule = new AbstractModule {
     override def configure(): Unit = {
+      bind(classOf[ExecutionContext]).toInstance(executionContext)
       bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
       bind(classOf[WSHttpT]).toInstance(mockWsHttp)
       bind(classOf[Environment]).toInstance(mockEnvironment)

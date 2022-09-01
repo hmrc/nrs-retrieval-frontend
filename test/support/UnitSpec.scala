@@ -23,10 +23,12 @@ import play.api.http.Status
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration.{FiniteDuration, _}
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status with Configs {
   implicit val defaultTimeout: FiniteDuration = 5 seconds
+
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

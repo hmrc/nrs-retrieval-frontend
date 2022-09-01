@@ -25,10 +25,10 @@ import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.concurrent.TimeUnit
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 
-class CheckStatusActor(appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+class CheckStatusActor(appConfig: AppConfig)(implicit val nrsRetrievalConnector: NrsRetrievalConnector, executionContext: ExecutionContext) extends Actor {
 
   implicit def hc: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("X-API-Key" -> appConfig.xApiKey))
 

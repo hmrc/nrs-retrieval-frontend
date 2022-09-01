@@ -29,8 +29,7 @@ import views.html.error_template
 import views.html.testonly.validate_download_page
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ValidateDownloadController @Inject()(override val controllerComponents: MessagesControllerComponents,
@@ -39,7 +38,7 @@ class ValidateDownloadController @Inject()(override val controllerComponents: Me
                                            override val errorPage: error_template,
                                            connector: TestOnlyNrsRetrievalConnector,
                                            validateDownloadPage: validate_download_page)
-                                          (implicit val appConfig: AppConfig)
+                                          (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends FrontendController(controllerComponents) with Stride {
 
   override val logger: Logger = Logger(this.getClass)

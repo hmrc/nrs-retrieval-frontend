@@ -31,15 +31,12 @@ import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcS
 import views.html.components.{Heading1, Layout}
 
 import scala.collection.immutable
-import scala.concurrent.ExecutionContext
 
 class BaseUnitSpec extends UnitSpec with StubMessageControllerComponents with PatienceConfiguration { this: Suite =>
   val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 
   lazy val indexedNotableEvents: immutable.Seq[(NotableEvent, Int)] =
     appConfig.notableEvents.values.toList.sortBy(_.displayName).zipWithIndex
-
-  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
 
   def addToken[T](fakeRequest: FakeRequest[T]): Request[T] = {
 

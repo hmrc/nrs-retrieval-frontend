@@ -26,12 +26,11 @@ import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Auditable)
-                                         (implicit val appConfig: AppConfig) extends NrsRetrievalConnector {
+                                         (implicit val appConfig: AppConfig, executionContext: ExecutionContext) extends NrsRetrievalConnector {
   private val logger: Logger = Logger(this.getClass)
 
   private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))

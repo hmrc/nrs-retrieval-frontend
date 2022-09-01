@@ -17,7 +17,6 @@
 package actors
 
 import java.util.concurrent.TimeUnit
-
 import akka.actor.{Actor, Cancellable, Props}
 import akka.pattern.ask
 import akka.util.Timeout
@@ -27,11 +26,11 @@ import org.joda.time.Instant
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class PollingActor (vaultId: String, archiveId: String, appConfig: AppConfig)
-  (implicit val nrsRetrievalConnector: NrsRetrievalConnector) extends Actor {
+  (implicit val nrsRetrievalConnector: NrsRetrievalConnector, executionContext: ExecutionContext) extends Actor {
 
   def receive: Receive = poll
 

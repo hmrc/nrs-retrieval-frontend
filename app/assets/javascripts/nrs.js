@@ -106,7 +106,6 @@ function startRetrieval(startRetrievalElement) {
 }
 
 function doDownload(downloadRetrievalElement) {
-  console.log("triggered")
   const dataIndex = downloadRetrievalElement.getAttribute("data-index")
   const resultRetrieveElement = document.getElementById('result-retrieve-' + dataIndex)
   const downloadingElement = document.getElementById('download-button-clicked-' + dataIndex)

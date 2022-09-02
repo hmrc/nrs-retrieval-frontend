@@ -38,7 +38,9 @@ search.results.retrieve.lbl=Retrieve
 search.results.download.lbl=Download
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieving {0}
+search.results.downloaded.message.lbl=Downloaded {0}
 search.results.retrieval.info=(this may take up to {0})
+search.results.download.info=(this may take some time)
 search.results.error.summary.lbl=There''s a problem
 search.results.error.action.message.lbl=Our team have been notified and are working to resolve the problem. For support contact
 search.results.error.action.message.link=<a href="mailto:hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@digital.hmrc.gov.uk</a>.

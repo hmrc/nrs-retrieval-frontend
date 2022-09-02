@@ -3,8 +3,10 @@ var timeout = 1000;
 
 const PATH = '/nrs-retrieval/';
 const RETRIEVAL_COMPLETE_CLASS = "retrieval-complete"
+const RETRIEVAL_DOWNLOADING_CLASS = "retrieval-downloading"
 const RETRIEVAL_INCOMPLETE_CLASS = "retrieval-incomplete"
 const RETRIEVAL_FAILED_CLASS = "retrieval-failed"
+const STATUS_DOWNLOADED = "Downloaded"
 const STATUS_COMPLETE = "Complete"
 const STATUS_INCOMPLETE = "Incomplete"
 const STATUS_FAILED = "Failed"
@@ -78,6 +80,14 @@ function setStatus(index, status) {
       document.getElementsByClassName(RETRIEVAL_FAILED_CLASS).forEach(show())
 
       break;
+      case STATUS_DOWNLOADED:
+      busy(resultRetrieveElement, false)
+        resultRetrieveElement.classList.add(RETRIEVAL_DOWNLOADING_CLASS);
+        resultRetrieveElement.classList.remove(RETRIEVAL_COMPLETE_CLASS);
+
+      hide(retrievalCompleteElement)
+
+      break;
     default:
       busy(resultRetrieveElement, true)
       resultRetrieveElement.classList.add(RETRIEVAL_INCOMPLETE_CLASS);
@@ -103,4 +113,3 @@ function startRetrieval(startRetrievalElement) {
 
   doRetrieve(dataIndex, dataVaultId, dataArchiveId)
 }
-

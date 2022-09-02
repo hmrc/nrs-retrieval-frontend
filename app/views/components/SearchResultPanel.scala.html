@@ -52,7 +52,7 @@
          data-index="@{index}"
          role="button"
          aria-hidden="true"
-         onclick="doDownload(this)"
+         onclick="setStatus(@index, 'Downloaded')"
          href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
          download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
       </a>

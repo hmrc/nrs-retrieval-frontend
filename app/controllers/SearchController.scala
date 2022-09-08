@@ -26,6 +26,7 @@ import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
 import models._
 import play.api.Logger
+import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
@@ -100,20 +101,34 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Refresh the result $vaultName, $archiveId on request $request")
-    ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-      case CompleteMessage =>
-        logger.info(s"Retrieval completed for $vaultName, $archiveId")
-        Ok(CompletionStatus.complete)
-      case FailedMessage =>
-        logger.info(s"Retrieval failed for $vaultName, $archiveId")
-        Ok(CompletionStatus.failed)
-      case IncompleteMessage =>
-        logger.info(s"Retrieval in progress for $vaultName, $archiveId")
-        Ok(CompletionStatus.incomplete)
-    } recoverWith {
-      case e: AskTimeoutException =>
-        logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
-        Future(Accepted(CompletionStatus.incomplete))
+//    ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
+//      case CompleteMessage =>
+//        logger.info(s"Retrieval completed for $vaultName, $archiveId")
+//        Ok(CompletionStatus.complete)
+//      case FailedMessage =>
+//        logger.info(s"Retrieval failed for $vaultName, $archiveId")
+//        Ok(CompletionStatus.failed)
+//      case IncompleteMessage =>
+//        logger.info(s"Retrieval in progress for $vaultName, $archiveId")
+//        Ok(CompletionStatus.incomplete)
+//    } recoverWith {
+//      case e: AskTimeoutException =>
+//        logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
+//        Future(Accepted(CompletionStatus.incomplete))
+//    }
+    nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map { response =>
+      logger.info(s"CheckStatusActor received response status: ${response.status} body: ${response.body}")
+      response.status match {
+        case OK =>
+          logger.info(s"Retrieval request complete for vault $vaultName, archive $archiveId")
+          Ok(CompletionStatus.complete)
+        case NOT_FOUND =>
+          logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
+          Ok(CompletionStatus.incomplete)
+        case _ =>
+          logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
+          Ok(CompletionStatus.failed)
+      }
     }
   }
 
@@ -129,12 +144,12 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
           logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
           Ok(CompletionStatus.incomplete)
         case _ =>
-          logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
+          logger.info(s"Retrieval request failed: status=${response.status} for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.failed)
       }
     } recoverWith {
       case e: Exception =>
-        logger.warn(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
+        logger.warn(s"Retrieval is still in progress for $vaultName, $archiveId, $e", e)
         Future(Accepted(CompletionStatus.incomplete))
     }
   }
@@ -142,13 +157,22 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Request retrieval for $vaultName, $archiveId")
     authWithStride("Download", { user =>
-      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map { _ =>
-        logger.info(s"Retrieval accepted for $vaultName, $archiveId")
-        Accepted(CompletionStatus.incomplete)
-      } recoverWith {
-        case e: AskTimeoutException =>
-          logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
-          Future(Accepted(CompletionStatus.incomplete))
+//      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map { _ =>
+//        logger.info(s"Retrieval accepted for $vaultName, $archiveId")
+//        Accepted(CompletionStatus.incomplete)
+//      } recoverWith {
+//        case e: AskTimeoutException =>
+//          logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
+//          Future(Accepted(CompletionStatus.incomplete))
+//      }
+      nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId, user).map { response =>
+        if (response.status == ACCEPTED || response.status == OK) {
+          logger.info("retrieval request successful")
+          Accepted(CompletionStatus.incomplete)
+        } else {
+          logger.info("retrieval request failed")
+          Ok(CompletionStatus.failed)
+        }
       }
     })
   }

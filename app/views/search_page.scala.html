@@ -72,6 +72,8 @@
 
     @p(content = Text(messages("search.page.hint", estimatedRetrievalTime)))
 
+    <input id="timeout" type="hidden" value="@appConfig.runTimeMillis">
+
     @formHelper(action = routes.SearchController.submitSearchPage(notableEventType), 'class -> "form js-form") {
         <input type="hidden" name="notableEventType" value="@{notableEventType}">
 

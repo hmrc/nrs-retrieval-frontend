@@ -124,7 +124,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
           Ok(CompletionStatus.complete)
         case NOT_FOUND =>
           logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
-          Ok(CompletionStatus.incomplete)
+          Accepted(CompletionStatus.incomplete)
         case _ =>
           logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.failed)
@@ -191,7 +191,7 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
         Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
       }.recoverWith { case e =>
-        logger.error(s"$messagePrefix failed with $e")
+        logger.error(s"$messagePrefix failed with $e", e)
 
         Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
       }

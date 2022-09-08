@@ -9,13 +9,16 @@ const STATUS_COMPLETE = "Complete"
 const STATUS_INCOMPLETE = "Incomplete"
 const STATUS_FAILED = "Failed"
 const GET = "GET"
+const FAILEDTIMEOUT = document.getElementById("timeout").value
 
 function checkStatus(index, vaultName, archiveId) {
-  const xmlhttp = http(index, vaultName, archiveId);
-  xmlhttp.open(GET, PATH + 'status/' + vaultName + '/' + archiveId);
-  xmlhttp.timeout = timeout;
-  xmlhttp.send();
-  timeout = Math.min(timeout * 2, 5000)
+  if (timeout !== 0) {
+    const xmlhttp = http(index, vaultName, archiveId);
+    xmlhttp.open(GET, PATH + 'status/' + vaultName + '/' + archiveId);
+    xmlhttp.timeout = timeout;
+    xmlhttp.send();
+    timeout = Math.min(timeout * 2, 5000)
+  }
 }
 
 function http(index, vaultName, archiveId) {
@@ -23,13 +26,16 @@ function http(index, vaultName, archiveId) {
 
   xmlhttp.onload = function (e) {
     if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+      console.log("stopping")
       setStatus(index, this.response)
     } else if (xmlhttp.status === 500) {
+      console.log("error")
       setStatus(index, STATUS_FAILED)
     } else {
-      setTimeout(function () {
-        checkStatus(index, vaultName, archiveId)
-      }, timeout)
+      console.log("polling")
+        setTimeout(function () {
+          checkStatus(index, vaultName, archiveId)
+        }, timeout)
     }
   };
 
@@ -94,6 +100,16 @@ function doRetrieve(index, vaultName, archiveId) {
   xmlhttp.open(GET, PATH + 'retrieve/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
+
+  setTimeout(function () {
+    const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
+
+    console.log("timeout")
+    var predicate = resultRetrieveElement.getAttribute("aria-busy") === "true"
+    if (predicate) {
+      setStatus(index, STATUS_FAILED)
+    }
+  }, FAILEDTIMEOUT)
 }
 
 function startRetrieval(startRetrievalElement) {

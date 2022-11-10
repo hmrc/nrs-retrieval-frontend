@@ -68,6 +68,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
       NotableEvent(
         name = loadFromConfig(clientConfiguration, "notableEvent"),
         displayName = loadFromConfig(clientConfiguration, "displayName"),
+        pluralDisplayName = loadFromConfig(clientConfiguration, "pluralDisplayName"),
         storedFrom = loadFromConfig(clientConfiguration, "storedFrom"),
         storedFor = loadFromConfig(clientConfiguration, "storedFor"),
         searchKeys = clientConfig.getConfigList("searchKeys").asScala.map { searchKeyConfig =>

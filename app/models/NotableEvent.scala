@@ -31,6 +31,7 @@ case class SearchKey(
 case class NotableEvent(
                          name: String,
                          displayName: String,
+                         pluralDisplayName: String,
                          storedFrom: String,
                          storedFor: String,
                          searchKeys: Seq[SearchKey],

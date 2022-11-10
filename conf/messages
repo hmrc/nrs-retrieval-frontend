@@ -19,7 +19,7 @@ start.button.start.lbl=Start now
 selector.page.header.lbl=What type of digital submission would you like to search for?
 
 ################################## Search Page ###################################################
-search.page.dynamic.header.lbl=Search for {0}s
+search.page.dynamic.header.lbl=Search for {0}
 search.page.searchkey.lbl=Enter a {0}
 search.page.hint=Retrieval from long term storage takes up to {0}
 search.page.results=Results

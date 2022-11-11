@@ -60,7 +60,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
       error_template)
 
   private def theSearchPageShouldBeRenderedWithoutResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
-    val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.displayName))
+    val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.pluralDisplayName))
 
     Option(content.getElementById("notFound")).isDefined shouldBe false
     Option(content.getElementById("resultsFound")).isDefined shouldBe false
@@ -124,7 +124,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
 
       def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
-        val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.displayName))
+        val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.pluralDisplayName))
 
         Option(content.getElementById("notFound")).isDefined shouldBe false
         Option(content.getElementById("resultsFound")).isDefined shouldBe true
@@ -152,7 +152,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
           def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
-            val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.displayName))
+            val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.pluralDisplayName))
 
             Option(content.getElementById("notFound")).isDefined shouldBe true
             Option(content.getElementById("resultsFound")).isDefined shouldBe false

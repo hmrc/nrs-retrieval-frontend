@@ -49,7 +49,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture {
 
   indexedNotableEvents.foreach{ case (notableEvent: NotableEvent, _ ) =>
     val searchKeyName = notableEvent.searchKeys.head.name
-    val searchPageHeadingText = s"Search for ${notableEvent.displayName}s"
+    val searchPageHeadingText = s"Search for ${notableEvent.pluralDisplayName}"
     val searchResultsTitleText = s"Results - $searchPageHeadingText"
 
     val formJson =

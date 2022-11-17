@@ -16,7 +16,7 @@ lazy val scoverageSettings = {
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "5.24.0",
+  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "7.11.0",
   "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "3.21.0-play-28",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
   "commons-io"        %  "commons-io"                 % "2.11.0"
@@ -30,7 +30,7 @@ def test(scope: String) = Seq(
   "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % Test,
   "org.jsoup" % "jsoup" % "1.13.1" % scope,
   "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
-  "com.typesafe.akka" %% "akka-testkit" % "2.6.19" % scope,
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.20" % scope,
 )
 
 lazy val appName: String = "nrs-retrieval-frontend"

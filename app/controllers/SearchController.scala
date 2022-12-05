@@ -16,11 +16,7 @@
 
 package controllers
 
-import actors._
-import akka.actor.ActorRef
-import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
-import com.google.inject.name.Named
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
@@ -37,11 +33,12 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 @Singleton
-class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: ActorRef,
-                                 val authConnector: AuthConnector,
-                                 val nrsRetrievalConnector: NrsRetrievalConnector,
+class SearchController @Inject()(
+                                  val authConnector: AuthConnector,
+                                  val nrsRetrievalConnector: NrsRetrievalConnector,
                                  val searchResultUtils: SearchResultUtils,
                                  override val controllerComponents: MessagesControllerComponents,
                                  override val strideAuthSettings: StrideAuthSettings,
@@ -100,20 +97,20 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Refresh the result $vaultName, $archiveId on request $request")
-    ask(retrievalActor, IsCompleteMessage(vaultName, archiveId)).mapTo[Future[ActorMessage]].flatMap(identity).map {
-      case CompleteMessage =>
+    nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map(_.status).map {
+      case OK =>
         logger.info(s"Retrieval completed for $vaultName, $archiveId")
         Ok(CompletionStatus.complete)
-      case FailedMessage =>
-        logger.info(s"Retrieval failed for $vaultName, $archiveId")
-        Ok(CompletionStatus.failed)
-      case IncompleteMessage =>
+      case NOT_FOUND =>
         logger.info(s"Retrieval in progress for $vaultName, $archiveId")
         Ok(CompletionStatus.incomplete)
-    } recoverWith {
-      case e: AskTimeoutException =>
-        logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
-        Future(Accepted(CompletionStatus.incomplete))
+      case _ =>
+        logger.info(s"Retrieval failed for $vaultName, $archiveId")
+        Ok(CompletionStatus.failed)
+    }.recover {
+      case NonFatal(e) =>
+        logger.info(s"Retrieval status failed with ${e.getMessage}", e)
+        Accepted(CompletionStatus.incomplete)
     }
   }
 
@@ -142,13 +139,9 @@ class SearchController @Inject()(@Named("retrieval-actor") retrievalActor: Actor
   def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Request retrieval for $vaultName, $archiveId")
     authWithStride("Download", { user =>
-      ask(retrievalActor, SubmitMessage(vaultName, archiveId, hc, user)).mapTo[Future[ActorMessage]].flatMap(identity).map { _ =>
+      nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId, user).map { _ =>
         logger.info(s"Retrieval accepted for $vaultName, $archiveId")
         Accepted(CompletionStatus.incomplete)
-      } recoverWith {
-        case e: AskTimeoutException =>
-          logger.info(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
-          Future(Accepted(CompletionStatus.incomplete))
       }
     })
   }

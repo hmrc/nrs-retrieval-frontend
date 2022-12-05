@@ -21,7 +21,7 @@ import models._
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
@@ -160,11 +160,19 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
       }
     }
 
+//    Upstream4xxResponse(
+//      s"POST of 'http://localhost:$port/nrs-retrieval/submission-bundles/vat-return/vrn/retrieval-requests' returned 404. Response body: ''.",
+//      ,
+//      500,
+//      Map.empty[String, Seq[String]]
+//    )
+
     Seq(NOT_FOUND, INTERNAL_SERVER_ERROR, BAD_GATEWAY).foreach { status =>
       s"return $status" when {
         s"the retrieval service returns $status" in {
           givenPostSubmissionBundlesRetrievalRequestsReturns(status)
-          submitRetrievalRequest().status shouldBe status
+
+          anUpstreamErrorResponseShouldBeThrownBy(submitRetrievalRequest, status)
         }
       }
     }

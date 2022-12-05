@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import actors.{ActorService, ActorServiceImpl, RetrievalActor}
 import akka.actor.ActorSystem
 import com.google.inject.AbstractModule
 import com.google.inject.name.Named
@@ -37,9 +36,6 @@ import javax.inject.{Inject, Singleton}
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
-    bind(classOf[ActorService]).to(classOf[ActorServiceImpl])
-    bindActor[RetrievalActor]("retrieval-actor")
-
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])

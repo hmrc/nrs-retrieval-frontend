@@ -103,7 +103,7 @@ class SearchController @Inject()(
         Ok(CompletionStatus.complete)
       case NOT_FOUND =>
         logger.info(s"Retrieval in progress for $vaultName, $archiveId")
-        Ok(CompletionStatus.incomplete)
+        Accepted(CompletionStatus.incomplete)
       case _ =>
         logger.info(s"Retrieval failed for $vaultName, $archiveId")
         Ok(CompletionStatus.failed)
@@ -124,7 +124,7 @@ class SearchController @Inject()(
           Ok(CompletionStatus.complete)
         case NOT_FOUND =>
           logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
-          Ok(CompletionStatus.incomplete)
+          Accepted(CompletionStatus.incomplete)
         case _ =>
           logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
           Ok(CompletionStatus.failed)

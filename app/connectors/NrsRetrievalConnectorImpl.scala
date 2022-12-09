@@ -56,14 +56,15 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
   }
 
   override def submitRetrievalRequest(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+    import uk.gov.hmrc.http.HttpReads.Implicits.{throwOnFailure, readEitherOf, readRaw}
+    val readRawWithErrors = throwOnFailure(readEitherOf(readRaw))
 
     logger.info(s"Submit a retrieval request for vault: $vaultName, archive: $archiveId")
 
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"
 
     for {
-      post <- http.POST[String, HttpResponse](path, "", extraHeaders)
+      post <- http.POSTEmpty[HttpResponse](path, extraHeaders)(readRawWithErrors, hc, executionContext)
       _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, user.userName, vaultName, archiveId,
         if(post.headers == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield post

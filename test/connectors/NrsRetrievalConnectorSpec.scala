@@ -38,6 +38,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 
 import javax.inject.Provider
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with BeforeAndAfterEach {
   override protected def beforeEach(): Unit = {
@@ -58,7 +59,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
   private val testModule = new AbstractModule {
     override def configure(): Unit = {
-      bind(classOf[ExecutionContext]).toInstance(executionContext)
+      bind(classOf[ExecutionContext]).toInstance(global)
       bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
       bind(classOf[WSHttpT]).toInstance(mockWsHttp)
       bind(classOf[Environment]).toInstance(mockEnvironment)
@@ -157,7 +158,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
   "submitRetrievalRequest" should {
     "make a post call to /retrieval-requests" in {
-      when(mockWsHttp.POST[Any, Any](any(), any(), expectedExtraHeaders)(any(), any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockWsHttp.POSTEmpty[Any](any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
       await(connector.submitRetrievalRequest(testAuditId, testArchiveId, testUser)).body should be("Some Text")
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])(any())

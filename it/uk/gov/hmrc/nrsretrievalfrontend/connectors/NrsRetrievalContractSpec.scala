@@ -21,7 +21,7 @@ import models._
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
@@ -164,7 +164,8 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
       s"return $status" when {
         s"the retrieval service returns $status" in {
           givenPostSubmissionBundlesRetrievalRequestsReturns(status)
-          submitRetrievalRequest().status shouldBe status
+
+          anUpstreamErrorResponseShouldBeThrownBy(submitRetrievalRequest, status)
         }
       }
     }

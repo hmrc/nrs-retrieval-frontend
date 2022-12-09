@@ -16,7 +16,6 @@
 
 package controllers
 
-import akka.actor.ActorRef
 import akka.util.ByteString
 import models.{NotableEvent, SearchResultUtils}
 import org.mockito.Matchers
@@ -50,7 +49,6 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
 
   private val controller =
     new SearchController(
-      mock[ActorRef],
       mockAuthConnector,
       nrsRetrievalConnector,
       new SearchResultUtils(appConfig),

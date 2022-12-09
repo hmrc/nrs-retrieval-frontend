@@ -11,16 +11,18 @@ const STATUS_COMPLETE = "Complete"
 const STATUS_INCOMPLETE = "Incomplete"
 const STATUS_FAILED = "Failed"
 const GET = "GET"
+const FAILEDTIMEOUT = document.getElementById("timeout").value
 
-function checkStatus(index, vaultName, archiveId) {
-  const xmlhttp = http(index, vaultName, archiveId);
-  xmlhttp.open(GET, PATH + 'status/' + vaultName + '/' + archiveId);
-  xmlhttp.timeout = timeout;
-  xmlhttp.send();
-  timeout = Math.min(timeout * 2, 5000)
+function checkStatus(index, vaultName, archiveId, requestTimeout) {
+  if (requestTimeout !== 0) {
+    const xmlhttp = http(index, vaultName, archiveId, requestTimeout);
+    xmlhttp.open(GET, PATH + 'status/' + vaultName + '/' + archiveId);
+    xmlhttp.timeout = requestTimeout;
+    xmlhttp.send();
+  }
 }
 
-function http(index, vaultName, archiveId) {
+function http(index, vaultName, archiveId, requestTimeout) {
   const xmlhttp = new XMLHttpRequest();
 
   xmlhttp.onload = function (e) {
@@ -29,14 +31,18 @@ function http(index, vaultName, archiveId) {
     } else if (xmlhttp.status === 500) {
       setStatus(index, STATUS_FAILED)
     } else {
+      const updatedRequestTimeout = shouldRetry(index, requestTimeout);
+
       setTimeout(function () {
-        checkStatus(index, vaultName, archiveId)
-      }, timeout)
+        checkStatus(index, vaultName, archiveId, updatedRequestTimeout)
+      }, updatedRequestTimeout)
     }
   };
 
   xmlhttp.ontimeout = function () {
-    checkStatus(index, vaultName, archiveId);
+    const updatedRequestTimeout = shouldRetry(index, requestTimeout);
+
+    checkStatus(index, vaultName, archiveId, updatedRequestTimeout);
   };
 
   return xmlhttp;
@@ -97,13 +103,37 @@ function setStatus(index, status) {
   }
 }
 
+function shouldRetry(index, requestTimeout) {
+  const predicate = isPending(index)
+
+  if (predicate) {
+    return Math.min(requestTimeout * 2, 5000)
+  } else {
+    return 0
+  }
+}
+
 function doRetrieve(index, vaultName, archiveId) {
   setStatus(index, STATUS_INCOMPLETE)
-  const xmlhttp = http(index, vaultName, archiveId);
+  const xmlhttp = http(index, vaultName, archiveId, timeout);
 
   xmlhttp.open(GET, PATH + 'retrieve/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
+
+  setTimeout(function () {
+    const predicate = isPending(index)
+
+    if (predicate) {
+      setStatus(index, STATUS_FAILED)
+    }
+  }, FAILEDTIMEOUT)
+}
+
+function isPending(index) {
+  const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
+
+  return resultRetrieveElement.getAttribute("aria-busy") === "true"
 }
 
 function startRetrieval(startRetrievalElement) {

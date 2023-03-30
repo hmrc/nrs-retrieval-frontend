@@ -22,6 +22,7 @@ import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
 import models._
 import play.api.Logger
+import play.api.http.HttpEntity
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
@@ -146,19 +147,49 @@ class SearchController @Inject()(
     })
   }
 
-  def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+  def downloadOld(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
     val messagePrefix = s"Request download of $vaultName, $archiveId"
 
     logger.info(messagePrefix)
 
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        val bytes = response.bodyAsSource
+        val bytes = response.bodyAsBytes
 
         // log response size rather than the content as this might contain sensitive information
-        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and from upstream.")
+        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream.")
 
-        Ok.chunked(bytes).withHeaders(mapToSeq(response.headers): _*)
+        Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
+      }.recoverWith { case e =>
+        logger.error(s"$messagePrefix failed with $e")
+
+        Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+      }
+    })
+  }
+
+  def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+    val messagePrefix = s"Request stream download of $vaultName, $archiveId"
+
+    logger.info(messagePrefix)
+
+    authWithStride("Download", { user =>
+      nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
+
+        val contentType = response.headers
+          .get("Content-Type")
+          .flatMap(_.headOption)
+          .getOrElse("application/octet-stream")
+
+        // log response size rather than the content as this might contain sensitive information
+//        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and from upstream.")
+
+        response.headers.get("Content-Length") match {
+          case Some(Seq(length)) =>
+            Ok.sendEntity(HttpEntity.Streamed(response.bodyAsSource, Some(length.toLong), Some(contentType)))
+          case _ =>
+            Ok.chunked(response.bodyAsSource).as(contentType)
+        }
       }.recoverWith { case e =>
         logger.error(s"$messagePrefix failed with $e")
 

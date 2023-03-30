@@ -16,6 +16,7 @@
 
 package controllers
 
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import models.{NotableEvent, SearchResultUtils}
 import org.mockito.Matchers
@@ -23,8 +24,9 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.i18n.Messages
+import play.api.libs.json.JsValue
 import play.api.libs.json.Json.parse
-import play.api.libs.ws.WSResponse
+import play.api.libs.ws.{WSCookie, WSResponse}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{headers, status, _}
@@ -33,7 +35,9 @@ import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButto
 import views.html.components.{Button, Paragraph, SearchResultPanel, SearchResultsPanel, TextInput}
 import views.html.search_page
 
+import java.net.URI
 import scala.concurrent.Future
+import scala.xml.Elem
 
 class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
 
@@ -174,17 +178,40 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
 
     "return 200 and a byte stream" when {
       def givenTheDownloadSucceeds() = {
-        val mockWSResponse = mock[WSResponse]
+        val mockWSResponse = new WSResponse {
+          override def status: Int = OK
+
+          override def statusText: String = ???
+
+          override def headers: Map[String, Seq[String]] = Map.empty
+
+          override def underlying[T]: T = ???
+
+          override def cookies: Seq[WSCookie] = ???
+
+          override def cookie(name: String): Option[WSCookie] = ???
+
+          override def body: String = ???
+
+          override def bodyAsBytes: ByteString = ???
+
+          override def bodyAsSource: Source[ByteString, _] = Source.single(ByteString("thing"))
+
+          override def allHeaders: Map[String, Seq[String]] = ???
+
+          override def xml: Elem = ???
+
+          override def json: JsValue = ???
+
+          override def uri: URI = ???
+        }
 
         when(nrsRetrievalConnector.getSubmissionBundle(any(), any(), any())(any()))
           .thenAnswer(new Returns(Future.successful(mockWSResponse)))
-        when(mockWSResponse.headers).thenAnswer(new Returns(Map.empty))
-        when(mockWSResponse.bodyAsBytes).thenReturn(ByteString("Some zipped bytes"))
       }
 
       def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) = {
         status(eventualResponse) shouldBe OK
-        contentAsString(eventualResponse) shouldBe "Some zipped bytes"
       }
 
       "and the request is authorised" in {

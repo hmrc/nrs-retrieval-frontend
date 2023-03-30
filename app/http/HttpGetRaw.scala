@@ -49,18 +49,8 @@ trait HttpGetRaw extends CoreGetRaw with GetRawHttpTransport with HttpVerb with 
                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse] = {
     withTracing(GET_VERB, url) {
       val allHeaders   = HeaderCarrier.headersForUrl(hcConfig, url, headers) :+ "Http-Client-Version" -> BuildInfo.version
-      val httpResponse = retryOnSslEngineClosed(GET_VERB, url)(doGetRaw(url, headers = allHeaders))
-      val wsHttpResponse = httpResponse.map(WSHttpResponse(_))
 
-      executeHooks(
-        GET_VERB,
-        url"$url",
-        RequestData(allHeaders, None),
-        wsHttpResponse.map(ResponseData.fromHttpResponse)
-      )
-
-      mapErrors(GET_VERB, url, wsHttpResponse)
-      httpResponse
+      doGetRaw(url, headers = allHeaders)
     }
   }
 }

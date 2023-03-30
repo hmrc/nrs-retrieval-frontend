@@ -54,6 +54,9 @@ trait IntegrationSpec extends AnyWordSpec
 
   val defaultConfiguration: Map[String, Any] = Map[String, Any](
     "microservice.services.nrs-retrieval.port" -> wireMockPort,
+    "controllers.SearchController" -> Map(
+      "needsAuditing" -> false
+    ),
     "auditing.enabled" -> false,
     "metrics.jvm" -> false)
 

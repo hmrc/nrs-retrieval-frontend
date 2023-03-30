@@ -153,12 +153,12 @@ class SearchController @Inject()(
 
     authWithStride("Download", { user =>
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        val bytes = response.bodyAsBytes
+        val bytes = response.bodyAsSource
 
         // log response size rather than the content as this might contain sensitive information
-        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream.")
+        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and from upstream.")
 
-        Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
+        Ok.chunked(bytes).withHeaders(mapToSeq(response.headers): _*)
       }.recoverWith { case e =>
         logger.error(s"$messagePrefix failed with $e")
 

@@ -36,7 +36,9 @@ trait CoreGetRaw {
 
 trait WSGetRaw extends WSRequest with CoreGetRaw with GetRawHttpTransport {
   override def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[WSResponse] =
-    buildRequest(url, headers).get()
+    buildRequest(url, headers)
+      .withMethod("GET")
+      .stream()
 }
 
 trait HttpGetRaw extends CoreGetRaw with GetRawHttpTransport with HttpVerb with ConnectionTracing with HttpHooks with Retries {

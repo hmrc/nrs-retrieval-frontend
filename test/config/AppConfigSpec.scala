@@ -40,7 +40,8 @@ class AppConfigSpec extends BaseUnitSpec{
         "trs-update-non-taxable",
         "vat-return",
         "saa-report-generated",
-        "saa-report-acknowledged"
+        "saa-report-acknowledged",
+        "ecl-registration"
       )
     }
   }

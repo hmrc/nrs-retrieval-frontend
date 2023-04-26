@@ -83,7 +83,7 @@ function setStatus(index, status) {
 
       hide(retrievalIncompleteElement)
 
-      document.getElementsByClassName(RETRIEVAL_FAILED_CLASS).forEach(show())
+      show(resultRetrieveElement)
 
       break;
       case STATUS_DOWNLOADED:

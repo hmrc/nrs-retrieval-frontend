@@ -50,11 +50,16 @@
     if (maybeResults.isDefined) s"${messages("search.page.results")} - $pageHeader" else pageHeader
 }
 
+@addedScripts = {
+   <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
+}
+
 @layout(
     pageTitle = pageTitle,
     maybePageHeader = Some(pageHeader),
     maybeUser = maybeUser,
     maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage),
+    addedScripts = Some(addedScripts),
     maybeBodyEndBlock = None
 ) {
     @p(content = Text(messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))

@@ -23,7 +23,7 @@ import play.Logger
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration._
 
 
@@ -71,7 +71,7 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
         pluralDisplayName = loadFromConfig(clientConfiguration, "pluralDisplayName"),
         storedFrom = loadFromConfig(clientConfiguration, "storedFrom"),
         storedFor = loadFromConfig(clientConfiguration, "storedFor"),
-        searchKeys = clientConfig.getConfigList("searchKeys").asScala.map { searchKeyConfig =>
+        searchKeys = clientConfig.getConfigList("searchKeys").asScala.toList.map { searchKeyConfig =>
           val searchKeyConfiguration = Configuration(searchKeyConfig)
 
           SearchKey(

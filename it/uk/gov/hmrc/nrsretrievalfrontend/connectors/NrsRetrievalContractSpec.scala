@@ -51,7 +51,8 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
     (vatReturnSearchQuery, vatReturnSearchText, false),
     (vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (query, queryText, crossKeySearch) =>
 
-    def search(): Seq[NrsSearchResult] = connector.search(query, authorisedUser, crossKeySearch).futureValue
+   val search: () => Seq[NrsSearchResult] = () => connector.search(query, authorisedUser, crossKeySearch).futureValue
+
 
     s"a ${if (crossKeySearch) "cross key" else "standard"} search" should {
       "return a sequence of results" when {
@@ -126,7 +127,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
         val response = submissionBundle()
         val body = response.bodyAsBytes
         val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
-        val zippedFileNames: Seq[String] = Stream.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
+        val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
 
         response.status shouldBe OK
         zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
@@ -143,7 +144,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "submitRetrievalRequest" should {
-    def submitRetrievalRequest(): HttpResponse =
+    val submitRetrievalRequest: () => HttpResponse =  () =>
       connector.submitRetrievalRequest(vatReturn, vrn, authorisedUser).futureValue
 
     "return OK" when {

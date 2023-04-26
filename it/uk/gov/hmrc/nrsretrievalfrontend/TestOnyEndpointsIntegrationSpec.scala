@@ -4,10 +4,10 @@ import play.api.libs.ws.WSResponse
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
   def checkAuthorisationRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/check-authorisation").get.futureValue
+    wsClient.url(s"$serviceRoot/test-only/check-authorisation").get().futureValue
 
   def validateDownloadGetRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/validate-download").get.futureValue
+    wsClient.url(s"$serviceRoot/test-only/validate-download").get().futureValue
 
   def validateDownloadPostRequest(): WSResponse =
     wsClient

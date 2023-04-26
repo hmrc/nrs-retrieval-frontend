@@ -52,7 +52,7 @@ class SelectorController @Inject()(val authConnector: AuthConnector,
 
   val submitSelectorPage: Action[AnyContent] = Action.async { implicit request =>
     authWithStride("Submit the selector page", { nrUser =>
-      selectorForm.bindFromRequest.fold(
+      selectorForm.bindFromRequest().fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Future.successful(

@@ -21,6 +21,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import uk.gov.hmrc.http.HeaderCarrier
+import scala.language.postfixOps
 
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Await, ExecutionContext, Future}

@@ -51,7 +51,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
             throw e
         }
       _ <- auditable.sendDataEvent(
-        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryString, get.seq.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryString, get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
     } yield get
   }
 

@@ -17,7 +17,7 @@ lazy val scoverageSettings = {
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "7.11.0",
-  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "3.21.0-play-28",
+  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "7.4.0-play-28",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
   "commons-io"        %  "commons-io"                 % "2.11.0"
 )
@@ -29,12 +29,13 @@ def test(scope: String) = Seq(
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % Test,
   "org.jsoup" % "jsoup" % "1.13.1" % scope,
-  "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope
+  "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
+  "uk.gov.hmrc"       %% "bootstrap-test-play-28"% "7.11.0"
 )
 
 lazy val appName: String = "nrs-retrieval-frontend"
 
-val silencerVersion = "1.7.1"
+val silencerVersion = "1.7.12"
 
 lazy val root = (project in file("."))
   .settings(
@@ -42,7 +43,7 @@ lazy val root = (project in file("."))
     organization := "uk.gov.hmrc",
     PlayKeys.playDefaultPort := 9390,
     majorVersion := 0,
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.13.8",
     resolvers ++= Seq(
       Resolver.typesafeRepo("releases"),
     ),

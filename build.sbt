@@ -30,7 +30,7 @@ def test(scope: String) = Seq(
   "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % Test,
   "org.jsoup" % "jsoup" % "1.13.1" % scope,
   "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
-  "uk.gov.hmrc"       %% "bootstrap-test-play-28"% "7.11.0"
+  "uk.gov.hmrc"       %% "bootstrap-test-play-28"% "7.11.0" % scope
 )
 
 lazy val appName: String = "nrs-retrieval-frontend"

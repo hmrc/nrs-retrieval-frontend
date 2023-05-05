@@ -38,29 +38,26 @@
     maybeUser: Option[AuthorisedUser] = None,
     maybeMainContentLayout: Option[Html => Html] = Some(defaultMainContent(_)),
     maybeBackButtonUrl: Option[play.api.mvc.Call] = None,
+    addedScripts: Option[Html] = None,
     maybeBodyEndBlock: Option[Html] = None
 )(content: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
 
 
-@banner = {
-  <div>
-      @maybeUserNameSpan
-  </div>
-  <div>
-    @maybeBackLink
-  </div>
-}
-
 @maybeUserNameSpan = @{
-  maybeUser.map { user =>
-    Html(s"""<span id="username" class="user-name govuk-body">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
-  }
+    maybeUser.map { user =>
+        Html(s"""<span id="username" class="user-name govuk-body">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
+    }
 }
 
 @maybeBackLink = @{
     maybeBackButtonUrl.map { url =>
         govukBackLink(BackLink(href = url.toString, content = Text(messages("site.back"))))
     }
+}
+
+@banner = {
+    @maybeUserNameSpan
+    @maybeBackLink
 }
 
 @nrsHeaderBlock = {
@@ -74,14 +71,13 @@
     )
 }
 
-@contentBlock() = {
+@beforeContentBlock = {
   @banner
-  @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
-  @content
 }
 
-@addedScripts = {
-    <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
+@contentBlock() = {
+  @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
+  @content
 }
 
 @optHeadBlock = @{
@@ -92,14 +88,13 @@
 
 @govukLayout(
     pageTitle = Some(pageTitle),
-    headBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = optHeadBlock)),
+    headBlock = Some(hmrcHead(headBlock = optHeadBlock)),
     headerBlock = Some(nrsHeaderBlock),
-    scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(addedScripts), nonce = CSPNonce.get)),
-    beforeContentBlock = None,
+    scriptsBlock = Some(hmrcScripts(scriptsBlock = addedScripts)),
+    beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter()),
     mainContentLayout = maybeMainContentLayout,
     assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url),
-    cspNonce = CSPNonce.get,
     bodyEndBlock = maybeBodyEndBlock
 )(contentBlock)
 

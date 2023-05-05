@@ -34,7 +34,7 @@ object ValidateDownloadResult extends HeaderNames{
 
     val zis: ZipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
 
-    val zippedFileNames: Seq[String] = Stream.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
+    val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
 
     ValidateDownloadResult(response.status, bytes.size, zippedFileNames, headers)
   }

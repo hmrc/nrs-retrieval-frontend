@@ -67,7 +67,7 @@ class SearchController @Inject()(
   def submitSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"Submit the search page for notable event $notableEventType")
     authWithStride("Submit the search page", { user =>
-      searchForm.bindFromRequest.fold(
+      searchForm.bindFromRequest().fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Future(BadRequest(formWithErrors.errors.toString()))
@@ -75,7 +75,7 @@ class SearchController @Inject()(
         search => {
           doSearch(search, user).map { results =>
             logger.info(s"Form $results")
-            Ok(searchPage(searchForm.bindFromRequest, Some(user), Some(results), getEstimatedRetrievalTime(notableEventType)))
+            Ok(searchPage(searchForm.fill(search), Some(user), Some(results), getEstimatedRetrievalTime(notableEventType)))
           }.recover {
             case e =>
               logger.info(s"SubmitSearchPage $e")
@@ -167,7 +167,7 @@ class SearchController @Inject()(
     })
   }
 
-  private def mapToSeq(sourceMap: Map[String, Seq[String]]): Seq[(String, String)] =
+  private def mapToSeq(sourceMap: Map[String, scala.collection.Seq[String]]): Seq[(String, String)] =
     sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
 
   private def getEstimatedRetrievalTime(notableEventType: String): FiniteDuration =

@@ -59,11 +59,11 @@ class ValidateDownloadController @Inject()(override val controllerComponents: Me
   val submitValidateDownload: Action[AnyContent] = Action.async { implicit request =>
     authWithStride(
       authAction, { user =>
-        validateDownloadForm.bindFromRequest.fold(
+        validateDownloadForm.bindFromRequest().fold(
           _ => Future.successful(BadRequest),
           validateDownloadRequest => {
             connector.validateDownload(validateDownloadRequest.vaultName, validateDownloadRequest.archiveId, user).map{ response =>
-              Ok(validateDownloadPage(validateDownloadForm.bindFromRequest, Some(response)))}
+              Ok(validateDownloadPage(validateDownloadForm.fill(validateDownloadRequest), Some(response)))}
           }
         )
       }

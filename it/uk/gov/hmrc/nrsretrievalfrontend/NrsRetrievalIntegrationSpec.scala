@@ -48,14 +48,14 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "GET /nrs-retrieval/start" should {
     "display the start page" in {
       assertPageIsRendered(
-        wsClient.url(s"$serviceRoot/start").get, startPageHeading)
+        wsClient.url(s"$serviceRoot/start").get(), startPageHeading)
     }
   }
 
   "GET /nrs-retrieval/select" should {
     "display the select page" in {
       assertPageIsRendered(
-        wsClient.url(s"$serviceRoot/select").get, "What type of digital submission would you like to search for?")
+        wsClient.url(s"$serviceRoot/select").get(), "What type of digital submission would you like to search for?")
     }
   }
 
@@ -70,18 +70,18 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "GET /nrs-retrieval/search" should {
     "redirect to the start page" when {
       "no notable event type is provided" in {
-        assertPageIsRendered(wsClient.url(searchUrl).get, startPageHeading)
+        assertPageIsRendered(wsClient.url(searchUrl).get(), startPageHeading)
       }
     }
 
     "display the search page" when {
       "a vat return is provided" in {
-        val document = assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get, vatReturnSearchPageHeading)
+        val document = assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get(), vatReturnSearchPageHeading)
         Option(document.getElementById("vat-registration-additional-info")).isEmpty shouldBe true
       }
 
       "a non vat registration is provided" in {
-        val document = assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).get, vatRegistrationSearchPageHeading)
+        val document = assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).get(), vatRegistrationSearchPageHeading)
         Option(document.getElementById("vat-registration-additional-info").id()).isDefined shouldBe true
       }
     }
@@ -132,10 +132,10 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "GET /nrs-retrieval/download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
       givenGetSubmissionBundlesReturns(OK)
-      val response = wsClient.url(s"$serviceRoot/download/$vatReturn/$vrn").get.futureValue
+      val response = wsClient.url(s"$serviceRoot/download/$vatReturn/$vrn").get().futureValue
       val body = response.bodyAsBytes
       val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
-      val zippedFileNames: Seq[String] = Stream.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
+      val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
 
       response.status shouldBe OK
       zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
@@ -156,7 +156,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "GET /nrs-retrieval/retrieve/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
-      wsClient.url(s"$serviceRoot/retrieve/$vatReturn/$vrn").get.futureValue.status shouldBe ACCEPTED
+      wsClient.url(s"$serviceRoot/retrieve/$vatReturn/$vrn").get().futureValue.status shouldBe ACCEPTED
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
     }
   }

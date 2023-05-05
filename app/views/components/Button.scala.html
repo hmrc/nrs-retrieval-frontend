@@ -18,5 +18,5 @@
 
 @(name: String, content: String, inputType: String)
 @govukButton(
- Button(name = Some(name), content = Text(content), inputType = Some(inputType), preventDoubleClick = true)
+ Button(name = Some(name), content = Text(content), inputType = Some(inputType), preventDoubleClick = Some(true))
 )

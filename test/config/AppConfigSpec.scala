@@ -41,7 +41,8 @@ class AppConfigSpec extends BaseUnitSpec{
         "vat-return",
         "saa-report-generated",
         "saa-report-acknowledged",
-        "ecl-registration"
+        "ecl-registration",
+        "ecl-return"
       )
     }
   }

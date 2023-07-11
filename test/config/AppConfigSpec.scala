@@ -42,7 +42,8 @@ class AppConfigSpec extends BaseUnitSpec{
         "saa-report-generated",
         "saa-report-acknowledged",
         "ecl-registration",
-        "ecl-return"
+        "ecl-return",
+        "itsa-ad-hoc-refund"
       )
     }
   }

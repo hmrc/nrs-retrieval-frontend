@@ -44,7 +44,8 @@ class AppConfigSpec extends BaseUnitSpec{
         "saa-report-acknowledged",
         "ecl-registration",
         "ecl-return",
-        "ecl-amend-return"
+        "ecl-amend-return",
+        "ecl-amend-registration"
       )
     }
   }

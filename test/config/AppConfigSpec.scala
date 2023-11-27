@@ -46,7 +46,13 @@ class AppConfigSpec extends BaseUnitSpec{
         "ecl-return",
         "ecl-amend-return",
         "ecl-amend-registration",
-        "emcs-create-a-movement-ui"
+        "emcs-create-a-movement-ui",
+        "emcs-change-a-destination-ui",
+        "emcs-cancel-a-movement-ui",
+        "emcs-explain-a-delay-ui",
+        "emcs-explain-a-shortage-ui",
+        "emcs-report-a-receipt-ui",
+        "emcs-submit-alert-or-rejection-ui"
       )
     }
   }

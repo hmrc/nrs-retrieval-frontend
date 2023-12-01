@@ -52,7 +52,14 @@ class AppConfigSpec extends BaseUnitSpec{
         "emcs-explain-a-delay-ui",
         "emcs-explain-a-shortage-ui",
         "emcs-report-a-receipt-ui",
-        "emcs-submit-alert-or-rejection-ui"
+        "emcs-submit-alert-or-rejection-ui",
+        "emcs-create-a-movement-api",
+        "emcs-change-a-destination-api",
+        "emcs-cancel-a-movement-api",
+        "emcs-explain-a-delay-api",
+        "emcs-explain-a-shortage-api",
+        "emcs-report-a-receipt-api",
+        "emcs-submit-alert-or-rejection-api"
       )
     }
   }

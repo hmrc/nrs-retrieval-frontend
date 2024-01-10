@@ -17,6 +17,7 @@
 package connectors
 
 import config.{AppConfig, Auditable}
+import controllers.FormMappings.Query
 import http.WSHttpT
 import models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import models.{AuthorisedUser, NrsSearchResult, SearchQuery}
@@ -25,6 +26,7 @@ import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import java.net.URLEncoder
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,14 +37,23 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
 
   private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
-  override def search(query: SearchQuery, user: AuthorisedUser, crossKeySearch: Boolean)(implicit hc: HeaderCarrier): Future[Seq[NrsSearchResult]] = {
-    val queryString = query.searchText(crossKeySearch)
-    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata?$queryString"
+  override def search(
+                       notableEvent: String,
+                       query: List[Query],
+                       crossKeySearch: Boolean
+                     )(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[Seq[NrsSearchResult]] = {
+    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata"
 
-    logger.info(s"Search for $queryString")
+    val queryParams: Seq[(String, String)] = Seq(
+      Seq("notableEvent" -> notableEvent),
+      query.map(q => q.name -> q.value),
+      Seq("crossKeySearch" -> "true").filter(_ => crossKeySearch)
+    ).flatten
+
+    val queryString = queryParams.map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }.mkString("", "&", "")
 
     for{
-      get <- http.GET[Seq[NrsSearchResult]](path, Seq.empty, extraHeaders)
+      get <- http.GET[Seq[NrsSearchResult]](path, queryParams, extraHeaders)
         .map { r => r }
         .recover{
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
@@ -55,7 +66,7 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     } yield get
   }
 
-  override def submitRetrievalRequest(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  override def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse] = {
     import uk.gov.hmrc.http.HttpReads.Implicits.{throwOnFailure, readEitherOf, readRaw}
     val readRawWithErrors = throwOnFailure(readEitherOf(readRaw))
 
@@ -78,8 +89,8 @@ class NrsRetrievalConnectorImpl @Inject()(val http: WSHttpT, val auditable: Audi
     http.HEAD(path, extraHeaders)
   }
 
-  override def getSubmissionBundle(vaultName: String, archiveId: String, user: AuthorisedUser)
-                                  (implicit hc: HeaderCarrier): Future[WSResponse] = {
+  override def getSubmissionBundle(vaultName: String, archiveId: String)
+                                  (implicit hc: HeaderCarrier, user: AuthorisedUser): Future[WSResponse] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")

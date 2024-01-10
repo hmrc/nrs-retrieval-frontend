@@ -18,29 +18,24 @@ package controllers.testonly
 
 import config.AppConfig
 import connectors.testonly.TestOnlyNrsRetrievalConnector
-import controllers.{Stride, StrideAuthSettings}
+import controllers.NRBaseController
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.error_template
 import views.html.testonly.check_authorisation_page
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class CheckAuthorisationController @Inject()(override val controllerComponents: MessagesControllerComponents,
-                                             override val authConnector: AuthConnector,
-                                             override val strideAuthSettings: StrideAuthSettings,
-                                             override val errorPage: error_template,
-                                             connector: TestOnlyNrsRetrievalConnector,
-                                             checkAuthorisationPage: check_authorisation_page)
+class CheckAuthorisationController @Inject()(
+                                              controllerComponents: MessagesControllerComponents,
+                                              connector: TestOnlyNrsRetrievalConnector,
+                                              checkAuthorisationPage: check_authorisation_page)
                                             (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends FrontendController(controllerComponents) with Stride {
+  extends NRBaseController(controllerComponents) {
 
-  override val logger: Logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
 
   val checkAuthorisation: Action[AnyContent] = Action.async { implicit request =>
       connector.checkAuthorisation().map { _ =>

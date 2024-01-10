@@ -26,7 +26,6 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.jdk.CollectionConverters._
 import scala.concurrent.duration._
 
-
 @Singleton
 class AppConfig @Inject()(val runModeConfiguration: Configuration, val environment: Environment, servicesConfig: ServicesConfig) {
 
@@ -58,8 +57,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
 
   private val vatService = Service("Value Added Tax (VAT)", Seq(
     SubmissionType("VAT Return", "VAT Registration Number (VRN)", LocalDate.parse("2018-04-01"), 20)))
-
-  val serviceScope: ServiceScope = ServiceScope(Seq(vatService))
 
   lazy val notableEvents: Map[String, NotableEvent] =
     runModeConfiguration.underlying.getConfigList(s"notableEvents").asScala.map { clientConfig =>

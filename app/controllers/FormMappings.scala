@@ -17,7 +17,7 @@
 package controllers
 
 import models._
-import play.api.data.Forms.{mapping, of, optional, text}
+import play.api.data.Forms.{mapping, of, optional, text, list}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 
@@ -26,9 +26,23 @@ object FormMappings {
   val searchForm: Form[SearchQuery] = Form(
     mapping(
       "searchKeyName_0" -> optional(text),
-      "searchKeyValue_0" -> optional(text),
-      "notableEventType" -> text
+      "searchKeyValue_0" -> optional(text)
     )(SearchQuery.apply)(SearchQuery.unapply))
+
+
+  case class Query(name: String, value: String)
+  case class SearchQueries(queries: List[Query])
+
+  val query = mapping(
+      "name" -> text,
+      "value" -> text
+    )(Query.apply)(Query.unapply)
+
+  val form = Form(
+    mapping(
+      "queries" -> list(query)
+    )(SearchQueries.apply)(SearchQueries.unapply)
+  )
 
   private val selectorFormatter: Formatter[String] = new Formatter[String] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] =

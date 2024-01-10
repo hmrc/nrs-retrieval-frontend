@@ -16,56 +16,40 @@
 
 package controllers
 
+import actions.AuthenticatedAction
 import config.AppConfig
 import controllers.FormMappings._
 import play.api.Logger
-import play.api.i18n.I18nSupport
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{error_template, selector_page}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SelectorController @Inject()(val authConnector: AuthConnector,
-                                   override val controllerComponents: MessagesControllerComponents,
-                                   override val strideAuthSettings: StrideAuthSettings,
+class SelectorController @Inject()(
+                                    authenticatedAction: AuthenticatedAction,
+                                    controllerComponents: MessagesControllerComponents,
                                    val selectorPage: selector_page,
-                                   override val errorPage: error_template)
-                                  (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends FrontendController(controllerComponents) with I18nSupport with Stride {
+                                   val errorPage: error_template)
+                                  (implicit val appConfig: AppConfig)
+  extends NRBaseController(controllerComponents) {
 
-  override val logger: Logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   logger.info(s"appConfig: auth host:port: ${appConfig.authHost}:${appConfig.authPort}")
 
-  val showSelectorPage: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride("Show the selector page", { nrUser =>
-      Future.successful(
-        Ok(selectorPage(selectorForm, Some(nrUser)))
-      )
-    })
+  val showSelectorPage: Action[AnyContent] = authenticatedAction { implicit request =>
+    Ok(selectorPage(selectorForm))
   }
 
-  val submitSelectorPage: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride("Submit the selector page", { nrUser =>
+  val submitSelectorPage: Action[AnyContent] = authenticatedAction { implicit request =>
       selectorForm.bindFromRequest().fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-          Future.successful(
-            Ok(selectorPage(formWithErrors, Some(nrUser)))
-          )
+          Ok(selectorPage(formWithErrors))
         },
-        v => {
-          Future.successful(
-            Redirect(routes.SearchController.showSearchPage(v.notableEventType))
-          )
-        }
+        v => Redirect(routes.SearchController.showSearchPage(v.notableEventType))
       )
-    })
   }
-
 }

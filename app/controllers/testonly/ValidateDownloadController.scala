@@ -16,58 +16,45 @@
 
 package controllers.testonly
 
+import actions.AuthenticatedAction
 import config.AppConfig
 import connectors.testonly.TestOnlyNrsRetrievalConnector
-import controllers.{Stride, StrideAuthSettings}
+import controllers.NRBaseController
 import controllers.testonly.FormMappings.validateDownloadForm
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, RequestHeader}
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.error_template
 import views.html.testonly.validate_download_page
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ValidateDownloadController @Inject()(override val controllerComponents: MessagesControllerComponents,
-                                           override val authConnector: AuthConnector,
-                                           override val strideAuthSettings: StrideAuthSettings,
-                                           override val errorPage: error_template,
-                                           connector: TestOnlyNrsRetrievalConnector,
-                                           validateDownloadPage: validate_download_page)
+class ValidateDownloadController @Inject()(
+                                            authenticatedAction: AuthenticatedAction,
+                                            controllerComponents: MessagesControllerComponents,
+                                            connector: TestOnlyNrsRetrievalConnector,
+                                            validateDownloadPage: validate_download_page)
                                           (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends FrontendController(controllerComponents) with Stride {
+  extends NRBaseController(controllerComponents) {
 
-  override val logger: Logger = Logger(this.getClass)
-
-  private val authAction = "Validate download"
+  val logger: Logger = Logger(this.getClass)
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
     super.hc.withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
-  val showValidateDownload: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride(
-      authAction, { _ =>
-        Future successful Ok(validateDownloadPage(validateDownloadForm))
-      }
-    )
+  val showValidateDownload: Action[AnyContent] = authenticatedAction.async { implicit request =>
+    Future successful Ok(validateDownloadPage(validateDownloadForm))
   }
 
-  val submitValidateDownload: Action[AnyContent] = Action.async { implicit request =>
-    authWithStride(
-      authAction, { user =>
+  val submitValidateDownload: Action[AnyContent] = authenticatedAction.async { implicit request =>
         validateDownloadForm.bindFromRequest().fold(
           _ => Future.successful(BadRequest),
           validateDownloadRequest => {
-            connector.validateDownload(validateDownloadRequest.vaultName, validateDownloadRequest.archiveId, user).map{ response =>
+            connector.validateDownload(validateDownloadRequest.vaultName, validateDownloadRequest.archiveId).map{ response =>
               Ok(validateDownloadPage(validateDownloadForm.fill(validateDownloadRequest), Some(response)))}
           }
         )
-      }
-    )
   }
 }
 

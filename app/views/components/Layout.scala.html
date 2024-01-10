@@ -14,76 +14,43 @@
  * limitations under the License.
  *@
 
-@import views.html.components.Heading1
-@import views.html.helper.CSPNonce
 @import config.AppConfig
-@import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
-@import uk.gov.hmrc.govukfrontend.views.html.components.TwoThirdsMainContent
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcHead
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLanguageSelectHelper
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcScripts
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukLayout, TwoThirdsMainContent}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardFooter}
 
-@this(  govukLayout: GovukLayout,
+@this(
+        govukLayout: GovukLayout,
         hmrcInternalHeader: HmrcInternalHeader,
         hmrcStandardFooter: HmrcStandardFooter,
         hmrcHead: HmrcHead,
         hmrcScripts: HmrcScripts,
         defaultMainContent: TwoThirdsMainContent,
-        h1: Heading1,
-        govukBackLink: GovukBackLink)
+        heading: HmrcPageHeading,
+        govukBackLink: GovukBackLink
+)
 
-@(  pageTitle: String,
-    maybePageHeader: Option[String] = None,
-    maybeUser: Option[AuthorisedUser] = None,
-    maybeMainContentLayout: Option[Html => Html] = Some(defaultMainContent(_)),
-    maybeBackButtonUrl: Option[play.api.mvc.Call] = None,
-    addedScripts: Option[Html] = None,
-    maybeBodyEndBlock: Option[Html] = None
-)(content: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
-
-
-@maybeUserNameSpan = @{
-    maybeUser.map { user =>
-        Html(s"""<span id="username" class="user-name govuk-body">${messages("site.welcome")} <strong>${user.userName}</strong></span>""")
-    }
-}
-
-@maybeBackLink = @{
-    maybeBackButtonUrl.map { url =>
-        govukBackLink(BackLink(href = url.toString, content = Text(messages("site.back"))))
-    }
-}
-
-@banner = {
-    @maybeUserNameSpan
-    @maybeBackLink
-}
+@(
+        pageTitle: String,
+        optHeadBlock: Option[Html] = None,
+        optBeforeContentBlock: Option[Html] = None,
+        maybePageHeader: Option[String] = None,
+        addedScripts: Option[Html] = None
+)(content: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @nrsHeaderBlock = {
-    @hmrcInternalHeader(
-        params = InternalHeader(
-            homepageUrl = "https://www.gov.uk/",
-            serviceName = Some(Messages("service.name")),
-            serviceUrl = routes.StartController.showStartPage.url,
-            language = En
-        )
+@hmrcInternalHeader(
+    params = InternalHeader(
+        homepageUrl = "https://www.gov.uk/",
+        serviceName = Some(Messages("service.name")),
+        serviceUrl = routes.StartController.showStartPage.url,
+        language = En
     )
-}
-
-@beforeContentBlock = {
-  @banner
+)
 }
 
 @contentBlock() = {
-  @h1(id="pageHeader", content = Text(maybePageHeader.getOrElse(pageTitle)))
-  @content
-}
-
-@optHeadBlock = @{
-    maybeUser.map { _ =>
-        Html(s"""<link href='${routes.Assets.versioned("/stylesheets/main.css")}' media="screen" rel="stylesheet" type="text/css" />""")
-    }
+@heading(PageHeading(maybePageHeader.getOrElse(pageTitle)))
+@content
 }
 
 @govukLayout(
@@ -91,10 +58,8 @@
     headBlock = Some(hmrcHead(headBlock = optHeadBlock)),
     headerBlock = Some(nrsHeaderBlock),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = addedScripts)),
-    beforeContentBlock = Some(beforeContentBlock),
+    beforeContentBlock = optBeforeContentBlock,
     footerBlock = Some(hmrcStandardFooter()),
-    mainContentLayout = maybeMainContentLayout,
-    assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url),
-    bodyEndBlock = maybeBodyEndBlock
+    assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url)
 )(contentBlock)
 

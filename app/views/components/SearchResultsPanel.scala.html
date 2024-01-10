@@ -17,37 +17,32 @@
 @import config.AppConfig
 @import views.html.components._
 @import scala.concurrent.duration.FiniteDuration
+@import actions.requests.NotableEventRequest
+@import controllers.FormMappings.SearchQueries
 
-@this(searchResultPanel: SearchResultPanel)
+@this(searchResultPanel: SearchResultPanel, govukTable : GovukTable)
 
-@(searchForm: Form[SearchQuery], results: Seq[SearchResult], estimatedRetrievalTime: FiniteDuration)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchForm: Form[SearchQueries], results: Seq[SearchResult], label: String, estimatedRetrievalTime: FiniteDuration)(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
 
 <br>
-<div class="divider--top"></div>
+<hr>
 
-@if(results.isEmpty) {
-    @*
-    * here we only repeat the search term for the first search key
-    * replaying more search key values will require a revisit to this pattern
-    *@
-
-    <h2 id="notFound" tabindex="-1" role="alert" class="govuk-heading-l">
-        @Messages("search.results.notfoundfor.lbl", searchForm("searchKeyValue_0").value.getOrElse(""))
-    </h2>
-} else {
-    <div id="resultsFound">
-        @for((searchKey, index) <- appConfig.notableEvents(searchForm.get.notableEventType).searchKeys.zipWithIndex){
-            <h2 tabindex="-1" role="alert"  class="govuk-heading-l">
-                @Messages("search.page.results.info", results.size, searchKey.label, searchForm(s"searchKeyValue_$index").value.getOrElse(""))
-            </h2>
-        }
-
-        <div class="results" style="position: relative;">
-            <div class="notable-event">
-                @results.zipWithIndex.map { sR =>
-                    @searchResultPanel(sR._1, sR._2.toString, estimatedRetrievalTime)
-                }
-            </div>
-        </div>
-    </div>
-}
+    @govukTable(Table(
+        rows = results.zipWithIndex.map { sR =>
+            Seq(
+                TableRow(
+                    content = new HtmlContent(searchResultPanel(sR._1, sR._2.toString, estimatedRetrievalTime))
+                )
+            )
+        },
+        head = None,
+        caption = {
+            if (results.isEmpty) {
+                Some(messages("search.results.notfoundfor.lbl", searchForm("queries[0].value").value.getOrElse("")))
+            } else {
+                Some(messages("search.page.results.info", results.size, request.notableEvent.searchKeys.headOption.map(_.label).getOrElse(""), searchForm(s"queries[0].value").value.getOrElse("")))
+            }
+        },
+        captionClasses = "govuk-table__caption--m",
+        firstCellIsHeader = false
+    ))

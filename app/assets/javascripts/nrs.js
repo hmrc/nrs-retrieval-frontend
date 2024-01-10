@@ -13,6 +13,7 @@ const STATUS_FAILED = "Failed"
 const GET = "GET"
 const FAILEDTIMEOUT = document.getElementById("timeout").value
 
+const GOVUK_VISUALLY_HIDDEN = "govuk-visually-hidden"
 function checkStatus(index, vaultName, archiveId, requestTimeout) {
   if (requestTimeout !== 0) {
     const xmlhttp = http(index, vaultName, archiveId, requestTimeout);
@@ -50,10 +51,12 @@ function http(index, vaultName, archiveId, requestTimeout) {
 
 function hide(element) {
   element.setAttribute("aria-hidden", true)
+  element.classList.add(GOVUK_VISUALLY_HIDDEN)
 }
 
 function show(element) {
   element.setAttribute("aria-hidden", false)
+  element.classList.remove(GOVUK_VISUALLY_HIDDEN)
 }
 
 function busy(element, isBusy) {
@@ -61,9 +64,16 @@ function busy(element, isBusy) {
 }
 
 function setStatus(index, status) {
+  // const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
+  // const retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
+  // const retrievalCompleteElement = document.getElementById('download-button-' + index)
+  // const startRetrievalElement = document.getElementById('start-retrieval-' + index)
   const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
+  const test = document.getElementById('retrieval-not-started-' + index)
+  const resultErrorElement = document.getElementById('retrieval-failed-' + index)
   const retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
   const retrievalCompleteElement = document.getElementById('download-button-' + index)
+  const retrievalDownloadedElement = document.getElementById('download-button-clicked-' + index)
   const startRetrievalElement = document.getElementById('start-retrieval-' + index)
 
   switch (status) {
@@ -83,7 +93,7 @@ function setStatus(index, status) {
 
       hide(retrievalIncompleteElement)
 
-      show(resultRetrieveElement)
+      show(resultErrorElement)
 
       break;
       case STATUS_DOWNLOADED:
@@ -92,7 +102,7 @@ function setStatus(index, status) {
         resultRetrieveElement.classList.remove(RETRIEVAL_COMPLETE_CLASS);
 
       hide(retrievalCompleteElement)
-
+      show(retrievalDownloadedElement)
       break;
     default:
       busy(resultRetrieveElement, true)

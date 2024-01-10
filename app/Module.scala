@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+import actions.NotableEventRefiner
 import akka.actor.ActorSystem
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides}
 import com.google.inject.name.Named
 import com.typesafe.config.{Config, ConfigFactory}
+import config.AppConfig
 import connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
 import connectors.{NrsRetrievalConnector, NrsRetrievalConnectorImpl}
 import http.MicroserviceAudit
+import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
@@ -30,8 +33,10 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.http.ws.WSHttp
+import views.html.error_template
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
 
@@ -43,6 +48,14 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
     bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
   }
+
+  @Provides
+  @Singleton
+  def registerNotableEventRefinerProvider(
+                                           messagesApi: MessagesApi,
+                                           errorPage: error_template
+                                    )(implicit executionContext: ExecutionContext, appConfig: AppConfig): String => NotableEventRefiner =
+    new NotableEventRefiner(messagesApi, errorPage)(_)
 }
 
 @Singleton

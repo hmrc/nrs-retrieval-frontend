@@ -15,31 +15,31 @@
  *@
 
 @import config.AppConfig
-@import models.AuthorisedUser
+@import models.SearchKey
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 @import views.html.components._
 @import scala.concurrent.duration._
+@import actions.requests.NotableEventRequest
+@import controllers.FormMappings.SearchQueries
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichInput
 
 @this(
-        layout: Layout,
+        mainTemplate: MainTemplate,
         formHelper: FormWithCSRF,
         p: Paragraph,
-        textInput: TextInput,
-        button: components.Button,
+        govukInput: GovukInput,
+        button: GovukButton,
         searchResultsPanel: SearchResultsPanel
 )
 
 @(
-        searchForm: Form[SearchQuery],
-        maybeUser: Option[AuthorisedUser] = None,
+        searchForm: Form[SearchQueries],
         maybeResults: Option[Seq[SearchResult]],
         estimatedRetrievalTime: FiniteDuration
-)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@notableEventType = @{searchForm.get.notableEventType}
+)(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
 
 @notableEvent = @{
-  appConfig.notableEvents(notableEventType)
+    request.notableEvent
 }
 
 @pageHeader = @{
@@ -51,13 +51,12 @@
 }
 
 @addedScripts = {
-   <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
+    <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
 }
 
-@layout(
+@mainTemplate(
     pageTitle = pageTitle,
     maybePageHeader = Some(pageHeader),
-    maybeUser = maybeUser,
     maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage),
     addedScripts = Some(addedScripts),
     maybeBodyEndBlock = None
@@ -66,32 +65,48 @@
 
     <input id="timeout" type="hidden" value="@appConfig.runTimeMillis">
 
-    @if(notableEventType == "vat-registration") {
-      <div id = "vat-registration-additional-info">
-        @p(content = Text(messages("search.page.vat-registration.searchkey.detail.info")))
+    @if(notableEvent.name == "vat-registration") {
+        <div id="vat-registration-additional-info">
+            @p(content = Text(messages("search.page.vat-registration.searchkey.detail.info")))
 
-        <ul class="govuk-list govuk-list--bullet">
-            <li>@messages("search.page.vat-registration.searchkey.detail.list.0")</li>
-            <li>@messages("search.page.vat-registration.searchkey.detail.list.1")</li>
-        </ul>
-      </div>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>@messages("search.page.vat-registration.searchkey.detail.list.0")</li>
+                <li>@messages("search.page.vat-registration.searchkey.detail.list.1")</li>
+            </ul>
+        </div>
     }
 
     @p(content = Text(messages("search.page.hint", estimatedRetrievalTime)))
 
-    @formHelper(action = routes.SearchController.submitSearchPage(notableEventType), 'class -> "form js-form") {
-        <input type="hidden" name="notableEventType" value="@{notableEventType}">
+    @formHelper(action = routes.SearchController.submitSearchPage(notableEvent.name), 'class -> "form js-form") {
 
-        @for((searchKey, index) <- appConfig.notableEvents(notableEventType).searchKeys.zipWithIndex){
-            <input type="hidden" name="searchKeyName_@{index}" value="@{searchKey.name}">
+        @for((searchKey, idx) <- request.notableEvent.searchKeys.zipWithIndex) {
 
-            @textInput(messages(s"search.page.searchkey.lbl", searchKey.label), searchForm(s"searchKeyValue_$index"))
+            <input type="hidden" name="queries[@{idx}].name" value="@{searchKey.name}">
+
+            @govukInput(
+                Input(
+                    inputType = "text",
+                    classes = "govuk-input--width-20",
+                    label = Label(classes = "", content = Text(messages(s"search.page.searchkey.lbl", searchKey.label)))
+                ).withFormField(searchForm(s"queries[${idx}].value"))
+            )
         }
 
-        @button(name = "searchButton", content = messages("search.button.search.lbl"), inputType = "submit")
+        @*        <input type="hidden" name="searchKeyName_0" value="@{request.searchKey.name}">*@
+
+        @*        @textInput(messages(s"search.page.searchkey.lbl", request.searchKey.label), searchForm(s"searchKeyValue_0"))*@
+
+
+        @button(Button(
+            name = Some("searchButton"),
+            content = Text(messages("search.button.search.lbl")),
+            inputType = Some("submit"),
+            preventDoubleClick = Some(true)
+        ))
     }
 
     @maybeResults.fold(Html("")){ results =>
-      @searchResultsPanel(searchForm, results, estimatedRetrievalTime)
+        @searchResultsPanel(searchForm, results, request.searchKey.label, estimatedRetrievalTime)
     }
 }

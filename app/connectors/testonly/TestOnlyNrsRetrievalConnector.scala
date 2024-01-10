@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 trait TestOnlyNrsRetrievalConnector {
-  def validateDownload(vaultName: String, archiveId: String, user: AuthorisedUser)(implicit hc: HeaderCarrier): Future[ValidateDownloadResult]
+  def validateDownload(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult]
 
   def checkAuthorisation()(implicit hc: HeaderCarrier): Future[Boolean]
 }

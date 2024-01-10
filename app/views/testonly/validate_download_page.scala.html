@@ -20,24 +20,45 @@
 @import models.testonly.{ValidateDownloadRequest, ValidateDownloadResult}
 @import views.html.components._
 @import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichInput
 
-@this(layout:Layout, formHelper: FormWithCSRF, p: Paragraph, textInput: TextInput, button: components.Button, h1: Heading1)
+@this(layout: Layout, formHelper: FormWithCSRF, p: Paragraph, govukInput: GovukInput, button: GovukButton)
 
 @(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Messages("test-only.validate-download.page.header"),
-        maybePageHeader = Some(Messages("test-only.validate-download.page.header"))) {
+@layout(
+    pageTitle = Messages("test-only.validate-download.page.header"),
+    maybePageHeader = Some(Messages("test-only.validate-download.page.header"))
+) {
     @p(content = Text(Messages("test-only.validate-download.page.info")))
 
     @formHelper(testonly.routes.ValidateDownloadController.submitValidateDownload, 'class -> "form js-form") {
-        @textInput(Messages("test-only.validate-download.form.vaultName"), form(vaultName))
-        @textInput(Messages("test-only.validate-download.form.archiveId"), form(archiveId))
-        @button(name = "submitButton", content = messages("test-only.validate-download.form.submit"), inputType = "submit")
+        @govukInput(
+            Input(
+                inputType = "text",
+                classes = "govuk-input--width-20",
+                label = Label(classes = "", content = Text(messages(s"test-only.validate-download.form.vaultName")))
+            ).withFormField(form(vaultName))
+        )
+
+        @govukInput(
+            Input(
+                inputType = "text",
+                classes = "govuk-input--width-20",
+                label = Label(classes = "", content = Text(messages(s"test-only.validate-download.form.archiveId")))
+            ).withFormField(form(archiveId))
+        )
+
+        @button(Button(
+            name = Some("submitButton"),
+            content = Text(messages("test-only.validate-download.form.submit")),
+            inputType = Some("submit"),
+            preventDoubleClick = Some(true)
+        ))
     }
 
     @maybeResults.fold { @Html("") } { result =>
-        @h1(id="resultsHeader", content=Text(Messages("test-only.validate-download.results.title")))
-
+    <!--     h1(id="resultsHeader", content=Text(Messages("test-only.validate-download.results.title"))) -->
         <table>
             <tr>
                 <td class="govuk-body">@Messages("test-only.validate-download.results.status")</td>
@@ -84,6 +105,6 @@
                     <td id="@header._1" class="govuk-body">@header._2</td>
                 </tr>
             }
-        </table>
+    </table>
     }
 }

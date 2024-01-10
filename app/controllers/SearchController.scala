@@ -16,38 +16,40 @@
 
 package controllers
 
-import akka.util.Timeout
+import actions.requests.NotableEventRequest
+import actions.{AuthenticatedAction, NotableEventRefiner}
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import akka.util.{ByteString, Timeout}
 import config.AppConfig
 import connectors.NrsRetrievalConnector
 import controllers.FormMappings._
 import models._
 import play.api.Logger
-import play.api.i18n.I18nSupport
+import play.api.http.HttpEntity
 import play.api.mvc._
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{error_template, search_page}
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
 class SearchController @Inject()(
-                                  val authConnector: AuthConnector,
+    authenticatedAction: AuthenticatedAction,
+    notableEventRefinerFunction: String => NotableEventRefiner,
                                   val nrsRetrievalConnector: NrsRetrievalConnector,
                                  val searchResultUtils: SearchResultUtils,
-                                 override val controllerComponents: MessagesControllerComponents,
-                                 override val strideAuthSettings: StrideAuthSettings,
+                                 controllerComponents: MessagesControllerComponents,
+                                 val strideAuthSettings: StrideAuthSettings,
                                  val searchPage: search_page,
-                                 override val errorPage: error_template)
+                                 val errorPage: error_template)
                                 (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends FrontendController(controllerComponents) with I18nSupport with Stride {
+  extends NRBaseController(controllerComponents) {
 
-  override val logger: Logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
@@ -57,41 +59,43 @@ class SearchController @Inject()(
     Future(Redirect(routes.StartController.showStartPage))
   }
 
-  def showSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Show the search page for notable event $notableEventType")
-    authWithStride("Show the search page", { nrUser =>
-      Future(Ok(searchPage(searchForm.fill(SearchQuery(None, None, notableEventType)), Some(nrUser), None, getEstimatedRetrievalTime(notableEventType))))
-    })
+  private val action: String => ActionBuilder[NotableEventRequest, AnyContent] = {
+    notableEventType =>
+      authenticatedAction.andThen(notableEventRefinerFunction(notableEventType))
   }
 
-  def submitSearchPage(notableEventType: String): Action[AnyContent] = Action.async { implicit request =>
+  def showSearchPage(notableEventType: String): Action[AnyContent] = action(notableEventType) { implicit request =>
+    logger.info(s"Show the search page for notable event $notableEventType")
+    println(form.fill(SearchQueries(List())).data)
+    Ok(searchPage(form, None, getEstimatedRetrievalTime(notableEventType)))
+  }
+
+  def submitSearchPage(notableEventType: String): Action[AnyContent] = action(notableEventType).async { implicit request =>
     logger.info(s"Submit the search page for notable event $notableEventType")
-    authWithStride("Submit the search page", { user =>
-      searchForm.bindFromRequest().fold(
+    form.bindFromRequest().fold(
         formWithErrors => {
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-          Future(BadRequest(formWithErrors.errors.toString()))
+          Future(BadRequest(searchPage(formWithErrors, None, getEstimatedRetrievalTime(notableEventType))))
         },
         search => {
-          doSearch(search, user).map { results =>
+          doSearch(search).map { results =>
             logger.info(s"Form $results")
-            Ok(searchPage(searchForm.fill(search), Some(user), Some(results), getEstimatedRetrievalTime(notableEventType)))
+            Ok(searchPage(form.fill(search), Some(results), getEstimatedRetrievalTime(notableEventType)))
           }.recover {
             case e =>
               logger.info(s"SubmitSearchPage $e")
-              Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message")))
+              Ok(errorPage(request.messages.messages("error.page.title"), request.messages.messages("error.page.heading"), request.messages.messages("error.page.message")))
           }
         }
       )
-    })
   }
 
-  private def doSearch(search: SearchQuery, user: AuthorisedUser)(implicit hc: HeaderCarrier) = {
-    val crossKeySearch = appConfig.notableEvents.get(search.notableEventType).fold(false)(_.crossKeySearch)
+  private def doSearch(search: SearchQueries)(implicit request: NotableEventRequest[_]) = {
+    val crossKeySearch = appConfig.notableEvents.get(request.notableEvent.name).fold(false)(_.crossKeySearch)
 
-    logger.info(s"Do search for submitted search query ${search.searchText(crossKeySearch)}")
+//    logger.info(s"Do search for submitted search query ${search.searchText(request.notableEvent.name, crossKeySearch)}")
 
-    nrsRetrievalConnector.search(search, user, crossKeySearch)
+    nrsRetrievalConnector.search(request.notableEvent.name, search.queries, crossKeySearch)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
   }
 
@@ -114,57 +118,41 @@ class SearchController @Inject()(
     }
   }
 
-  def refreshAjax(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
-    logger.info(s"Refresh the result $vaultName, $archiveId on ajax call")
-
-    nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map { response =>
-      response.status match {
-        case OK =>
-          logger.info(s"Retrieval request complete for vault $vaultName, archive $archiveId")
-          Ok(CompletionStatus.complete)
-        case NOT_FOUND =>
-          logger.info(s"Status check for vault $vaultName, archive $archiveId returned 404")
-          Accepted(CompletionStatus.incomplete)
-        case _ =>
-          logger.info(s"Retrieval request failed for vault $vaultName, archive $archiveId")
-          Ok(CompletionStatus.failed)
-      }
-    } recoverWith {
-      case e: Exception =>
-        logger.warn(s"Retrieval is still in progress for $vaultName, $archiveId, $e")
-        Future(Accepted(CompletionStatus.incomplete))
-    }
-  }
-
-  def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+  def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = authenticatedAction.async { implicit request =>
     logger.info(s"Request retrieval for $vaultName, $archiveId")
-    authWithStride("Download", { user =>
-      nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId, user).map { _ =>
+      nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId).map { _ =>
         logger.info(s"Retrieval accepted for $vaultName, $archiveId")
         Accepted(CompletionStatus.incomplete)
       }
-    })
   }
 
-  def download(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+  def download(vaultName: String, archiveId: String): Action[AnyContent] = authenticatedAction.async { implicit request =>
     val messagePrefix = s"Request download of $vaultName, $archiveId"
 
     logger.info(messagePrefix)
 
-    authWithStride("Download", { user =>
-      nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map { response =>
-        val bytes = response.bodyAsBytes
+      nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map { response =>
+        val bytes: ByteString = response.bodyAsBytes
 
+        val source: Source[ByteString, NotUsed] = Source.single(bytes)
         // log response size rather than the content as this might contain sensitive information
         logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream.")
 
-        Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
+        val ignoredHeaders = List("content-type", "content-length")
+
+        new Result(
+          header = ResponseHeader(
+            status = OK,
+            headers = mapToSeq(response.headers.filter(header => ignoredHeaders.contains(header._1))).toMap
+          ),
+          body = HttpEntity.Streamed(source, Some(bytes.length.toLong), Some(response.contentType))
+        )
+//        Ok(bytes).withHeaders(mapToSeq(response.headers): _*)
       }.recoverWith { case e =>
         logger.error(s"$messagePrefix failed with $e")
 
-        Future(Ok(errorPage(request.messages("error.page.title"), request.messages("error.page.heading"), request.messages("error.page.message"))))
+        Future(Ok(errorPage(request.messages.messages("error.page.title"), request.messages.messages("error.page.heading"), request.messages.messages("error.page.message"))))
       }
-    })
   }
 
   private def mapToSeq(sourceMap: Map[String, scala.collection.Seq[String]]): Seq[(String, String)] =

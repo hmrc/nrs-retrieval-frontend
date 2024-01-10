@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package actions.requests
 
-import actions.requests.AuthenticatedRequest
+import models.{NotableEvent, SearchKey}
+import play.api.mvc.WrappedRequest
 
-case class AuthorisedUser(userName: String, authProviderId: String)
+case class NotableEventRequest[A](notableEvent: NotableEvent, searchKey: SearchKey, request: AuthenticatedRequest[A]) extends WrappedRequest(request)
 
-object AuthorisedUser {
-  implicit def converter[A](implicit authenticatedRequest: AuthenticatedRequest[A]) =
-    AuthorisedUser(authenticatedRequest.userName, authenticatedRequest.authProviderId)
+object NotableEventRequest {
 
+  def apply[A](notableEvent: NotableEvent, request: AuthenticatedRequest[A]): Option[NotableEventRequest[A]] = {
+    val optSearchKey = notableEvent.searchKeys.headOption
+
+    optSearchKey.map(new NotableEventRequest(notableEvent, _, request))
+  }
 }

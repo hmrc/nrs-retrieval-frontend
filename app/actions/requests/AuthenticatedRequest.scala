@@ -1,5 +1,5 @@
-@*
- * Copyright 2023 HM Revenue & Customs
+/*
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,17 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
-@import play.api.data.Field
+package actions.requests
 
-@this(govukInput: GovukInput)
+import play.api.mvc.{Request, WrappedRequest}
 
-@(content: String, field: Field)(implicit messages: Messages)
+case class AuthenticatedRequest[A](userName: String, authProviderId: String, request: Request[A]) extends WrappedRequest(request)
 
-@govukInput(
- Input(
-  inputType = "text", classes = "govuk-input--width-20", label = Label(classes = "", content = Text(content))
- ).withFormField(field)
-)
+object AuthenticatedRequest {
+  implicit def converter[A](implicit request: NotableEventRequest[A]): AuthenticatedRequest[A] = request.request
+}

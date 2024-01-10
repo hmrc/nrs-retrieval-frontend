@@ -31,9 +31,9 @@ class TestOnlyNrsRetrievalConnectorImpl @Inject()(nrsRetrievalConnector: NrsRetr
                                                  (implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends TestOnlyNrsRetrievalConnector {
 
-  override def validateDownload(vaultName: String, archiveId: String, user: AuthorisedUser)
-                               (implicit hc: HeaderCarrier): Future[ValidateDownloadResult] =
-    nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId, user).map(response => ValidateDownloadResult(response))
+  override def validateDownload(vaultName: String, archiveId: String)
+                               (implicit hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult] =
+    nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map(response => ValidateDownloadResult(response))
 
   override def checkAuthorisation()(implicit hc: HeaderCarrier): Future[Boolean] =
     http.GET[Boolean](s"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation")

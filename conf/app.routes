@@ -4,14 +4,14 @@
 GET   /assets/*file                                 controllers.Assets.versioned(path="/public", file: Asset)
 
 # microservice specific routes
-GET        /start                                   controllers.StartController.showStartPage
-GET        /select                                  controllers.SelectorController.showSelectorPage
-POST       /select                                  controllers.SelectorController.submitSelectorPage
-GET        /search                                  controllers.SearchController.noParameters
-GET        /search/:notableEventType                controllers.SearchController.showSearchPage(notableEventType)
-POST       /search/:notableEventType                controllers.SearchController.submitSearchPage(notableEventType)
+GET        /start                                   uk.gov.hmrc.nrsretrievalfrontend.controllers.StartController.showStartPage
+GET        /select                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.SelectorController.showSelectorPage
+POST       /select                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.SelectorController.submitSelectorPage
+GET        /search                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.noParameters
+GET        /search/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.showSearchPage(notableEventType)
+POST       /search/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.submitSearchPage(notableEventType)
 
-GET        /download/:vaultId/:archiveId            controllers.SearchController.download(vaultId, archiveId)
+GET        /download/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.download(vaultId, archiveId)
 
-GET        /status/:vaultId/:archiveId              controllers.SearchController.refresh(vaultId, archiveId)
-GET        /retrieve/:vaultId/:archiveId            controllers.SearchController.doAjaxRetrieve(vaultId, archiveId)
+GET        /status/:vaultId/:archiveId              uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.refresh(vaultId, archiveId)
+GET        /retrieve/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.doAjaxRetrieve(vaultId, archiveId)

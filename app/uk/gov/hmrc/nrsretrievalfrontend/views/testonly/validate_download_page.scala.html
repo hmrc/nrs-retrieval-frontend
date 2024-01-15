@@ -1,0 +1,117 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichInput
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+@import uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
+@import uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly.FormMappings._
+@import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.{ValidateDownloadRequest, ValidateDownloadResult}
+@import uk.gov.hmrc.nrsretrievalfrontend.views.html.components.{Layout, Paragraph}
+
+@this(
+        layout: Layout,
+        formHelper: FormWithCSRF,
+        heading: HmrcPageHeading,
+        p: Paragraph,
+        govukInput: GovukInput,
+        button: GovukButton
+)
+
+@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@layout(
+    pageTitle = Messages("test-only.validate-download.page.header"),
+    maybePageHeader = Some(Messages("test-only.validate-download.page.header"))
+) {
+    @p(content = Text(Messages("test-only.validate-download.page.info")))
+
+    @formHelper(testonly.routes.ValidateDownloadController.submitValidateDownload, 'class -> "form js-form") {
+        @govukInput(
+            Input(
+                inputType = "text",
+                classes = "govuk-input--width-20",
+                label = Label(classes = "", content = Text(messages(s"test-only.validate-download.form.vaultName")))
+            ).withFormField(form(vaultName))
+        )
+
+        @govukInput(
+            Input(
+                inputType = "text",
+                classes = "govuk-input--width-20",
+                label = Label(classes = "", content = Text(messages(s"test-only.validate-download.form.archiveId")))
+            ).withFormField(form(archiveId))
+        )
+
+        @button(Button(
+            name = Some("submitButton"),
+            content = Text(messages("test-only.validate-download.form.submit")),
+            inputType = Some("submit"),
+            preventDoubleClick = Some(true)
+        ))
+    }
+
+    @maybeResults.fold { @Html("") } { result =>
+        @heading(PageHeading(text = messages("test-only.validate-download.results.title")))
+        <table>
+            <tr>
+                <td class="govuk-body">@messages("test-only.validate-download.results.status")</td>
+                <td id="status" class="govuk-body">@{result.status}</td>
+            </tr>
+            <tr>
+                <td class="govuk-body">@messages("test-only.validate-download.results.numberOfZippedBytes")</td>
+                <td id="zipSize" class="govuk-body">@{result.zipSize}</td>
+            </tr>
+            <tr>
+                <td class="govuk-body">@messages("test-only.validate-download.results.numberOfZippedFiles")</td>
+                <td id="numberOfZippedFiles" class="govuk-body">@{result.files.size}</td>
+            </tr>
+        </table>
+
+        <br>
+        <br>
+
+        <table>
+            <thead>
+                <tr>
+                    <td colspan="2" class="govuk-body">@messages("test-only.validate-download.results.files")</td>
+                </tr>
+            </thead>
+            @result.files.map{ fileName =>
+                <tr>
+                    <td id ="@fileName" class="govuk-body">@fileName</td>
+                </tr>
+            }
+        </table>
+
+        <br>
+        <br>
+
+        <table>
+            <thead>
+                <tr>
+                    <td colspan="2" class="govuk-body">@messages("test-only.validate-download.results.headers")</td>
+                </tr>
+            </thead>
+            @result.headers.map{ header =>
+                <tr>
+                    <td class="govuk-body">@header._1</td>
+                    <td id="@header._1" class="govuk-body">@header._2</td>
+                </tr>
+            }
+    </table>
+    }
+}

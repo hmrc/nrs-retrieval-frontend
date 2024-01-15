@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
-import connectors.NrsRetrievalConnectorImpl
 import models._
 import org.joda.time.LocalDate
 import org.scalatest.Assertion

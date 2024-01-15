@@ -57,6 +57,8 @@ lazy val root = (project in file("."))
     scoverageSettings)
   .settings(
     TwirlKeys.templateImports ++= Seq(
+      "uk.gov.hmrc.nrsretrievalfrontend.views.html.components._",
+      "uk.gov.hmrc.nrsretrievalfrontend.controllers.routes",
       "uk.gov.hmrc.govukfrontend.views.html.components._",
       "uk.gov.hmrc.hmrcfrontend.views.html.components._",
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"

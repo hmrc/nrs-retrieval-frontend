@@ -1,0 +1,93 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.nrsretrievalfrontend.views.helpers.Utils._
+@import scala.concurrent.duration.FiniteDuration
+@import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
+@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+
+@this(p: Paragraph, govukErrorSummary: GovukErrorSummary)
+
+@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@timeSubmitted = {
+  @formatDisplayDate(searchResult.submissionDateEpochMilli)
+}
+
+@errorContent = {
+    <span id ="retrieval-failed-@index" class="govuk-body" aria-hidden="true">
+    @Text(s"${Messages("search.results.cannot.retrieve.lbl")} ${searchResult.linkText} $timeSubmitted").asHtml
+    </span>
+    <span class="govuk-body" aria-hidden="true">
+        @p(content = Text(Messages("search.results.error.action.message.lbl")))
+        <a href="mailto:hmrc-ddcw-team-nonrepudiation-g@@digital.hmrc.gov.uk">hmrc-ddcw-team-nonrepudiation-g@@digital.hmrc.gov.uk</a>
+    </span>
+}
+
+<div id="retrieve@index-updated">
+    <div id="retrieval-failed-@index" class="govuk-visually-hidden" >
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("search.results.error.summary.lbl")),
+            description = new HtmlContent(errorContent)
+        ))
+    </div>
+    <div id="result-incomplete-@index" class="govuk-visually-hidden" >
+        <span class="govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
+            @Text(s"${Messages("search.results.retrieval.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
+            <br>
+            @Text(s"${Messages("search.results.retrieval.info", estimatedRetrievalTime)}").asHtml
+        </span>
+    </div>
+    <div id="download-button-@index" class="govuk-visually-hidden" >
+        <a
+        class="govuk-button govuk-button--secondary"
+        data-index="@{index}"
+        role="button"
+        aria-hidden="true"
+        onclick="setStatus(@index, 'Downloaded')"
+        href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
+        download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
+        </a>
+    </div>
+    <div id="download-button-clicked-@index" class="govuk-visually-hidden">
+        <span class="govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
+            @Text(s"${Messages("search.results.downloaded.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
+            <br>
+            @Text(messages("search.results.download.info")).asHtml
+        </span>
+    </div>
+    <div id="start-retrieval-@index">
+        <p>
+            <a
+            class="govuk-link"
+            data-index="@{index}"
+            data-vault-id="@{searchResult.vaultId}"
+            data-archive-id="@{searchResult.archiveId}"
+            onclick="startRetrieval(this)"
+            href="javascript:void(0)">@Messages("search.results.retrieve.lbl") @searchResult.linkText @timeSubmitted
+            </a>
+            @if(searchResult.hasAttachments) {
+                <img style="float:right" src="@controllers.routes.Assets.versioned("images/attachment.png")" alt="@messages("search.results.attachment.image.fallback")" >
+                }
+        </p>
+    </div>
+    <div id="result-retrieve-@index" class="result-retrieve" aria-live="polite" aria-busy="false">
+        @p(content = Text(s"${Messages("search.results.filename.lbl")}: ${searchResult.fileDetails}"))
+    </div>
+</div>
+
+
+

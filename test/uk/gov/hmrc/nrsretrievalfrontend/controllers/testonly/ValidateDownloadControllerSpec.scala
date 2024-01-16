@@ -44,7 +44,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
     val content = Jsoup.parse(contentAsString(eventualResult))
 
     status(eventualResult) shouldBe OK
-    content.getElementById("pageHeader").text() shouldBe messages("test-only.validate-download.page.header")
+    content.select(headingCssSelector).text() shouldBe messages("test-only.validate-download.page.header")
     content.getElementById("vaultName").tag().getName shouldBe "input"
     content.getElementById("archiveId").tag().getName shouldBe "input"
     content.getElementsByAttributeValue("name", "submitButton").text() shouldBe messages("test-only.validate-download.form.submit")
@@ -82,7 +82,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
       val eventualResult = controller.submitValidateDownload(request)
       val content = validateResponse(eventualResult)
 
-      content.getElementById("resultsHeader").text() shouldBe messages("test-only.validate-download.results.title")
+      content.select("#main-content > div > div > table:nth-child(4) > caption").text() shouldBe messages("test-only.validate-download.results.title")
       content.getElementById("status").text() shouldBe OK.toString
       content.getElementById("numberOfZippedFiles").text() shouldBe files.size.toString
       content.getElementById(file1).text() shouldBe file1

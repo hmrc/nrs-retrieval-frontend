@@ -1,6 +1,8 @@
 package uk.gov.hmrc.nrsretrievalfrontend
 
-import models.SearchQuery
+import uk.gov.hmrc.nrsretrievalfrontend.models.{Query, SearchQueries}
+
+import java.net.URLEncoder
 
 trait Fixture {
   val vatReturn = "vat-return"
@@ -21,9 +23,12 @@ trait Fixture {
   val vatRegistrationSearchKey = "postCodeOrFormBundleId"
   val postCode = "aPostCode"
 
-  val vatReturnSearchQuery: SearchQuery = SearchQuery(Some(vrn), Some(validVrn), vatReturn)
-  val vatReturnSearchText: String = vatReturnSearchQuery.searchText(false)
+  def queryString(query: Seq[(String, String)]): String =
+    query.map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }.mkString("", "&", "")
 
-  val vatRegistrationSearchQuery: SearchQuery = SearchQuery(Some(vatRegistrationSearchKey), Some(postCode), vatRegistration)
-  val vatRegistrationSearchText: String = vatRegistrationSearchQuery.searchText(true)
+  val vatReturnSearchQuery: SearchQueries = SearchQueries(List(Query(vrn, validVrn)))
+  val vatReturnSearchText: String = queryString(Query.queryParams(vatReturn, vatReturnSearchQuery.queries, false))
+
+  val vatRegistrationSearchQuery: SearchQueries = SearchQueries(List(Query(vatRegistrationSearchKey, postCode)))
+  val vatRegistrationSearchText: String = queryString(Query.queryParams(vatRegistration, vatRegistrationSearchQuery.queries, true))
 }

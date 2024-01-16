@@ -43,8 +43,8 @@ class ValidateDownloadController @Inject()(
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
     super.hc.withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
-  val showValidateDownload: Action[AnyContent] = authenticatedAction.async { implicit request =>
-    Future successful Ok(validateDownloadPage(validateDownloadForm))
+  val showValidateDownload: Action[AnyContent] = authenticatedAction { implicit request =>
+    Ok(validateDownloadPage(validateDownloadForm))
   }
 
   val submitValidateDownload: Action[AnyContent] = authenticatedAction.async { implicit request =>

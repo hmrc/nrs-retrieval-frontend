@@ -44,7 +44,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture with Views {
     val searchResultsTitleText = s"Results - $searchPageHeadingText"
 
     val formJson =
-      s"""{"searchKeyName_0": "$searchKeyName", "searchKeyValue_0": "$searchKeyValue"}"""
+      s"""{"queries": [{"name": "$searchKeyName", "value": "$searchKeyValue"}]}"""
 
     val boundForm = form.bind(parse(formJson), Int.MaxValue)
 
@@ -58,13 +58,9 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture with Views {
         titleText = titleText,
         maybeBackLinkCall = Some(uk.gov.hmrc.nrsretrievalfrontend.controllers.routes.SelectorController.showSelectorPage))
 
-      val notableEventTypeElement: Elements = elementByName(doc, "notableEventType")
-      val searchKeyNameElement: Elements = elementByName(doc, "searchKeyName_0")
-      val searchKeyInput: Element =  doc.getElementById("searchKeyValue_0")
+      val searchKeyNameElement: Elements = elementByName(doc, "queries[0].name")
+      val searchKeyInput: Element =  doc.getElementById("queries[0].value")
       val searchButton = elementByName(doc, "searchButton")
-
-      notableEventTypeElement.`val`() mustBe notableEvent.name
-      notableEventTypeElement.attr("type") mustBe "hidden"
 
       searchKeyNameElement.`val`() mustBe searchKeyName
       searchKeyNameElement.attr("type") mustBe "hidden"

@@ -132,6 +132,7 @@ trait Views { this: Configs =>
     hmrcPageHeading,
     paragraph,
     govukInput,
+    govukTable,
     govukButton
   )
 

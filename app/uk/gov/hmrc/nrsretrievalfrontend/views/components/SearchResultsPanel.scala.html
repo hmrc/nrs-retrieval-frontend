@@ -28,12 +28,13 @@
 <hr>
 
     @govukTable(Table(
-        rows = results.zipWithIndex.map { sR =>
-            Seq(
-                TableRow(
-                    content = new HtmlContent(searchResultPanel(sR._1, sR._2.toString, estimatedRetrievalTime))
+        rows = results.zipWithIndex.map {
+            case (result, idx) =>
+                Seq(
+                    TableRow(
+                        content = new HtmlContent(searchResultPanel(result, idx.toString, estimatedRetrievalTime))
+                    )
                 )
-            )
         },
         head = None,
         caption = {
@@ -44,5 +45,12 @@
             }
         },
         captionClasses = "govuk-table__caption--m",
-        firstCellIsHeader = false
+        firstCellIsHeader = false,
+        attributes = {
+            if (results.isEmpty) {
+              Map("id" -> "notFound")
+            } else {
+              Map("id" -> "resultsFound")
+            }
+        }
     ))

@@ -36,6 +36,7 @@ trait WSHttpT extends HttpGet with WSGet
   with HttpDelete with WSDelete
   with HttpPatch with WSPatch
   with HttpHead with WSHead
+  with HttpGetRaw with WSGetRaw
 
 @Singleton
 class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configuration, val appNameConfig: Configuration, val wsClient: WSClient)

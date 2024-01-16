@@ -53,6 +53,10 @@ class AuthenticatedAction @Inject()(
 
   override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
     implicit val r: Request[A] = request
+
+    println("SESSION VALUES")
+    println(request.session)
+
       logger.info(s"Verify stride authorisation")
 
       val notAuthorised = "Not authorised"
@@ -73,10 +77,7 @@ class AuthenticatedAction @Inject()(
           toStrideLogin(if (appConfig.isLocal) s"http://${request.host}${request.uri}" else s"${request.uri}")
         case ex: InsufficientEnrolments =>
           logger.warn(s"error, not authorised: insufficent enrolements", ex)
-          Ok(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${ex.msg}"))
-        case ex =>
-          logger.warn(s"error, other error", ex)
-          Ok(errorPage(notAuthorised, notAuthorised, "Sorry, not authorised"))
+          Forbidden(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${ex.msg}"))
       }
   }
 }

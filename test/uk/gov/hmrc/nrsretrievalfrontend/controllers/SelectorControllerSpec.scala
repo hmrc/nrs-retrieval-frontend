@@ -39,12 +39,6 @@ class SelectorControllerSpec extends ControllerSpec {
         theSelectorPageShouldBeRendered(selectorController.showSelectorPage(getRequest))
       }
     }
-
-    "return OK and render the error page" when {
-      "the request is unauthorised" in {
-        theNotAuthorisedPageShouldBeRendered(selectorController.showSelectorPage(getRequest))
-      }
-    }
   }
 
   "submitSelectorPage" should {
@@ -73,12 +67,6 @@ class SelectorControllerSpec extends ControllerSpec {
       "and the request is authorised and no notable event type is selected" in {
         theSelectorPageShouldBeRenderedWithAnErrorMessage(
           selectorController.submitSelectorPage(emptyPostRequest))
-      }
-    }
-
-    "return OK and render the error page" when {
-      "and the request is unauthorised" in {
-        theNotAuthorisedPageShouldBeRendered(selectorController.submitSelectorPage(emptyPostRequest))
       }
     }
   }

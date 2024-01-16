@@ -16,17 +16,11 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.models.testonly
 
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Source, StreamConverters}
-import akka.util.ByteString
-import org.apache.commons.io.IOUtils
 import play.api.http.HeaderNames
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.http.HttpResponse
 
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
-import scala.util.Try
 
 case class ValidateDownloadResult(status: Int, zipSize: Long, files: Seq[String], headers: Seq[(String,String)] )
 
@@ -43,32 +37,5 @@ object ValidateDownloadResult extends HeaderNames{
     val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
 
     ValidateDownloadResult(response.status, bytes.size, zippedFileNames, headers)
-  }
-
-  def apply(response: HttpResponse)(implicit materializer: Materializer): ValidateDownloadResult = {
-    val bytes: Source[ByteString, _] = response.bodyAsSource
-
-    val sink = StreamConverters.asInputStream()
-
-    val inputStream = bytes.runWith(sink)
-
-    val optContentLength =
-      for {
-        header           <- response.headers.get("content-length")
-        value            <- header.headOption
-        optContentLength <- Try(value.toLong).toOption
-      } yield optContentLength
-
-    val headers: Seq[(String, String)] = response.headers.keys.map { key =>
-      (key, response.headers(key).head)
-    }.toSeq
-
-    val zis: ZipInputStream = new ZipInputStream(inputStream)
-
-    val contentLength = optContentLength.getOrElse(IOUtils.toByteArray(zis).length.toLong)
-
-    val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
-
-    ValidateDownloadResult(response.status, contentLength, zippedFileNames, headers)
   }
 }

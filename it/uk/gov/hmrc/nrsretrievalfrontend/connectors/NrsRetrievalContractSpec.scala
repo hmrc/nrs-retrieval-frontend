@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
-import models._
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
+import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, Bundle, Glacier, NrsSearchResult}
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
 
 import java.io.ByteArrayInputStream
@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream
 class NrsRetrievalContractSpec extends IntegrationSpec {
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private val authorisedUser = AuthorisedUser("userName", "authProviderId")
+  private implicit val authorisedUser = AuthorisedUser("userName", "authProviderId")
 
   private lazy val connector = injector.instanceOf[NrsRetrievalConnectorImpl]
 
@@ -47,10 +47,10 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
     anUpstreamErrorResponseShouldBeThrownBy(request, BAD_GATEWAY)
 
   Seq(
-    (vatReturnSearchQuery, vatReturnSearchText, false),
-    (vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (query, queryText, crossKeySearch) =>
+    (vatReturn, vatReturnSearchQuery, vatReturnSearchText, false),
+    (vatRegistration, vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (notableEvent, query, queryText, crossKeySearch) =>
 
-   val search: () => Seq[NrsSearchResult] = () => connector.search(query, authorisedUser, crossKeySearch).futureValue
+   val search: () => Seq[NrsSearchResult] = () => connector.search(notableEvent, query.queries, crossKeySearch).futureValue
 
 
     s"a ${if (crossKeySearch) "cross key" else "standard"} search" should {
@@ -58,16 +58,16 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
         val results =
           Seq(
             NrsSearchResult(
-              "businessId",
-              "notableEvent",
-              "payloadContentType",
-              ZonedDateTime.now(),
-              "userAuthToken",
-              "nrSubmissionId",
-              Bundle("fileType", 1),
-              None,
-              LocalDate.now(),
-              Glacier(vatReturn, vrn)
+              businessId = "businessId",
+              notableEvent = "notableEvent",
+              payloadContentType = "payloadContentType",
+              userSubmissionTimestamp = ZonedDateTime.now(),
+              userAuthToken = "userAuthToken",
+              nrSubmissionId = "nrSubmissionId",
+              bundle = Bundle("fileType", 1),
+              attachmentIds = None,
+              expiryDate = LocalDate.now(),
+              glacier = Glacier(vatReturn, vrn)
             )
           )
 
@@ -116,7 +116,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "getSubmissionBundle" should {
-    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vatReturn, vrn, authorisedUser).futureValue
+    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vatReturn, vrn).futureValue
 
     // the backend only returns OK here, to do fix under NONPR-2082
     "return OK" when {
@@ -144,7 +144,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
 
   "submitRetrievalRequest" should {
     val submitRetrievalRequest: () => HttpResponse =  () =>
-      connector.submitRetrievalRequest(vatReturn, vrn, authorisedUser).futureValue
+      connector.submitRetrievalRequest(vatReturn, vrn).futureValue
 
     "return OK" when {
       "the retrieval service returns OK" in {

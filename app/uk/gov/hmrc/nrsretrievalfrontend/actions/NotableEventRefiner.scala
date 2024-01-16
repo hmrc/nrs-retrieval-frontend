@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.actions
 
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results.NotFound
 import play.api.mvc.{ActionRefiner, Result}
@@ -32,11 +33,15 @@ class NotableEventRefiner(
   extends ActionRefiner[AuthenticatedRequest, NotableEventRequest]
   with I18nSupport {
 
+  val logger = Logger(this.getClass.getName)
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, NotableEventRequest[A]]] = Future {
     implicit val r: AuthenticatedRequest[A] = request
     val optNotableEvent = appConfig.notableEvents.get(notableEventType)
 
-    optNotableEvent.flatMap(NotableEventRequest.apply(_, request)).toRight(NotFound(errorPage("Not found", "Not found", s"Notable Event Type not found")))
+    optNotableEvent.flatMap(NotableEventRequest.apply(_, request)).toRight{
+      logger.warn(s"notable event ${notableEventType} not found")
+      NotFound(errorPage("Not found", "Not found", s"Notable Event Type not found"))
+    }
   }
 
 }

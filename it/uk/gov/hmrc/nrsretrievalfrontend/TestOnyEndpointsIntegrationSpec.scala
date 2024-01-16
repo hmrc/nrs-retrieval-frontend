@@ -1,17 +1,19 @@
 package uk.gov.hmrc.nrsretrievalfrontend
 
 import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticated
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
   def checkAuthorisationRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/check-authorisation").get().futureValue
+    wsClient.url(s"$serviceRoot/test-only/check-authorisation").withHttpHeaders(authenticationHeader).get().futureValue
 
   def validateDownloadGetRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/validate-download").get().futureValue
+    wsClient.url(s"$serviceRoot/test-only/validate-download").withHttpHeaders(authenticationHeader).get().futureValue
 
   def validateDownloadPostRequest(): WSResponse =
     wsClient
       .url(s"$serviceRoot/test-only/validate-download")
+      .withHttpHeaders(authenticationHeader)
       .post(Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))).futureValue
 
   override val configuration: Map[String, Any] =
@@ -28,6 +30,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
   "GET /nrs-retrieval/test-only/check-authorisation" should {
     "display the check-authorisation page" when {
       "the default router is used" in {
+        givenAuthenticated()
         checkAuthorisationRequest().body should include("Test-only check authorisation")
       }
     }
@@ -36,6 +39,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
   "GET /nrs-retrieval/test-only/validate-download" should {
     "display the validate-download page" when {
       "the testOnlyDoNotUseInAppConf router is used" in {
+        givenAuthenticated()
         validate(validateDownloadGetRequest())
       }
     }
@@ -44,6 +48,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
   "POST /nrs-retrieval/test-only/validate-download" should {
     "display the validate-download page" when {
       "the default router is used" in {
+        givenAuthenticated()
         validate(validateDownloadPostRequest())
       }
     }

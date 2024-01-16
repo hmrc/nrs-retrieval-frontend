@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly
 
-import akka.stream.Materializer
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
@@ -31,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TestOnlyNrsRetrievalConnectorImpl @Inject()(
                                                    nrsRetrievalConnector: NrsRetrievalConnector,
                                                    http: HttpClient
-                                                 )(implicit val appConfig: AppConfig, materializer: Materializer, executionContext: ExecutionContext)
+                                                 )(implicit val appConfig: AppConfig, executionContext: ExecutionContext)
   extends TestOnlyNrsRetrievalConnector {
 
   override def validateDownload(vaultName: String, archiveId: String)

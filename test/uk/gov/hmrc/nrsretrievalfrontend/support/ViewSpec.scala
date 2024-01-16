@@ -25,7 +25,7 @@ import play.api.mvc.Call
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrsretrievalfrontend.models.AuthorisedUser
 
-trait ViewSpec extends BaseUnitSpec with Views {
+trait ViewSpec extends BaseUnitSpec with Views with ViewsSelectors {
 
   def view: HtmlFormat.Appendable
 
@@ -37,7 +37,7 @@ trait ViewSpec extends BaseUnitSpec with Views {
   lazy val errorSummary: Element = doc.getElementsByClass("amls-error-summary").first()
 }
 
-object ViewSpec {
+object ViewSpec extends ViewsSelectors {
   def elementByName(doc: Document, name: String): Elements = doc.getElementsByAttributeValue("name", name)//.first()
 
   val userName = "userName"
@@ -58,7 +58,7 @@ object ViewSpec {
       doc.getElementById("username").text() mustBe s"Welcome $userName"
     }
 
-    val pageHeader: Element = doc.select("#main-content > div > div > header > h1").first()
+    val pageHeader: Element = doc.select(headingCssSelector).first()
     pageHeader.text() mustBe headerText
     doc.title mustBe titleText
   }

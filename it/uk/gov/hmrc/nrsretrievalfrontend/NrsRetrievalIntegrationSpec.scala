@@ -40,29 +40,32 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     val document = parse(response.body)
 
     response.status shouldBe OK
-    document.getElementById("pageHeader").text() shouldBe pageHeader
+    document.select("#main-content > div > div > header > h1").text() shouldBe pageHeader
 
     document
   }
 
   "GET /nrs-retrieval/start" should {
     "display the start page" in {
+      givenAuthenticated()
       assertPageIsRendered(
-        wsClient.url(s"$serviceRoot/start").get(), startPageHeading)
+        wsClient.url(s"$serviceRoot/start").withHttpHeaders(authenticationHeader).get(), startPageHeading)
     }
   }
 
   "GET /nrs-retrieval/select" should {
     "display the select page" in {
+      givenAuthenticated()
       assertPageIsRendered(
-        wsClient.url(s"$serviceRoot/select").get(), "What type of digital submission would you like to search for?")
+        wsClient.url(s"$serviceRoot/select").withHttpHeaders(authenticationHeader).get(), "What type of digital submission would you like to search for?")
     }
   }
 
   "POST /nrs-retrieval/select" should {
     "redirect to the search page" in {
+      givenAuthenticated()
       assertPageIsRendered(
-        wsClient.url(selectUrl).post(Map[String, Seq[String]](notableEventType -> Seq(vatReturn))),
+        wsClient.url(selectUrl).withHttpHeaders(authenticationHeader).post(Map[String, Seq[String]](notableEventType -> Seq(vatReturn))),
         vatReturnSearchPageHeading)
     }
   }
@@ -70,18 +73,25 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "GET /nrs-retrieval/search" should {
     "redirect to the start page" when {
       "no notable event type is provided" in {
-        assertPageIsRendered(wsClient.url(searchUrl).get(), startPageHeading)
+        givenAuthenticated()
+        assertPageIsRendered(wsClient.url(searchUrl).withHttpHeaders(authenticationHeader).get(), startPageHeading)
       }
     }
 
     "display the search page" when {
       "a vat return is provided" in {
-        val document = assertPageIsRendered(wsClient.url(vatReturnSearchUrl).get(), vatReturnSearchPageHeading)
+        givenAuthenticated()
+        val document =
+          assertPageIsRendered(wsClient.url(vatReturnSearchUrl).withHttpHeaders(authenticationHeader).get(), vatReturnSearchPageHeading)
+
         Option(document.getElementById("vat-registration-additional-info")).isEmpty shouldBe true
       }
 
       "a non vat registration is provided" in {
-        val document = assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).get(), vatRegistrationSearchPageHeading)
+        givenAuthenticated()
+        val document =
+          assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).withHttpHeaders(authenticationHeader).get(), vatRegistrationSearchPageHeading)
+
         Option(document.getElementById("vat-registration-additional-info").id()).isDefined shouldBe true
       }
     }
@@ -90,10 +100,13 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "POST /nrs-retrieval/search" should {
     "perform a search and display the results panel" when {
       "a standard search is made" in {
+        givenAuthenticated()
         givenSearchReturns(vatReturnSearchText, OK, Seq.empty[NrsSearchResult])
 
         val document = assertPageIsRendered(
-          wsClient.url(vatRegistrationSearchUrl).post(
+          wsClient.url(vatRegistrationSearchUrl)
+            .withHttpHeaders(authenticationHeader)
+            .post(
             Map[String, Seq[String]](
               searchKeyName -> Seq(vrn),
               searchKeyValue -> Seq(validVrn),
@@ -109,10 +122,13 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       }
 
       "a cross key search is made" in {
+        givenAuthenticated()
         givenSearchReturns(vatRegistrationSearchText, OK, Seq.empty[NrsSearchResult])
 
         val document = assertPageIsRendered(
-          wsClient.url(vatReturnSearchUrl).post(
+          wsClient.url(vatReturnSearchUrl)
+            .withHttpHeaders(authenticationHeader)
+            .post(
             Map[String, Seq[String]](
               searchKeyName -> Seq(vatRegistrationSearchKey),
               searchKeyValue -> Seq(postCode),
@@ -131,8 +147,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
 
   "GET /nrs-retrieval/download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
+      givenAuthenticated()
       givenGetSubmissionBundlesReturns(OK)
-      val response = wsClient.url(s"$serviceRoot/download/$vatReturn/$vrn").get().futureValue
+      val response = wsClient.url(s"$serviceRoot/download/$vatReturn/$vrn").withHttpHeaders(authenticationHeader).get().futureValue
       val body = response.bodyAsBytes
       val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
       val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
@@ -155,8 +172,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
 
   "GET /nrs-retrieval/retrieve/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
+      givenAuthenticated()
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
-      wsClient.url(s"$serviceRoot/retrieve/$vatReturn/$vrn").get().futureValue.status shouldBe ACCEPTED
+      wsClient.url(s"$serviceRoot/retrieve/$vatReturn/$vrn").withHttpHeaders(authenticationHeader).get().futureValue.status shouldBe ACCEPTED
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
     }
   }

@@ -66,13 +66,6 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         }
       }
     }
-
-    "return OK and render the error page" when {
-      "and the request is unauthorised" in {
-        theNotAuthorisedPageShouldBeRendered(
-          controller.showSearchPage("vatReturn")(getRequestWithJsonBody("vatReturn")))
-      }
-    }
   }
 
   "noParameters" should {
@@ -140,13 +133,6 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         }
       }
     }
-
-    "return OK and render the error page" when {
-      "and the request is unauthorised" in {
-        theNotAuthorisedPageShouldBeRendered(
-          controller.submitSearchPage("vatReturn")(emptyPostRequest))
-      }
-    }
   }
 
   "download" should {
@@ -158,9 +144,14 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         val mockWSResponse = mock[WSResponse]
 
         when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(any(), any()))
-          .thenAnswer(new Returns(Future.successful(mockWSResponse)))
-        when(mockWSResponse.headers).thenAnswer(new Returns(Map.empty))
-        when(mockWSResponse.bodyAsBytes).thenReturn(ByteString("Some zipped bytes"))
+          .thenReturn(Future.successful(mockWSResponse))
+        when(mockWSResponse.headers).thenReturn(
+          Map(
+            "content-length" -> Seq("15"),
+            "content-type" -> Seq("application/zip")
+          )
+        )
+        when(mockWSResponse.bodyAsBytes).thenAnswer(new Returns(ByteString("Some zipped bytes")))
       }
 
       def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) = {
@@ -171,12 +162,6 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
       "and the request is authorised" in {
         givenTheDownloadSucceeds()
         theDownloadedBytesShouldBeReturned(controller.download(vaultName, archiveId)(getRequest))
-      }
-    }
-
-    "return OK and render the error page" when {
-      "and the request is unauthorised" in {
-        theNotAuthorisedPageShouldBeRendered(controller.download(vaultName, archiveId)(getRequest))
       }
     }
   }

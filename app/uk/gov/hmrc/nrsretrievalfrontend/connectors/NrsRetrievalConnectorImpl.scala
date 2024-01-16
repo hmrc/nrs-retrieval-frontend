@@ -17,8 +17,8 @@
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
 import play.api.Logger
-import uk.gov.hmrc.http.HttpReads.Implicits.{readFromJson, throwOnFailure, readEitherOf}
-import uk.gov.hmrc.http.HttpReads.Implicits
+import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, Auditable}
 import uk.gov.hmrc.nrsretrievalfrontend.http.WSHttpT
@@ -36,8 +36,6 @@ class NrsRetrievalConnectorImpl @Inject()(
   private val logger: Logger = Logger(this.getClass)
 
   private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
-
-  implicit private val legacyRawReads = throwOnFailure(readEitherOf(Implicits.readRaw))
 
   override def search(
                        notableEvent: String,
@@ -86,13 +84,13 @@ class NrsRetrievalConnectorImpl @Inject()(
   }
 
   override def getSubmissionBundle(vaultName: String, archiveId: String)
-                                  (implicit hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse] = {
+                                  (implicit hc: HeaderCarrier, user: AuthorisedUser): Future[WSResponse] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
     for {
-      get <- http.GET[HttpResponse](path, extraHeaders)
+      get <- http.GETRaw(path, extraHeaders)
       _ <- auditable.sendDataEvent(
         NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield get

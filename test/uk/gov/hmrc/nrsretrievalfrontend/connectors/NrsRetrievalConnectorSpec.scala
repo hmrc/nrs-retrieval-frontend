@@ -195,7 +195,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
   "getSubmissionBundle" should {
     "make a get call to /submission-bundles" in {
-      when(mockWsHttp.GET[HttpResponse](any(), expectedExtraHeaders)(any(), any(), any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockWsHttp.GETRaw(any(), expectedExtraHeaders)(any(), any())).thenReturn(Future.successful(mockWSResponse))
       when(mockWSResponse.header(any())).thenReturn(Some("Some Header"))
       when(mockWSResponse.body).thenReturn("Some zipped bytes")
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))

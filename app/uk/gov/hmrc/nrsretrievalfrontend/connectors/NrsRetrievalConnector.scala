@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
+import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NrsSearchResult, Query}
 
@@ -29,5 +30,5 @@ trait NrsRetrievalConnector {
 
   def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
 
-  def getSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse]
+  def getSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[WSResponse]
 }

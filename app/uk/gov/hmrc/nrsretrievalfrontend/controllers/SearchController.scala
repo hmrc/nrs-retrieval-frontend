@@ -18,7 +18,6 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
 import akka.util.Timeout
 import play.api.Logger
-import play.api.http.HttpEntity
 import play.api.mvc._
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
 import uk.gov.hmrc.nrsretrievalfrontend.actions.{AuthenticatedAction, NotableEventRefiner}
@@ -32,7 +31,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 import scala.util.control.NonFatal
 
 @Singleton
@@ -81,7 +79,7 @@ class SearchController @Inject()(
           }.recover {
             case e =>
               logger.info(s"SubmitSearchPage $e")
-              Ok(errorPage(
+              InternalServerError(errorPage(
                 request.messages.messages("error.page.title"),
                 request.messages.messages("error.page.heading"),
                 request.messages.messages("error.page.message")
@@ -133,29 +131,21 @@ class SearchController @Inject()(
     logger.info(messagePrefix)
 
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map { response =>
-        val contentType = response.header(CONTENT_TYPE)
-        val contentLength = response.header(CONTENT_LENGTH).flatMap(header => Try(header.toLong).toOption)
-
         // log response size rather than the content as this might contain sensitive information
-        logger.info(s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${contentLength} bytes from upstream.")
-
-        val ignoredHeaders = List(CONTENT_TYPE, CONTENT_LENGTH)
-
-        new Result(
-          header = ResponseHeader(
-            status = OK,
-            headers = mapToSeq(response.headers.filter(header => ignoredHeaders.contains(header._1))).toMap
-          ),
-          body = HttpEntity.Streamed(response.bodyAsSource, contentLength, contentType)
+        logger.info(
+          s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${response.bodyAsBytes.size} bytes from upstream."
         )
-      }.recoverWith { case e =>
-        logger.error(s"$messagePrefix failed with $e")
 
-        Future(Ok(errorPage(
-          request.messages.messages("error.page.title"),
-          request.messages.messages("error.page.heading"),
-          request.messages.messages("error.page.message"))
-        ))
+        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.headers): _*)
+      }.recoverWith {
+        case e =>
+          logger.error(s"$messagePrefix failed with $e", e)
+
+          Future(InternalServerError(errorPage(
+            request.messages.messages("error.page.title"),
+            request.messages.messages("error.page.heading"),
+            request.messages.messages("error.page.message"))
+          ))
       }
   }
 

@@ -28,6 +28,7 @@
         heading: HmrcPageHeading,
         p: Paragraph,
         govukInput: GovukInput,
+        govukTable: GovukTable,
         button: GovukButton
 )
 
@@ -65,53 +66,52 @@
     }
 
     @maybeResults.fold { @Html("") } { result =>
-        @heading(PageHeading(text = messages("test-only.validate-download.results.title")))
-        <table>
-            <tr>
-                <td class="govuk-body">@messages("test-only.validate-download.results.status")</td>
-                <td id="status" class="govuk-body">@{result.status}</td>
-            </tr>
-            <tr>
-                <td class="govuk-body">@messages("test-only.validate-download.results.numberOfZippedBytes")</td>
-                <td id="zipSize" class="govuk-body">@{result.zipSize}</td>
-            </tr>
-            <tr>
-                <td class="govuk-body">@messages("test-only.validate-download.results.numberOfZippedFiles")</td>
-                <td id="numberOfZippedFiles" class="govuk-body">@{result.files.size}</td>
-            </tr>
-        </table>
+      @govukTable(Table(
+          rows = Seq(
+            Seq(
+                TableRow(content = Text(messages("test-only.validate-download.results.status"))),
+                TableRow(content = Text(result.status.toString), attributes = Map("id" -> "status"))
+            ),
+            Seq(
+                TableRow(content = Text(messages("test-only.validate-download.results.numberOfZippedBytes"))),
+                TableRow(content = Text(result.zipSize.toString), attributes = Map("id" -> "zipSize"))
+            ),
+            Seq(
+                TableRow(content = Text(messages("test-only.validate-download.results.numberOfZippedFiles"))),
+                TableRow(content = Text(result.files.size.toString), attributes = Map("id" -> "numberOfZippedFiles"))
+            )
+        ),
+          caption = Some(messages("test-only.validate-download.results.title"))
+      ))
+        <br>
+        <br>
+
+      @govukTable(Table(
+        head = Some(Seq(
+          HeadCell(Text(messages("test-only.validate-download.results.files")))
+        )),
+          rows = result.files.map { fileName =>
+              Seq(
+                  TableRow(content = Text(fileName), attributes = Map("id" -> fileName))
+              )
+          }
+      ))
 
         <br>
         <br>
 
-        <table>
-            <thead>
-                <tr>
-                    <td colspan="2" class="govuk-body">@messages("test-only.validate-download.results.files")</td>
-                </tr>
-            </thead>
-            @result.files.map{ fileName =>
-                <tr>
-                    <td id ="@fileName" class="govuk-body">@fileName</td>
-                </tr>
-            }
-        </table>
-
-        <br>
-        <br>
-
-        <table>
-            <thead>
-                <tr>
-                    <td colspan="2" class="govuk-body">@messages("test-only.validate-download.results.headers")</td>
-                </tr>
-            </thead>
-            @result.headers.map{ header =>
-                <tr>
-                    <td class="govuk-body">@header._1</td>
-                    <td id="@header._1" class="govuk-body">@header._2</td>
-                </tr>
-            }
-    </table>
+      @govukTable(Table(
+          head = Some(Seq(
+              HeadCell(Text(messages("test-only.validate-download.results.headers"))),
+              HeadCell(Empty)
+          )),
+          rows = result.headers.map {
+              case (key, value) =>
+                Seq(
+                    TableRow(content = Text(key)),
+                    TableRow(content = Text(value), attributes = Map("id" -> key))
+                )
+          }
+      ))
     }
 }

@@ -24,23 +24,23 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 import uk.gov.hmrc.nrsretrievalfrontend.actions.{AuthenticatedAction, NotableEventRefiner}
-import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
+import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views, ViewsSelectors}
 
 import scala.concurrent.Future
 
-trait ControllerSpec extends BaseUnitSpec with Views  {
+trait ControllerSpec extends BaseUnitSpec with Views with ViewsSelectors {
   val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
 
   def aPageShouldBeRendered(eventualResult: Future[Result], pageHeader: String): Document = {
     val content = parse(contentAsString(eventualResult))
     status(eventualResult) shouldBe OK
-    content.select("#main-content > div > div > header > h1").text() shouldBe pageHeader
+    content.select(headingCssSelector).text() shouldBe pageHeader
     content
   }
 
   def theNotAuthorisedPageShouldBeRendered(eventualResult: Future[Result]): Document =
-    aPageShouldBeRendered(eventualResult,"Not authorised" )
+    aPageShouldBeRendered(eventualResult,"Not authorised")
 
 
   val authenticatedAction = new AuthenticatedAction(

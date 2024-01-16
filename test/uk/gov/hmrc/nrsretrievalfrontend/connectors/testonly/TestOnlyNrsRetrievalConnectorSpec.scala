@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly
 
-import org.apache.commons.io.IOUtils
+import akka.util.ByteString
 import org.mockito.Matchers.{any, endsWith}
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
-import uk.gov.hmrc.http.{HttpClient, HttpResponse}
+import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.models.AuthorisedUser
 import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
@@ -35,7 +36,7 @@ class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
   private val aVaultName = "vaultName"
   private val anArchiveId = "archiveId"
   private val user = AuthorisedUser("", "")
-  private val wsResponse = mock[HttpResponse]
+  private val wsResponse = mock[WSResponse]
   private val expectedResult = ValidateDownloadResult(OK, 0, Seq.empty, Seq.empty)
 
   "validateDownload" should {
@@ -43,7 +44,7 @@ class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
       when(nrsConnector.getSubmissionBundle(aVaultName, anArchiveId)(hc, user)).thenReturn(Future successful wsResponse)
       when(wsResponse.status).thenReturn(OK)
       when(wsResponse.headers).thenAnswer(new Returns(Map.empty))
-      when(wsResponse.bodyAsSource.runWith(any())).thenReturn(IOUtils.toInputStream("", "utf-8"))
+      when(wsResponse.bodyAsBytes).thenReturn(ByteString.empty)
 
       await(connector.validateDownload(aVaultName, anArchiveId)(hc, user)) shouldBe expectedResult
 

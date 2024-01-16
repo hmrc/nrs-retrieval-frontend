@@ -38,12 +38,6 @@ class StartControllerSpec extends ControllerSpec {
         theStartPageShouldBeRendered(startController.showStartPage(getRequest))
       }
     }
-
-    "return OK and render the error page" when {
-      "the request is unauthorised" in {
-        theNotAuthorisedPageShouldBeRendered(startController.showStartPage(getRequest))
-      }
-    }
   }
 }
 

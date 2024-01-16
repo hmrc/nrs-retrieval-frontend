@@ -104,7 +104,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         givenSearchReturns(vatReturnSearchText, OK, Seq.empty[NrsSearchResult])
 
         val document = assertPageIsRendered(
-          wsClient.url(vatRegistrationSearchUrl)
+          wsClient.url(vatReturnSearchUrl)
             .withHttpHeaders(authenticationHeader)
             .post(
             Map[String, Seq[String]](
@@ -126,7 +126,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         givenSearchReturns(vatRegistrationSearchText, OK, Seq.empty[NrsSearchResult])
 
         val document = assertPageIsRendered(
-          wsClient.url(vatReturnSearchUrl)
+          wsClient.url(vatRegistrationSearchUrl)
             .withHttpHeaders(authenticationHeader)
             .post(
             Map[String, Seq[String]](

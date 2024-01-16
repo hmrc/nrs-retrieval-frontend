@@ -42,7 +42,7 @@ class CheckAuthorisationController @Inject()(
         Ok(checkAuthorisationPage("test-only.check-authorisation.status.200"))
       }.recover {
         case e: UpstreamErrorResponse =>
-          Ok(checkAuthorisationPage(s"test-only.check-authorisation.status.${e.statusCode}"))
+          InternalServerError(checkAuthorisationPage(s"test-only.check-authorisation.status.${e.statusCode}"))
       }
   }
 }

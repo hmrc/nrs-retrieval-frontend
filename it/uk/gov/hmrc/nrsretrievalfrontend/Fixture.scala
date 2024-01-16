@@ -10,8 +10,8 @@ trait Fixture {
   val validVrn = "validVrn"
 
   val notableEventType = "notableEventType"
-  val searchKeyName = "searchKeyName_0"
-  val searchKeyValue = "searchKeyValue_0"
+  val searchKeyName = "queries[0].name"
+  val searchKeyValue = "queries[0].value"
 
   val submissionId = "604958ae-973a-4554-9e4b-fed3025dd845"
   val datetime = "Tue, 13 Jul 2021 12:36:51 GMT"

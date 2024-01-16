@@ -64,12 +64,7 @@ function busy(element, isBusy) {
 }
 
 function setStatus(index, status) {
-  // const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
-  // const retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
-  // const retrievalCompleteElement = document.getElementById('download-button-' + index)
-  // const startRetrievalElement = document.getElementById('start-retrieval-' + index)
   const resultRetrieveElement = document.getElementById('result-retrieve-' + index)
-  const test = document.getElementById('retrieval-not-started-' + index)
   const resultErrorElement = document.getElementById('retrieval-failed-' + index)
   const retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
   const retrievalCompleteElement = document.getElementById('download-button-' + index)

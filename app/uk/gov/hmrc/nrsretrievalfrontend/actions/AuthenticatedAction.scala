@@ -54,9 +54,6 @@ class AuthenticatedAction @Inject()(
   override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
     implicit val r: Request[A] = request
 
-    println("SESSION VALUES")
-    println(request.session)
-
       logger.info(s"Verify stride authorisation")
 
       val notAuthorised = "Not authorised"
@@ -68,9 +65,9 @@ class AuthenticatedAction @Inject()(
         case Some(userCredentials) ~ Some(userName) =>
           block(AuthenticatedRequest((userName.name.toList ++ userName.lastName.toList).mkString(" "), userCredentials.providerId, request))
         case None ~ _ =>
-          Future successful Ok(errorPage(notAuthorised, notAuthorised, s"User credentials not found"))
+          Future successful Forbidden(errorPage(notAuthorised, notAuthorised, s"User credentials not found"))
         case _ ~ None =>
-          Future successful Ok(errorPage(notAuthorised, notAuthorised, s"User name not found"))
+          Future successful Forbidden(errorPage(notAuthorised, notAuthorised, s"User name not found"))
       }.recover {
         case ex: NoActiveSession =>
           logger.warn(s"NoActiveSession", ex)

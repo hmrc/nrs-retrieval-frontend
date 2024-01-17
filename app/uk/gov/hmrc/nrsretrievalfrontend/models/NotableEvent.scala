@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.models
 
-import scala.concurrent.duration.FiniteDuration
+import play.api.libs.json._
+
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.util.Try
 
 case class SearchKeySubmission(
                       searchKeyName: String,
@@ -28,6 +31,10 @@ case class SearchKey(
                     label: String
                     )
 
+object SearchKey {
+  implicit val searchKeyFormat: OFormat[SearchKey] = Json.format[SearchKey]
+
+}
 case class NotableEvent(
                          name: String,
                          displayName: String,
@@ -38,3 +45,19 @@ case class NotableEvent(
                          estimatedRetrievalTime: FiniteDuration,
                          crossKeySearch: Boolean
                        )
+
+object NotableEvent {
+  implicit val finiteDurationFormat: Format[FiniteDuration] = new Format[FiniteDuration] {
+    override def reads(json: JsValue): JsResult[FiniteDuration] = {
+      Try(Duration.apply(json.as[String])).toOption.collect {
+        case duration: FiniteDuration => JsSuccess(duration)
+      }.getOrElse(JsError(s"can't build finite duration from string value: ${json}"))
+    }
+
+    override def writes(o: FiniteDuration): JsValue =
+      JsString(o.toString())
+  }
+
+  implicit val notableEventFormat: OFormat[NotableEvent] = Json.format[NotableEvent]
+
+}

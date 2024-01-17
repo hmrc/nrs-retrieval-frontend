@@ -18,24 +18,19 @@ package uk.gov.hmrc.nrsretrievalfrontend.actions
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{Format, JsError, JsResult, JsString, JsSuccess, JsValue, Json, OFormat, OWrites}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Result, Results}
-import play.api.test.{FakeRequest, ResultExtractors}
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, ~}
-import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.{AuthenticatedRequest, NotableEventRequest}
-import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 import play.api.test.Helpers.defaultAwaitTimeout
+import play.api.test.{FakeRequest, ResultExtractors}
+import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.{AuthenticatedRequest, NotableEventRequest}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey}
+import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 
 import scala.concurrent.Future
-import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
-import scala.util.Try
+import scala.concurrent.duration.DurationInt
 
 class NotableEventRefinerSpec extends BaseUnitSpec
   with MockitoSugar

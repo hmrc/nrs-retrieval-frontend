@@ -17,17 +17,26 @@
 package uk.gov.hmrc.nrsretrievalfrontend
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import controllers.StrideAuthSettings
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.{Binding, Injector, Module}
-import play.api.libs.ws.WSClient
 import play.api.{Application, Configuration, Environment, inject}
+import play.api.inject.{Binding, Injector, Module}
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.ws.WSClient
+import play.api.mvc.{MessagesControllerComponents, RequestHeader}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nrsretrievalfrontend.actions.AuthenticatedAction
+import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.nrsretrievalfrontend.views.html.error_template
 import uk.gov.hmrc.nrsretrievalfrontend.wiremock.WireMockSupport
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 trait IntegrationSpec extends AnyWordSpec
   with Matchers
@@ -37,6 +46,8 @@ trait IntegrationSpec extends AnyWordSpec
   with IntegrationPatience
   with BeforeAndAfterEach
   with Fixture {
+
+  val authenticationHeader: (String, String) = "Authorization" -> "Bearer some-token"
   override def beforeEach(): Unit = WireMock.reset()
 
   override def fakeApplication(): Application =
@@ -45,7 +56,7 @@ trait IntegrationSpec extends AnyWordSpec
         Seq(
           new Module() {
             override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
-              Seq(inject.bind[StrideAuthSettings].to[StrideAuthIsDisabled])
+              Seq(inject.bind[AuthenticatedAction].to[ITAuthenticatedAction])
           }
         )
     )
@@ -53,7 +64,11 @@ trait IntegrationSpec extends AnyWordSpec
     .build()
 
   val defaultConfiguration: Map[String, Any] = Map[String, Any](
+    "microservice.services.auth.port" -> wireMockPort,
     "microservice.services.nrs-retrieval.port" -> wireMockPort,
+    "play.filters.csrf.header.bypassHeaders" -> Map(
+      "Authorization" -> "Bearer some-token"
+    ),
     "auditing.enabled" -> false,
     "metrics.jvm" -> false)
 
@@ -65,6 +80,17 @@ trait IntegrationSpec extends AnyWordSpec
   lazy val serviceRoot = s"http://localhost:$port/nrs-retrieval"
 }
 
-class StrideAuthIsDisabled extends StrideAuthSettings {
-  override val strideAuthEnabled: Boolean = false
+@Singleton
+class ITAuthenticatedAction @Inject()(
+             authConnector: AuthConnector,
+             config: Configuration,
+             env: Environment,
+             controllerComponents: MessagesControllerComponents,
+             errorPage: error_template
+           )(implicit executionContext: ExecutionContext, appConfig: AppConfig)
+  extends AuthenticatedAction(authConnector, config, env, controllerComponents, errorPage) {
+
+  //Override the hc method to make use of full action
+  override implicit protected def hc(implicit request: RequestHeader): HeaderCarrier =
+    HeaderCarrierConverter.fromRequest(request)
 }

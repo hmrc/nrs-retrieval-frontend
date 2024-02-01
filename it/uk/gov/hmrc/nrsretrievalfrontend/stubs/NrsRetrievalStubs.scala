@@ -16,11 +16,11 @@
 package uk.gov.hmrc.nrsretrievalfrontend.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.matching.EqualToPattern
+import com.github.tomakehurst.wiremock.matching.{EqualToPattern, UrlPattern}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import models.NrsSearchResult
 import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.nrsretrievalfrontend.Fixture
+import uk.gov.hmrc.nrsretrievalfrontend.models.NrsSearchResult
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
@@ -32,9 +32,51 @@ object NrsRetrievalStubs extends Fixture {
   private val submissionBundlesRetrievalRequestsPath = s"$submissionBundlesPath/retrieval-requests"
   private val equalToXApiKey = new EqualToPattern(xApiKey)
 
-  private def searchPathUrl(searchText: String) = urlEqualTo(s"$retrievalPath/submission-metadata?$searchText")
+  private def searchPathUrl(searchText: String): UrlPattern = urlEqualTo(s"$retrievalPath/submission-metadata?$searchText")
 
   private def searchRequest(searchText: String) = get(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey)
+
+
+  def givenAuthenticated(): StubMapping =
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .withRequestBody(
+          equalToJson(
+            """
+               |{
+               |  "authorise": [ {
+               |    "authProviders" : [ "PrivilegedApplication" ]
+               |  }, {
+               |  "$or": [{
+               |     "enrolment" :"nrs_digital_investigator",
+               |     "identifiers":[],
+               |     "state":"Activated"
+               |     }, {
+               |     "enrolment" :"nrs digital investigator",
+               |     "identifiers":[],
+               |     "state":"Activated"
+               |     }]
+               |  } ],
+               |  "retrieve": ["optionalCredentials", "optionalName"]
+               |}
+          """.stripMargin,
+            true,
+            true
+          )).willReturn(aResponse()
+        .withStatus(200)
+        .withBody(
+          s"""
+             |{
+             |  "optionalCredentials": {
+             |    "providerId": "test-authority-id",
+             |    "providerType": "government-gateway"
+             |  },
+             |  "optionalName": {
+             |    "name": "test-user"
+             |  }
+             |}
+              """.stripMargin))
+    )
 
   def givenSearchReturns(searchText: String, status: Int, results: Seq[NrsSearchResult]): StubMapping =
     stubFor(searchRequest(searchText).willReturn(aResponse().withStatus(status).withBody(toJson(results).toString())))

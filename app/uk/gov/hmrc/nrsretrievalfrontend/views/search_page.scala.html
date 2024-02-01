@@ -1,0 +1,106 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichInput
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import scala.concurrent.duration._
+@import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
+@import uk.gov.hmrc.nrsretrievalfrontend.models.SearchQueries
+@import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
+
+@this(
+        mainTemplate: MainTemplate,
+        formHelper: FormWithCSRF,
+        p: Paragraph,
+        govukInput: GovukInput,
+        button: GovukButton,
+        searchResultsPanel: SearchResultsPanel
+)
+
+@(
+        searchForm: Form[SearchQueries],
+        maybeResults: Option[Seq[SearchResult]],
+        estimatedRetrievalTime: FiniteDuration
+)(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
+
+@notableEvent = @{
+    request.notableEvent
+}
+
+@pageHeader = @{
+    messages(s"search.page.dynamic.header.lbl", notableEvent.pluralDisplayName)
+}
+
+@pageTitle = @{
+    if (maybeResults.isDefined) s"${messages("search.page.results")} - $pageHeader" else pageHeader
+}
+
+@addedScripts = {
+    <script src='@controllers.routes.Assets.versioned("javascripts/nrs.js")'></script>
+}
+
+@mainTemplate(
+    pageTitle = pageTitle,
+    maybePageHeader = Some(pageHeader),
+    maybeBackButtonUrl = Some(routes.SelectorController.showSelectorPage),
+    addedScripts = Some(addedScripts),
+    maybeBodyEndBlock = None
+) {
+    @p(content = Text(messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
+
+    <input id="timeout" type="hidden" value="@appConfig.runTimeMillis">
+
+    @if(notableEvent.name == "vat-registration") {
+        <div id="vat-registration-additional-info">
+            @p(content = Text(messages("search.page.vat-registration.searchkey.detail.info")))
+
+            <ul class="govuk-list govuk-list--bullet">
+                <li>@messages("search.page.vat-registration.searchkey.detail.list.0")</li>
+                <li>@messages("search.page.vat-registration.searchkey.detail.list.1")</li>
+            </ul>
+        </div>
+    }
+
+    @p(content = Text(messages("search.page.hint", estimatedRetrievalTime)))
+
+    @formHelper(action = routes.SearchController.submitSearchPage(notableEvent.name), 'class -> "form js-form") {
+
+        @for((searchKey, idx) <- request.notableEvent.searchKeys.zipWithIndex) {
+
+            <input type="hidden" name="queries[@{idx}].name" value="@{searchKey.name}">
+
+            @govukInput(
+                Input(
+                    inputType = "text",
+                    classes = "govuk-input--width-20",
+                    label = Label(classes = "", content = Text(messages(s"search.page.searchkey.lbl", searchKey.label)))
+                ).withFormField(searchForm(s"queries[${idx}].value"))
+            )
+        }
+
+        @button(Button(
+            name = Some("searchButton"),
+            content = Text(messages("search.button.search.lbl")),
+            inputType = Some("submit"),
+            preventDoubleClick = Some(true)
+        ))
+    }
+
+    @maybeResults.fold(Html("")){ results =>
+        @searchResultsPanel(searchForm, results, request.searchKey.label, estimatedRetrievalTime)
+    }
+}

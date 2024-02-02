@@ -28,7 +28,7 @@
 }
 
 @errorContent = {
-    <span id ="retrieval-failed-@index" class="govuk-body" aria-hidden="true">
+    <span class="govuk-body" aria-hidden="true">
     @Text(s"${Messages("search.results.cannot.retrieve.lbl")} ${searchResult.linkText} $timeSubmitted").asHtml
     </span>
     <span class="govuk-body" aria-hidden="true">
@@ -38,31 +38,31 @@
 }
 
 <div id="retrieve@index-updated">
-    <div id="retrieval-failed-@index" class="govuk-visually-hidden" >
+    <div id="retrieval-failed-@index" class="govuk-visually-hidden" style="display:none">
         @govukErrorSummary(ErrorSummary(
             title = Text(messages("search.results.error.summary.lbl")),
             description = new HtmlContent(errorContent)
         ))
     </div>
-    <div id="result-incomplete-@index" class="govuk-visually-hidden" >
+    <div id="result-incomplete-@index" class="govuk-visually-hidden" style="display:none">
         <span class="govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
             @Text(s"${Messages("search.results.retrieval.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
             <br>
             @Text(s"${Messages("search.results.retrieval.info", estimatedRetrievalTime)}").asHtml
         </span>
     </div>
-    <div id="download-button-@index" class="govuk-visually-hidden" >
+    <div id="download-button-@index" class="govuk-visually-hidden" style="display:none">
         <a
+            id="download-button-@index-link"
         class="govuk-button govuk-button--secondary"
         data-index="@{index}"
         role="button"
-        aria-hidden="true"
         onclick="setStatus(@index, 'Downloaded')"
         href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
         download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
         </a>
     </div>
-    <div id="download-button-clicked-@index" class="govuk-visually-hidden">
+    <div id="download-button-clicked-@index" class="govuk-visually-hidden" style="display:none">
         <span class="govuk-body" aria-hidden="true" aria-label="@Messages("search.results.retrieval.message.lbl", searchResult.linkText)">
             @Text(s"${Messages("search.results.downloaded.message.lbl", searchResult.linkText)} $timeSubmitted").asHtml
             <br>
@@ -72,6 +72,7 @@
     <div id="start-retrieval-@index">
         <p>
             <a
+            id="start-retrieval-@index-link"
             class="govuk-link"
             data-index="@{index}"
             data-vault-id="@{searchResult.vaultId}"

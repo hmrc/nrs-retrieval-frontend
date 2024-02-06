@@ -51,11 +51,13 @@ function http(index, vaultName, archiveId, requestTimeout) {
 
 function hide(element) {
   element.setAttribute("aria-hidden", true)
+  element.setAttribute("style", "display:none")
   element.classList.add(GOVUK_VISUALLY_HIDDEN)
 }
 
 function show(element) {
   element.setAttribute("aria-hidden", false)
+  element.removeAttribute("style")
   element.classList.remove(GOVUK_VISUALLY_HIDDEN)
 }
 
@@ -68,8 +70,10 @@ function setStatus(index, status) {
   const resultErrorElement = document.getElementById('retrieval-failed-' + index)
   const retrievalIncompleteElement = document.getElementById('result-incomplete-' + index)
   const retrievalCompleteElement = document.getElementById('download-button-' + index)
+  const retrievalCompleteButtonElement = document.getElementById('download-button-' + index + '-link')
   const retrievalDownloadedElement = document.getElementById('download-button-clicked-' + index)
   const startRetrievalElement = document.getElementById('start-retrieval-' + index)
+  const startRetrievalButtonElement = document.getElementById('start-retrieval-' + index + '-link')
 
   switch (status) {
     case STATUS_COMPLETE:
@@ -79,6 +83,7 @@ function setStatus(index, status) {
 
       hide(retrievalIncompleteElement)
       show(retrievalCompleteElement)
+      show(retrievalCompleteButtonElement)
 
       break;
     case STATUS_FAILED:
@@ -104,6 +109,7 @@ function setStatus(index, status) {
       resultRetrieveElement.classList.add(RETRIEVAL_INCOMPLETE_CLASS);
 
       hide(startRetrievalElement)
+      hide(startRetrievalButtonElement)
       show(retrievalIncompleteElement)
   }
 }

@@ -17,7 +17,7 @@ lazy val scoverageSettings = {
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "7.11.0",
-  "uk.gov.hmrc"       %% "play-frontend-hmrc"         % "7.4.0-play-28",
+  "uk.gov.hmrc"       %% "play-frontend-hmrc-play-28" % "8.5.0",
   "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
   "commons-io"        %  "commons-io"                 % "2.11.0"
 )

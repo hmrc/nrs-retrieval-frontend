@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
 import uk.gov.hmrc.govukfrontend.views.html.components._
-import uk.gov.hmrc.hmrcfrontend.config.{AccessibilityStatementConfig, AssetsConfig, TrackingConsentConfig}
+import uk.gov.hmrc.hmrcfrontend.config.{AccessibilityStatementConfig, AssetsConfig, TrackingConsentConfig, TudorCrownConfig}
 import uk.gov.hmrc.hmrcfrontend.views.config.HmrcFooterItems
 import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcFooter, HmrcInternalHeader, HmrcPageHeading}
 import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardFooter, HmrcTrackingConsentSnippet}
@@ -25,12 +25,14 @@ import uk.gov.hmrc.nrsretrievalfrontend.views.html.components._
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.{check_authorisation_page, validate_download_page}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.{error_template, search_page, selector_page, start_page}
 
-trait Views { this: Configs =>
+trait Views {
+  this: Configs =>
 
+  lazy val tudorCrownConfig = new TudorCrownConfig(this.configuration)
   lazy val trackingConsentConfig = new TrackingConsentConfig(this.configuration)
   lazy val hmrcTrackingConsentSnippet = new HmrcTrackingConsentSnippet(trackingConsentConfig)
   lazy val assetsConfig = new AssetsConfig
-  lazy val hmrcInternalHeader = new HmrcInternalHeader()
+  lazy val hmrcInternalHeader = new HmrcInternalHeader(tudorCrownConfig)
   lazy val hmrcFooter = new HmrcFooter
   lazy val accessibilityStatementConfig = new AccessibilityStatementConfig(this.configuration)
   lazy val hmrcFooterItems = new HmrcFooterItems(accessibilityStatementConfig)
@@ -51,7 +53,7 @@ trait Views { this: Configs =>
 
   lazy val govukSkipLink = new GovukSkipLink
   lazy val govukFooter = new GovukFooter
-  lazy val govukHeader = new GovukHeader
+  lazy val govukHeader = new GovukHeader(tudorCrownConfig)
   lazy val govukTemplate = new GovukTemplate(
     govukHeader,
     govukFooter,

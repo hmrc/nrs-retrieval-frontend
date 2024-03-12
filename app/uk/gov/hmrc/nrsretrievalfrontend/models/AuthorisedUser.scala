@@ -21,7 +21,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 case class AuthorisedUser(userName: String, authProviderId: String)
 
 object AuthorisedUser {
-  implicit def converter[A](implicit authenticatedRequest: AuthenticatedRequest[A]) =
+  implicit def converter[A](implicit authenticatedRequest: AuthenticatedRequest[A]): AuthorisedUser =
     AuthorisedUser(authenticatedRequest.userName, authenticatedRequest.authProviderId)
 
 }

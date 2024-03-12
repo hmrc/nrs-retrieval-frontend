@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import akka.util.ByteString
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.apache.pekko.util.ByteString
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.i18n.Messages
@@ -94,7 +94,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
           .withFormUrlEncodedBody(("notableEventType", notableEventType), ("searchText", "someSearchText"))
 
       def givenTheSearchSucceeds() =
-        when(nrsRetrievalConnector.search(any(), any(), Matchers.eq(notableEvent.crossKeySearch))(any(), any()))
+        when(nrsRetrievalConnector.search(any(), any(), ArgumentMatchers.eq(notableEvent.crossKeySearch))(any(), any()))
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
 
       def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {

@@ -77,7 +77,7 @@
 
     @p(content = Text(messages("search.page.hint", estimatedRetrievalTime)))
 
-    @formHelper(action = routes.SearchController.submitSearchPage(notableEvent.name), 'class -> "form js-form") {
+    @formHelper(action = routes.SearchController.submitSearchPage(notableEvent.name), Symbol("class") -> "form js-form") {
 
         @for((searchKey, idx) <- request.notableEvent.searchKeys.zipWithIndex) {
 

@@ -18,8 +18,8 @@ package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Guice, Injector}
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
@@ -82,7 +82,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
   private val testArchiveId = "2"
   private implicit val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
 
-  private def expectedExtraHeaders = Matchers.eq(connector.extraHeaders)
+  private def expectedExtraHeaders = ArgumentMatchers.eq(connector.extraHeaders)
 
   "extraHeaders" should {
     "contain the X-API-Key header" in {
@@ -98,7 +98,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
       "make a get call to /submission-metadata returning data" when {
         s"a $searchType search is requested" in {
-          when(mockWsHttp.GET[Seq[NrsSearchResult]](Matchers.eq(url), Matchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
+          when(mockWsHttp.GET[Seq[NrsSearchResult]](ArgumentMatchers.eq(url), ArgumentMatchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
             .thenReturn(Future.successful(Seq(nrsVatSearchResult)))
           when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
           await(connector.search(notableEvent, searchParams, crossKeySearch)).size shouldBe 1
@@ -108,7 +108,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
       "make a get call to /submission-metadata with parameters returning no data" when {
         s"a $searchType search is requested" in {
-          when(mockWsHttp.GET[Seq[NrsSearchResult]](Matchers.eq(url), Matchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
+          when(mockWsHttp.GET[Seq[NrsSearchResult]](ArgumentMatchers.eq(url), ArgumentMatchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
             .thenReturn(Future.failed(new Throwable("404")))
           when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
           await(connector.search(notableEvent, searchQuery.queries, crossKeySearch)).size shouldBe 0
@@ -118,7 +118,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
       "make a get call to /submission-metadata with parameters resulting in a failure" when {
         s"a $searchType search is requested" in {
-          when(mockWsHttp.GET[Seq[NrsSearchResult]](Matchers.eq(url), Matchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
+          when(mockWsHttp.GET[Seq[NrsSearchResult]](ArgumentMatchers.eq(url), ArgumentMatchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
             .thenReturn(Future.failed(new Throwable("401")))
           when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenReturn(Future.successful(()))
           a[Throwable] should be thrownBy await(connector.search(notableEvent, searchQuery.queries, crossKeySearch))
@@ -128,11 +128,11 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
       "make a get call to /submission-metadata and retrieve nr-submission-id from header" when {
         s"a $searchType search is requested" in {
-          when(mockWsHttp.GET[Seq[NrsSearchResult]](Matchers.eq(url), Matchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
+          when(mockWsHttp.GET[Seq[NrsSearchResult]](ArgumentMatchers.eq(url), ArgumentMatchers.eq(queryParams), expectedExtraHeaders)(any(), any(), any()))
             .thenReturn(Future.successful(Seq(nrsVatSearchResult)))
           when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenAnswer(new Answer[Future[Unit]](){
             override def answer(invocationOnMock: InvocationOnMock): Future[Unit] = {
-              if(invocationOnMock.getArgumentAt(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId){
+              if(invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId){
                 Future.successful(())
               }else{
                 Future.failed(new Throwable())
@@ -146,7 +146,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
 
       "write an audit record containing the required data" when {
         s"a $searchType search is requested" in {
-          when(mockWsHttp.GET[Seq[NrsSearchResult]](Matchers.eq(url), any(), expectedExtraHeaders)(any(), any(), any()))
+          when(mockWsHttp.GET[Seq[NrsSearchResult]](ArgumentMatchers.eq(url), any(), expectedExtraHeaders)(any(), any(), any()))
             .thenReturn(Future.successful(Seq(nrsVatSearchResult)))
           when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])(any())).thenReturn(Future.successful(()))
           await(connector.search(notableEvent, searchParams, crossKeySearch)).size shouldBe 1
@@ -172,7 +172,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
       when(mockHttpResponse.header("nr-submission-id")).thenReturn(Some(nrSubmissionId))
       when(mockAuditable.sendDataEvent(any[DataEventAuditType])(any())).thenAnswer(new Answer[Future[Unit]](){
         override def answer(invocationOnMock: InvocationOnMock): Future[Unit] = {
-          if(invocationOnMock.getArgumentAt(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId){
+          if(invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId){
             Future.successful(())
           }else{
             Future.failed(new Throwable())

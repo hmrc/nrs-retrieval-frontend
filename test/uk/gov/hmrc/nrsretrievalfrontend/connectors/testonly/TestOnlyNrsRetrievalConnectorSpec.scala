@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly
 
-import akka.util.ByteString
-import org.mockito.Matchers.{any, endsWith}
+import org.apache.pekko.util.ByteString
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.libs.ws.WSResponse

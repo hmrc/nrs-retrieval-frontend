@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.model.testonly
 
-import akka.util.ByteString
+import org.apache.pekko.util.ByteString
 import org.mockito.Mockito.when
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.libs.ws.WSResponse

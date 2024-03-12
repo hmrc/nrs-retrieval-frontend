@@ -15,12 +15,11 @@
  *@
 
 @import play.api.i18n.Messages
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 @import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 
 @this(mainTemplate: MainTemplate, p: Paragraph, button: GovukButton)
 
-@()(implicit request: AuthenticatedRequest[_], messages : Messages, appConfig: AppConfig)
+@()(implicit request: AuthenticatedRequest[_], messages : Messages)
 
 @mainTemplate(pageTitle = messages("start.page.header.lbl")) {
     @p(content = Text(messages("start.text.one.lbl")))

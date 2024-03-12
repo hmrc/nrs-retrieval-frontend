@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
 
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.test.Helpers._

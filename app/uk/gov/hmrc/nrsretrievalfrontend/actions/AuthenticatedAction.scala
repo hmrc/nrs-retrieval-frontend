@@ -24,9 +24,8 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
-import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, AuthRedirects}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.error_template
-import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.{Inject, Singleton}
@@ -43,8 +42,8 @@ class AuthenticatedAction @Inject()(
                                    )(implicit val executionContext: ExecutionContext, appConfig: AppConfig)
   extends ActionBuilder[AuthenticatedRequest, AnyContent]
     with AuthorisedFunctions
-    with AuthRedirects
     with FrontendBaseController
+    with AuthRedirects
     with I18nSupport {
 
   val logger: Logger = Logger(this.getClass.getName)

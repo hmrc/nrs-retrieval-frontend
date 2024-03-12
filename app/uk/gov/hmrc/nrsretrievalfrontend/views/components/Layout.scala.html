@@ -16,7 +16,6 @@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukLayout, TwoThirdsMainContent}
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardFooter}
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 @import uk.gov.hmrc.nrsretrievalfrontend.controllers.routes
 
 @this(
@@ -36,7 +35,7 @@
         optBeforeContentBlock: Option[Html] = None,
         maybePageHeader: Option[String] = None,
         addedScripts: Option[Html] = None
-)(content: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+)(content: Html)(implicit request: Request[_], messages: Messages)
 
 @nrsHeaderBlock = {
 @hmrcInternalHeader(
@@ -62,5 +61,5 @@
     beforeContentBlock = optBeforeContentBlock,
     footerBlock = Some(hmrcStandardFooter()),
     assetPath = Some(uk.gov.hmrc.hmrcfrontend.controllers.routes.Assets.at("govuk").url)
-)(contentBlock)
+)(contentBlock())
 

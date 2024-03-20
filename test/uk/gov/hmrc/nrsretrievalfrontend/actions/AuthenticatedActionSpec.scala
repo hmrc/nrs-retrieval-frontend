@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.actions
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar

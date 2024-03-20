@@ -17,11 +17,10 @@
 @import uk.gov.hmrc.nrsretrievalfrontend.views.helpers.Utils._
 @import scala.concurrent.duration.FiniteDuration
 @import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 
 @this(p: Paragraph, govukErrorSummary: GovukErrorSummary)
 
-@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit messages: Messages)
 
 @timeSubmitted = {
   @formatDisplayDate(searchResult.submissionDateEpochMilli)

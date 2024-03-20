@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.config
 
 import com.google.inject.{AbstractModule, Provides}
 import play.api.i18n.MessagesApi
-import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.libs.concurrent.PekkoGuiceSupport
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nrsretrievalfrontend.actions.NotableEventRefiner
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 
-class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with AkkaGuiceSupport {
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with PekkoGuiceSupport {
 
   override def configure(): Unit = {
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])

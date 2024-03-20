@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream
 class NrsRetrievalContractSpec extends IntegrationSpec {
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private implicit val authorisedUser = AuthorisedUser("userName", "authProviderId")
+  private implicit val authorisedUser: AuthorisedUser = AuthorisedUser("userName", "authProviderId")
 
   private lazy val connector = injector.instanceOf[NrsRetrievalConnectorImpl]
 

@@ -16,16 +16,20 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
-import uk.gov.hmrc.nrsretrievalfrontend.models.audit.NonRepudiationStoreSearch
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import uk.gov.hmrc.nrsretrievalfrontend.models.audit.NonRepudiationStoreSearch
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
-import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
+import uk.gov.hmrc.play.audit.model._
 
-class AuditableSpec extends UnitSpec {
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
+
+abstract class AuditableSpec extends UnitSpec {
   private val appName = "TestAppName"
   private val mockAudit: Audit = mock[Audit]
   private val auditable = new Auditable(appName, mockAudit)
+  private val ec: ExecutionContextExecutor = ExecutionContext.global
+  val dataEvent: DataEvent
 
   "sendDataEvent" should {
     "send a NonRepudiationStoreSearch audit event" in {
@@ -33,10 +37,10 @@ class AuditableSpec extends UnitSpec {
 
       val func: DataEvent => Unit = mock[DataEvent => Unit]
       when(func.apply(any())).thenReturn(())
-      when(mockAudit.sendDataEvent).thenReturn(func)
+      when(mockAudit.sendDataEvent(dataEvent)(ec)).thenReturn(())
 
       await(auditable.sendDataEvent(dataEventAuditType))
-      verify(mockAudit, times(1)).sendDataEvent
+      verify(mockAudit, times(1)).sendDataEvent(dataEvent)
     }
   }
 }

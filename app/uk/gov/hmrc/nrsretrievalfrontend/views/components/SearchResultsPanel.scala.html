@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 @import scala.concurrent.duration.FiniteDuration
 @import uk.gov.hmrc.nrsretrievalfrontend.models.SearchQueries
 @import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
@@ -22,7 +21,7 @@
 
 @this(searchResultPanel: SearchResultPanel, govukTable : GovukTable)
 
-@(searchForm: Form[SearchQueries], results: Seq[SearchResult], label: String, estimatedRetrievalTime: FiniteDuration)(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
+@(searchForm: Form[SearchQueries], results: Seq[SearchResult], label: String, estimatedRetrievalTime: FiniteDuration)(implicit request: NotableEventRequest[_], messages: Messages)
 
 <br>
 <hr>

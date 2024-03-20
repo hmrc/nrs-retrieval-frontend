@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import akka.util.Timeout
+import org.apache.pekko.util.Timeout
 import play.api.Logger
 import play.api.mvc._
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest

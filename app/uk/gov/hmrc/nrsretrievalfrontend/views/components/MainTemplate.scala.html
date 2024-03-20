@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components.TwoThirdsMainContent
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardFooter}
 @import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
@@ -31,7 +30,7 @@
         maybeBackButtonUrl: Option[play.api.mvc.Call] = None,
         addedScripts: Option[Html] = None,
         maybeBodyEndBlock: Option[Html] = None
-)(content: Html)(implicit request: AuthenticatedRequest[_], messages: Messages, appConfig: AppConfig)
+)(content: Html)(implicit request: AuthenticatedRequest[_], messages: Messages)
 
 @userNameSpan = {
     <span id="username" style="float:right" class="govuk-!-margin-top-3 govuk-body">@messages("site.welcome") <strong class="govuk-!-font-weight-bold">@{request.userName}</strong></span>

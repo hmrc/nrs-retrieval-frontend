@@ -1,41 +1,46 @@
-import play.core.PlayVersion
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc.DefaultBuildSettings
+import play.core.PlayVersion.current
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*AuthService.*;modgiels/.data/..*;controllers.auth.*;filters.*;forms.*;config.*;" +
       ".*BuildInfo.*;prod.Routes;app.Routes;testOnlyDoNotUseInAppConf.Routes;controllers.ExampleController;controllers.testonly.TestOnlyController",
-    ScoverageKeys.coverageMinimum := 70.00,
+    ScoverageKeys.coverageMinimumStmtTotal := 70.00,
     ScoverageKeys.coverageHighlighting := true,
     Test / parallelExecution := false
   )
 }
 
+lazy val appDependencies: Seq[ModuleID] = compile ++ test()
+lazy val appDependenciesIt: Seq[ModuleID] = it()
+lazy val appName: String = "nrs-retrieval-frontend"
+val currentScalaVersion = "2.13.12"
+val bootstrapPlayVersion = "8.5.0"
+
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc"       %% "bootstrap-frontend-play-28" % "7.11.0",
-  "uk.gov.hmrc"       %% "play-frontend-hmrc-play-28" % "8.5.0",
-  "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
-  "commons-io"        %  "commons-io"                 % "2.11.0"
+  "uk.gov.hmrc"       %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
+  "uk.gov.hmrc"       %% "play-frontend-hmrc-play-30" % "8.5.0",
+  "com.typesafe.play" %% "play-json-joda"             % "2.10.4",
+  "commons-io"        %  "commons-io"                 % "2.15.1"
 )
-
-def test(scope: String) = Seq(
-  "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % scope,
-  "org.scalatest" %% "scalatest" % "3.2.9" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % scope,
-  "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+def test(scope: String = "test"): Seq[ModuleID] = Seq(
+  "org.scalatest" %% "scalatest" % "3.2.17" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
+  "org.playframework" %% "play-test" % current % scope,
   "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % Test,
-  "org.jsoup" % "jsoup" % "1.13.1" % scope,
-  "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
-  "uk.gov.hmrc"       %% "bootstrap-test-play-28"% "7.11.0" % scope
+  "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope,
+  "uk.gov.hmrc"       %% "bootstrap-test-play-30"% bootstrapPlayVersion % scope
 )
-
-lazy val appName: String = "nrs-retrieval-frontend"
-
-val silencerVersion = "1.7.12"
+def it(scope: String = "test"): Seq[ModuleID] = Seq(
+  "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope,
+  "com.github.tomakehurst" % "wiremock" % "2.33.2" % scope,
+  "org.playframework" %% "play-test" % current % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
+  "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope
+)
 
 lazy val root = (project in file("."))
   .settings(
@@ -43,17 +48,15 @@ lazy val root = (project in file("."))
     organization := "uk.gov.hmrc",
     PlayKeys.playDefaultPort := 9390,
     majorVersion := 0,
-    scalaVersion := "2.13.8",
+    scalaVersion := currentScalaVersion,
+    scalacOptions += "-Wconf:cat=deprecation:warning-verbose",
+    scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s",
+    scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s",
+    scalacOptions += "-Wconf:src=routes/.*:s",
     resolvers ++= Seq(
       Resolver.typesafeRepo("releases"),
     ),
-    libraryDependencies ++= compile ++ test("test") ++ test("it"),
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    ),
-    scalacOptions += "-P:silencer:pathFilters=target/.*",
-    publishingSettings,
+    libraryDependencies ++= appDependencies,
     scoverageSettings)
   .settings(
     TwirlKeys.templateImports ++= Seq(
@@ -64,14 +67,15 @@ lazy val root = (project in file("."))
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
     )
   )
-  .settings(defaultSettings(): _*)
-  .settings(integrationTestSettings())
-  .configs(IntegrationTest)
-  .settings(
-    IntegrationTest / Keys.fork := false,
-    Defaults.itSettings,
-    IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
-    IntegrationTest / parallelExecution := false
-  )
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
+
+lazy val it = project
+  .dependsOn(root % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+  .enablePlugins(play.sbt.PlayScala)
+  .settings(scalaVersion := currentScalaVersion)
+  .settings(majorVersion := 1)
+  .settings(
+    libraryDependencies ++= appDependenciesIt
+  )

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.http
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
 import play.api.libs.ws.WSClient

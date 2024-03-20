@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
@@ -32,7 +32,7 @@ trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Stat
 
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
-  implicit val actorSystem = ActorSystem.create("test")
+  implicit val actorSystem: ActorSystem = ActorSystem.create("test")
 //  val materializer: ExecutionContextExecutor = actorSystem.mater
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

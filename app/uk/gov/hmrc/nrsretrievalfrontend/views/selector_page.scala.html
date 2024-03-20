@@ -39,7 +39,7 @@
     pageTitle = title,
     maybeBackButtonUrl = Some(routes.StartController.showStartPage)
 ) {
-    @formHelper(action = routes.SelectorController.submitSelectorPage, 'class -> "form", 'novalidate -> "") {
+    @formHelper(action = routes.SelectorController.submitSelectorPage, Symbol("class") -> "form", Symbol("novalidate") -> "") {
         @govukRadios(
             Radios(
                 fieldset = Some(Fieldset(legend = Some(Legend(content = Text(title))))),

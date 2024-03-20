@@ -14,11 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-
 @this(layout: Layout, p: Paragraph)
 
-@(authorisationStatusMessageKey: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(authorisationStatusMessageKey: String)(implicit request: Request[_], messages: Messages)
 
 @layout(
  pageTitle = messages("test-only.check-authorisation.page.header"),

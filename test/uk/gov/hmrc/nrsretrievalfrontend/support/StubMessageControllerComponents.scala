@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
-import akka.stream.testkit.NoMaterializer
+import org.apache.pekko.stream.testkit.NoMaterializer
 import play.api.http.{DefaultFileMimeTypes, FileMimeTypesConfiguration, HttpConfiguration}
 import play.api.i18n.Messages.UrlMessageSource
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi, Lang, Langs, Messages, MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContentAsEmpty, DefaultActionBuilder, DefaultMessagesActionBuilderImpl, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.i18n._
+import play.api.mvc._
 import play.api.test.Helpers.{stubBodyParser, stubPlayBodyParsers}
 
 import java.util.Locale

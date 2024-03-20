@@ -14,11 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
-
 @this(layout: Layout, p: Paragraph)
 
-@(title: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(title: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title, maybePageHeader = Some(heading)){
   @p(content = Text(message))

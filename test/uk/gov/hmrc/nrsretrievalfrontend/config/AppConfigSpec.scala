@@ -28,7 +28,6 @@ class AppConfigSpec extends BaseUnitSpec{
         "itsa-crystallisation",
         "itsa-cgt-disposal",
         "itsa-cgt-disposal-ppd",
-        "itsa-cgt-disposal-other",
         "itsa-personal-income-submission",
         "itsa-ad-hoc-refund",
         "vat-registration",

@@ -26,7 +26,6 @@ class AppConfigSpec extends BaseUnitSpec{
         "ppt-return",
         "itsa-annual-adjustment",
         "itsa-crystallisation",
-        "itsa-cgt-disposal",
         "itsa-cgt-disposal-ppd",
         "itsa-personal-income-submission",
         "itsa-ad-hoc-refund",

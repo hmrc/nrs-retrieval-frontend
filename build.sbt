@@ -1,4 +1,3 @@
-import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.DefaultBuildSettings
 import play.core.PlayVersion.current
 
@@ -67,7 +66,7 @@ lazy val root = (project in file("."))
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
     )
   )
-  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
+  .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
 
 lazy val it = project

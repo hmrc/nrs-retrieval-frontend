@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
 import org.apache.pekko.util.Timeout
+import org.slf4j.MDC
 import play.api.Logger
 import play.api.mvc._
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
@@ -57,6 +58,7 @@ class SearchController @Inject()(
 
   private val action: String => ActionBuilder[NotableEventRequest, AnyContent] = {
     notableEventType =>
+      MDC.put("notableEvent", notableEventType)
       authenticatedAction.andThen(notableEventRefinerFunction(notableEventType))
   }
 

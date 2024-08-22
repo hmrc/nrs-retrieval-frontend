@@ -149,7 +149,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
       givenAuthenticated()
       givenGetSubmissionBundlesReturns(OK)
-      val response = wsClient.url(s"$serviceRoot/download/$vatReturn/$vrn").withHttpHeaders(authenticationHeader).get().futureValue
+      val response = wsClient.url(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn").withHttpHeaders(authenticationHeader).get().futureValue
       val body = response.bodyAsBytes
       val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
       val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
@@ -174,7 +174,8 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
       givenAuthenticated()
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
-      wsClient.url(s"$serviceRoot/retrieve/$vatReturn/$vrn").withHttpHeaders(authenticationHeader).get().futureValue.status shouldBe ACCEPTED
+      wsClient.url(s"$serviceRoot/retrieve/$vatReturnNotableEvent/$vatReturn/$vrn")
+        .withHttpHeaders(authenticationHeader).get().futureValue.status shouldBe ACCEPTED
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
     }
   }

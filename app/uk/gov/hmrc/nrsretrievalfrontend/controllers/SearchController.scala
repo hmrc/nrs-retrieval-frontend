@@ -58,7 +58,7 @@ class SearchController @Inject()(
 
   private val action: String => ActionBuilder[NotableEventRequest, AnyContent] = {
     notableEventType =>
-      MDC.put("notableEvent", notableEventType)
+      MDC.put("notable_event", notableEventType)
       authenticatedAction.andThen(notableEventRefinerFunction(notableEventType))
   }
 
@@ -119,7 +119,7 @@ class SearchController @Inject()(
     }
   }
 
-  def doAjaxRetrieve(vaultName: String, archiveId: String): Action[AnyContent] = authenticatedAction.async { implicit request =>
+  def doAjaxRetrieve(notableEventType: String, vaultName: String, archiveId: String): Action[AnyContent] = action(notableEventType).async { implicit request =>
     logger.info(s"Request retrieval for $vaultName, $archiveId")
       nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId).map { _ =>
         logger.info(s"Retrieval accepted for $vaultName, $archiveId")
@@ -127,7 +127,7 @@ class SearchController @Inject()(
       }
   }
 
-  def download(vaultName: String, archiveId: String): Action[AnyContent] = authenticatedAction.async { implicit request =>
+  def download(notableEventType: String, vaultName: String, archiveId: String): Action[AnyContent] = action(notableEventType).async { implicit request =>
     val messagePrefix = s"Request download of $vaultName, $archiveId"
 
     logger.info(messagePrefix)

@@ -17,10 +17,12 @@
 @import uk.gov.hmrc.nrsretrievalfrontend.views.helpers.Utils._
 @import scala.concurrent.duration.FiniteDuration
 @import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
+@import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
+
 
 @this(p: Paragraph, govukErrorSummary: GovukErrorSummary)
 
-@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit messages: Messages)
+@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit messages: Messages, request: NotableEventRequest[_])
 
 @timeSubmitted = {
   @formatDisplayDate(searchResult.submissionDateEpochMilli)
@@ -57,7 +59,7 @@
         data-index="@{index}"
         role="button"
         onclick="setStatus(@index, 'Downloaded')"
-        href="@{s"/nrs-retrieval/download/${searchResult.vaultId}/${searchResult.archiveId}"}"
+        href="@{s"/nrs-retrieval/download/${request.notableEvent.name}/${searchResult.vaultId}/${searchResult.archiveId}"}"
         download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
         </a>
     </div>

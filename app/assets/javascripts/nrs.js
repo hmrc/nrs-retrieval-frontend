@@ -128,7 +128,7 @@ function doRetrieve(index, vaultName, archiveId) {
   setStatus(index, STATUS_INCOMPLETE)
   const xmlhttp = http(index, vaultName, archiveId, timeout);
 
-  xmlhttp.open(GET, PATH + 'retrieve/' + vaultName + '/' + archiveId);
+  xmlhttp.open(GET, PATH + 'retrieve/' + notableEvent.name + '/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
 

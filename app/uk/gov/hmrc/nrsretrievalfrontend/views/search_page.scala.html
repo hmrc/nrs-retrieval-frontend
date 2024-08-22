@@ -41,8 +41,6 @@
     request.notableEvent
 }
 
-<script type="text/javascript"> var notableEvent = { name: "@notableEvent.name" };</script>
-
 @pageHeader = @{
     messages(s"search.page.dynamic.header.lbl", notableEvent.pluralDisplayName)
 }
@@ -63,6 +61,8 @@
     maybeBodyEndBlock = None
 ) {
     @p(content = Text(messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
+
+    <input type="hidden"  id="notableEventType" name="@notableEvent.name">
 
     <input id="timeout" type="hidden" value="@appConfig.runTimeMillis">
 

@@ -12,6 +12,7 @@ const STATUS_INCOMPLETE = "Incomplete"
 const STATUS_FAILED = "Failed"
 const GET = "GET"
 const FAILEDTIMEOUT = document.getElementById("timeout").value
+const notableEventType = document.getElementById('notableEventType');
 
 const GOVUK_VISUALLY_HIDDEN = "govuk-visually-hidden"
 function checkStatus(index, vaultName, archiveId, requestTimeout) {
@@ -128,7 +129,7 @@ function doRetrieve(index, vaultName, archiveId) {
   setStatus(index, STATUS_INCOMPLETE)
   const xmlhttp = http(index, vaultName, archiveId, timeout);
 
-  xmlhttp.open(GET, PATH + 'retrieve/' + notableEvent.name + '/' + vaultName + '/' + archiveId);
+  xmlhttp.open(GET, PATH + 'retrieve/' + notableEventType.name + '/' + vaultName + '/' + archiveId);
   xmlhttp.timeout = timeout;
   xmlhttp.send();
 

@@ -15,6 +15,3 @@ GET        /download/:notableEventType/:vaultId/:archiveId            uk.gov.hmr
 
 GET        /status/:vaultId/:archiveId              uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.refresh(vaultId, archiveId)
 GET        /retrieve/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.doAjaxRetrieve(notableEventType,vaultId, archiveId)
-
-
-#GET        /retrieve/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.doAjaxRetrieveTest(vaultId, archiveId, notableEventType)

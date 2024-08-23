@@ -59,7 +59,7 @@
         data-index="@{index}"
         role="button"
         onclick="setStatus(@index, 'Downloaded')"
-        href="@{s"/nrs-retrieval/download/${request.notableEvent.name}/${searchResult.vaultId}/${searchResult.archiveId}"}"
+        href="@routes.SearchController.download(request.notableEvent.name, searchResult.vaultId, searchResult.archiveId)"
         download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
         </a>
     </div>

@@ -11,7 +11,7 @@ GET        /search                                  uk.gov.hmrc.nrsretrievalfron
 GET        /search/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.showSearchPage(notableEventType)
 POST       /search/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.submitSearchPage(notableEventType)
 
-GET        /download/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.download(vaultId, archiveId)
+GET        /download/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.download(notableEventType,vaultId, archiveId)
 
 GET        /status/:vaultId/:archiveId              uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.refresh(vaultId, archiveId)
-GET        /retrieve/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.doAjaxRetrieve(vaultId, archiveId)
+GET        /retrieve/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.doAjaxRetrieve(notableEventType,vaultId, archiveId)

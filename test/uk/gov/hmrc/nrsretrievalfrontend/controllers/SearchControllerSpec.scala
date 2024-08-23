@@ -136,6 +136,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
   }
 
   "download" should {
+    val notableEvent = "vat-return"
     val vaultName = "vat-return"
     val archiveId = "vrn"
 
@@ -161,7 +162,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
 
       "and the request is authorised" in {
         givenTheDownloadSucceeds()
-        theDownloadedBytesShouldBeReturned(controller.download(vaultName, archiveId)(getRequest))
+        theDownloadedBytesShouldBeReturned(controller.download(notableEvent,vaultName, archiveId)(getRequest))
       }
     }
   }

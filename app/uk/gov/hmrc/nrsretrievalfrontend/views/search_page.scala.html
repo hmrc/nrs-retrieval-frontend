@@ -62,6 +62,8 @@
 ) {
     @p(content = Text(messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
 
+    <input type="hidden"  id="notableEventType" name="@notableEvent.name">
+
     <input id="timeout" type="hidden" value="@appConfig.runTimeMillis">
 
     @if(notableEvent.name == "vat-registration") {

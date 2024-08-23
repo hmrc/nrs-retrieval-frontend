@@ -22,6 +22,7 @@ import java.net.URLEncoder
 
 trait Fixture {
   val vatReturn = "vat-return"
+  val vatReturnNotableEvent = "vat-return"
   val vrn = "vrn"
   val validVrn = "validVrn"
 

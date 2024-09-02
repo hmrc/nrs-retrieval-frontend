@@ -89,10 +89,19 @@ class NrsRetrievalConnectorImpl @Inject()(
 
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
-    for {
-      get <- http.GETRaw(path, extraHeaders)
-      _ <- auditable.sendDataEvent(
-        NonRepudiationStoreDownload(user.authProviderId, user.userName, vaultName, archiveId, get.header("nr-submission-id").getOrElse("(Empty)"), path))
-    } yield get
+    http.GETRaw(path, extraHeaders).map { get =>
+      auditable.sendDataEvent(
+        NonRepudiationStoreDownload(
+          authProviderId = user.authProviderId,
+          name = user.userName,
+          vaultName = vaultName,
+          archiveId = archiveId,
+          nrSubmissionId = get.header("nr-submission-id").getOrElse("(Empty)"),
+          path = path
+        )
+      )
+
+      get
+    }
   }
 }

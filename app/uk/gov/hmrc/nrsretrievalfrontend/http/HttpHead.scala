@@ -21,6 +21,7 @@ import uk.gov.hmrc.http.HttpVerbs.{HEAD => HEAD_VERB}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.{HttpHooks, RequestData, ResponseData}
 import uk.gov.hmrc.http.logging.ConnectionTracing
+import uk.gov.hmrc.play.http.logging.Mdc
 import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,7 +37,7 @@ trait CoreHead {
 trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
 
   override def doHead(url: String, headers: Seq[(String, String)])(implicit executionContext: ExecutionContext): Future[HttpResponse] =
-    buildRequest(url, headers).head().map(WSHttpResponse.apply)
+    Mdc.preservingMdc(buildRequest(url, headers).head().map(WSHttpResponse.apply))
 }
 
 trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks with Retries {

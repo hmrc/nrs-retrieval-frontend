@@ -21,12 +21,13 @@ import uk.gov.hmrc.http.HttpVerbs.{GET => GET_VERB}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.{HttpHooks, RequestData, ResponseData}
 import uk.gov.hmrc.http.logging.ConnectionTracing
+import uk.gov.hmrc.play.http.logging.Mdc
 import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait GetRawHttpTransport {
-  def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[WSResponse]
+  def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse]
 }
 
 trait CoreGetRaw {
@@ -35,8 +36,8 @@ trait CoreGetRaw {
 }
 
 trait WSGetRaw extends WSRequest with CoreGetRaw with GetRawHttpTransport {
-  override def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): Future[WSResponse] =
-    buildRequest(url, headers).get()
+  override def doGetRaw(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[WSResponse] =
+    Mdc.preservingMdc(buildRequest(url, headers).get())
 }
 
 trait HttpGetRaw extends CoreGetRaw with GetRawHttpTransport with HttpVerb with ConnectionTracing with HttpHooks with Retries {

@@ -133,7 +133,6 @@ class SearchController @Inject()(
     logger.info(messagePrefix)
 
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map { response =>
-    //    MDC.put("notable_event", notableEventType)
         // log response size rather than the content as this might contain sensitive information
         logger.info(
           s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${response.bodyAsBytes.size} bytes from upstream."

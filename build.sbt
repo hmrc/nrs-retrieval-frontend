@@ -74,7 +74,7 @@ lazy val it = project
   .settings(DefaultBuildSettings.itSettings())
   .enablePlugins(play.sbt.PlayScala)
   .settings(scalaVersion := currentScalaVersion)
-  .settings(majorVersion := 1)
+  .settings(majorVersion := 0)
   .settings(
     libraryDependencies ++= appDependenciesIt
   )

@@ -44,6 +44,10 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, val environme
   lazy val interval: FiniteDuration = loadConfig(s"polling.interval").toLong.millis
   lazy val runTimeMillis: Long = loadConfig(s"polling.duration").toLong
 
+  val testConfig: Option[String] = runModeConfiguration.getOptional[String]("microservice.services.nrs-service.x-api-key")
+
+  logger.info(s"test configuration is = $testConfig")
+
   lazy val futureTimeoutSeconds = 30
 
   lazy val notableEvents: Map[String, NotableEvent] =

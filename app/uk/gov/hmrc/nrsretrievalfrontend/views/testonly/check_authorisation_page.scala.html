@@ -16,7 +16,7 @@
 
 @this(layout: Layout, p: Paragraph)
 
-@(authorisationStatusMessageKey: String)(implicit request: Request[_], messages: Messages)
+@(authorisationStatusMessageKey: String)(implicit request: Request[?], messages: Messages)
 
 @layout(
  pageTitle = messages("test-only.check-authorisation.page.header"),

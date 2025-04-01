@@ -17,14 +17,13 @@
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
 import com.google.inject.Inject
-
-import javax.inject.Named
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nrsretrievalfrontend.models.audit.DataEventAuditType
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 
+import javax.inject.Named
 import scala.concurrent.{ExecutionContext, Future}
 
 class Auditable @Inject()(
@@ -40,7 +39,7 @@ class Auditable @Inject()(
       dataEventAuditType.auditType,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(dataEventAuditType.transactionName, dataEventAuditType.path)
         ++ dataEventAuditType.tags.tags,
-      detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(dataEventAuditType.details.details.toSeq: _*)
+      detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(dataEventAuditType.details.details.toSeq*)
     )
     logger.debug(s"Audit event: ${event.toString}")
     Future(audit.sendDataEvent(event))

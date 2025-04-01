@@ -19,7 +19,7 @@
 
 @this(mainTemplate: MainTemplate, p: Paragraph, button: GovukButton)
 
-@()(implicit request: AuthenticatedRequest[_], messages : Messages)
+@()(implicit request: AuthenticatedRequest[?], messages : Messages)
 
 @mainTemplate(pageTitle = messages("start.page.header.lbl")) {
     @p(content = Text(messages("start.text.one.lbl")))

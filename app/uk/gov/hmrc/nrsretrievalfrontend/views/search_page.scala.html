@@ -35,7 +35,7 @@
         searchForm: Form[SearchQueries],
         maybeResults: Option[Seq[SearchResult]],
         estimatedRetrievalTime: FiniteDuration
-)(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
+)(implicit request: NotableEventRequest[?], messages: Messages, appConfig: AppConfig)
 
 @notableEvent = @{
     request.notableEvent

@@ -16,7 +16,7 @@
 
 @this(layout: Layout, p: Paragraph)
 
-@(title: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
+@(title: String, heading: String, message: String)(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = title, maybePageHeader = Some(heading)){
   @p(content = Text(message))

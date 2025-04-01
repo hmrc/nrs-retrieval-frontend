@@ -22,7 +22,7 @@
 
 @this(p: Paragraph, govukErrorSummary: GovukErrorSummary)
 
-@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit messages: Messages, request: NotableEventRequest[_])
+@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit messages: Messages, request: NotableEventRequest[?])
 
 @timeSubmitted = {
   @formatDisplayDate(searchResult.submissionDateEpochMilli)

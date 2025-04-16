@@ -62,7 +62,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
               notableEvent = "notableEvent",
               payloadContentType = "payloadContentType",
               userSubmissionTimestamp = ZonedDateTime.now(),
-              userAuthToken = "userAuthToken",
+              userAuthToken = Some("userAuthToken"),
               nrSubmissionId = "nrSubmissionId",
               bundle = Bundle("fileType", 1),
               attachmentIds = None,

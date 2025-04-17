@@ -24,12 +24,10 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.0.0",
   "com.typesafe.play" %% "play-json-joda" % "2.10.5",
   "commons-io" % "commons-io" % "2.17.0",
-//  "uk.gov.hmrc" %% "auth-client-play-30" % "8.6.0",
   "uk.gov.hmrc" %% "http-verbs-play-30" % "15.2.0"
 )
 def test(scope: String = "test"): Seq[ModuleID] = Seq(
   "org.scalatest" %% "scalatest" % "3.2.18" % scope,
-//  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
   "org.playframework" %% "play-test" % current % scope,
   "org.scalatestplus" %% "mockito-5-12" % "3.2.19.0" % Test,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope,
@@ -37,9 +35,7 @@ def test(scope: String = "test"): Seq[ModuleID] = Seq(
 )
 def it(scope: String = "test"): Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope,
-//  "com.github.tomakehurst" % "wiremock" % "3.0.1" % scope,
   "org.playframework" %% "play-test" % current % scope,
-//  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope
 )
 

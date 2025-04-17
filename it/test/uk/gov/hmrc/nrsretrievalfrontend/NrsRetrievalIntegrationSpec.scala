@@ -16,25 +16,20 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend
 
-import models.NrsSearchResult
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.util.ByteString
 import org.jsoup.Jsoup.parse
-import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 import play.api.libs.ws.DefaultBodyWritables
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import play.api.test.Helpers.await
-import play.api.test.Helpers.defaultAwaitTimeout
-
-import java.net.URL
 import play.api.libs.ws.DefaultBodyWritables.*
-import uk.gov.hmrc.http.HttpReads.Implicits.*
-import uk.gov.hmrc.http.client.HttpClientV2
-import scala.concurrent.duration.*
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.readStreamHttpResponse
+import uk.gov.hmrc.nrsretrievalfrontend.models.NrsSearchResult
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 
 import java.io.ByteArrayInputStream
+import java.net.URL
 import java.util.zip.ZipInputStream
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 class NrsRetrievalIntegrationSpec extends IntegrationSpec {
@@ -46,7 +41,6 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   private val startPageHeading = "Search the Non-Repudiation Store"
   private val vatReturnSearchPageHeading = "Search for VAT returns"
   private val vatRegistrationSearchPageHeading = "Search for VAT registrations"
- // given hc: HeaderCarrier = HeaderCarrier()
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   private def assertPageIsRendered(eventualResponse: Future[HttpResponse], pageHeader: String) = {
     val response = eventualResponse.futureValue
@@ -217,35 +211,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       }
     }
   }
-
-/*  def givenGetSubmissionBundlesReturnsTest(status: Int): StubMapping = {
-    val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())
-    val byteArrayOutputStream = new ByteArrayOutputStream()
-    val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
-    val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
-
-    fileNames.foreach { fileName =>
-      val zipEntry: ZipEntry = new ZipEntry(fileName)
-      zipOutputStream.putNextEntry(zipEntry)
-      zipOutputStream.write(output)
-      zipOutputStream.closeEntry()
-    }
-
-    val body = byteArrayOutputStream.toByteArray
-
-    stubFor(get(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey)
-      .willReturn(aResponse()
-        .withStatus(status)
-        .withBody(body)
-        .withHeader("Cache-Control", "no-cache,no-store,max-age=0")
-        .withHeader("Content-Length", s"${body.size}")
-        .withHeader("Content-Disposition", s"inline; filename=$submissionId.zip")
-        .withHeader("Content-Type", "application/octet-stream")
-        .withHeader("nr-submission-id", submissionId)
-        .withHeader("Date", "Tue, 13 Jul 2021 12:36:51 GMT")
-      ))
-  }*/
-
+  
   "GET /nrs-retrieval/download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
       givenAuthenticated()
@@ -255,7 +221,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       val url = new URL(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn")
       val responseFuture = httpClientV2
         .get(url)
-        .setHeader(authenticationHeader1: _*)
+        .setHeader(authenticationHeader)
         .stream[HttpResponse]
         .futureValue
 
@@ -290,7 +256,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       val url = new URL(s"$serviceRoot/retrieve/$vatReturnNotableEvent/$vatReturn/$vrn")
       httpClientV2
         .get(url)
-        .setHeader(authenticationHeader1: _*)
+        .setHeader(authenticationHeader)
         .execute[HttpResponse]
         .futureValue.status shouldBe ACCEPTED
 

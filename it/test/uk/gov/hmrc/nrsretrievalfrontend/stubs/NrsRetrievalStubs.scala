@@ -19,10 +19,9 @@ package uk.gov.hmrc.nrsretrievalfrontend.stubs
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.{EqualToPattern, UrlPattern}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import org.apache.pekko.util.ByteString
 import play.api.libs.json.Json.toJson
-import uk.gov.hmrc.nrsretrievalfrontend.{Fixture, IntegrationSpec}
 import uk.gov.hmrc.nrsretrievalfrontend.models.NrsSearchResult
+import uk.gov.hmrc.nrsretrievalfrontend.{Fixture, IntegrationSpec}
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
@@ -116,37 +115,7 @@ object NrsRetrievalStubs extends Fixture with IntegrationSpec {
       .withHeader("Date","Tue, 13 Jul 2021 12:36:51 GMT")
     ))
   }
-
-  def givenGetSubmissionBundlesReturnsTest(status: Int): StubMapping = {
-    val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())
-    val byteArrayOutputStream = new ByteArrayOutputStream()
-    val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
-    val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
-
-    fileNames.foreach { fileName =>
-      val zipEntry: ZipEntry = new ZipEntry(fileName)
-      zipOutputStream.putNextEntry(zipEntry)
-      zipOutputStream.write(output)
-      zipOutputStream.closeEntry()
-    }
-
-
-    val body = byteArrayOutputStream.toByteArray
-
-    stubFor(get(urlEqualTo(submissionBundlesPath))
-      .willReturn(aResponse()
-        .withStatus(status)
-        .withBody(body)
-        .withHeader("Cache-Control", "no-cache,no-store,max-age=0")
-        .withHeader("Content-Length", s"${body.size}")
-        .withHeader("Content-Disposition", s"inline; filename=$submissionId.zip")
-        .withHeader("Content-Type", "application/octet-stream")
-        .withHeader("nr-submission-id", submissionId)
-        .withHeader("Date", "Tue, 13 Jul 2021 12:36:51 GMT")
-      ))
-  }
-
-   val serviceRoots = s"http://localhost:$port/nrs-retrieval"
+  
   def verifyGetSubmissionBundlesWithXApiKeyHeader(): Unit =
     verify(getRequestedFor(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey))
 

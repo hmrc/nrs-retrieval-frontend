@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend
 
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticated
 import play.api.libs.ws.DefaultBodyWritables
-import play.api.libs.ws.DefaultBodyWritables._
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.client.HttpClientV2
+import play.api.libs.ws.DefaultBodyWritables.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticated
 
 import java.net.URL
 import scala.concurrent.ExecutionContext

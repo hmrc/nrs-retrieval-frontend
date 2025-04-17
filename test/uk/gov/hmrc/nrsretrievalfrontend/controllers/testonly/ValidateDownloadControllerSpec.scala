@@ -18,13 +18,15 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
 
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.TestOnlyNrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.controllers.ControllerSpec
+import uk.gov.hmrc.nrsretrievalfrontend.models.AuthorisedUser
 import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
 
 import scala.concurrent.Future
@@ -73,7 +75,7 @@ class ValidateDownloadControllerSpec extends ControllerSpec {
       val header1 = ("header1", "h1")
       val header2 = ("header2", "h2")
 
-      when(connector.validateDownload(ArgumentMatchers.eq(aVaultName), ArgumentMatchers.eq(anArchiveId))(any(), any()))
+      when(connector.validateDownload(ArgumentMatchers.eq(aVaultName), ArgumentMatchers.eq(anArchiveId))(using any[HeaderCarrier], any[AuthorisedUser]))
         .thenReturn(Future successful ValidateDownloadResult(OK, zipSize, files, Seq(header1, header2)))
 
       val request: FakeRequest[AnyContentAsFormUrlEncoded] =

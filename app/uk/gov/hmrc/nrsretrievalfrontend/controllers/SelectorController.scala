@@ -30,8 +30,7 @@ class SelectorController @Inject()(
                                     authenticatedAction: AuthenticatedAction,
                                     controllerComponents: MessagesControllerComponents,
                                     selectorPage: selector_page
-                                  )(implicit val appConfig: AppConfig)
-  extends NRBaseController(controllerComponents) {
+                                  )(using val appConfig: AppConfig) extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
@@ -49,4 +48,3 @@ class SelectorController @Inject()(
         v => Redirect(routes.SearchController.showSearchPage(v.notableEventType))
       )
   }
-}

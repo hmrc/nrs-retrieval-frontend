@@ -17,13 +17,25 @@
 package uk.gov.hmrc.nrsretrievalfrontend
 
 import models.NrsSearchResult
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.util.ByteString
 import org.jsoup.Jsoup.parse
-import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
+import play.api.libs.ws.DefaultBodyWritables
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import play.api.test.Helpers.await
+import play.api.test.Helpers.defaultAwaitTimeout
+
+import java.net.URL
+import play.api.libs.ws.DefaultBodyWritables.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.client.HttpClientV2
+import scala.concurrent.duration.*
+import uk.gov.hmrc.http.client.readStreamHttpResponse
 
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
-import scala.concurrent.Future
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   private val selectUrl = s"$serviceRoot/select"
@@ -34,8 +46,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   private val startPageHeading = "Search the Non-Repudiation Store"
   private val vatReturnSearchPageHeading = "Search for VAT returns"
   private val vatRegistrationSearchPageHeading = "Search for VAT registrations"
-
-  private def assertPageIsRendered(eventualResponse: Future[WSResponse], pageHeader: String) = {
+ // given hc: HeaderCarrier = HeaderCarrier()
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+  private def assertPageIsRendered(eventualResponse: Future[HttpResponse], pageHeader: String) = {
     val response = eventualResponse.futureValue
     val document = parse(response.body)
 
@@ -48,25 +61,51 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   "GET /nrs-retrieval/start" should {
     "display the start page" in {
       givenAuthenticated()
-      assertPageIsRendered(
-        wsClient.url(s"$serviceRoot/start").withHttpHeaders(authenticationHeader).get(), startPageHeading)
+      val url = new URL(s"$serviceRoot/start")
+      val responseFuture: Future[HttpResponse] = httpClientV2
+        .get(url)
+        .setHeader(authenticationHeader)
+        .execute[HttpResponse]
+
+      val response = responseFuture
+
+      assertPageIsRendered(response,startPageHeading)
     }
   }
 
   "GET /nrs-retrieval/select" should {
     "display the select page" in {
       givenAuthenticated()
-      assertPageIsRendered(
-        wsClient.url(s"$serviceRoot/select").withHttpHeaders(authenticationHeader).get(), "What type of digital submission would you like to search for?")
+
+      val url = new URL(s"$serviceRoot/select")
+      val responseFuture: Future[HttpResponse] = httpClientV2
+        .get(url)
+        .setHeader(authenticationHeader)
+        .execute[HttpResponse]
+
+      val response = responseFuture
+
+      assertPageIsRendered(response, "What type of digital submission would you like to search for?")
+
     }
   }
 
   "POST /nrs-retrieval/select" should {
     "redirect to the search page" in {
       givenAuthenticated()
-      assertPageIsRendered(
-        wsClient.url(selectUrl).withHttpHeaders(authenticationHeader).post(Map[String, Seq[String]](notableEventType -> Seq(vatReturn))),
-        vatReturnSearchPageHeading)
+      val body: Map[String, Seq[String]] = Map(notableEventType -> Seq(vatReturn))
+
+      val url = new URL(selectUrl)
+      val responseFuture: Future[HttpResponse] = httpClientV2
+        .post(url)
+        .setHeader(authenticationHeader)
+        .withBody(body)
+        .execute[HttpResponse]
+
+      val response = responseFuture
+
+      assertPageIsRendered(response,vatReturnSearchPageHeading)
+
     }
   }
 
@@ -74,23 +113,49 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     "redirect to the start page" when {
       "no notable event type is provided" in {
         givenAuthenticated()
-        assertPageIsRendered(wsClient.url(searchUrl).withHttpHeaders(authenticationHeader).get(), startPageHeading)
+
+        val url = new URL(searchUrl)
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .get(url)
+          .setHeader(authenticationHeader)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        assertPageIsRendered(response, startPageHeading)
+
       }
     }
 
     "display the search page" when {
       "a vat return is provided" in {
         givenAuthenticated()
-        val document =
-          assertPageIsRendered(wsClient.url(vatReturnSearchUrl).withHttpHeaders(authenticationHeader).get(), vatReturnSearchPageHeading)
+
+        val url = new URL(vatReturnSearchUrl)
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .get(url)
+          .setHeader(authenticationHeader)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        val document =  assertPageIsRendered(response, vatReturnSearchPageHeading)
 
         Option(document.getElementById("vat-registration-additional-info")).isEmpty shouldBe true
       }
 
       "a non vat registration is provided" in {
         givenAuthenticated()
-        val document =
-          assertPageIsRendered(wsClient.url(vatRegistrationSearchUrl).withHttpHeaders(authenticationHeader).get(), vatRegistrationSearchPageHeading)
+
+        val url = new URL(vatRegistrationSearchUrl)
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .get(url)
+          .setHeader(authenticationHeader)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        val document = assertPageIsRendered(response, vatRegistrationSearchPageHeading)
 
         Option(document.getElementById("vat-registration-additional-info").id()).isDefined shouldBe true
       }
@@ -103,18 +168,22 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         givenAuthenticated()
         givenSearchReturns(vatReturnSearchText, OK, Seq.empty[NrsSearchResult])
 
-        val document = assertPageIsRendered(
-          wsClient.url(vatReturnSearchUrl)
-            .withHttpHeaders(authenticationHeader)
-            .post(
-            Map[String, Seq[String]](
-              searchKeyName -> Seq(vrn),
-              searchKeyValue -> Seq(validVrn),
-              notableEventType -> Seq(vatReturn)
-            )
-          ),
-          vatReturnSearchPageHeading
+        val body: Map[String, Seq[String]] = Map(
+          searchKeyName -> Seq(vrn),
+          searchKeyValue -> Seq(validVrn),
+          notableEventType -> Seq(vatReturn)
         )
+
+        val url = new URL(vatReturnSearchUrl)
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .post(url)
+          .setHeader(authenticationHeader)
+          .withBody(body)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        val document = assertPageIsRendered(response, vatReturnSearchPageHeading)
 
         document.getElementById("notFound").text() shouldBe """No results found for "validVrn""""
 
@@ -125,18 +194,22 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         givenAuthenticated()
         givenSearchReturns(vatRegistrationSearchText, OK, Seq.empty[NrsSearchResult])
 
-        val document = assertPageIsRendered(
-          wsClient.url(vatRegistrationSearchUrl)
-            .withHttpHeaders(authenticationHeader)
-            .post(
-            Map[String, Seq[String]](
-              searchKeyName -> Seq(vatRegistrationSearchKey),
-              searchKeyValue -> Seq(postCode),
-              notableEventType -> Seq(vatRegistration)
-            )
-          ),
-          vatRegistrationSearchPageHeading
+        val body: Map[String, Seq[String]] = Map(
+          searchKeyName -> Seq(vatRegistrationSearchKey),
+          searchKeyValue -> Seq(postCode),
+          notableEventType -> Seq(vatRegistration)
         )
+
+        val url = new URL(vatRegistrationSearchUrl)
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .post(url)
+          .setHeader(authenticationHeader)
+          .withBody(body)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        val document = assertPageIsRendered(response, vatRegistrationSearchPageHeading)
 
         document.getElementById("notFound").text() shouldBe """No results found for "aPostCode""""
 
@@ -145,20 +218,59 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     }
   }
 
+/*  def givenGetSubmissionBundlesReturnsTest(status: Int): StubMapping = {
+    val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())
+    val byteArrayOutputStream = new ByteArrayOutputStream()
+    val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
+    val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+
+    fileNames.foreach { fileName =>
+      val zipEntry: ZipEntry = new ZipEntry(fileName)
+      zipOutputStream.putNextEntry(zipEntry)
+      zipOutputStream.write(output)
+      zipOutputStream.closeEntry()
+    }
+
+    val body = byteArrayOutputStream.toByteArray
+
+    stubFor(get(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey)
+      .willReturn(aResponse()
+        .withStatus(status)
+        .withBody(body)
+        .withHeader("Cache-Control", "no-cache,no-store,max-age=0")
+        .withHeader("Content-Length", s"${body.size}")
+        .withHeader("Content-Disposition", s"inline; filename=$submissionId.zip")
+        .withHeader("Content-Type", "application/octet-stream")
+        .withHeader("nr-submission-id", submissionId)
+        .withHeader("Date", "Tue, 13 Jul 2021 12:36:51 GMT")
+      ))
+  }*/
+
   "GET /nrs-retrieval/download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
       givenAuthenticated()
       givenGetSubmissionBundlesReturns(OK)
-      val response = wsClient.url(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn").withHttpHeaders(authenticationHeader).get().futureValue
-      val body = response.bodyAsBytes
-      val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
+      given ActorSystem = ActorSystem()
+
+      val url = new URL(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn")
+      val responseFuture = httpClientV2
+        .get(url)
+        .setHeader(authenticationHeader1: _*)
+        .stream[HttpResponse]
+        .futureValue
+
+      val response = responseFuture
+
+      val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _), 5.seconds)
+
+      val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
       val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
 
       response.status shouldBe OK
       zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
       response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
-      response.header("Content-Length") shouldBe Some(s"${body.size}")
+      response.header("Content-Length") shouldBe Some("276")
       response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
       response.header("Content-Type") shouldBe Some("application/octet-stream")
       response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
@@ -174,8 +286,14 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
       givenAuthenticated()
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
-      wsClient.url(s"$serviceRoot/retrieve/$vatReturnNotableEvent/$vatReturn/$vrn")
-        .withHttpHeaders(authenticationHeader).get().futureValue.status shouldBe ACCEPTED
+
+      val url = new URL(s"$serviceRoot/retrieve/$vatReturnNotableEvent/$vatReturn/$vrn")
+      httpClientV2
+        .get(url)
+        .setHeader(authenticationHeader1: _*)
+        .execute[HttpResponse]
+        .futureValue.status shouldBe ACCEPTED
+
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
     }
   }

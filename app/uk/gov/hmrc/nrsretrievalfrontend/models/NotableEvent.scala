@@ -32,7 +32,7 @@ case class SearchKey(
                     )
 
 object SearchKey {
-  implicit val searchKeyFormat: OFormat[SearchKey] = Json.format[SearchKey]
+  given OFormat[SearchKey] = Json.format[SearchKey]
 
 }
 case class NotableEvent(
@@ -47,7 +47,7 @@ case class NotableEvent(
                        )
 
 object NotableEvent {
-  implicit val finiteDurationFormat: Format[FiniteDuration] = new Format[FiniteDuration] {
+  given Format[FiniteDuration] = new Format[FiniteDuration] {
     override def reads(json: JsValue): JsResult[FiniteDuration] = {
       Try(Duration.apply(json.as[String])).toOption.collect {
         case duration: FiniteDuration => JsSuccess(duration)
@@ -58,6 +58,6 @@ object NotableEvent {
       JsString(o.toString())
   }
 
-  implicit val notableEventFormat: OFormat[NotableEvent] = Json.format[NotableEvent]
+  given OFormat[NotableEvent] = Json.format[NotableEvent]
 
 }

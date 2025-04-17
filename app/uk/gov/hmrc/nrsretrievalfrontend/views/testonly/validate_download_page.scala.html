@@ -31,7 +31,7 @@
         button: GovukButton
 )
 
-@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[?], messages: Messages)
+@(form: Form[ValidateDownloadRequest], maybeResults: Option[ValidateDownloadResult] = None)(implicit request: Request[_], messages: Messages)
 
 @layout(
     pageTitle = Messages("test-only.validate-download.page.header"),

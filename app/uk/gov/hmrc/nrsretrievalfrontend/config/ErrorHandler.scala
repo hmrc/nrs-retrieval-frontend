@@ -17,18 +17,19 @@
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
 import play.api.i18n.MessagesApi
-import play.api.mvc.Request
+import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.error_template
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErrorHandler @Inject()(
                               val messagesApi: MessagesApi,
                               errorPage: error_template
-                            )(implicit val appConfig: AppConfig) extends FrontendErrorHandler {
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[?]): Html =
-    errorPage(pageTitle, heading, message)
-}
+                            )(using val appConfig: AppConfig,
+                              val ec: ExecutionContext) extends FrontendErrorHandler:
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader): Future[Html] =
+    Future.successful(errorPage(pageTitle, heading, message))

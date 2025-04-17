@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
-import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NrsSearchResult, Query}
 
@@ -24,11 +23,12 @@ import scala.concurrent.Future
 
 trait NrsRetrievalConnector {
 
-  def search(notableEvent: String, query: List[Query], crossKeySearch: Boolean)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[Seq[NrsSearchResult]]
+  def search(notableEvent: String, query: List[Query], crossKeySearch: Boolean)(using HeaderCarrier, AuthorisedUser): Future[Seq[NrsSearchResult]]
 
-  def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse]
+  def submitRetrievalRequest(vaultName: String, archiveId: String)(using hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse]
 
-  def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def statusSubmissionBundle(vaultName: String, archiveId: String)(using hc: HeaderCarrier): Future[HttpResponse]
 
-  def getSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[WSResponse]
+  def getSubmissionBundle(vaultName: String, archiveId: String)(using hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse]
+  
 }

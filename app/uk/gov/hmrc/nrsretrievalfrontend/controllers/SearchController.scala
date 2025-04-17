@@ -16,22 +16,23 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import org.apache.pekko.util.Timeout
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.util.{ByteString, Timeout}
 import org.slf4j.MDC
 import play.api.Logger
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
 import uk.gov.hmrc.nrsretrievalfrontend.actions.{AuthenticatedAction, NotableEventRefiner}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
-import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings._
+import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.*
 import uk.gov.hmrc.nrsretrievalfrontend.models.{CompletionStatus, SearchQueries, SearchResultUtils}
-import uk.gov.hmrc.nrsretrievalfrontend.views.html._
+import uk.gov.hmrc.nrsretrievalfrontend.views.html.*
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.*
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
@@ -43,8 +44,8 @@ class SearchController @Inject()(
                                   controllerComponents: MessagesControllerComponents,
                                   searchPage: search_page,
                                   errorPage: error_template
-                                )(implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends NRBaseController(controllerComponents) {
+                                )(using val appConfig: AppConfig, executionContext: ExecutionContext)
+  extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
@@ -133,12 +134,14 @@ class SearchController @Inject()(
     logger.info(messagePrefix)
 
       nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map { response =>
+        given ActorSystem = ActorSystem()
+        val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _), 5.seconds)
         // log response size rather than the content as this might contain sensitive information
         logger.info(
-          s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${response.bodyAsBytes.size} bytes from upstream."
+          s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."
         )
-
-        Ok(response.bodyAsBytes).withHeaders(mapToSeq(response.headers): _*)
+        
+        Ok(bytes).withHeaders(mapToSeq(response.headers)*)
       }.recoverWith {
         case e =>
           logger.error(s"$messagePrefix failed with $e", e)
@@ -156,4 +159,3 @@ class SearchController @Inject()(
 
   private def getEstimatedRetrievalTime(notableEventType: String): FiniteDuration =
     appConfig.notableEvents.get(notableEventType).fold(5.minutes)(_.estimatedRetrievalTime)
-}

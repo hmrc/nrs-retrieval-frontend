@@ -16,37 +16,39 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.http
 
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.HttpReads.Implicits
-import uk.gov.hmrc.http.HttpVerbs.{HEAD => HEAD_VERB}
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+import uk.gov.hmrc.http.HttpVerbs.HEAD as HEAD_VERB
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.hooks.{HttpHooks, RequestData, ResponseData}
 import uk.gov.hmrc.http.logging.ConnectionTracing
 import uk.gov.hmrc.play.http.logging.Mdc
-import uk.gov.hmrc.play.http.ws.{WSHttpResponse, WSRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeadHttpTransport {
-  def doHead(url: String, headers: Seq[(String, String)])(implicit executionContext: ExecutionContext): Future[HttpResponse]
+  def doHead(url: String, headers: Seq[(String, String)])(using hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 }
 
 trait CoreHead {
-  def HEAD(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+  def HEAD(url: String, headers: Seq[(String, String)])(using hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 }
 
-trait WSHead extends WSRequest with CoreHead with HeadHttpTransport {
+trait WSHead extends CoreHead with HeadHttpTransport {
+  def httpClient: HttpClientV2
 
-  override def doHead(url: String, headers: Seq[(String, String)])(implicit executionContext: ExecutionContext): Future[HttpResponse] =
-    Mdc.preservingMdc(buildRequest(url, headers).head().map(WSHttpResponse.apply))
+  override def doHead(url: String, headers: Seq[(String, String)])(using hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    Mdc.preservingMdc(httpClient.head(url"$url").setHeader(headers*).execute[HttpResponse])
 }
 
-trait HttpHead extends CoreHead with HeadHttpTransport with HttpVerb with ConnectionTracing with HttpHooks with Retries {
+trait HttpHead extends CoreHead with HeadHttpTransport with MapErrors with ConnectionTracing with HttpHooks with Retries {
 
   private lazy val hcConfig = HeaderCarrier.Config.fromConfig(configuration)
 
-  override def HEAD(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+  override def HEAD(url: String, headers: Seq[(String, String)])(using hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     withTracing(HEAD_VERB, url) {
-      val allHeaders   = HeaderCarrier.headersForUrl(hcConfig, url, headers) :+ "Http-Client-Version" -> BuildInfo.version
+      val allHeaders = HeaderCarrier.headersForUrl(hcConfig, url, headers) :+ "Http-Client-Version" -> BuildInfo.version
       val httpResponse = retryOnSslEngineClosed(HEAD_VERB, url)(doHead(url, headers = allHeaders))
 
       executeHooks(

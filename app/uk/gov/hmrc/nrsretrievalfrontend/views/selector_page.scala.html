@@ -24,7 +24,7 @@
 
 @this(mainTemplate: MainTemplate, formHelper: FormWithCSRF, govukRadios: GovukRadios, button: GovukButton)
 
-@(selectorForm: Form[Selector])(implicit request: AuthenticatedRequest[?], messages: Messages, appConfig: AppConfig)
+@(selectorForm: Form[Selector])(implicit request: AuthenticatedRequest[_], messages: Messages, appConfig: AppConfig)
 
 @title = @{
     val title = Messages("selector.page.header.lbl")
@@ -43,7 +43,7 @@
         @govukRadios(
             Radios(
                 fieldset = Some(Fieldset(legend = Some(Legend(content = Text(title))))),
-                items = radioOptions.map { param: RadioParams =>
+                items = radioOptions.map { (param: RadioParams) =>
                     RadioItem(content = Text(param.label), value = Some(param.value))
                 }
             ).withFormField(selectorForm("notableEventType"))

@@ -21,7 +21,7 @@
 
 @this(searchResultPanel: SearchResultPanel, govukTable : GovukTable)
 
-@(searchForm: Form[SearchQueries], results: Seq[SearchResult], label: String, estimatedRetrievalTime: FiniteDuration)(implicit request: NotableEventRequest[?], messages: Messages)
+@(searchForm: Form[SearchQueries], results: Seq[SearchResult], label: String, estimatedRetrievalTime: FiniteDuration)(implicit request: NotableEventRequest[_], messages: Messages)
 
 <br>
 <hr>

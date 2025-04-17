@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
-import uk.gov.hmrc.govukfrontend.views.html.components._
+import uk.gov.hmrc.govukfrontend.views.html.components.*
+import uk.gov.hmrc.govukfrontend.views.html.helpers.{GovukFormGroup, GovukHintAndErrorMessage}
 import uk.gov.hmrc.hmrcfrontend.config.{AccessibilityStatementConfig, AssetsConfig, TrackingConsentConfig, TudorCrownConfig}
 import uk.gov.hmrc.hmrcfrontend.views.config.HmrcFooterItems
 import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcFooter, HmrcInternalHeader, HmrcPageHeading}
 import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardFooter, HmrcTrackingConsentSnippet}
-import uk.gov.hmrc.nrsretrievalfrontend.views.html.components._
+import uk.gov.hmrc.nrsretrievalfrontend.views.html.components.*
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.{check_authorisation_page, validate_download_page}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.{error_template, search_page, selector_page, start_page}
 
@@ -33,7 +34,7 @@ trait Views {
   lazy val hmrcTrackingConsentSnippet = new HmrcTrackingConsentSnippet(trackingConsentConfig)
   lazy val assetsConfig = new AssetsConfig
   lazy val hmrcInternalHeader = new HmrcInternalHeader(tudorCrownConfig)
-  lazy val hmrcFooter = new HmrcFooter
+  lazy val hmrcFooter = new HmrcFooter(govukFooter)
   lazy val accessibilityStatementConfig = new AccessibilityStatementConfig(this.configuration)
   lazy val hmrcFooterItems = new HmrcFooterItems(accessibilityStatementConfig)
   lazy val hmrcStandardFooter = new HmrcStandardFooter(hmrcFooter, hmrcFooterItems)
@@ -49,6 +50,8 @@ trait Views {
   lazy val govukFieldset = new GovukFieldset
   lazy val govukHint = new GovukHint
   lazy val govukLabel = new GovukLabel
+  lazy val goveukFormGroup = new GovukFormGroup
+  lazy val goveukHintAndErrorMessage = new GovukHintAndErrorMessage(govukHint, govukErrorMessage)
   lazy val govukTable = new GovukTable
 
   lazy val govukSkipLink = new GovukSkipLink
@@ -90,8 +93,8 @@ trait Views {
   )
 
   lazy val paragraph = new Paragraph
-  lazy val govukInput = new GovukInput(govukErrorMessage, govukHint, govukLabel)
-  lazy val govukRadios = new GovukRadios(govukErrorMessage, govukFieldset, govukHint, govukLabel)
+  lazy val govukInput = new GovukInput(govukLabel, goveukFormGroup, goveukHintAndErrorMessage)
+  val govukRadios = new GovukRadios(govukFieldset, govukHint, govukLabel, goveukFormGroup, goveukHintAndErrorMessage)
   lazy val govukButton = new GovukButton
 
   lazy val error_template: error_template = new error_template(

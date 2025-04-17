@@ -35,7 +35,7 @@
         optBeforeContentBlock: Option[Html] = None,
         maybePageHeader: Option[String] = None,
         addedScripts: Option[Html] = None
-)(content: Html)(implicit request: Request[?], messages: Messages)
+)(content: Html)(implicit request: RequestHeader, messages: Messages)
 
 @nrsHeaderBlock = {
 @hmrcInternalHeader(

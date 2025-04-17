@@ -30,15 +30,13 @@ case class SearchResult(
                          submissionDateEpochMilli: Long,
                          retrievalStatus: Option[String] = None,
                          hasAttachments: Boolean
-                       ) {
+                       ):
 
   val linkText: String =
     s"$notableEventDisplayName submitted ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
 
-}
-
 object SearchResult {
-  implicit val formats: OFormat[SearchResult] = Json.format[SearchResult]
+  given OFormat[SearchResult] = Json.format[SearchResult]
 }
 
 class SearchResultUtils @Inject()(appConfig: AppConfig) {

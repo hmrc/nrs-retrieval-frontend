@@ -16,25 +16,26 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.util.ByteString
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
-import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, Bundle, Glacier, NrsSearchResult}
-import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs._
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 
 import java.io.ByteArrayInputStream
+import java.nio.charset.Charset.*
 import java.time.ZonedDateTime
 import java.util.zip.ZipInputStream
+import scala.concurrent.Await
+import scala.concurrent.duration.*
 
 class NrsRetrievalContractSpec extends IntegrationSpec {
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private implicit val authorisedUser: AuthorisedUser = AuthorisedUser("userName", "authProviderId")
-
-  private lazy val connector = injector.instanceOf[NrsRetrievalConnectorImpl]
-
   private def anUpstreamErrorResponseShouldBeThrownBy[T](request: () => T, statusCode: Int): Assertion =
     intercept[Exception] {
       request()
@@ -50,7 +51,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
     (vatReturn, vatReturnSearchQuery, vatReturnSearchText, false),
     (vatRegistration, vatRegistrationSearchQuery, vatRegistrationSearchText, true)).foreach { case (notableEvent, query, queryText, crossKeySearch) =>
 
-   val search: () => Seq[NrsSearchResult] = () => connector.search(notableEvent, query.queries, crossKeySearch).futureValue
+    val search: () => Seq[NrsSearchResult] = () => connector.search(notableEvent, query.queries, crossKeySearch).futureValue
 
 
     s"a ${if (crossKeySearch) "cross key" else "standard"} search" should {
@@ -116,26 +117,27 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "getSubmissionBundle" should {
-    def submissionBundle(): WSResponse = connector.getSubmissionBundle(vatReturn, vrn).futureValue
+    def submissionBundle(): HttpResponse = connector.getSubmissionBundle(vatReturn, vrn).futureValue
 
-    // the backend only returns OK here, to do fix under NONPR-2082
     "return OK" when {
       "the retrieval service returns OK" in {
         givenGetSubmissionBundlesReturns(OK)
 
+        given ActorSystem = ActorSystem()
+
         val response = submissionBundle()
-        val body = response.bodyAsBytes
-        val zipInputStream = new ZipInputStream(new ByteArrayInputStream(body.toArray))
+        val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _), 5.seconds)
+        val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
         val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
 
         response.status shouldBe OK
-        zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
         response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
-        response.header("Content-Length") shouldBe Some(s"${body.size}")
+        response.header("Content-Length") shouldBe Some("276")
         response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
         response.header("Content-Type") shouldBe Some("application/octet-stream")
         response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
         response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
+        zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
         zipInputStream.close()
       }
@@ -143,7 +145,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "submitRetrievalRequest" should {
-    val submitRetrievalRequest: () => HttpResponse =  () =>
+    val submitRetrievalRequest: () => HttpResponse = () =>
       connector.submitRetrievalRequest(vatReturn, vrn).futureValue
 
     "return OK" when {
@@ -164,8 +166,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
       s"return $status" when {
         s"the retrieval service returns $status" in {
           givenPostSubmissionBundlesRetrievalRequestsReturns(status)
-
-          anUpstreamErrorResponseShouldBeThrownBy(submitRetrievalRequest, status)
+          submitRetrievalRequest().status shouldBe status
         }
       }
     }

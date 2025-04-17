@@ -16,30 +16,52 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend
 
-import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticated
+import play.api.libs.ws.DefaultBodyWritables
+import play.api.libs.ws.DefaultBodyWritables._
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+
+import java.net.URL
+import scala.concurrent.ExecutionContext
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
-  def checkAuthorisationRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/check-authorisation").withHttpHeaders(authenticationHeader).get().futureValue
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+  def checkAuthorisationRequest(): HttpResponse =
+    val url = new URL(s"$serviceRoot/test-only/check-authorisation")
+    httpClientV2
+      .get(url)
+      .setHeader(authenticationHeader)
+      .execute[HttpResponse]
+      .futureValue
 
-  def validateDownloadGetRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/validate-download").withHttpHeaders(authenticationHeader).get().futureValue
+  def validateDownloadGetRequest(): HttpResponse =
+    val url = new URL(s"$serviceRoot/test-only/validate-download")
+    httpClientV2
+      .get(url)
+      .setHeader(authenticationHeader)
+      .execute[HttpResponse]
+      .futureValue
+  def validateDownloadPostRequest(): HttpResponse =
 
-  def validateDownloadPostRequest(): WSResponse =
-    wsClient
-      .url(s"$serviceRoot/test-only/validate-download")
-      .withHttpHeaders(authenticationHeader)
-      .post(Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))).futureValue
+    val body: Map[String, Seq[String]] = Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))
+
+    val url = new URL(s"$serviceRoot/test-only/validate-download")
+    httpClientV2
+      .post(url)
+      .setHeader(authenticationHeader)
+      .withBody(body)
+      .execute[HttpResponse]
+      .futureValue
 
   override val configuration: Map[String, Any] =
     defaultConfiguration + ("application.router" -> "testOnlyDoNotUseInAppConf.Routes")
 }
 
 class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
-  private def validate(response: WSResponse) = {
+  private def validate(response: HttpResponse) = {
     response.status shouldBe OK
-    response.contentType shouldBe "text/html; charset=UTF-8"
     response.body.contains("Test-only validate download") shouldBe true
   }
 

@@ -15,29 +15,31 @@ lazy val scoverageSettings = {
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 lazy val appDependenciesIt: Seq[ModuleID] = it()
 lazy val appName: String = "nrs-retrieval-frontend"
-val currentScalaVersion = "3.5.0"
+val currentScalaVersion = "3.3.5"
 val bootstrapPlayVersion = "9.11.0"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc"       %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
-  "uk.gov.hmrc"       %% "play-frontend-hmrc-play-30" % "11.12.0",
-  "com.typesafe.play" %% "play-json-joda"             % "2.10.5",
-  "commons-io"        %  "commons-io"                 % "2.17.0"
+  "uk.gov.hmrc" %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
+  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.0.0",
+  "com.typesafe.play" %% "play-json-joda" % "2.10.5",
+  "commons-io" % "commons-io" % "2.17.0",
+//  "uk.gov.hmrc" %% "auth-client-play-30" % "8.6.0",
+  "uk.gov.hmrc" %% "http-verbs-play-30" % "15.2.0"
 )
 def test(scope: String = "test"): Seq[ModuleID] = Seq(
   "org.scalatest" %% "scalatest" % "3.2.18" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
+//  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
   "org.playframework" %% "play-test" % current % scope,
-  "org.scalatestplus" %% "mockito-4-11" % "3.2.18.0" % Test,
+  "org.scalatestplus" %% "mockito-5-12" % "3.2.19.0" % Test,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope,
-  "uk.gov.hmrc"       %% "bootstrap-test-play-30"% bootstrapPlayVersion % scope
+  "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope
 )
 def it(scope: String = "test"): Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope,
-  "com.github.tomakehurst" % "wiremock" % "3.0.1" % scope,
+//  "com.github.tomakehurst" % "wiremock" % "3.0.1" % scope,
   "org.playframework" %% "play-test" % current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
+//  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % scope,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope
 )
 
@@ -48,10 +50,13 @@ lazy val root = (project in file("."))
     PlayKeys.playDefaultPort := 9390,
     majorVersion := 0,
     scalaVersion := currentScalaVersion,
-    ThisBuild / scalacOptions += "-Wconf:msg=unused imports&src=routes/.*:s",
-    ThisBuild / scalacOptions += "-Wconf:msg=unused imports&src=html/.*:s",
-    ThisBuild / scalacOptions += "-Wconf:msg=routes/.*:s",
-    ThisBuild / scalacOptions += "-Wconf:msg=Flag.*repeatedly:s",
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Wconf:src=target/.*:s",
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:msg=.*-Wunused.*:s"
+    ),
     resolvers ++= Seq(
       Resolver.typesafeRepo("releases"),
     ),

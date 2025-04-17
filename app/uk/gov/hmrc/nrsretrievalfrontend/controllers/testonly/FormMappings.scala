@@ -25,5 +25,6 @@ object FormMappings {
   val archiveId = "archiveId"
 
   val validateDownloadForm: Form[ValidateDownloadRequest] =
-    Form(mapping(vaultName -> text, archiveId -> text)(ValidateDownloadRequest.apply)(ValidateDownloadRequest.unapply))
+    Form(mapping(vaultName -> text, archiveId -> text
+    )(ValidateDownloadRequest.apply)(o => Some(Tuple.fromProductTyped(o))))
 }

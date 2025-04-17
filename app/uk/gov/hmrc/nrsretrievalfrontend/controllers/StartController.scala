@@ -29,8 +29,7 @@ class StartController @Inject()(
                                  authenticatedAction: AuthenticatedAction,
                                  controllerComponents: MessagesControllerComponents,
                                  startPage: start_page
-                               )(implicit val appConfig: AppConfig)
-  extends NRBaseController(controllerComponents) {
+                               )(using val appConfig: AppConfig) extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
@@ -39,4 +38,3 @@ class StartController @Inject()(
     logger.info(s"Show start page")
     Ok(startPage())
   }
-}

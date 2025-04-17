@@ -21,5 +21,6 @@ import play.api.libs.json.{Json, OFormat}
 case class Selector(notableEventType: String)
 
 object Selector {
-  implicit val formats: OFormat[Selector] = Json.format[Selector]
+  def unapply(q: Selector): Option[String] = Some(q.notableEventType)
+  given OFormat[Selector] = Json.format[Selector]
 }

@@ -16,19 +16,23 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.models.testonly
 
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.util.ByteString
 import play.api.http.HeaderNames
-import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.HttpResponse
 
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
+import scala.concurrent.Await
+import scala.concurrent.duration.*
 
-case class ValidateDownloadResult(status: Int, zipSize: Long, files: Seq[String], headers: Seq[(String,String)] )
+case class ValidateDownloadResult(status: Int, zipSize: Long, files: Seq[String], headers: Seq[(String, String)])
+object ValidateDownloadResult extends HeaderNames {
+  def apply(response: HttpResponse): ValidateDownloadResult = {
+    given ActorSystem =  ActorSystem()
+    val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_++_), 5.seconds)
 
-object ValidateDownloadResult extends HeaderNames{
-  def apply(response: WSResponse): ValidateDownloadResult = {
-    val bytes = response.bodyAsBytes
-
-    val headers: Seq[(String, String)] = response.headers.keys.map{ key =>
+    val headers: Seq[(String, String)] = response.headers.keys.map { key =>
       (key, response.headers(key).head)
     }.toSeq
 

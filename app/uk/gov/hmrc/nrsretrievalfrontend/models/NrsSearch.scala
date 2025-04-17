@@ -28,7 +28,7 @@ case class Glacier (
 )
 
 object Glacier {
-  implicit val formats: OFormat[Glacier] = Json.format[Glacier]
+  given OFormat[Glacier] = Json.format[Glacier]
 }
 
 case class Bundle (
@@ -37,7 +37,7 @@ case class Bundle (
 )
 
 object Bundle {
-  implicit val formats: OFormat[Bundle] = Json.format[Bundle]
+  given OFormat[Bundle] = Json.format[Bundle]
 }
 
 case class NrsSearchResult(
@@ -60,6 +60,6 @@ case class NotableEventDisplay (
 
 object NrsSearchResult {
 
-  implicit val notableEventFormat: OFormat[NotableEventDisplay] = Json.format[NotableEventDisplay]
-  implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]
+  given OFormat[NotableEventDisplay] = Json.format[NotableEventDisplay]
+  given OFormat[NrsSearchResult] = Json.format[NrsSearchResult]
 }

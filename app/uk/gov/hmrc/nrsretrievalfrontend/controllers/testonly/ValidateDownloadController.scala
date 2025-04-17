@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
 
-import FormMappings.validateDownloadForm
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, RequestHeader}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -24,6 +23,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.actions.AuthenticatedAction
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.TestOnlyNrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.controllers.NRBaseController
+import uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly.FormMappings.validateDownloadForm
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.validate_download_page
 
 import javax.inject.{Inject, Singleton}
@@ -35,8 +35,7 @@ class ValidateDownloadController @Inject()(
                                             controllerComponents: MessagesControllerComponents,
                                             connector: TestOnlyNrsRetrievalConnector,
                                             validateDownloadPage: validate_download_page
-                                          )(implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends NRBaseController(controllerComponents) {
+                                          )(using val appConfig: AppConfig, executionContext: ExecutionContext) extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
 
@@ -56,5 +55,3 @@ class ValidateDownloadController @Inject()(
           }
         )
   }
-}
-

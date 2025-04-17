@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
 
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
-import play.api.test.Helpers._
-import uk.gov.hmrc.http.UpstreamErrorResponse
+import play.api.test.Helpers.*
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.TestOnlyNrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.controllers.ControllerSpec
 
@@ -40,7 +40,7 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
   "checkAuthorisation" should {
     "confirm that the request is authenticated and authorised" when {
       "the user is authenticated and authorised" in {
-        doAnswer(new Returns(Future(true))).when(connector).checkAuthorisation()(any())
+        doAnswer(new Returns(Future(true))).when(connector).checkAuthorisation(using any[HeaderCarrier])
 
         contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.200"))
       }
@@ -49,7 +49,7 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
     "confirm that the request is unauthorised" when {
       "the user is not authenticated" in {
         doAnswer(new Returns(Future failed UpstreamErrorResponse(UNAUTHORIZED.toString, UNAUTHORIZED)))
-          .when(connector).checkAuthorisation()(any())
+          .when(connector).checkAuthorisation(using any[HeaderCarrier])
 
         contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.401"))
       }
@@ -58,7 +58,7 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
     "confirm that the request is forbidden" when {
       "the user is authenticated but not authorised" in {
         doAnswer(new Returns(Future failed UpstreamErrorResponse(FORBIDDEN.toString, FORBIDDEN)))
-          .when(connector).checkAuthorisation()(any())
+          .when(connector).checkAuthorisation(using any[HeaderCarrier])
 
         contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.403"))
       }

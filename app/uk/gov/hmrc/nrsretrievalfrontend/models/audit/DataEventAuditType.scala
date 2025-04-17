@@ -38,7 +38,7 @@ case class NonRepudiationStoreSearch(authProviderId: String,
                                      name: String,
                                      searchParams: Seq[(String, String)],
                                      nrSubmissionId: String,
-                                     override val path: String) extends DataEventAuditType {
+                                     override val path: String) extends DataEventAuditType:
 
   override val auditType: String = "nonRepudiationStoreSearch"
   override val transactionName = "Non-Repudiation Store search"
@@ -54,14 +54,13 @@ case class NonRepudiationStoreSearch(authProviderId: String,
       "searchText" -> searchText
     ))
   }
-}
 
 case class NonRepudiationStoreRetrieve(authProviderId: String,
                                        name: String,
                                        vaultName: String,
                                        archiveId: String,
                                        nrSubmissionId: String,
-                                       override val path: String) extends DataEventAuditType {
+                                       override val path: String) extends DataEventAuditType:
 
   override val auditType: String = "nonRepudiationStoreRetrieve"
   override val transactionName = "Non-Repudiation Store retrieval"
@@ -76,7 +75,6 @@ case class NonRepudiationStoreRetrieve(authProviderId: String,
       "archiveId" -> archiveId
     ))
   }
-}
 
 case class NonRepudiationStoreDownload(authProviderId: String,
                                        name: String,

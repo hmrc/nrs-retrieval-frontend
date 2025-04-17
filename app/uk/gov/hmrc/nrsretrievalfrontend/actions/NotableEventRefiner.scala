@@ -29,19 +29,18 @@ import scala.concurrent.{ExecutionContext, Future}
 class NotableEventRefiner(
                            val messagesApi: MessagesApi,
                            errorPage: error_template
-                         )(notableEventType: String)(implicit val executionContext: ExecutionContext, appConfig: AppConfig)
-  extends ActionRefiner[AuthenticatedRequest, NotableEventRequest]
-  with I18nSupport {
+                         )(notableEventType: String)(using val executionContext: ExecutionContext, appConfig: AppConfig)
+  extends ActionRefiner[AuthenticatedRequest, NotableEventRequest], I18nSupport:
 
   val logger = Logger(this.getClass.getName)
+
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, NotableEventRequest[A]]] = Future {
     implicit val r: AuthenticatedRequest[A] = request
     val optNotableEvent = appConfig.notableEvents.get(notableEventType)
 
-    optNotableEvent.flatMap(NotableEventRequest.apply(_, request)).toRight{
+    optNotableEvent.flatMap(NotableEventRequest.apply(_, request)).toRight {
       logger.warn(s"notable event ${notableEventType} not found")
       NotFound(errorPage("Not found", "Not found", s"Notable Event Type not found"))
     }
   }
 
-}

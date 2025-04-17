@@ -21,5 +21,5 @@ import play.api.libs.json.{Json, OFormat}
 case class SearchResults(results: Seq[SearchResult], resultCount: Int)
 
 object SearchResults {
-  implicit val formats: OFormat[SearchResults] = Json.format[SearchResults]
+  given OFormat[SearchResults] = Json.format[SearchResults]
 }

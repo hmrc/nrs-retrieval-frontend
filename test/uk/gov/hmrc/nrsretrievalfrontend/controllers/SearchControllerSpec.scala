@@ -19,20 +19,22 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.i18n.Messages
 import play.api.libs.json.Json.parse
-import play.api.libs.ws.WSResponse
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchResultUtils}
+import play.api.test.Helpers.*
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, SearchResultUtils}
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
+import org.apache.pekko.stream.scaladsl.Source
 
 import scala.concurrent.Future
 
 class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
+
 
   private val controller =
     new SearchController(
@@ -89,12 +91,13 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
     indexedNotableEvents.foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
+
       val postRequestWithNotableEventTypeAndSearchText =
         FakeRequest("POST", "/")
           .withFormUrlEncodedBody(("notableEventType", notableEventType), ("searchText", "someSearchText"))
 
       def givenTheSearchSucceeds() =
-        when(nrsRetrievalConnector.search(any(), any(), ArgumentMatchers.eq(notableEvent.crossKeySearch))(any(), any()))
+        when(nrsRetrievalConnector.search(any(), any(), ArgumentMatchers.eq(notableEvent.crossKeySearch))(using any[HeaderCarrier], any[AuthorisedUser]))
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
 
       def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
@@ -121,7 +124,7 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
                 .withFormUrlEncodedBody(("notableEventType", notableEventType))), notableEvent)
 
           def givenTheSearchSucceedsWithNoResults() =
-            when(nrsRetrievalConnector.search(any(), any(), any())(any(), any()))
+            when(nrsRetrievalConnector.search(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
           def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
@@ -142,17 +145,17 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
 
     "return 200 and a byte stream" when {
       def givenTheDownloadSucceeds() = {
-        val mockWSResponse = mock[WSResponse]
+        val mockHttpResponse = mock[HttpResponse]
 
-        when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(any(), any()))
-          .thenReturn(Future.successful(mockWSResponse))
-        when(mockWSResponse.headers).thenReturn(
+        when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
+          .thenReturn(Future.successful(mockHttpResponse))
+        when(mockHttpResponse.headers).thenReturn(
           Map(
             "content-length" -> Seq("15"),
             "content-type" -> Seq("application/zip")
           )
         )
-        when(mockWSResponse.bodyAsBytes).thenAnswer(new Returns(ByteString("Some zipped bytes")))
+        when(mockHttpResponse.bodyAsSource).thenReturn(Source.single(ByteString("Some zipped bytes")))
       }
 
       def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) = {

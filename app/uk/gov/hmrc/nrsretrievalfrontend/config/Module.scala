@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 
-class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with PekkoGuiceSupport {
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with PekkoGuiceSupport:
 
   override def configure(): Unit = {
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
@@ -43,6 +43,5 @@ class Module(val environment: Environment, val configuration: Configuration) ext
   def registerNotableEventRefinerProvider(
                                            messagesApi: MessagesApi,
                                            errorPage: error_template
-                                    )(implicit executionContext: ExecutionContext, appConfig: AppConfig): String => NotableEventRefiner =
+                                    )(using executionContext: ExecutionContext, appConfig: AppConfig): String => NotableEventRefiner =
     new NotableEventRefiner(messagesApi, errorPage)(_)
-}

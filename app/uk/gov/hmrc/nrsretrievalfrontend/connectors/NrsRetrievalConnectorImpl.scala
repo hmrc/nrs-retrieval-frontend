@@ -17,11 +17,11 @@
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
 import play.api.Logger
-import play.api.libs.ws.WSResponse
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.client.{HttpClientV2, readStreamHttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, Auditable}
-import uk.gov.hmrc.nrsretrievalfrontend.http.WSHttpT
 import uk.gov.hmrc.nrsretrievalfrontend.models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NrsSearchResult, Query}
 
@@ -30,78 +30,88 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NrsRetrievalConnectorImpl @Inject()(
-                                           val http: WSHttpT,
+                                           val httpClient: HttpClientV2,
                                            val auditable: Auditable
-                                         )(implicit val appConfig: AppConfig, executionContext: ExecutionContext) extends NrsRetrievalConnector {
+                                         )(using val appConfig: AppConfig, executionContext: ExecutionContext) extends NrsRetrievalConnector:
   private val logger: Logger = Logger(this.getClass)
 
-  private[connectors] val extraHeaders: Seq[(String,String)] = Seq(("X-API-Key", appConfig.xApiKey))
+  given hc: HeaderCarrier = HeaderCarrier()
+
+  private[connectors] val extraHeaders: Seq[(String, String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
   override def search(
                        notableEvent: String,
                        query: List[Query],
                        crossKeySearch: Boolean
-                     )(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[Seq[NrsSearchResult]] = {
+                     )(using hc: HeaderCarrier, user: AuthorisedUser): Future[Seq[NrsSearchResult]] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata"
 
     val queryParams: Seq[(String, String)] = Query.queryParams(notableEvent, query, crossKeySearch)
 
-    for{
-      get <- http.GET[Seq[NrsSearchResult]](path, queryParams, extraHeaders)
+    for {
+      get <- httpClient.get(url"$path")
+        .transform(_.withQueryStringParameters(queryParams *))
+        .setHeader(extraHeaders *)
+        .execute[Seq[NrsSearchResult]]
         .map { r => r }
-        .recover{
+        .recover {
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
           case e if e.getMessage.contains("401") =>
             auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, queryParams, "Unauthorized", path))
             throw e
         }
       _ <- auditable.sendDataEvent(
-        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryParams, get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)") ,path))
+        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryParams, get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)"), path))
     } yield get
   }
 
-  override def submitRetrievalRequest(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse] = {
-    import uk.gov.hmrc.http.HttpReads.Implicits.{readEitherOf, readRaw, throwOnFailure}
-    val readRawWithErrors = throwOnFailure(readEitherOf(readRaw))
 
+  override def submitRetrievalRequest(vaultName: String, archiveId: String)(using hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse] = {
     logger.info(s"Submit a retrieval request for vault: $vaultName, archive: $archiveId")
 
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId/retrieval-requests"
 
     for {
-      post <- http.POSTEmpty[HttpResponse](path, extraHeaders)(readRawWithErrors, hc, executionContext)
+      post <- httpClient.post(url"$path")
+        .setHeader(extraHeaders *)
+        .withBody("")
+        .execute[HttpResponse]
       _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, user.userName, vaultName, archiveId,
-        if(post.headers == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
+        if (post.headers == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield post
   }
 
-  override def statusSubmissionBundle(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  override def statusSubmissionBundle(vaultName: String, archiveId: String)(using hc: HeaderCarrier): Future[HttpResponse] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     logger.info(s"Get submission bundle status for vault: $vaultName, archive: $archiveId, path: $path")
 
-    http.HEAD(path, extraHeaders)
+    httpClient.head(url"$path")
+      .setHeader(extraHeaders *)
+      .execute[HttpResponse]
   }
 
   override def getSubmissionBundle(vaultName: String, archiveId: String)
-                                  (implicit hc: HeaderCarrier, user: AuthorisedUser): Future[WSResponse] = {
+                                  (using hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse] = {
     val path = s"${appConfig.nrsRetrievalUrl}/submission-bundles/$vaultName/$archiveId"
 
     logger.info(s"Get submission bundle for vault: $vaultName, archive: $archiveId, path: $path")
 
-    http.GETRaw(path, extraHeaders).map { get =>
-      auditable.sendDataEvent(
-        NonRepudiationStoreDownload(
-          authProviderId = user.authProviderId,
-          name = user.userName,
-          vaultName = vaultName,
-          archiveId = archiveId,
-          nrSubmissionId = get.header("nr-submission-id").getOrElse("(Empty)"),
-          path = path
+    httpClient.get(url"$path")
+      .setHeader(extraHeaders *)
+      .stream[HttpResponse] // HttpResponse has to be streamed out here instead of executed due to downloaded zip not being able to be extracted
+      .map { get =>
+        auditable.sendDataEvent(
+          NonRepudiationStoreDownload(
+            authProviderId = user.authProviderId,
+            name = user.userName,
+            vaultName = vaultName,
+            archiveId = archiveId,
+            nrSubmissionId = get.header("nr-submission-id").getOrElse("(Empty)"),
+            path = path
+          )
         )
-      )
 
-      get
-    }
+        get
+      }
   }
-}

@@ -20,6 +20,7 @@ case class Query(name: String, value: String)
 
 object Query {
 
+  def unapply(q: Query): Option[(String, String)] = Some((q.name, q.value))
   def queryParams(notableEvent: String, queries: List[Query], crossKeySearch: Boolean): Seq[(String, String)] = Seq(
     Seq("notableEvent" -> notableEvent),
     queries.map(q => q.name -> q.value),

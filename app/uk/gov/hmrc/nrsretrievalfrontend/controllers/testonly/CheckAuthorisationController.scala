@@ -18,8 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
 
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.TestOnlyNrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.controllers.NRBaseController
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.check_authorisation_page
@@ -32,17 +31,15 @@ class CheckAuthorisationController @Inject()(
                                               controllerComponents: MessagesControllerComponents,
                                               connector: TestOnlyNrsRetrievalConnector,
                                               checkAuthorisationPage: check_authorisation_page
-                                            )(implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends NRBaseController(controllerComponents) {
+                                            )(using executionContext: ExecutionContext) extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
 
   val checkAuthorisation: Action[AnyContent] = Action.async { implicit request =>
-      connector.checkAuthorisation().map { _ =>
+      connector.checkAuthorisation(using hc: HeaderCarrier).map { _ =>
         Ok(checkAuthorisationPage("test-only.check-authorisation.status.200"))
       }.recover {
         case e: UpstreamErrorResponse =>
           InternalServerError(checkAuthorisationPage(s"test-only.check-authorisation.status.${e.statusCode}"))
       }
   }
-}

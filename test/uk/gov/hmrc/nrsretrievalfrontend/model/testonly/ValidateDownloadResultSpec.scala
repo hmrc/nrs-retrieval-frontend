@@ -17,10 +17,11 @@
 package uk.gov.hmrc.nrsretrievalfrontend.model.testonly
 
 import org.apache.pekko.util.ByteString
-import org.mockito.Mockito.when
+import org.apache.pekko.stream.scaladsl.Source
+import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
-import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 
 import java.io.ByteArrayOutputStream
@@ -28,7 +29,8 @@ import java.nio.charset.Charset.defaultCharset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
 class ValidateDownloadResultSpec extends UnitSpec {
-  private val wsResponse = mock[WSResponse]
+  private val httpResponse = mock[HttpResponse]
+
 
   "ValidateDownloadResultSpec.apply" should {
     "transform a WSResponse" in {
@@ -46,11 +48,11 @@ class ValidateDownloadResultSpec extends UnitSpec {
 
       val bytes = ByteString(byteArrayOutputStream.toByteArray)
 
-      when(wsResponse.status).thenReturn(OK)
-      when(wsResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
-      when(wsResponse.bodyAsBytes).thenReturn(bytes)
+      when(httpResponse.status).thenReturn(OK)
+      when(httpResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
+      when(httpResponse.bodyAsSource).thenReturn(Source.single(bytes))
 
-      ValidateDownloadResult(wsResponse) shouldBe ValidateDownloadResult(OK, bytes.length, fileNames, Seq(("foo", "bar")) )
+      ValidateDownloadResult(httpResponse) shouldBe ValidateDownloadResult(OK, bytes.size, fileNames, Seq(("foo", "bar")) )
 
       zipOutputStream.close()
     }

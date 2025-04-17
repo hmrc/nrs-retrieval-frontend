@@ -17,7 +17,8 @@
 package uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly
 
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.*
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.models.AuthorisedUser
@@ -29,14 +30,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TestOnlyNrsRetrievalConnectorImpl @Inject()(
                                                    nrsRetrievalConnector: NrsRetrievalConnector,
-                                                   http: HttpClient
-                                                 )(implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends TestOnlyNrsRetrievalConnector {
+                                                   http: HttpClientV2
+                                                 )(using appConfig: AppConfig, executionContext: ExecutionContext) extends TestOnlyNrsRetrievalConnector:
 
   override def validateDownload(vaultName: String, archiveId: String)
-                               (implicit hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult] =
+                               (using hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult] =
     nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map(response => ValidateDownloadResult(response))
 
-  override def checkAuthorisation()(implicit hc: HeaderCarrier): Future[Boolean] =
-    http.GET[Boolean](s"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation")
-}
+  override def checkAuthorisation(using hc: HeaderCarrier): Future[Boolean] = {
+    http.get(url"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation").execute[Boolean]
+  }

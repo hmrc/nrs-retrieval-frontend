@@ -50,7 +50,7 @@ class SearchController @Inject()(
   val logger: Logger = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
-  implicit val timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
+  given timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
   val noParameters: Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"No parameters provided so redirecting to start page on request $request")
@@ -92,7 +92,7 @@ class SearchController @Inject()(
       )
   }
 
-  private def doSearch(search: SearchQueries)(implicit request: NotableEventRequest[?]) = {
+  private def doSearch(search: SearchQueries)(implicit request: NotableEventRequest[_]) = {
     val crossKeySearch = appConfig.notableEvents.get(request.notableEvent.name).fold(false)(_.crossKeySearch)
 
     logger.info(s"doing search for ${request.notableEvent} with submitted search query ${search.queries} with crossKeySearch: ${crossKeySearch}")

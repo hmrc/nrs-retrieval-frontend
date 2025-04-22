@@ -23,7 +23,6 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nrsretrievalfrontend.actions.NotableEventRefiner
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.{NrsRetrievalConnector, NrsRetrievalConnectorImpl}
-import uk.gov.hmrc.nrsretrievalfrontend.http.MicroserviceAudit
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.error_template
 import uk.gov.hmrc.play.audit.model.Audit
 

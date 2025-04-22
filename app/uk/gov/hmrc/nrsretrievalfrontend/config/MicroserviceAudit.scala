@@ -14,31 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nrsretrievalfrontend.http
+package uk.gov.hmrc.nrsretrievalfrontend.config
 
-import com.google.inject.ImplementedBy
-import com.typesafe.config.Config
-import org.apache.pekko.actor.ActorSystem
-import play.api.{Configuration, Environment}
-import uk.gov.hmrc.http.*
-import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 
-import javax.inject.{Inject, Named, Singleton}
-
-
-@ImplementedBy(classOf[WSHttp])
-trait WSHttpT extends HttpHead
-
-
-@Singleton
-class WSHttp @Inject() (val environment: Environment, val runModeConfig: Configuration, val appNameConfig: Configuration, val httpClient: HttpClientV2)
-                       (implicit val actorSystem: ActorSystem) extends WSHttpT with WSHead:
-  override val hooks: Seq[HttpHook] = NoneRequired
-
-  override protected def configuration: Config = runModeConfig.underlying
-
+import javax.inject.{Inject, Named}
 class MicroserviceAudit @Inject()(@Named("appName") val applicationName: String,
                                   val auditConnector: AuditConnector) extends Audit(applicationName, auditConnector)

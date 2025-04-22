@@ -27,11 +27,9 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
 import play.api.Environment
-import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, Auditable}
-import uk.gov.hmrc.nrsretrievalfrontend.http.MicroserviceAudit
+import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, Auditable, MicroserviceAudit}
 import uk.gov.hmrc.nrsretrievalfrontend.models.audit.{DataEventAuditType, NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NrsSearchResult, Query}
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
@@ -50,13 +48,11 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
     reset(mockAuditable)
   }
 
-//  private val mockWsHttp = mock[WSHttpT]
   private val mockHttpClientV2 = mock[HttpClientV2]
   private val mockEnvironment = mock[Environment]
   private val mockHttpResponse = mock[HttpResponse]
   private val mockAuditConnector = mock[AuditConnector]
   private val mockAuditable = mock[Auditable]
-  private val mockWSClient = mock[WSClient]
   private val mockAppConfig = mock[AppConfig]
   private val mockRequestBuilder = mock[RequestBuilder]
 
@@ -65,13 +61,11 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
     override def configure(): Unit = {
       bind(classOf[ExecutionContext]).toInstance(global)
       bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
- //     bind(classOf[WSHttpT]).toInstance(mockWsHttp)
       bind(classOf[HttpClientV2]).toInstance(mockHttpClientV2)
       bind(classOf[Environment]).toInstance(mockEnvironment)
       bind(classOf[AppConfig]).toInstance(mockAppConfig)
       bind(classOf[Auditable]).toInstance(mockAuditable)
       bind(classOf[AuditConnector]).toInstance(mockAuditConnector)
-      bind(classOf[WSClient]).toInstance(mockWSClient)
       bind(classOf[Audit]).to(classOf[MicroserviceAudit])
       bind(classOf[String]).annotatedWith(Names.named("appName")).toProvider(AppNameProvider)
     }

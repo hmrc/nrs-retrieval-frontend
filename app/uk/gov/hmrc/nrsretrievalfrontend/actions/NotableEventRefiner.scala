@@ -35,7 +35,7 @@ class NotableEventRefiner(
   val logger = Logger(this.getClass.getName)
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, NotableEventRequest[A]]] = Future {
-    implicit val r: AuthenticatedRequest[A] = request
+    given r: AuthenticatedRequest[A] = request
     val optNotableEvent = appConfig.notableEvents.get(notableEventType)
 
     optNotableEvent.flatMap(NotableEventRequest.apply(_, request)).toRight {

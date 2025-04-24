@@ -31,7 +31,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, ViewSpec, Views}
 
 import scala.concurrent.duration._
 
-class search_pageSpec extends BaseUnitSpec with SearchFixture with Views:
+class search_pageSpec extends BaseUnitSpec, SearchFixture, Views:
 
   private def notFoundPanelIsDisplayed(doc: Document): Boolean     = Option(doc.getElementById("notFound")).isDefined
   private def resultsFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("resultsFound")).isDefined

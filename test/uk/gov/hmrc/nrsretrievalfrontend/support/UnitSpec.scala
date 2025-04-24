@@ -27,7 +27,7 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 
-trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status with Configs:
+trait UnitSpec extends AnyWordSpecLike, Matchers, MockitoSugar, Status, Configs:
   given defaultTimeout: FiniteDuration = 5 seconds
 
   given executionContext: ExecutionContext = ExecutionContext.Implicits.global

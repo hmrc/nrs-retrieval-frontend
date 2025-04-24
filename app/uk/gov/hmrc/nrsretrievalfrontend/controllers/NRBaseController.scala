@@ -22,4 +22,4 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 abstract class NRBaseController(
   controllerComponents: MessagesControllerComponents
-) extends FrontendController(controllerComponents) with I18nSupport
+) extends FrontendController(controllerComponents), I18nSupport

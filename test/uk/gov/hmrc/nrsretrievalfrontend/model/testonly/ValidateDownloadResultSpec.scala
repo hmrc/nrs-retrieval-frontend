@@ -29,7 +29,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset.defaultCharset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-class ValidateDownloadResultSpec extends UnitSpec with ScalaFutures:
+class ValidateDownloadResultSpec extends UnitSpec, ScalaFutures:
   private val httpResponse = mock[HttpResponse]
 
   "ValidateDownloadResultSpec.apply" should {

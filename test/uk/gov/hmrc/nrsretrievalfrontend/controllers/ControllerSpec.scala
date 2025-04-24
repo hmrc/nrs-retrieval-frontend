@@ -28,7 +28,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views, ViewsSelec
 
 import scala.concurrent.Future
 
-trait ControllerSpec extends BaseUnitSpec with Views with ViewsSelectors:
+trait ControllerSpec extends BaseUnitSpec, Views, ViewsSelectors:
   val getRequest: FakeRequest[AnyContentAsEmpty.type]       = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
 

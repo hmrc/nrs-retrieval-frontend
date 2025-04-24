@@ -46,7 +46,6 @@ lazy val root = (project in file("."))
     majorVersion := 0,
     scalaVersion := currentScalaVersion,
     scalacOptions ++= Seq(
-      "-feature",
       "-Wconf:src=target/.*:s",
       "-Wconf:src=routes/.*:s",
       "-Wconf:msg=Flag.*repeatedly:s",

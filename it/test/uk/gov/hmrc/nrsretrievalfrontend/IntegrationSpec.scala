@@ -41,8 +41,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 trait IntegrationSpec
-    extends AnyWordSpec with Matchers with ScalaFutures with GuiceOneServerPerSuite with WireMockSupport with IntegrationPatience
-    with BeforeAndAfterEach with Fixture:
+    extends AnyWordSpec, Matchers, ScalaFutures, GuiceOneServerPerSuite, WireMockSupport, IntegrationPatience, BeforeAndAfterEach, Fixture:
 
   val authenticationHeader: (String, String) = "Authorization" -> "Bearer some-token"
   override def beforeEach(): Unit            = WireMock.reset()
@@ -89,5 +88,5 @@ class ITAuthenticatedAction @Inject() (
     extends AuthenticatedAction(authConnector, config, env, controllerComponents, errorPage):
 
   // Override the hc method to make use of full action
-  override implicit protected def hc(using request: RequestHeader): HeaderCarrier =
+  override protected def hc(using request: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromRequest(request)

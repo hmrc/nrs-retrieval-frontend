@@ -33,7 +33,7 @@ import org.apache.pekko.stream.scaladsl.Source
 
 import scala.concurrent.Future
 
-class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture:
+class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixture:
 
   private val controller =
     new SearchController(

@@ -42,7 +42,7 @@ import javax.inject.Provider
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with BeforeAndAfterEach:
+class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAfterEach:
   override protected def beforeEach(): Unit =
     reset(mockAuditConnector)
     reset(mockAuditable)

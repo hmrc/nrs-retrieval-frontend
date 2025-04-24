@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 
-class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with PekkoGuiceSupport:
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule, PekkoGuiceSupport:
 
   override def configure(): Unit =
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])

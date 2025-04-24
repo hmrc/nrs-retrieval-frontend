@@ -33,7 +33,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
 class NotableEventRefinerSpec
-    extends BaseUnitSpec with MockitoSugar with Results with Status with ScalaFutures with HeaderNames with ResultExtractors with Views:
+    extends BaseUnitSpec, MockitoSugar, Results, Status, ScalaFutures, HeaderNames, ResultExtractors, Views:
 
   trait Setup:
 

@@ -27,7 +27,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.NotableEvent
 
 import scala.collection.immutable
 
-class BaseUnitSpec extends UnitSpec with StubMessageControllerComponents with PatienceConfiguration:
+class BaseUnitSpec extends UnitSpec, StubMessageControllerComponents, PatienceConfiguration:
   this: Suite =>
   val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 

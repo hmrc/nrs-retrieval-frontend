@@ -25,7 +25,7 @@ import play.api.mvc.Call
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrsretrievalfrontend.models.AuthorisedUser
 
-trait ViewSpec extends BaseUnitSpec with Views with ViewsSelectors:
+trait ViewSpec extends BaseUnitSpec, Views, ViewsSelectors:
 
   def view: HtmlFormat.Appendable
 

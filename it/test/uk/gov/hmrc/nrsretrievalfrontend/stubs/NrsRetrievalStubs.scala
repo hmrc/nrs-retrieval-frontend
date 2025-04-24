@@ -27,7 +27,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-object NrsRetrievalStubs extends Fixture with IntegrationSpec:
+object NrsRetrievalStubs extends Fixture, IntegrationSpec:
   private val retrievalPath                          = "/nrs-retrieval"
   private val submissionBundlesPath                  = s"$retrievalPath/submission-bundles/$vatReturn/$vrn"
   private val submissionBundlesRetrievalRequestsPath = s"$submissionBundlesPath/retrieval-requests"

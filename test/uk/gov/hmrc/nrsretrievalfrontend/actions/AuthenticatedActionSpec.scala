@@ -35,7 +35,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 import scala.concurrent.Future
 
 class AuthenticatedActionSpec
-    extends BaseUnitSpec with MockitoSugar with Results with Status with ScalaFutures with HeaderNames with ResultExtractors with Views:
+    extends BaseUnitSpec, MockitoSugar, Results, Status, ScalaFutures, HeaderNames, ResultExtractors, Views:
 
   trait Setup:
     val mockAuthConnector = mock[AuthConnector]

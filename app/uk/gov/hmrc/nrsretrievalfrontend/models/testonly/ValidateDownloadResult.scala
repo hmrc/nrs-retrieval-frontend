@@ -23,23 +23,23 @@ import uk.gov.hmrc.http.HttpResponse
 
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
-import scala.concurrent.Await
-import scala.concurrent.duration.*
+import scala.concurrent.{ExecutionContext, Future}
 
 case class ValidateDownloadResult(status: Int, zipSize: Long, files: Seq[String], headers: Seq[(String, String)])
 object ValidateDownloadResult extends HeaderNames {
-  def apply(response: HttpResponse): ValidateDownloadResult = {
-    given ActorSystem =  ActorSystem()
-    val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_++_), 5.seconds)
+  def apply(response: HttpResponse)(using ec: ExecutionContext): Future[ValidateDownloadResult] = {
+    given ActorSystem = ActorSystem()
 
-    val headers: Seq[(String, String)] = response.headers.keys.map { key =>
-      (key, response.headers(key).head)
-    }.toSeq
+    response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
+      val headers: Seq[(String, String)] = response.headers.keys.map { key =>
+        (key, response.headers(key).head)
+      }.toSeq
 
-    val zis: ZipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
+      val zis: ZipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
 
-    val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
+      val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
 
-    ValidateDownloadResult(response.status, bytes.size, zippedFileNames, headers)
+      ValidateDownloadResult(response.status, bytes.size, zippedFileNames, headers)
+    }
   }
 }

@@ -20,7 +20,7 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.util.ByteString
 import org.joda.time.LocalDate
 import org.scalatest.Assertion
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.IntegrationSpec
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, Bundle, Glacier, NrsSearchResult}
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
@@ -29,13 +29,12 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.Charset.*
 import java.time.ZonedDateTime
 import java.util.zip.ZipInputStream
-import scala.concurrent.Await
+import scala.concurrent.{Await,Future, ExecutionContext}
 import scala.concurrent.duration.*
+given executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
 class NrsRetrievalContractSpec extends IntegrationSpec {
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  private implicit val authorisedUser: AuthorisedUser = AuthorisedUser("userName", "authProviderId")
+  given authorisedUser: AuthorisedUser = AuthorisedUser("authProviderId")
   private def anUpstreamErrorResponseShouldBeThrownBy[T](request: () => T, statusCode: Int): Assertion =
     intercept[Exception] {
       request()
@@ -117,29 +116,27 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
   }
 
   "getSubmissionBundle" should {
-    def submissionBundle(): HttpResponse = connector.getSubmissionBundle(vatReturn, vrn).futureValue
-
     "return OK" when {
       "the retrieval service returns OK" in {
         givenGetSubmissionBundlesReturns(OK)
-
         given ActorSystem = ActorSystem()
 
-        val response = submissionBundle()
-        val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _), 5.seconds)
-        val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
-        val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
+        connector.getSubmissionBundle(vatReturn, vrn).flatMap { response =>
+          response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
+            val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
+            val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
+            response.status shouldBe OK
+            response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
+            response.header("Content-Length") shouldBe Some("276")
+            response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
+            response.header("Content-Type") shouldBe Some("application/octet-stream")
+            response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
+            response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
+            zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
-        response.status shouldBe OK
-        response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
-        response.header("Content-Length") shouldBe Some("276")
-        response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
-        response.header("Content-Type") shouldBe Some("application/octet-stream")
-        response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
-        response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
-        zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
-
-        zipInputStream.close()
+            zipInputStream.close()
+          }
+        }
       }
     }
   }

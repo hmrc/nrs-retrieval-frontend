@@ -16,24 +16,25 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.model.testonly
 
-import org.apache.pekko.util.ByteString
 import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
-import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
+import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset.defaultCharset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-class ValidateDownloadResultSpec extends UnitSpec {
+class ValidateDownloadResultSpec extends UnitSpec with ScalaFutures {
   private val httpResponse = mock[HttpResponse]
 
 
   "ValidateDownloadResultSpec.apply" should {
-    "transform a WSResponse" in {
+    "transform a HttpResponse" in {
       val output: Array[Byte] = "text".getBytes(defaultCharset())
       val byteArrayOutputStream = new ByteArrayOutputStream()
       val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
@@ -49,10 +50,17 @@ class ValidateDownloadResultSpec extends UnitSpec {
       val bytes = ByteString(byteArrayOutputStream.toByteArray)
 
       when(httpResponse.status).thenReturn(OK)
-      when(httpResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
       when(httpResponse.bodyAsSource).thenReturn(Source.single(bytes))
+      when(httpResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
 
-      ValidateDownloadResult(httpResponse) shouldBe ValidateDownloadResult(OK, bytes.size, fileNames, Seq(("foo", "bar")) )
+      val responseTest = ValidateDownloadResult(httpResponse)
+
+      whenReady(responseTest) { resultsTest =>
+        assert(resultsTest.status == OK)
+        assert(resultsTest.files == fileNames)
+        assert(resultsTest.zipSize == bytes.size)
+        assert(resultsTest.headers.contains("foo", "bar"))
+      }
 
       zipOutputStream.close()
     }

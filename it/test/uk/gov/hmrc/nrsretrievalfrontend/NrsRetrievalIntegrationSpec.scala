@@ -29,8 +29,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 import java.io.ByteArrayInputStream
 import java.net.URL
 import java.util.zip.ZipInputStream
-import scala.concurrent.duration.*
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   private val selectUrl = s"$serviceRoot/select"
@@ -41,7 +40,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
   private val startPageHeading = "Search the Non-Repudiation Store"
   private val vatReturnSearchPageHeading = "Search for VAT returns"
   private val vatRegistrationSearchPageHeading = "Search for VAT registrations"
-  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+
+  given executionContext: ExecutionContext = ExecutionContext.Implicits.global
+
   private def assertPageIsRendered(eventualResponse: Future[HttpResponse], pageHeader: String) = {
     val response = eventualResponse.futureValue
     val document = parse(response.body)
@@ -63,7 +64,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
 
       val response = responseFuture
 
-      assertPageIsRendered(response,startPageHeading)
+      assertPageIsRendered(response, startPageHeading)
     }
   }
 
@@ -98,7 +99,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
 
       val response = responseFuture
 
-      assertPageIsRendered(response,vatReturnSearchPageHeading)
+      assertPageIsRendered(response, vatReturnSearchPageHeading)
 
     }
   }
@@ -133,7 +134,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
 
         val response = responseFuture
 
-        val document =  assertPageIsRendered(response, vatReturnSearchPageHeading)
+        val document = assertPageIsRendered(response, vatReturnSearchPageHeading)
 
         Option(document.getElementById("vat-registration-additional-info")).isEmpty shouldBe true
       }
@@ -211,11 +212,12 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       }
     }
   }
-  
+
   "GET /nrs-retrieval/download/:vaultId/:archiveId" should {
     "pass the X-API-HEADER to the nrs-retrieval backend and return a zip file and response headers to the consumer" in {
       givenAuthenticated()
       givenGetSubmissionBundlesReturns(OK)
+
       given ActorSystem = ActorSystem()
 
       val url = new URL(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn")
@@ -223,28 +225,28 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         .get(url)
         .setHeader(authenticationHeader)
         .stream[HttpResponse]
-        .futureValue
 
-      val response = responseFuture
+      responseFuture.flatMap { response =>
+        response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
 
-      val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _), 5.seconds)
+          val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
+          val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
 
-      val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
-      val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
+          response.status shouldBe OK
+          zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
-      response.status shouldBe OK
-      zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+          response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
+          response.header("Content-Length") shouldBe Some("276")
+          response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
+          response.header("Content-Type") shouldBe Some("application/octet-stream")
+          response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
+          response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
 
-      response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
-      response.header("Content-Length") shouldBe Some("276")
-      response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
-      response.header("Content-Type") shouldBe Some("application/octet-stream")
-      response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
-      response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
+          verifyGetSubmissionBundlesWithXApiKeyHeader()
 
-      verifyGetSubmissionBundlesWithXApiKeyHeader()
-
-      zipInputStream.close()
+          zipInputStream.close()
+        }
+      }
     }
   }
 

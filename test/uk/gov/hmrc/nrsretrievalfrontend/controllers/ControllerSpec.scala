@@ -52,7 +52,7 @@ trait ControllerSpec extends BaseUnitSpec with Views with ViewsSelectors {
   ) {
 
     override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
-      val authenticatedRequest = new AuthenticatedRequest[A]("fakeUser", "someId", request)
+      val authenticatedRequest = new AuthenticatedRequest[A]("someId", request)
       block(authenticatedRequest)
     }
   }

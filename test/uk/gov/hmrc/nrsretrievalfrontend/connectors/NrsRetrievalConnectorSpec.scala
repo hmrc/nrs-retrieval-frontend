@@ -79,7 +79,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
   private val connector = injector.getInstance(classOf[NrsRetrievalConnectorImpl])
   private val testAuditId = "1"
   private val testArchiveId = "2"
-  private implicit val testUser: AuthorisedUser = AuthorisedUser("aUser", "anAuthProviderId")
+  given testUser: AuthorisedUser = AuthorisedUser("anAuthProviderId")
   private val submissionBundlesUrl = new URL("http://localhost:19391/nrs-retrieval/submission-bundles/vat-return/vrn/retrieval-requests")
   private val submissionMetadataUrl = s"null/submission-metadata"
 
@@ -166,7 +166,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec with NrsSearchFixture with Befo
             when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])).thenReturn(Future.successful(()))
             await(connector.search(notableEvent, searchParams, crossKeySearch)).size shouldBe 1
             verify(mockAuditable, times(1)).sendDataEvent(NonRepudiationStoreSearch(
-              "anAuthProviderId", "aUser", queryParams, nrsVatSearchResult.nrSubmissionId, submissionMetadataUrl))(using hc)
+              "anAuthProviderId", queryParams, nrsVatSearchResult.nrSubmissionId, submissionMetadataUrl))(using hc)
         }
       }
     }

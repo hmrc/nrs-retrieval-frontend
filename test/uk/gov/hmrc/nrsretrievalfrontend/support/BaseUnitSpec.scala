@@ -36,8 +36,8 @@ class BaseUnitSpec extends UnitSpec with StubMessageControllerComponents with Pa
   val requestWithToken: Request[AnyContentAsEmpty.type] =
     addToken(FakeRequest())
 
-  implicit val authenticatedRequest: AuthenticatedRequest[AnyContentAsEmpty.type] =
-    new AuthenticatedRequest("userName", "someId", requestWithToken)
+  given authenticatedRequest: AuthenticatedRequest[AnyContentAsEmpty.type] =
+    new AuthenticatedRequest("someId", requestWithToken)
 
   def addToken[T](fakeRequest: FakeRequest[T]): Request[T] = {
 

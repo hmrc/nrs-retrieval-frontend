@@ -35,8 +35,6 @@ class NrsRetrievalConnectorImpl @Inject()(
                                          )(using val appConfig: AppConfig, executionContext: ExecutionContext) extends NrsRetrievalConnector:
   private val logger: Logger = Logger(this.getClass)
 
-  given hc: HeaderCarrier = HeaderCarrier()
-
   private[connectors] val extraHeaders: Seq[(String, String)] = Seq(("X-API-Key", appConfig.xApiKey))
 
   override def search(
@@ -57,11 +55,11 @@ class NrsRetrievalConnectorImpl @Inject()(
         .recover {
           case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
           case e if e.getMessage.contains("401") =>
-            auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, user.userName, queryParams, "Unauthorized", path))
+            auditable.sendDataEvent(NonRepudiationStoreSearch(user.authProviderId, queryParams, "Unauthorized", path))
             throw e
         }
       _ <- auditable.sendDataEvent(
-        NonRepudiationStoreSearch(user.authProviderId, user.userName, queryParams, get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)"), path))
+        NonRepudiationStoreSearch(user.authProviderId, queryParams, get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)"), path))
     } yield get
   }
 
@@ -76,7 +74,7 @@ class NrsRetrievalConnectorImpl @Inject()(
         .setHeader(extraHeaders *)
         .withBody("")
         .execute[HttpResponse]
-      _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, user.userName, vaultName, archiveId,
+      _ <- auditable.sendDataEvent(NonRepudiationStoreRetrieve(user.authProviderId, vaultName, archiveId,
         if (post.headers == null) "(Empty)" else post.header("nr-submission-id").getOrElse("(Empty)"), path))
     } yield post
   }
@@ -99,12 +97,11 @@ class NrsRetrievalConnectorImpl @Inject()(
 
     httpClient.get(url"$path")
       .setHeader(extraHeaders *)
-      .stream[HttpResponse] // HttpResponse has to be streamed out here instead of executed due to downloaded zip not being able to be extracted
+      .stream[HttpResponse] // .stream[HttpResponse] required as execute causes issues while deploying the .zip bundle (unextractable due to charset parsing)
       .map { get =>
         auditable.sendDataEvent(
           NonRepudiationStoreDownload(
             authProviderId = user.authProviderId,
-            name = user.userName,
             vaultName = vaultName,
             archiveId = archiveId,
             nrSubmissionId = get.header("nr-submission-id").getOrElse("(Empty)"),

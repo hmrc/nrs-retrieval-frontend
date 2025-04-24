@@ -29,5 +29,5 @@ trait Configs {
 
   def servicesConfig: ServicesConfig = new ServicesConfig(configuration)
 
-  implicit def appConfig: AppConfig = new AppConfig(configuration, environment, servicesConfig)
+  given appConfig: AppConfig = new AppConfig(configuration, environment, servicesConfig)
 }

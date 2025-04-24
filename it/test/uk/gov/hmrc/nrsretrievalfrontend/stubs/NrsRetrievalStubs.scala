@@ -58,7 +58,7 @@ object NrsRetrievalStubs extends Fixture with IntegrationSpec {
                |     "state":"Activated"
                |     }]
                |  } ],
-               |  "retrieve": ["optionalCredentials", "optionalName"]
+               |  "retrieve": ["optionalCredentials"]
                |}
           """.stripMargin,
             true,
@@ -71,9 +71,6 @@ object NrsRetrievalStubs extends Fixture with IntegrationSpec {
              |  "optionalCredentials": {
              |    "providerId": "test-authority-id",
              |    "providerType": "government-gateway"
-             |  },
-             |  "optionalName": {
-             |    "name": "test-user"
              |  }
              |}
               """.stripMargin))
@@ -115,7 +112,7 @@ object NrsRetrievalStubs extends Fixture with IntegrationSpec {
       .withHeader("Date","Tue, 13 Jul 2021 12:36:51 GMT")
     ))
   }
-  
+
   def verifyGetSubmissionBundlesWithXApiKeyHeader(): Unit =
     verify(getRequestedFor(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey))
 

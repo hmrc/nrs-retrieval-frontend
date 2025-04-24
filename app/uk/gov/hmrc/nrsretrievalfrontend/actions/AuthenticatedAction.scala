@@ -22,7 +22,6 @@ import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
-import uk.gov.hmrc.auth.core.retrieve.{Name, OptionalRetrieval, Retrieval, ~}
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, AuthRedirects}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.error_template
@@ -43,14 +42,10 @@ class AuthenticatedAction @Inject()(
   extends ActionBuilder[AuthenticatedRequest, AnyContent], AuthorisedFunctions , FrontendBaseController, AuthRedirects, I18nSupport:
 
   val logger: Logger = Logger(this.getClass.getName)
-
-  // moved temporarily due to deprecation
-  val name: Retrieval[Option[Name]] = OptionalRetrieval("optionalName", Name.reads)
-
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
 
   override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
-    implicit val r: Request[A] = request
+    given r: Request[A] = request
 
     logger.info(s"Verify stride authorisation")
 
@@ -59,13 +54,11 @@ class AuthenticatedAction @Inject()(
     authorised(
       AuthProviders(PrivilegedApplication) and
         (Enrolment("nrs_digital_investigator") or Enrolment("nrs digital investigator"))
-    ).retrieve(credentials and name) {
-      case Some(userCredentials) ~ Some(userName) =>
-        block(AuthenticatedRequest((userName.name.toList ++ userName.lastName.toList).mkString(" "), userCredentials.providerId, request))
-      case None ~ _ =>
+    ).retrieve(credentials) {
+      case Some(userCredentials) =>
+        block(AuthenticatedRequest(userCredentials.providerId, request))
+      case None =>
         Future successful Forbidden(errorPage(notAuthorised, notAuthorised, s"User credentials not found"))
-      case _ ~ None =>
-        Future successful Forbidden(errorPage(notAuthorised, notAuthorised, s"User name not found"))
     }.recover {
       case ex: NoActiveSession =>
         logger.warn(s"NoActiveSession", ex)

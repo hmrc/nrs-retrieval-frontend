@@ -26,7 +26,7 @@ import java.net.URL
 import scala.concurrent.ExecutionContext
 
 trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
-  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+  given executionContext: ExecutionContext = ExecutionContext.Implicits.global
   def checkAuthorisationRequest(): HttpResponse =
     val url = new URL(s"$serviceRoot/test-only/check-authorisation")
     httpClientV2

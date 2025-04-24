@@ -28,14 +28,13 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 
 trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status with Configs {
-  implicit val defaultTimeout: FiniteDuration = 5 seconds
+  given defaultTimeout: FiniteDuration = 5 seconds
 
-  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+  given executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
-  implicit val actorSystem: ActorSystem = ActorSystem.create("test")
-//  val materializer: ExecutionContextExecutor = actorSystem.mater
+  given actorSystem: ActorSystem = ActorSystem.create("test")
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given hc: HeaderCarrier = HeaderCarrier()
 
-  def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
+  def await[A](future: Future[A])(using timeout: Duration): A = Await.result(future, timeout)
 }

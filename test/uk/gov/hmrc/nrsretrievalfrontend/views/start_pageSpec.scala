@@ -30,7 +30,7 @@ class start_pageSpec extends ViewSpec {
     "render correctly" in {
       val headerText = Messages("start.page.header.lbl")
 
-      ensureCommonPageElementsAreRendered(doc = doc, headerText = headerText, titleText = headerText, maybeUserName = None)
+      ensureCommonPageElementsAreRendered(doc = doc, headerText = headerText, titleText = headerText)
       doc.getElementById("continueButton").text() mustBe Messages("start.button.start.lbl")
     }
   }

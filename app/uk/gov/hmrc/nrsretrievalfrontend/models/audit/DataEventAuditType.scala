@@ -35,7 +35,6 @@ trait DataEventAuditType {
 }
 
 case class NonRepudiationStoreSearch(authProviderId: String,
-                                     name: String,
                                      searchParams: Seq[(String, String)],
                                      nrSubmissionId: String,
                                      override val path: String) extends DataEventAuditType:
@@ -48,7 +47,6 @@ case class NonRepudiationStoreSearch(authProviderId: String,
   override def details: DataEventDetails = {
     DataEventDetails(Map(
       "authProviderId" -> authProviderId,
-      "name" -> name,
       "submissionType" -> submissionType,
       "nrSubmissionId" -> nrSubmissionId,
       "searchText" -> searchText
@@ -56,7 +54,6 @@ case class NonRepudiationStoreSearch(authProviderId: String,
   }
 
 case class NonRepudiationStoreRetrieve(authProviderId: String,
-                                       name: String,
                                        vaultName: String,
                                        archiveId: String,
                                        nrSubmissionId: String,
@@ -68,7 +65,6 @@ case class NonRepudiationStoreRetrieve(authProviderId: String,
   override def details: DataEventDetails = {
     DataEventDetails(Map(
       "authProviderId" -> authProviderId,
-      "name" -> name,
       "submissionType" -> submissionType,
       "nrSubmissionId" -> nrSubmissionId,
       "vaultName" -> vaultName,
@@ -77,7 +73,6 @@ case class NonRepudiationStoreRetrieve(authProviderId: String,
   }
 
 case class NonRepudiationStoreDownload(authProviderId: String,
-                                       name: String,
                                        vaultName: String,
                                        archiveId: String,
                                        nrSubmissionId: String,
@@ -89,7 +84,6 @@ case class NonRepudiationStoreDownload(authProviderId: String,
   override def details: DataEventDetails = {
     DataEventDetails(Map(
       "authProviderId" -> authProviderId,
-      "name" -> name,
       "submissionType" -> submissionType,
       "nrSubmissionId" -> nrSubmissionId,
       "vaultName" -> vaultName,

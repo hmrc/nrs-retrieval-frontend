@@ -37,7 +37,7 @@ class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
   private val connector = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector, httpClientV2)
   private val aVaultName = "vaultName"
   private val anArchiveId = "archiveId"
-  private val user = AuthorisedUser("", "")
+  private val user = AuthorisedUser("")
   private val httpResponse = mock[HttpResponse]
   private val expectedResult = ValidateDownloadResult(OK, 0, Seq.empty, Seq.empty)
 

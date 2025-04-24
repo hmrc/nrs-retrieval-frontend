@@ -32,7 +32,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.views.html.*
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.*
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
@@ -52,7 +52,7 @@ class SearchController @Inject()(
 
   given timeout: Timeout = Timeout(FiniteDuration(appConfig.futureTimeoutSeconds, TimeUnit.SECONDS))
 
-  val noParameters: Action[AnyContent] = Action.async { implicit request =>
+  val noParameters: Action[AnyContent] = Action.async { request =>
     logger.info(s"No parameters provided so redirecting to start page on request $request")
     Future(Redirect(routes.StartController.showStartPage))
   }
@@ -92,7 +92,7 @@ class SearchController @Inject()(
       )
   }
 
-  private def doSearch(search: SearchQueries)(implicit request: NotableEventRequest[_]) = {
+  private def doSearch(search: SearchQueries)(using request: NotableEventRequest[_]) = {
     val crossKeySearch = appConfig.notableEvents.get(request.notableEvent.name).fold(false)(_.crossKeySearch)
 
     logger.info(s"doing search for ${request.notableEvent} with submitted search query ${search.queries} with crossKeySearch: ${crossKeySearch}")
@@ -101,7 +101,8 @@ class SearchController @Inject()(
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
   }
 
-  def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { implicit request =>
+  def refresh(vaultName: String, archiveId: String): Action[AnyContent] = Action.async { request =>
+    given Request[AnyContent] = request
     logger.info(s"Refresh the result $vaultName, $archiveId on request $request")
     nrsRetrievalConnector.statusSubmissionBundle(vaultName, archiveId).map(_.status).map {
       case OK =>
@@ -133,15 +134,16 @@ class SearchController @Inject()(
 
     logger.info(messagePrefix)
 
-      nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map { response =>
+      nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).flatMap { response =>
         given ActorSystem = ActorSystem()
-        val bytes: ByteString = Await.result(response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _), 5.seconds)
-        // log response size rather than the content as this might contain sensitive information
-        logger.info(
-          s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."
-        )
-        
-        Ok(bytes).withHeaders(mapToSeq(response.headers)*)
+        response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
+          // log response size rather than the content as this might contain sensitive information
+          logger.info(
+            s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."
+          )
+
+          Ok(bytes).withHeaders(mapToSeq(response.headers) *)
+        }
       }.recoverWith {
         case e =>
           logger.error(s"$messagePrefix failed with $e", e)

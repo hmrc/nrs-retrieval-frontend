@@ -92,10 +92,10 @@ class ITAuthenticatedAction @Inject()(
                                        env: Environment,
                                        controllerComponents: MessagesControllerComponents,
                                        errorPage: error_template
-                                     )(implicit executionContext: ExecutionContext, appConfig: AppConfig)
+                                     )(using executionContext: ExecutionContext, appConfig: AppConfig)
   extends AuthenticatedAction(authConnector, config, env, controllerComponents, errorPage) {
 
   //Override the hc method to make use of full action
-  override implicit protected def hc(implicit request: RequestHeader): HeaderCarrier =
+  override implicit protected def hc(using request: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromRequest(request)
 }

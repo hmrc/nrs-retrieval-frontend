@@ -31,5 +31,5 @@ class ErrorHandler @Inject()(
                               errorPage: error_template
                             )(using val appConfig: AppConfig,
                               val ec: ExecutionContext) extends FrontendErrorHandler:
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader): Future[Html] =
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(using request: RequestHeader): Future[Html] =
     Future.successful(errorPage(pageTitle, heading, message))

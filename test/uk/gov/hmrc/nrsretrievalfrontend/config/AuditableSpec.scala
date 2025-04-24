@@ -33,7 +33,7 @@ abstract class AuditableSpec extends UnitSpec {
 
   "sendDataEvent" should {
     "send a NonRepudiationStoreSearch audit event" in {
-      val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", "name", Seq("vatReturnVRN" -> "validVrn"), "nrSubmissionId", "path")
+      val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", Seq("vatReturnVRN" -> "validVrn"), "nrSubmissionId", "path")
 
       val func: DataEvent => Unit = mock[DataEvent => Unit]
       when(func.apply(any())).thenReturn(())

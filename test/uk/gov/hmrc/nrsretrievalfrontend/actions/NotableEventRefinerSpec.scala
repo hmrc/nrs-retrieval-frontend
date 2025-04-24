@@ -69,7 +69,7 @@ class NotableEventRefinerSpec extends BaseUnitSpec
           crossKeySearch = true
         )
 
-        val request = new AuthenticatedRequest("userName", "authProviderId", FakeRequest())
+        val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
         val action: NotableEventRequest[_] => Future[Result] = { request =>
           Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))
@@ -89,7 +89,7 @@ class NotableEventRefinerSpec extends BaseUnitSpec
       "notable event does not exist" in new Setup {
         val notableEvent = "INVALID"
 
-        val request = new AuthenticatedRequest("userName", "authProviderId", FakeRequest())
+        val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
         val action: NotableEventRequest[_] => Future[Result] = { request =>
           Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))

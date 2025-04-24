@@ -48,7 +48,7 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture with Views {
 
     val boundForm = form.bind(parse(formJson), Int.MaxValue)
 
-    implicit val notableEventRequest: NotableEventRequest[AnyContentAsEmpty.type] =
+    given notableEventRequest: NotableEventRequest[AnyContentAsEmpty.type] =
       new NotableEventRequest(notableEvent, searchKey = notableEvent.searchKeys.head, authenticatedRequest)
 
     def ensureThePageIsRendered(doc: Document, titleText: String) = {

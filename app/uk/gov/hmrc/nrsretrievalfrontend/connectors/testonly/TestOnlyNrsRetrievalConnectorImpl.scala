@@ -35,7 +35,7 @@ class TestOnlyNrsRetrievalConnectorImpl @Inject()(
 
   override def validateDownload(vaultName: String, archiveId: String)
                                (using hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult] =
-    nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).map(response => ValidateDownloadResult(response))
+    nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).flatMap(response => ValidateDownloadResult(response))
 
   override def checkAuthorisation(using hc: HeaderCarrier): Future[Boolean] = {
     http.get(url"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation").execute[Boolean]

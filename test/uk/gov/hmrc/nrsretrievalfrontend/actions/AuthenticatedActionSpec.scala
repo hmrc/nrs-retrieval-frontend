@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.actions
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
@@ -27,8 +27,8 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Result, Results}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeRequest, ResultExtractors}
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, ~}
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 
@@ -59,13 +59,12 @@ class AuthenticatedActionSpec extends BaseUnitSpec
     "execute the block" when {
       "authenticated" in new Setup {
         val authProviderId = "authProviderId"
-        val userName = "userName"
 
-        when(mockAuthConnector.authorise[Option[Credentials] ~ Option[Name]](any(), any())(any(), any()))
-          .thenReturn(Future.successful(new~(Some(Credentials(authProviderId, "goverment-gateway")), Some(Name(Some(userName), None)))))
+        when(mockAuthConnector.authorise[Option[Credentials]](any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some(Credentials(authProviderId, "goverment-gateway"))))
 
         val action: AuthenticatedRequest[_] => Future[Result] = { request =>
-          Future(Ok(Json.obj("userName" -> request.userName, "authProviderId" -> request.authProviderId)))
+          Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
         }
 
         val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
@@ -74,7 +73,6 @@ class AuthenticatedActionSpec extends BaseUnitSpec
         val json: JsValue = contentAsJson(result)
 
         (json \ "authProviderId").as[String] shouldBe authProviderId
-        (json \ "userName").as[String] shouldBe userName
       }
     }
 
@@ -105,11 +103,11 @@ class AuthenticatedActionSpec extends BaseUnitSpec
     "return error page" when {
       "credentials can't be found" in new Setup {
 
-        when(mockAuthConnector.authorise[Option[Credentials] ~ Option[Name]](any(), any())(any(), any()))
-          .thenReturn(Future.successful(new~(None, Some(Name(Some("userName"), None)))))
+        when(mockAuthConnector.authorise[Option[Credentials]](any(), any())(any(), any()))
+          .thenReturn(Future.successful(None))
 
         val action: AuthenticatedRequest[_] => Future[Result] = { request =>
-          Future(Ok(Json.obj("userName" -> request.userName, "authProviderId" -> request.authProviderId)))
+          Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
         }
 
         val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
@@ -120,31 +118,13 @@ class AuthenticatedActionSpec extends BaseUnitSpec
         doc.select("#main-content > div > div > p").text() shouldBe "User credentials not found"
       }
 
-      "name can't be found" in new Setup {
-        val authProviderId = "authProviderId"
-
-        when(mockAuthConnector.authorise[Option[Credentials] ~ Option[Name]](any(), any())(any(), any()))
-          .thenReturn(Future.successful(new~(Some(Credentials(authProviderId, "goverment-gateway")), None)))
-
-        val action: AuthenticatedRequest[_] => Future[Result] = { request =>
-          Future(Ok(Json.obj("userName" -> request.userName, "authProviderId" -> request.authProviderId)))
-        }
-
-        val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
-
-        status(result) shouldBe FORBIDDEN
-        val doc: Document = Jsoup.parse(contentAsString(result))
-        doc.title() shouldBe "Not authorised"
-        doc.select("#main-content > div > div > p").text() shouldBe "User name not found"
-      }
-
       "required enrolments are missing" in new Setup {
 
         when(mockAuthConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(InsufficientEnrolments()))
 
         val action: AuthenticatedRequest[_] => Future[Result] = { request =>
-          Future(Ok(Json.obj("userName" -> request.userName, "authProviderId" -> request.authProviderId)))
+          Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
         }
 
         val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)

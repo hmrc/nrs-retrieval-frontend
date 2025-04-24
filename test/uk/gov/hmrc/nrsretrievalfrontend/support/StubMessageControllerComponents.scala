@@ -34,19 +34,19 @@ trait StubMessageControllerComponents extends Configs {
 
   val httpConfiguration = new HttpConfiguration()
 
-  implicit val messages: Map[String, String] =
+  given messages: Map[String, String] =
     Messages
       .parse(UrlMessageSource(this.getClass.getClassLoader.getResource("messages")), "")
       .toOption
       .getOrElse(Map.empty[String, String])
 
-  implicit lazy val messagesApi: MessagesApi =
+  given messagesApi: MessagesApi =
     new DefaultMessagesApi(
       messages = Map("default" -> messages),
       langs = langs
     )
 
-  implicit val messagesImpl: MessagesImpl = MessagesImpl(lang, messagesApi)
+  given messagesImpl: MessagesImpl = MessagesImpl(lang, messagesApi)
 
   def stubMessagesControllerComponents()(implicit
                                          executionContext: ExecutionContext

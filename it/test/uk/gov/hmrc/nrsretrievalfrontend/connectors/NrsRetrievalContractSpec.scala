@@ -125,14 +125,15 @@ class NrsRetrievalContractSpec extends IntegrationSpec {
           response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
             val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
             val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
-            response.status shouldBe OK
-            response.header("Cache-Control") shouldBe Some("no-cache,no-store,max-age=0")
-            response.header("Content-Length") shouldBe Some("276")
-            response.header("Content-Disposition") shouldBe Some("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip")
-            response.header("Content-Type") shouldBe Some("application/octet-stream")
-            response.header("nr-submission-id") shouldBe Some("604958ae-973a-4554-9e4b-fed3025dd845")
-            response.header("Date") shouldBe Some("Tue, 13 Jul 2021 12:36:51 GMT")
-            zippedFileNames shouldBe Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+            assert(response.status == OK)
+            assert(response.header("Cache-Control").contains("no-cache,no-store,max-age=0"))
+            assert(response.header("Content-Length").contains("276"))
+            assert(response.header("Content-Disposition").contains("inline; filename=604958ae-973a-4554-9e4b-fed3025dd845.zip"))
+            assert(response.header("Content-Type").contains("application/octet-stream"))
+            assert(response.header("nr-submission-id").contains("604958ae-973a-4554-9e4b-fed3025dd845"))
+            assert(response.header("Date").contains("Tue, 13 Jul 2021 12:36:51 GMT"))
+            assert(zippedFileNames == Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m"))
+
 
             zipInputStream.close()
           }

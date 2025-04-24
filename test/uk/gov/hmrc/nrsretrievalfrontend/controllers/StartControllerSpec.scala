@@ -20,7 +20,7 @@ import play.api.mvc.Result
 
 import scala.concurrent.Future
 
-class StartControllerSpec extends ControllerSpec {
+class StartControllerSpec extends ControllerSpec:
 
   private def startController =
     new StartController(
@@ -34,10 +34,7 @@ class StartControllerSpec extends ControllerSpec {
       def theStartPageShouldBeRendered(eventualResult: Future[Result]) =
         aPageShouldBeRendered(eventualResult, messages("start.page.header.lbl"))
 
-      "the request is authorised" in {
+      "the request is authorised" in
         theStartPageShouldBeRendered(startController.showStartPage(getRequest))
-      }
     }
   }
-}
-

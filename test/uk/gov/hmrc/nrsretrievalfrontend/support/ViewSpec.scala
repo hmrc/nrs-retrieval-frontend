@@ -25,36 +25,34 @@ import play.api.mvc.Call
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrsretrievalfrontend.models.AuthorisedUser
 
-trait ViewSpec extends BaseUnitSpec with Views with ViewsSelectors {
+trait ViewSpec extends BaseUnitSpec with Views with ViewsSelectors:
 
   def view: HtmlFormat.Appendable
 
-  lazy val html: String = view.body
-  lazy val doc: Document = Jsoup.parse(html)
-  lazy val form: Element = doc.getElementsByTag("form").first()
-  lazy val heading: Element = doc.getElementsByTag("h1").first()
-  lazy val subHeading: Element = doc.getElementsByClass("heading-secondary").first()
+  lazy val html: String          = view.body
+  lazy val doc: Document         = Jsoup.parse(html)
+  lazy val form: Element         = doc.getElementsByTag("form").first()
+  lazy val heading: Element      = doc.getElementsByTag("h1").first()
+  lazy val subHeading: Element   = doc.getElementsByClass("heading-secondary").first()
   lazy val errorSummary: Element = doc.getElementsByClass("amls-error-summary").first()
-}
 
-object ViewSpec extends ViewsSelectors {
-  def elementByName(doc: Document, name: String): Elements = doc.getElementsByAttributeValue("name", name)//.first()
+object ViewSpec extends ViewsSelectors:
+  def elementByName(doc: Document, name: String): Elements = doc.getElementsByAttributeValue("name", name) // .first()
 
   val someUser: Option[AuthorisedUser] = Some(AuthorisedUser("authProviderId"))
 
-  def ensureCommonPageElementsAreRendered(doc: Document,
-                                          headerText: String,
-                                          titleText: String,
-                                          maybeBackLinkCall: Option[Call] = None): Assertion = {
-    maybeBackLinkCall.map{ call =>
+  def ensureCommonPageElementsAreRendered(
+    doc: Document,
+    headerText: String,
+    titleText: String,
+    maybeBackLinkCall: Option[Call] = None
+  ): Assertion =
+    maybeBackLinkCall.map { call =>
       val backLink = doc.getElementsByClass("govuk-back-link")
       backLink.attr("href") mustBe call.url
       backLink.text() mustBe "Back"
     }
 
-
     val pageHeader: Element = doc.select(headingCssSelector).first()
     pageHeader.text() mustBe headerText
     doc.title mustBe titleText
-  }
-}

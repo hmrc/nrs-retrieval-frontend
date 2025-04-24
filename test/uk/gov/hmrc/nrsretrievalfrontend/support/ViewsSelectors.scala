@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
-trait ViewsSelectors {
+trait ViewsSelectors:
 
   val headingCssSelector = "#main-content > div > div > header > h1"
-
-
-}

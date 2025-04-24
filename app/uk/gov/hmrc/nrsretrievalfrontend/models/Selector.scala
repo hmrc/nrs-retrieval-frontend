@@ -20,7 +20,6 @@ import play.api.libs.json.{Json, OFormat}
 
 case class Selector(notableEventType: String)
 
-object Selector {
+object Selector:
   def unapply(q: Selector): Option[String] = Some(q.notableEventType)
-  given OFormat[Selector] = Json.format[Selector]
-}
+  given OFormat[Selector]                  = Json.format[Selector]

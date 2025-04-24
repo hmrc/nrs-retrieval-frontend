@@ -21,7 +21,7 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-trait Configs {
+trait Configs:
 
   def configuration: Configuration = Configuration(ConfigFactory.parseResources("application.conf"))
 
@@ -30,4 +30,3 @@ trait Configs {
   def servicesConfig: ServicesConfig = new ServicesConfig(configuration)
 
   given appConfig: AppConfig = new AppConfig(configuration, environment, servicesConfig)
-}

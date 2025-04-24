@@ -30,21 +30,24 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton()
-class AuthenticatedAction @Inject()(
-                                     val authConnector: AuthConnector,
-                                     val config: Configuration,
-                                     val env: Environment,
-                                     val controllerComponents: MessagesControllerComponents,
-                                     errorPage: error_template
-                                   )(using val executionContext: ExecutionContext, appConfig: AppConfig)
-  extends ActionBuilder[AuthenticatedRequest, AnyContent], AuthorisedFunctions , FrontendBaseController, AuthRedirects, I18nSupport:
+class AuthenticatedAction @Inject() (
+  val authConnector: AuthConnector,
+  val config: Configuration,
+  val env: Environment,
+  val controllerComponents: MessagesControllerComponents,
+  errorPage: error_template
+)(using val executionContext: ExecutionContext, appConfig: AppConfig)
+    extends ActionBuilder[AuthenticatedRequest, AnyContent], AuthorisedFunctions, FrontendBaseController, AuthRedirects, I18nSupport:
 
-  val logger: Logger = Logger(this.getClass.getName)
-  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
+  val logger: Logger                          = Logger(this.getClass.getName)
+  override def parser: BodyParser[AnyContent] =
+    controllerComponents.parsers.anyContent
 
-  override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
+  override def invokeBlock[A](
+    request: Request[A],
+    block: AuthenticatedRequest[A] => Future[Result]
+  ): Future[Result] =
     given r: Request[A] = request
 
     logger.info(s"Verify stride authorisation")
@@ -53,19 +56,30 @@ class AuthenticatedAction @Inject()(
 
     authorised(
       AuthProviders(PrivilegedApplication) and
-        (Enrolment("nrs_digital_investigator") or Enrolment("nrs digital investigator"))
+        (Enrolment("nrs_digital_investigator") or Enrolment(
+          "nrs digital investigator"
+        ))
     ).retrieve(credentials) {
       case Some(userCredentials) =>
         block(AuthenticatedRequest(userCredentials.providerId, request))
-      case None =>
-        Future successful Forbidden(errorPage(notAuthorised, notAuthorised, s"User credentials not found"))
+      case None                  =>
+        Future successful Forbidden(
+          errorPage(notAuthorised, notAuthorised, s"User credentials not found")
+        )
     }.recover {
-      case ex: NoActiveSession =>
+      case ex: NoActiveSession        =>
         logger.warn(s"NoActiveSession", ex)
-        toStrideLogin(if (appConfig.isLocal) s"http://${request.host}${request.uri}" else s"${request.uri}")
+        toStrideLogin(
+          if (appConfig.isLocal) s"http://${request.host}${request.uri}"
+          else s"${request.uri}"
+        )
       case ex: InsufficientEnrolments =>
         logger.warn(s"error, not authorised: insufficent enrolements", ex)
-        Forbidden(errorPage(notAuthorised, notAuthorised, s"Insufficient enrolments - ${ex.msg}"))
+        Forbidden(
+          errorPage(
+            notAuthorised,
+            notAuthorised,
+            s"Insufficient enrolments - ${ex.msg}"
+          )
+        )
     }
-  }
-

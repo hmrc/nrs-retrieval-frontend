@@ -31,16 +31,16 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, ViewSpec, Views}
 
 import scala.concurrent.duration._
 
-class search_pageSpec extends BaseUnitSpec with SearchFixture with Views {
+class search_pageSpec extends BaseUnitSpec with SearchFixture with Views:
 
-  private def notFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("notFound")).isDefined
+  private def notFoundPanelIsDisplayed(doc: Document): Boolean     = Option(doc.getElementById("notFound")).isDefined
   private def resultsFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("resultsFound")).isDefined
 
   val searchKeyValue = "searchKeyValue"
 
-  indexedNotableEvents.foreach{ case (notableEvent: NotableEvent, _ ) =>
-    val searchKeyName = notableEvent.searchKeys.head.name
-    val searchPageHeadingText = s"Search for ${notableEvent.pluralDisplayName}"
+  indexedNotableEvents.foreach { case (notableEvent: NotableEvent, _) =>
+    val searchKeyName          = notableEvent.searchKeys.head.name
+    val searchPageHeadingText  = s"Search for ${notableEvent.pluralDisplayName}"
     val searchResultsTitleText = s"Results - $searchPageHeadingText"
 
     val formJson =
@@ -51,16 +51,17 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture with Views {
     given notableEventRequest: NotableEventRequest[AnyContentAsEmpty.type] =
       new NotableEventRequest(notableEvent, searchKey = notableEvent.searchKeys.head, authenticatedRequest)
 
-    def ensureThePageIsRendered(doc: Document, titleText: String) = {
+    def ensureThePageIsRendered(doc: Document, titleText: String) =
       ensureCommonPageElementsAreRendered(
         doc = doc,
         headerText = searchPageHeadingText,
         titleText = titleText,
-        maybeBackLinkCall = Some(uk.gov.hmrc.nrsretrievalfrontend.controllers.routes.SelectorController.showSelectorPage))
+        maybeBackLinkCall = Some(uk.gov.hmrc.nrsretrievalfrontend.controllers.routes.SelectorController.showSelectorPage)
+      )
 
       val searchKeyNameElement: Elements = elementByName(doc, "queries[0].name")
-      val searchKeyInput: Element =  doc.getElementById("queries[0].value")
-      val searchButton = elementByName(doc, "searchButton")
+      val searchKeyInput: Element        = doc.getElementById("queries[0].value")
+      val searchButton                   = elementByName(doc, "searchButton")
 
       searchKeyNameElement.`val`() mustBe searchKeyName
       searchKeyNameElement.attr("type") mustBe "hidden"
@@ -70,34 +71,29 @@ class search_pageSpec extends BaseUnitSpec with SearchFixture with Views {
 
       searchButton.attr("type") mustBe "submit"
       searchButton.text() mustBe "Search"
-    }
 
     s"the search page for notableEventType [${notableEvent.name}]" should {
       "render correctly" when {
-        "no search was made" in new ViewSpec {
+        "no search was made" in new ViewSpec:
           override val view: HtmlFormat.Appendable = searchPage(boundForm, None, 5.minutes)
 
           ensureThePageIsRendered(doc, searchPageHeadingText)
           notFoundPanelIsDisplayed(doc) mustBe false
           resultsFoundPanelIsDisplayed(doc) mustBe false
-        }
 
-        "search results were not found" in new ViewSpec {
+        "search results were not found" in new ViewSpec:
           override val view: HtmlFormat.Appendable = searchPage(boundForm, Some(Seq.empty[SearchResult]), 5.minutes)
 
           ensureThePageIsRendered(doc, searchResultsTitleText)
           notFoundPanelIsDisplayed(doc) mustBe true
           resultsFoundPanelIsDisplayed(doc) mustBe false
-        }
 
-        "search results were found" in new ViewSpec {
+        "search results were found" in new ViewSpec:
           override val view: HtmlFormat.Appendable = searchPage(boundForm, Some(Seq(vatSearchResult)), 5.minutes)
 
           ensureThePageIsRendered(doc, searchResultsTitleText)
           notFoundPanelIsDisplayed(doc) mustBe false
           resultsFoundPanelIsDisplayed(doc) mustBe true
-        }
       }
     }
   }
-}

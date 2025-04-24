@@ -32,29 +32,22 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
-class NotableEventRefinerSpec extends BaseUnitSpec
-  with MockitoSugar
-  with Results
-  with Status
-  with ScalaFutures
-  with HeaderNames
-  with ResultExtractors
-  with Views {
+class NotableEventRefinerSpec
+    extends BaseUnitSpec with MockitoSugar with Results with Status with ScalaFutures with HeaderNames with ResultExtractors with Views:
 
-  trait Setup {
+  trait Setup:
 
     def notableEventRefiner(notableEvent: String) = new NotableEventRefiner(
       messagesApi = messagesApi,
       errorPage = error_template
     )(notableEvent)
-  }
 
   "refining request based on notable event" should {
     "execute the block with correct notable event" when {
-      "the event exists" in new Setup {
+      "the event exists" in new Setup:
         val notableEvent = "vat-registration"
 
-        val searchKey = SearchKey(
+        val searchKey          = SearchKey(
           name = "postCodeOrFormBundleId",
           label = "Post Code or Form Bundle Id"
         )
@@ -71,9 +64,8 @@ class NotableEventRefinerSpec extends BaseUnitSpec
 
         val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
-        val action: NotableEventRequest[_] => Future[Result] = { request =>
+        val action: NotableEventRequest[_] => Future[Result] = request =>
           Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))
-        }
 
         val result: Future[Result] = notableEventRefiner(notableEvent).invokeBlock(request, action)
 
@@ -81,27 +73,23 @@ class NotableEventRefinerSpec extends BaseUnitSpec
         val json: JsValue = contentAsJson(result)
 
         (json \ "notableEvent").as[NotableEvent] shouldBe notableEventConfig
-        (json \ "searchKey").as[SearchKey] shouldBe searchKey
-      }
+        (json \ "searchKey").as[SearchKey]       shouldBe searchKey
     }
 
     "return error page" when {
-      "notable event does not exist" in new Setup {
+      "notable event does not exist" in new Setup:
         val notableEvent = "INVALID"
 
         val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
-        val action: NotableEventRequest[_] => Future[Result] = { request =>
+        val action: NotableEventRequest[_] => Future[Result] = request =>
           Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))
-        }
 
         val result: Future[Result] = notableEventRefiner(notableEvent).invokeBlock(request, action)
 
         status(result) shouldBe NOT_FOUND
         val doc: Document = Jsoup.parse(contentAsString(result))
-        doc.title() shouldBe "Not found"
+        doc.title()                                        shouldBe "Not found"
         doc.select("#main-content > div > div > p").text() shouldBe "Notable Event Type not found"
-      }
     }
   }
-}

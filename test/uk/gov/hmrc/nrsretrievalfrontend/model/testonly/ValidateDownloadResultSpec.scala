@@ -29,16 +29,15 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset.defaultCharset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-class ValidateDownloadResultSpec extends UnitSpec with ScalaFutures {
+class ValidateDownloadResultSpec extends UnitSpec with ScalaFutures:
   private val httpResponse = mock[HttpResponse]
-
 
   "ValidateDownloadResultSpec.apply" should {
     "transform a HttpResponse" in {
-      val output: Array[Byte] = "text".getBytes(defaultCharset())
-      val byteArrayOutputStream = new ByteArrayOutputStream()
+      val output: Array[Byte]              = "text".getBytes(defaultCharset())
+      val byteArrayOutputStream            = new ByteArrayOutputStream()
       val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
-      val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+      val fileNames                        = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
       fileNames.foreach { fileName =>
         val zipEntry: ZipEntry = new ZipEntry(fileName)
@@ -65,4 +64,3 @@ class ValidateDownloadResultSpec extends UnitSpec with ScalaFutures {
       zipOutputStream.close()
     }
   }
-}

@@ -26,7 +26,7 @@ import play.api.test.Helpers.{stubBodyParser, stubPlayBodyParsers}
 import java.util.Locale
 import scala.concurrent.ExecutionContext
 
-trait StubMessageControllerComponents extends Configs {
+trait StubMessageControllerComponents extends Configs:
 
   val lang = Lang(new Locale("en"))
 
@@ -49,7 +49,7 @@ trait StubMessageControllerComponents extends Configs {
   given messagesImpl: MessagesImpl = MessagesImpl(lang, messagesApi)
 
   def stubMessagesControllerComponents()(implicit
-                                         executionContext: ExecutionContext
+    executionContext: ExecutionContext
   ): MessagesControllerComponents =
     DefaultMessagesControllerComponents(
       new DefaultMessagesActionBuilderImpl(stubBodyParser(AnyContentAsEmpty), messagesApi),
@@ -60,5 +60,3 @@ trait StubMessageControllerComponents extends Configs {
       new DefaultFileMimeTypes(FileMimeTypesConfiguration()),
       executionContext
     )
-
-}

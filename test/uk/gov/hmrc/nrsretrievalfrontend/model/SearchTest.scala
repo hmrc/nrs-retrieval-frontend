@@ -20,7 +20,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResultUtils
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 
-class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
+class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture:
   "fromNrsSearchResult" should {
     "create a SearchResult from an NrsSearchResult based on notable event config " in {
       new SearchResultUtils(appConfig).fromNrsSearchResult(nrsVatSearchResult) shouldBe vatSearchResult
@@ -32,4 +32,3 @@ class SearchTest extends UnitSpec with SearchFixture with NrsSearchFixture {
       vatSearchResult.linkText shouldBe "VAT return submitted 18 January 1970"
     }
   }
-}

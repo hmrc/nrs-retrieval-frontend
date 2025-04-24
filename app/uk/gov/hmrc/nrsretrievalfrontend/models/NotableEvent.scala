@@ -22,42 +22,41 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.Try
 
 case class SearchKeySubmission(
-                      searchKeyName: String,
-                      searchKeyValue: Option[String]
-                    )
+  searchKeyName: String,
+  searchKeyValue: Option[String]
+)
 
 case class SearchKey(
-                    name: String,
-                    label: String
-                    )
+  name: String,
+  label: String
+)
 
-object SearchKey {
+object SearchKey:
   given OFormat[SearchKey] = Json.format[SearchKey]
 
-}
 case class NotableEvent(
-                         name: String,
-                         displayName: String,
-                         pluralDisplayName: String,
-                         storedFrom: String,
-                         storedFor: String,
-                         searchKeys: Seq[SearchKey],
-                         estimatedRetrievalTime: FiniteDuration,
-                         crossKeySearch: Boolean
-                       )
+  name: String,
+  displayName: String,
+  pluralDisplayName: String,
+  storedFrom: String,
+  storedFor: String,
+  searchKeys: Seq[SearchKey],
+  estimatedRetrievalTime: FiniteDuration,
+  crossKeySearch: Boolean
+)
 
-object NotableEvent {
-  given Format[FiniteDuration] = new Format[FiniteDuration] {
-    override def reads(json: JsValue): JsResult[FiniteDuration] = {
-      Try(Duration.apply(json.as[String])).toOption.collect {
-        case duration: FiniteDuration => JsSuccess(duration)
-      }.getOrElse(JsError(s"can't build finite duration from string value: ${json}"))
-    }
+object NotableEvent:
+  given Format[FiniteDuration] = new Format[FiniteDuration]:
+    override def reads(json: JsValue): JsResult[FiniteDuration] =
+      Try(Duration.apply(json.as[String])).toOption
+        .collect { case duration: FiniteDuration =>
+          JsSuccess(duration)
+        }
+        .getOrElse(
+          JsError(s"can't build finite duration from string value: $json")
+        )
 
     override def writes(o: FiniteDuration): JsValue =
       JsString(o.toString())
-  }
 
   given OFormat[NotableEvent] = Json.format[NotableEvent]
-
-}

@@ -20,5 +20,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 
 import javax.inject.{Inject, Named}
-class MicroserviceAudit @Inject()(@Named("appName") val applicationName: String,
-                                  val auditConnector: AuditConnector) extends Audit(applicationName, auditConnector)
+class MicroserviceAudit @Inject() (
+  @Named("appName") val applicationName: String,
+  val auditConnector: AuditConnector
+) extends Audit(applicationName, auditConnector)

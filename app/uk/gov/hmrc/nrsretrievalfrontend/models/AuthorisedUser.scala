@@ -20,8 +20,8 @@ import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 
 case class AuthorisedUser(authProviderId: String)
 
-object AuthorisedUser {
-  given converter[A](using authenticatedRequest: AuthenticatedRequest[A]): AuthorisedUser =
+object AuthorisedUser:
+  given converter[A](using
+    authenticatedRequest: AuthenticatedRequest[A]
+  ): AuthorisedUser =
     AuthorisedUser(authenticatedRequest.authProviderId)
-
-}

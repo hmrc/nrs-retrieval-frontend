@@ -20,6 +20,7 @@ import play.api.mvc.{Request, WrappedRequest}
 
 case class AuthenticatedRequest[A](authProviderId: String, request: Request[A]) extends WrappedRequest(request)
 
-object AuthenticatedRequest {
-  given converter[A](using request: NotableEventRequest[A]): AuthenticatedRequest[A] = request.request
-}
+object AuthenticatedRequest:
+  given converter[A](using
+    request: NotableEventRequest[A]
+  ): AuthenticatedRequest[A] = request.request

@@ -40,62 +40,54 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-trait IntegrationSpec extends AnyWordSpec
-  with Matchers
-  with ScalaFutures
-  with GuiceOneServerPerSuite
-  with WireMockSupport
-  with IntegrationPatience
-  with BeforeAndAfterEach
-  with Fixture {
+trait IntegrationSpec
+    extends AnyWordSpec with Matchers with ScalaFutures with GuiceOneServerPerSuite with WireMockSupport with IntegrationPatience
+    with BeforeAndAfterEach with Fixture:
 
   val authenticationHeader: (String, String) = "Authorization" -> "Bearer some-token"
-  override def beforeEach(): Unit = WireMock.reset()
+  override def beforeEach(): Unit            = WireMock.reset()
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder(
-      modules =
-        Seq(
-          new Module() {
-            override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
-              Seq(inject.bind[AuthenticatedAction].to[ITAuthenticatedAction])
-          }
-        )
+      modules = Seq(
+        new Module():
+          override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+            Seq(inject.bind[AuthenticatedAction].to[ITAuthenticatedAction])
+      )
     )
       .configure(configuration)
       .build()
 
   val defaultConfiguration: Map[String, Any] = Map[String, Any](
-    "microservice.services.auth.port" -> wireMockPort,
+    "microservice.services.auth.port"          -> wireMockPort,
     "microservice.services.nrs-retrieval.port" -> wireMockPort,
-    "play.filters.csrf.header.bypassHeaders" -> Map(
+    "play.filters.csrf.header.bypassHeaders"   -> Map(
       "Authorization" -> "Bearer some-token"
     ),
-    "auditing.enabled" -> false,
-    "metrics.jvm" -> false)
+    "auditing.enabled"                         -> false,
+    "metrics.jvm"                              -> false
+  )
 
   def configuration: Map[String, Any] = defaultConfiguration
-  
-  lazy val injector: Injector = fakeApplication().injector
-  lazy val wsClient: WSClient = injector.instanceOf[WSClient]
-  lazy val httpClientV2: HttpClientV2 = injector.instanceOf[HttpClientV2]
+
+  lazy val injector: Injector                   = fakeApplication().injector
+  lazy val wsClient: WSClient                   = injector.instanceOf[WSClient]
+  lazy val httpClientV2: HttpClientV2           = injector.instanceOf[HttpClientV2]
   lazy val connector: NrsRetrievalConnectorImpl = injector.instanceOf[NrsRetrievalConnectorImpl]
-  given hc: HeaderCarrier = HeaderCarrier()
+  given hc: HeaderCarrier                       = HeaderCarrier()
 
   lazy val serviceRoot = s"http://localhost:$port/nrs-retrieval"
-}
 
 @Singleton
-class ITAuthenticatedAction @Inject()(
-                                       authConnector: AuthConnector,
-                                       config: Configuration,
-                                       env: Environment,
-                                       controllerComponents: MessagesControllerComponents,
-                                       errorPage: error_template
-                                     )(using executionContext: ExecutionContext, appConfig: AppConfig)
-  extends AuthenticatedAction(authConnector, config, env, controllerComponents, errorPage) {
+class ITAuthenticatedAction @Inject() (
+  authConnector: AuthConnector,
+  config: Configuration,
+  env: Environment,
+  controllerComponents: MessagesControllerComponents,
+  errorPage: error_template
+)(using executionContext: ExecutionContext, appConfig: AppConfig)
+    extends AuthenticatedAction(authConnector, config, env, controllerComponents, errorPage):
 
-  //Override the hc method to make use of full action
+  // Override the hc method to make use of full action
   override implicit protected def hc(using request: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromRequest(request)
-}

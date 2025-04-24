@@ -31,16 +31,20 @@ import scala.concurrent.ExecutionContext
 
 class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with PekkoGuiceSupport:
 
-  override def configure(): Unit = {
+  override def configure(): Unit =
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
-    bind(classOf[TestOnlyNrsRetrievalConnector]).to(classOf[TestOnlyNrsRetrievalConnectorImpl])
+    bind(classOf[TestOnlyNrsRetrievalConnector]).to(
+      classOf[TestOnlyNrsRetrievalConnectorImpl]
+    )
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
-  }
 
   @Provides
   @Singleton
   def registerNotableEventRefinerProvider(
-                                           messagesApi: MessagesApi,
-                                           errorPage: error_template
-                                    )(using executionContext: ExecutionContext, appConfig: AppConfig): String => NotableEventRefiner =
+    messagesApi: MessagesApi,
+    errorPage: error_template
+  )(using
+    executionContext: ExecutionContext,
+    appConfig: AppConfig
+  ): String => NotableEventRefiner =
     new NotableEventRefiner(messagesApi, errorPage)(_)

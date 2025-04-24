@@ -30,12 +30,13 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ValidateDownloadController @Inject()(
-                                            authenticatedAction: AuthenticatedAction,
-                                            controllerComponents: MessagesControllerComponents,
-                                            connector: TestOnlyNrsRetrievalConnector,
-                                            validateDownloadPage: validate_download_page
-                                          )(using val appConfig: AppConfig, executionContext: ExecutionContext) extends NRBaseController(controllerComponents):
+class ValidateDownloadController @Inject() (
+  authenticatedAction: AuthenticatedAction,
+  controllerComponents: MessagesControllerComponents,
+  connector: TestOnlyNrsRetrievalConnector,
+  validateDownloadPage: validate_download_page
+)(using val appConfig: AppConfig, executionContext: ExecutionContext)
+    extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
 
@@ -47,11 +48,23 @@ class ValidateDownloadController @Inject()(
   }
 
   val submitValidateDownload: Action[AnyContent] = authenticatedAction.async { implicit request =>
-        validateDownloadForm.bindFromRequest().fold(
-          _ => Future.successful(BadRequest),
-          validateDownloadRequest => {
-            connector.validateDownload(validateDownloadRequest.vaultName, validateDownloadRequest.archiveId).map{ response =>
-              Ok(validateDownloadPage(validateDownloadForm.fill(validateDownloadRequest), Some(response)))}
-          }
-        )
+    validateDownloadForm
+      .bindFromRequest()
+      .fold(
+        _ => Future.successful(BadRequest),
+        validateDownloadRequest =>
+          connector
+            .validateDownload(
+              validateDownloadRequest.vaultName,
+              validateDownloadRequest.archiveId
+            )
+            .map { response =>
+              Ok(
+                validateDownloadPage(
+                  validateDownloadForm.fill(validateDownloadRequest),
+                  Some(response)
+                )
+              )
+            }
+      )
   }

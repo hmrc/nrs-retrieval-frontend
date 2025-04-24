@@ -20,12 +20,13 @@ import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.api.{Configuration, Environment, Mode}
 
-trait AuthRedirects {
+trait AuthRedirects:
   def config: Configuration
   def env: Environment
 
   private lazy val envPrefix =
-    if (env.mode.equals(Mode.Test)) "Test" else config.getOptional[String]("run.mode").getOrElse("Dev")
+    if (env.mode.equals(Mode.Test)) "Test"
+    else config.getOptional[String]("run.mode").getOrElse("Dev")
 
   private val hostDefaults: Map[String, String] = Map(
     "Dev.external-url.bas-gateway-frontend.host"           -> "http://localhost:9553",
@@ -34,25 +35,25 @@ trait AuthRedirects {
     "Dev.external-url.stride-auth-frontend.host"           -> "http://localhost:9041"
   )
 
-  private def host(service: String): String = {
+  private def host(service: String): String =
     val key = s"$envPrefix.external-url.$service.host"
     config.getOptional[String](key).orElse(hostDefaults.get(key)).getOrElse("")
-  }
 
-  final lazy val defaultOrigin: String = {
+  final lazy val defaultOrigin: String =
     config
       .getOptional[String]("sosOrigin")
       .orElse(config.getOptional[String]("appName"))
       .getOrElse("undefined")
-  }
-  def origin: String = defaultOrigin
-  def strideLoginUrl: String = host("stride-auth-frontend") + "/stride/sign-in"
-  def toStrideLogin(successUrl: String, failureUrl: Option[String] = None): Result =
+  def origin: String                   = defaultOrigin
+  def strideLoginUrl: String           = host("stride-auth-frontend") + "/stride/sign-in"
+  def toStrideLogin(
+    successUrl: String,
+    failureUrl: Option[String] = None
+  ): Result =
     Redirect(
       strideLoginUrl,
       Map(
         "successURL" -> Seq(successUrl),
         "origin"     -> Seq(origin)
-      ) ++ failureUrl.map(f => Map("failureURL" -> Seq(f))).getOrElse(Map()))
-
-}
+      ) ++ failureUrl.map(f => Map("failureURL" -> Seq(f))).getOrElse(Map())
+    )

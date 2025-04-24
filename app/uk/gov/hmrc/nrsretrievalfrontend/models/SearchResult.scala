@@ -23,28 +23,31 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 
 case class SearchResult(
-                         notableEventDisplayName: String,
-                         fileDetails: String,
-                         vaultId: String,
-                         archiveId: String,
-                         submissionDateEpochMilli: Long,
-                         retrievalStatus: Option[String] = None,
-                         hasAttachments: Boolean
-                       ):
+  notableEventDisplayName: String,
+  fileDetails: String,
+  vaultId: String,
+  archiveId: String,
+  submissionDateEpochMilli: Long,
+  retrievalStatus: Option[String] = None,
+  hasAttachments: Boolean
+):
 
   val linkText: String =
     s"$notableEventDisplayName submitted ${DateTimeFormat.forPattern("d MMMM YYYY").print(submissionDateEpochMilli)}"
 
-object SearchResult {
+object SearchResult:
   given OFormat[SearchResult] = Json.format[SearchResult]
-}
 
-class SearchResultUtils @Inject()(appConfig: AppConfig) {
+class SearchResultUtils @Inject() (appConfig: AppConfig):
 
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
       notableEventDisplayName = appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
-      fileDetails = filename(nrsSearchResult.nrSubmissionId, nrsSearchResult.bundle.fileType, nrsSearchResult.bundle.fileSize),
+      fileDetails = filename(
+        nrsSearchResult.nrSubmissionId,
+        nrsSearchResult.bundle.fileType,
+        nrsSearchResult.bundle.fileSize
+      ),
       vaultId = nrsSearchResult.glacier.vaultName,
       archiveId = nrsSearchResult.glacier.archiveId,
       submissionDateEpochMilli = nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli,
@@ -52,7 +55,9 @@ class SearchResultUtils @Inject()(appConfig: AppConfig) {
       hasAttachments = nrsSearchResult.attachmentIds.getOrElse(Nil).nonEmpty
     )
 
-  private def filename (nrSubmissionId: String, fileType: String, fileSize: Long) =
+  private def filename(
+    nrSubmissionId: String,
+    fileType: String,
+    fileSize: Long
+  ) =
     s"$nrSubmissionId.$fileType (${byteCountToDisplaySize(fileSize)})"
-
-}

@@ -28,15 +28,21 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TestOnlyNrsRetrievalConnectorImpl @Inject()(
-                                                   nrsRetrievalConnector: NrsRetrievalConnector,
-                                                   http: HttpClientV2
-                                                 )(using appConfig: AppConfig, executionContext: ExecutionContext) extends TestOnlyNrsRetrievalConnector:
+class TestOnlyNrsRetrievalConnectorImpl @Inject() (
+  nrsRetrievalConnector: NrsRetrievalConnector,
+  http: HttpClientV2
+)(using appConfig: AppConfig, executionContext: ExecutionContext)
+    extends TestOnlyNrsRetrievalConnector:
 
-  override def validateDownload(vaultName: String, archiveId: String)
-                               (using hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult] =
-    nrsRetrievalConnector.getSubmissionBundle(vaultName, archiveId).flatMap(response => ValidateDownloadResult(response))
+  override def validateDownload(vaultName: String, archiveId: String)(using
+    hc: HeaderCarrier,
+    user: AuthorisedUser
+  ): Future[ValidateDownloadResult] =
+    nrsRetrievalConnector
+      .getSubmissionBundle(vaultName, archiveId)
+      .flatMap(response => ValidateDownloadResult(response))
 
-  override def checkAuthorisation(using hc: HeaderCarrier): Future[Boolean] = {
-    http.get(url"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation").execute[Boolean]
-  }
+  override def checkAuthorisation(using hc: HeaderCarrier): Future[Boolean] =
+    http
+      .get(url"${appConfig.nrsRetrievalUrl}/test-only/check-authorisation")
+      .execute[Boolean]

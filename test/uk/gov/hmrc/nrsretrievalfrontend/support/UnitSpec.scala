@@ -27,7 +27,7 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 
-trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status with Configs {
+trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Status with Configs:
   given defaultTimeout: FiniteDuration = 5 seconds
 
   given executionContext: ExecutionContext = ExecutionContext.Implicits.global
@@ -37,4 +37,3 @@ trait UnitSpec extends AnyWordSpecLike with Matchers with MockitoSugar with Stat
   given hc: HeaderCarrier = HeaderCarrier()
 
   def await[A](future: Future[A])(using timeout: Duration): A = Await.result(future, timeout)
-}

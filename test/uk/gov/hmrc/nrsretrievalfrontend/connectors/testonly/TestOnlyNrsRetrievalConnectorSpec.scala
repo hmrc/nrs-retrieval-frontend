@@ -31,14 +31,14 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 
 import scala.concurrent.Future
 
-class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
-  private val nrsConnector = mock[NrsRetrievalConnector]
-  private val httpClientV2 = mock[HttpClientV2]
-  private val connector = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector, httpClientV2)
-  private val aVaultName = "vaultName"
-  private val anArchiveId = "archiveId"
-  private val user = AuthorisedUser("")
-  private val httpResponse = mock[HttpResponse]
+class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec:
+  private val nrsConnector   = mock[NrsRetrievalConnector]
+  private val httpClientV2   = mock[HttpClientV2]
+  private val connector      = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector, httpClientV2)
+  private val aVaultName     = "vaultName"
+  private val anArchiveId    = "archiveId"
+  private val user           = AuthorisedUser("")
+  private val httpResponse   = mock[HttpResponse]
   private val expectedResult = ValidateDownloadResult(OK, 0, Seq.empty, Seq.empty)
 
   "validateDownload" should {
@@ -57,10 +57,9 @@ class TestOnlyNrsRetrievalConnectorSpec extends UnitSpec {
   "checkAuthorisation" should {
     "delegate to the nrs-retrieval endpoint /test-only/check-authorisation" in {
       val mockRequestBuilder = mock[RequestBuilder]
-      val testConnector = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector,httpClientV2)
+      val testConnector      = new TestOnlyNrsRetrievalConnectorImpl(nrsConnector, httpClientV2)
       when(httpClientV2.get(ArgumentMatchers.any())(using any[HeaderCarrier])).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.execute[Boolean](any(), any())).thenReturn(Future.successful(true))
       await(testConnector.checkAuthorisation) shouldBe true
     }
   }
-}

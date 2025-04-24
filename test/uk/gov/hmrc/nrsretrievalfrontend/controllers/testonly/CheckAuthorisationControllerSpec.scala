@@ -26,9 +26,8 @@ import uk.gov.hmrc.nrsretrievalfrontend.controllers.ControllerSpec
 
 import scala.concurrent.Future
 
-class CheckAuthorisationControllerSpec extends ControllerSpec {
+class CheckAuthorisationControllerSpec extends ControllerSpec:
   private val connector = mock[TestOnlyNrsRetrievalConnector]
-
 
   private lazy val controller =
     new CheckAuthorisationController(
@@ -49,7 +48,8 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
     "confirm that the request is unauthorised" when {
       "the user is not authenticated" in {
         doAnswer(new Returns(Future failed UpstreamErrorResponse(UNAUTHORIZED.toString, UNAUTHORIZED)))
-          .when(connector).checkAuthorisation(using any[HeaderCarrier])
+          .when(connector)
+          .checkAuthorisation(using any[HeaderCarrier])
 
         contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.401"))
       }
@@ -58,10 +58,10 @@ class CheckAuthorisationControllerSpec extends ControllerSpec {
     "confirm that the request is forbidden" when {
       "the user is authenticated but not authorised" in {
         doAnswer(new Returns(Future failed UpstreamErrorResponse(FORBIDDEN.toString, FORBIDDEN)))
-          .when(connector).checkAuthorisation(using any[HeaderCarrier])
+          .when(connector)
+          .checkAuthorisation(using any[HeaderCarrier])
 
         contentAsString(controller.checkAuthorisation(getRequest)) should include(messages("test-only.check-authorisation.status.403"))
       }
     }
   }
-}

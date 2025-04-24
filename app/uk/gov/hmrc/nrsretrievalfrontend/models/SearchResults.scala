@@ -20,6 +20,5 @@ import play.api.libs.json.{Json, OFormat}
 
 case class SearchResults(results: Seq[SearchResult], resultCount: Int)
 
-object SearchResults {
+object SearchResults:
   given OFormat[SearchResults] = Json.format[SearchResults]
-}

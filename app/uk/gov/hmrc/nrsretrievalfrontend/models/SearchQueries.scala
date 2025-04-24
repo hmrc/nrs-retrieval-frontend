@@ -18,6 +18,5 @@ package uk.gov.hmrc.nrsretrievalfrontend.models
 
 case class SearchQueries(queries: List[Query])
 
-object SearchQueries{
+object SearchQueries:
   def unapply(q: SearchQueries): Option[List[Query]] = Some(q.queries)
-}

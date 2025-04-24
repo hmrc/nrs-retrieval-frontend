@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.views.helpers
 
 case class RadioParams(
-                        value: String,
-                        label: String,
-                        dataTarget: Option[String] = None
-                      )
+  value: String,
+  label: String,
+  dataTarget: Option[String] = None
+)

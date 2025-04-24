@@ -21,14 +21,23 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NrsSearchResult,
 
 import scala.concurrent.Future
 
-trait NrsRetrievalConnector {
+trait NrsRetrievalConnector:
 
-  def search(notableEvent: String, query: List[Query], crossKeySearch: Boolean)(using HeaderCarrier, AuthorisedUser): Future[Seq[NrsSearchResult]]
+  def search(notableEvent: String, query: List[Query], crossKeySearch: Boolean)(using
+    HeaderCarrier,
+    AuthorisedUser
+  ): Future[Seq[NrsSearchResult]]
 
-  def submitRetrievalRequest(vaultName: String, archiveId: String)(using hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse]
+  def submitRetrievalRequest(vaultName: String, archiveId: String)(using
+    hc: HeaderCarrier,
+    user: AuthorisedUser
+  ): Future[HttpResponse]
 
-  def statusSubmissionBundle(vaultName: String, archiveId: String)(using hc: HeaderCarrier): Future[HttpResponse]
+  def statusSubmissionBundle(vaultName: String, archiveId: String)(using
+    hc: HeaderCarrier
+  ): Future[HttpResponse]
 
-  def getSubmissionBundle(vaultName: String, archiveId: String)(using hc: HeaderCarrier, user: AuthorisedUser): Future[HttpResponse]
-  
-}
+  def getSubmissionBundle(vaultName: String, archiveId: String)(using
+    hc: HeaderCarrier,
+    user: AuthorisedUser
+  ): Future[HttpResponse]

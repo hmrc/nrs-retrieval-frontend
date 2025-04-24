@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.models
 
-object CompletionStatus {
-  val complete = "Complete"
-  val failed = "Failed"
+object CompletionStatus:
+  val complete   = "Complete"
+  val failed     = "Failed"
   val incomplete = "Incomplete"
-}

@@ -22,7 +22,7 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec.ensureCommonPageElementsAreRendered
 
-class start_pageSpec extends ViewSpec {
+class start_pageSpec extends ViewSpec:
 
   override lazy val view: HtmlFormat.Appendable = startPage()
 
@@ -34,4 +34,3 @@ class start_pageSpec extends ViewSpec {
       doc.getElementById("continueButton").text() mustBe Messages("start.button.start.lbl")
     }
   }
-}

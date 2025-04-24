@@ -31,32 +31,31 @@ import java.net.URL
 import java.util.zip.ZipInputStream
 import scala.concurrent.{ExecutionContext, Future}
 
-class NrsRetrievalIntegrationSpec extends IntegrationSpec {
-  private val selectUrl = s"$serviceRoot/select"
-  private val searchUrl = s"$serviceRoot/search"
-  private val vatReturnSearchUrl = s"$searchUrl/$vatReturn"
+class NrsRetrievalIntegrationSpec extends IntegrationSpec:
+  private val selectUrl                = s"$serviceRoot/select"
+  private val searchUrl                = s"$serviceRoot/search"
+  private val vatReturnSearchUrl       = s"$searchUrl/$vatReturn"
   private val vatRegistrationSearchUrl = s"$searchUrl/$vatRegistration"
 
-  private val startPageHeading = "Search the Non-Repudiation Store"
-  private val vatReturnSearchPageHeading = "Search for VAT returns"
+  private val startPageHeading                 = "Search the Non-Repudiation Store"
+  private val vatReturnSearchPageHeading       = "Search for VAT returns"
   private val vatRegistrationSearchPageHeading = "Search for VAT registrations"
 
   given executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
-  private def assertPageIsRendered(eventualResponse: Future[HttpResponse], pageHeader: String) = {
+  private def assertPageIsRendered(eventualResponse: Future[HttpResponse], pageHeader: String) =
     val response = eventualResponse.futureValue
     val document = parse(response.body)
 
-    response.status shouldBe OK
+    response.status                                                   shouldBe OK
     document.select("#main-content > div > div > header > h1").text() shouldBe pageHeader
 
     document
-  }
 
   "GET /nrs-retrieval/start" should {
     "display the start page" in {
       givenAuthenticated()
-      val url = new URL(s"$serviceRoot/start")
+      val url                                  = new URL(s"$serviceRoot/start")
       val responseFuture: Future[HttpResponse] = httpClientV2
         .get(url)
         .setHeader(authenticationHeader)
@@ -72,7 +71,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
     "display the select page" in {
       givenAuthenticated()
 
-      val url = new URL(s"$serviceRoot/select")
+      val url                                  = new URL(s"$serviceRoot/select")
       val responseFuture: Future[HttpResponse] = httpClientV2
         .get(url)
         .setHeader(authenticationHeader)
@@ -90,7 +89,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       givenAuthenticated()
       val body: Map[String, Seq[String]] = Map(notableEventType -> Seq(vatReturn))
 
-      val url = new URL(selectUrl)
+      val url                                  = new URL(selectUrl)
       val responseFuture: Future[HttpResponse] = httpClientV2
         .post(url)
         .setHeader(authenticationHeader)
@@ -109,7 +108,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       "no notable event type is provided" in {
         givenAuthenticated()
 
-        val url = new URL(searchUrl)
+        val url                                  = new URL(searchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .get(url)
           .setHeader(authenticationHeader)
@@ -126,7 +125,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       "a vat return is provided" in {
         givenAuthenticated()
 
-        val url = new URL(vatReturnSearchUrl)
+        val url                                  = new URL(vatReturnSearchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .get(url)
           .setHeader(authenticationHeader)
@@ -142,7 +141,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       "a non vat registration is provided" in {
         givenAuthenticated()
 
-        val url = new URL(vatRegistrationSearchUrl)
+        val url                                  = new URL(vatRegistrationSearchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .get(url)
           .setHeader(authenticationHeader)
@@ -164,12 +163,12 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         givenSearchReturns(vatReturnSearchText, OK, Seq.empty[NrsSearchResult])
 
         val body: Map[String, Seq[String]] = Map(
-          searchKeyName -> Seq(vrn),
-          searchKeyValue -> Seq(validVrn),
+          searchKeyName    -> Seq(vrn),
+          searchKeyValue   -> Seq(validVrn),
           notableEventType -> Seq(vatReturn)
         )
 
-        val url = new URL(vatReturnSearchUrl)
+        val url                                  = new URL(vatReturnSearchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .post(url)
           .setHeader(authenticationHeader)
@@ -190,12 +189,12 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         givenSearchReturns(vatRegistrationSearchText, OK, Seq.empty[NrsSearchResult])
 
         val body: Map[String, Seq[String]] = Map(
-          searchKeyName -> Seq(vatRegistrationSearchKey),
-          searchKeyValue -> Seq(postCode),
+          searchKeyName    -> Seq(vatRegistrationSearchKey),
+          searchKeyValue   -> Seq(postCode),
           notableEventType -> Seq(vatRegistration)
         )
 
-        val url = new URL(vatRegistrationSearchUrl)
+        val url                                  = new URL(vatRegistrationSearchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .post(url)
           .setHeader(authenticationHeader)
@@ -220,7 +219,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
 
       given ActorSystem = ActorSystem()
 
-      val url = new URL(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn")
+      val url            = new URL(s"$serviceRoot/download/$vatReturnNotableEvent/$vatReturn/$vrn")
       val responseFuture = httpClientV2
         .get(url)
         .setHeader(authenticationHeader)
@@ -229,7 +228,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
       responseFuture.flatMap { response =>
         response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
 
-          val zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
+          val zipInputStream               = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
           val zippedFileNames: Seq[String] = LazyList.continually(zipInputStream.getNextEntry).takeWhile(_ != null).map(_.getName)
 
           assert(response.status == OK)
@@ -259,9 +258,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec {
         .get(url)
         .setHeader(authenticationHeader)
         .execute[HttpResponse]
-        .futureValue.status shouldBe ACCEPTED
+        .futureValue
+        .status shouldBe ACCEPTED
 
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
     }
   }
-}

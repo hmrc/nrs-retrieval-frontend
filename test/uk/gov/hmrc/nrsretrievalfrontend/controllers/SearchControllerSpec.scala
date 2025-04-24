@@ -33,8 +33,7 @@ import org.apache.pekko.stream.scaladsl.Source
 
 import scala.concurrent.Future
 
-class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture {
-
+class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSearchFixture:
 
   private val controller =
     new SearchController(
@@ -44,75 +43,78 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
       new SearchResultUtils(appConfig),
       stubMessagesControllerComponents(),
       searchPage,
-      error_template)
+      error_template
+    )
 
-  private def theSearchPageShouldBeRenderedWithoutResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
+  private def theSearchPageShouldBeRenderedWithoutResults(eventualResult: Future[Result], notableEvent: NotableEvent) =
     val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.pluralDisplayName))
 
-    Option(content.getElementById("notFound")).isDefined shouldBe false
+    Option(content.getElementById("notFound")).isDefined     shouldBe false
     Option(content.getElementById("resultsFound")).isDefined shouldBe false
-  }
 
   private def getRequestWithJsonBody(notableEventType: String) =
     getRequest.withJsonBody(
-      parse(s"""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "$notableEventType"}"""))
+      parse(s"""{"searchKeyName_0": "someValue", "searchKeyValue_0": "someValue", "notableEventType": "$notableEventType"}""")
+    )
 
-  s"showSearchPage" should {
+  s"showSearchPage" should
     indexedNotableEvents.foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       "return 200 and render the search page" when {
-        s"$notableEventType is specified and and the request is authorised" in {
+        s"$notableEventType is specified and and the request is authorised" in
           theSearchPageShouldBeRenderedWithoutResults(
-            controller.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)), notableEvent)
-        }
+            controller.showSearchPage(notableEventType)(getRequestWithJsonBody(notableEventType)),
+            notableEvent
+          )
       }
     }
-  }
 
   "noParameters" should {
     "redirect to the selector page" when {
-      def theRequestShouldBeRedirectedToTheStartPage(eventualResult: Future[Result]) = {
-        status(eventualResult) shouldBe SEE_OTHER
+      def theRequestShouldBeRedirectedToTheStartPage(eventualResult: Future[Result]) =
+        status(eventualResult)  shouldBe SEE_OTHER
         headers(eventualResult) shouldBe Map("Location" -> routes.StartController.showStartPage.url)
-      }
 
-      "and the request is authorised" in {
+      "and the request is authorised" in
         theRequestShouldBeRedirectedToTheStartPage(controller.noParameters()(getRequest))
-      }
 
-      "and the request is unauthorised" in {
+      "and the request is unauthorised" in
         theRequestShouldBeRedirectedToTheStartPage(controller.noParameters()(getRequest))
-      }
     }
   }
 
-  "submitSearchPage" should {
+  "submitSearchPage" should
     indexedNotableEvents.foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
-
 
       val postRequestWithNotableEventTypeAndSearchText =
         FakeRequest("POST", "/")
           .withFormUrlEncodedBody(("notableEventType", notableEventType), ("searchText", "someSearchText"))
 
       def givenTheSearchSucceeds() =
-        when(nrsRetrievalConnector.search(any(), any(), ArgumentMatchers.eq(notableEvent.crossKeySearch))(using any[HeaderCarrier], any[AuthorisedUser]))
+        when(
+          nrsRetrievalConnector.search(any(), any(), ArgumentMatchers.eq(notableEvent.crossKeySearch))(using
+            any[HeaderCarrier],
+            any[AuthorisedUser]
+          )
+        )
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
 
-      def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
+      def theSearchPageShouldBeRenderedWithResults(eventualResult: Future[Result], notableEvent: NotableEvent) =
         val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.pluralDisplayName))
 
-        Option(content.getElementById("notFound")).isDefined shouldBe false
+        Option(content.getElementById("notFound")).isDefined     shouldBe false
         Option(content.getElementById("resultsFound")).isDefined shouldBe true
-      }
 
       "perform a search and render the results" when {
         s"and the request is authorised and a $notableEventType search is submitted" in {
           givenTheSearchSucceeds()
 
           theSearchPageShouldBeRenderedWithResults(
-            controller.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText), notableEvent)
+            controller.submitSearchPage(notableEventType)(postRequestWithNotableEventTypeAndSearchText),
+            notableEvent
+          )
         }
 
         s"a $notableEventType search is submitted with no search text" in {
@@ -120,31 +122,33 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
 
           theSearchPageShouldBeRenderedWithEmptyResults(
             controller
-              .submitSearchPage(notableEventType)(FakeRequest("POST", "/")
-                .withFormUrlEncodedBody(("notableEventType", notableEventType))), notableEvent)
+              .submitSearchPage(notableEventType)(
+                FakeRequest("POST", "/")
+                  .withFormUrlEncodedBody(("notableEventType", notableEventType))
+              ),
+            notableEvent
+          )
 
           def givenTheSearchSucceedsWithNoResults() =
             when(nrsRetrievalConnector.search(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
-          def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) = {
+          def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) =
             val content = aPageShouldBeRendered(eventualResult, Messages("search.page.dynamic.header.lbl", notableEvent.pluralDisplayName))
 
-            Option(content.getElementById("notFound")).isDefined shouldBe true
+            Option(content.getElementById("notFound")).isDefined     shouldBe true
             Option(content.getElementById("resultsFound")).isDefined shouldBe false
-          }
         }
       }
     }
-  }
 
   "download" should {
     val notableEvent = "vat-return"
-    val vaultName = "vat-return"
-    val archiveId = "vrn"
+    val vaultName    = "vat-return"
+    val archiveId    = "vrn"
 
     "return 200 and a byte stream" when {
-      def givenTheDownloadSucceeds() = {
+      def givenTheDownloadSucceeds() =
         val mockHttpResponse = mock[HttpResponse]
 
         when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
@@ -152,23 +156,18 @@ class SearchControllerSpec extends ControllerSpec with SearchFixture with NrsSea
         when(mockHttpResponse.headers).thenReturn(
           Map(
             "content-length" -> Seq("15"),
-            "content-type" -> Seq("application/zip")
+            "content-type"   -> Seq("application/zip")
           )
         )
         when(mockHttpResponse.bodyAsSource).thenReturn(Source.single(ByteString("Some zipped bytes")))
-      }
 
-      def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) = {
-        status(eventualResponse) shouldBe OK
+      def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) =
+        status(eventualResponse)          shouldBe OK
         contentAsString(eventualResponse) shouldBe "Some zipped bytes"
-      }
 
       "and the request is authorised" in {
         givenTheDownloadSucceeds()
-        theDownloadedBytesShouldBeReturned(controller.download(notableEvent,vaultName, archiveId)(getRequest))
+        theDownloadedBytesShouldBeReturned(controller.download(notableEvent, vaultName, archiveId)(getRequest))
       }
     }
   }
-}
-
-

@@ -26,21 +26,30 @@ import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import javax.inject.Named
 import scala.concurrent.{ExecutionContext, Future}
 
-class Auditable @Inject()(
-                           @Named("appName") val applicationName: String,
-                           val audit: Audit)(using executionContext: ExecutionContext):
+class Auditable @Inject() (
+  @Named("appName") val applicationName: String,
+  val audit: Audit
+)(using executionContext: ExecutionContext):
 
   private val logger = Logger(this.getClass)
 
   // This only has side-effects, making a fire and forget call to an external system
-  def sendDataEvent(dataEventAuditType: DataEventAuditType)(using hc: HeaderCarrier): Future[Unit] = {
+  def sendDataEvent(
+    dataEventAuditType: DataEventAuditType
+  )(using hc: HeaderCarrier): Future[Unit] =
     val event = DataEvent(
       dataEventAuditType.auditSource,
       dataEventAuditType.auditType,
-      tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(dataEventAuditType.transactionName, dataEventAuditType.path)
+      tags = AuditExtensions
+        .auditHeaderCarrier(hc)
+        .toAuditTags(
+          dataEventAuditType.transactionName,
+          dataEventAuditType.path
+        )
         ++ dataEventAuditType.tags.tags,
-      detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(dataEventAuditType.details.details.toSeq *)
+      detail = AuditExtensions
+        .auditHeaderCarrier(hc)
+        .toAuditDetails(dataEventAuditType.details.details.toSeq*)
     )
     logger.debug(s"Audit event: ${event.toString}")
     Future(audit.sendDataEvent(event))
-  }

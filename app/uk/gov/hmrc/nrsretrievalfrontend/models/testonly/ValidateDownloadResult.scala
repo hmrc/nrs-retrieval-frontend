@@ -25,9 +25,16 @@ import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
 import scala.concurrent.{ExecutionContext, Future}
 
-case class ValidateDownloadResult(status: Int, zipSize: Long, files: Seq[String], headers: Seq[(String, String)])
-object ValidateDownloadResult extends HeaderNames {
-  def apply(response: HttpResponse)(using ec: ExecutionContext): Future[ValidateDownloadResult] = {
+case class ValidateDownloadResult(
+  status: Int,
+  zipSize: Long,
+  files: Seq[String],
+  headers: Seq[(String, String)]
+)
+object ValidateDownloadResult extends HeaderNames:
+  def apply(
+    response: HttpResponse
+  )(using ec: ExecutionContext): Future[ValidateDownloadResult] =
     given ActorSystem = ActorSystem()
 
     response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
@@ -35,11 +42,18 @@ object ValidateDownloadResult extends HeaderNames {
         (key, response.headers(key).head)
       }.toSeq
 
-      val zis: ZipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
+      val zis: ZipInputStream =
+        new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
 
-      val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
+      val zippedFileNames: Seq[String] = LazyList
+        .continually(zis.getNextEntry)
+        .takeWhile(_ != null)
+        .map(_.getName)
 
-      ValidateDownloadResult(response.status, bytes.size, zippedFileNames, headers)
+      ValidateDownloadResult(
+        response.status,
+        bytes.size,
+        zippedFileNames,
+        headers
+      )
     }
-  }
-}

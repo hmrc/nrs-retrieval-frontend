@@ -25,8 +25,8 @@ import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticat
 import java.net.URL
 import scala.concurrent.ExecutionContext
 
-trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
-  given executionContext: ExecutionContext = ExecutionContext.Implicits.global
+trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec:
+  given executionContext: ExecutionContext      = ExecutionContext.Implicits.global
   def checkAuthorisationRequest(): HttpResponse =
     val url = new URL(s"$serviceRoot/test-only/check-authorisation")
     httpClientV2
@@ -35,7 +35,7 @@ trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
       .execute[HttpResponse]
       .futureValue
 
-  def validateDownloadGetRequest(): HttpResponse =
+  def validateDownloadGetRequest(): HttpResponse  =
     val url = new URL(s"$serviceRoot/test-only/validate-download")
     httpClientV2
       .get(url)
@@ -56,13 +56,11 @@ trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
 
   override val configuration: Map[String, Any] =
     defaultConfiguration + ("application.router" -> "testOnlyDoNotUseInAppConf.Routes")
-}
 
-class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
-  private def validate(response: HttpResponse) = {
-    response.status shouldBe OK
+class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec:
+  private def validate(response: HttpResponse) =
+    response.status                                       shouldBe OK
     response.body.contains("Test-only validate download") shouldBe true
-  }
 
   "GET /nrs-retrieval/test-only/check-authorisation" should {
     "display the check-authorisation page" when {
@@ -90,9 +88,8 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
       }
     }
   }
-}
 
-class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
+class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec:
   override val configuration: Map[String, Any] = defaultConfiguration
 
   "GET /nrs-retrieval/test-only/check-authorisation" should {
@@ -118,4 +115,3 @@ class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegratio
       }
     }
   }
-}

@@ -25,13 +25,14 @@ import uk.gov.hmrc.nrsretrievalfrontend.views.html.start_page
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class StartController @Inject()(
-                                 authenticatedAction: AuthenticatedAction,
-                                 controllerComponents: MessagesControllerComponents,
-                                 startPage: start_page
-                               )(using val appConfig: AppConfig) extends NRBaseController(controllerComponents):
+class StartController @Inject() (
+  authenticatedAction: AuthenticatedAction,
+  controllerComponents: MessagesControllerComponents,
+  startPage: start_page
+)(using val appConfig: AppConfig)
+    extends NRBaseController(controllerComponents):
 
-  val logger: Logger = Logger(this.getClass)
+  val logger: Logger                       = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   val showStartPage: Action[AnyContent] = authenticatedAction { implicit request =>

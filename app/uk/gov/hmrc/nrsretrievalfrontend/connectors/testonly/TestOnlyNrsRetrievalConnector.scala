@@ -22,8 +22,9 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
 
 import scala.concurrent.Future
 
-trait TestOnlyNrsRetrievalConnector {
-  def validateDownload(vaultName: String, archiveId: String)(implicit hc: HeaderCarrier, user: AuthorisedUser): Future[ValidateDownloadResult]
-
-  def checkAuthorisation()(implicit hc: HeaderCarrier): Future[Boolean]
-}
+trait TestOnlyNrsRetrievalConnector:
+  def validateDownload(vaultName: String, archiveId: String)(using
+    hc: HeaderCarrier,
+    user: AuthorisedUser
+  ): Future[ValidateDownloadResult]
+  def checkAuthorisation(using hc: HeaderCarrier): Future[Boolean]

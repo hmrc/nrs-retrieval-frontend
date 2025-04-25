@@ -26,7 +26,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.NotableEvent
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered}
 
-class selector_pageSpec extends ViewSpec {
+class selector_pageSpec extends ViewSpec:
 
   override lazy val view: HtmlFormat.Appendable =
     selectorPage(selectorForm.bind(parse("""{"notableEventType": "vat-return"}"""), Int.MaxValue))
@@ -39,17 +39,17 @@ class selector_pageSpec extends ViewSpec {
         doc = doc,
         headerText = headerText,
         titleText = headerText,
-        maybeBackLinkCall = Some(routes.StartController.showStartPage))
+        maybeBackLinkCall = Some(routes.StartController.showStartPage)
+      )
 
       elementByName(doc, "continueButton").text() mustBe Messages("button.continue.lbl")
 
-      indexedNotableEvents.map{ case (notableEvent: NotableEvent, index: Int ) =>
+      indexedNotableEvents.map { case (notableEvent: NotableEvent, index: Int) =>
         val notableEventTypeInputIdSuffix = if (index > 0) s"-${index + 1}" else ""
-        val notableEventTypeInput = doc.getElementById(s"notableEventType$notableEventTypeInputIdSuffix")
+        val notableEventTypeInput         = doc.getElementById(s"notableEventType$notableEventTypeInputIdSuffix")
 
         notableEventTypeInput.attr("type") mustBe "radio"
         notableEventTypeInput.attr("value") mustBe notableEvent.name
       }
     }
   }
-}

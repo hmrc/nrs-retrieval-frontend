@@ -20,10 +20,13 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadRequest
 
-object FormMappings {
+object FormMappings:
   val vaultName = "vaultName"
   val archiveId = "archiveId"
 
   val validateDownloadForm: Form[ValidateDownloadRequest] =
-    Form(mapping(vaultName -> text, archiveId -> text)(ValidateDownloadRequest.apply)(ValidateDownloadRequest.unapply))
-}
+    Form(
+      mapping(vaultName -> text, archiveId -> text)(
+        ValidateDownloadRequest.apply
+      )(o => Some(Tuple.fromProductTyped(o)))
+    )

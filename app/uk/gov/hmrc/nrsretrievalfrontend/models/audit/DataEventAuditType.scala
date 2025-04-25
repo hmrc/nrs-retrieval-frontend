@@ -18,8 +18,8 @@ package uk.gov.hmrc.nrsretrievalfrontend.models.audit
 
 import java.net.URLEncoder
 
-trait DataEventAuditType {
-  val auditSource = "nrs-retrieval"
+trait DataEventAuditType:
+  val auditSource    = "nrs-retrieval"
   val submissionType = "vat-return"
   val auditType: String
   val transactionName: String
@@ -27,78 +27,80 @@ trait DataEventAuditType {
 
   def details: DataEventDetails
 
-  def tags: DataEventTags = {
-    DataEventTags(Map(
-      "transactionName" -> transactionName
-    ))
-  }
-}
+  def tags: DataEventTags =
+    DataEventTags(
+      Map(
+        "transactionName" -> transactionName
+      )
+    )
 
-case class NonRepudiationStoreSearch(authProviderId: String,
-                                     name: String,
-                                     searchParams: Seq[(String, String)],
-                                     nrSubmissionId: String,
-                                     override val path: String) extends DataEventAuditType {
+case class NonRepudiationStoreSearch(
+  authProviderId: String,
+  searchParams: Seq[(String, String)],
+  nrSubmissionId: String,
+  override val path: String
+) extends DataEventAuditType:
 
   override val auditType: String = "nonRepudiationStoreSearch"
-  override val transactionName = "Non-Repudiation Store search"
+  override val transactionName   = "Non-Repudiation Store search"
 
-  val searchText = searchParams.map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }.mkString("", "&", "")
+  val searchText = searchParams
+    .map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }
+    .mkString("", "&", "")
 
-  override def details: DataEventDetails = {
-    DataEventDetails(Map(
-      "authProviderId" -> authProviderId,
-      "name" -> name,
-      "submissionType" -> submissionType,
-      "nrSubmissionId" -> nrSubmissionId,
-      "searchText" -> searchText
-    ))
-  }
-}
+  override def details: DataEventDetails =
+    DataEventDetails(
+      Map(
+        "authProviderId" -> authProviderId,
+        "submissionType" -> submissionType,
+        "nrSubmissionId" -> nrSubmissionId,
+        "searchText"     -> searchText
+      )
+    )
 
-case class NonRepudiationStoreRetrieve(authProviderId: String,
-                                       name: String,
-                                       vaultName: String,
-                                       archiveId: String,
-                                       nrSubmissionId: String,
-                                       override val path: String) extends DataEventAuditType {
+case class NonRepudiationStoreRetrieve(
+  authProviderId: String,
+  vaultName: String,
+  archiveId: String,
+  nrSubmissionId: String,
+  override val path: String
+) extends DataEventAuditType:
 
   override val auditType: String = "nonRepudiationStoreRetrieve"
-  override val transactionName = "Non-Repudiation Store retrieval"
+  override val transactionName   = "Non-Repudiation Store retrieval"
 
-  override def details: DataEventDetails = {
-    DataEventDetails(Map(
-      "authProviderId" -> authProviderId,
-      "name" -> name,
-      "submissionType" -> submissionType,
-      "nrSubmissionId" -> nrSubmissionId,
-      "vaultName" -> vaultName,
-      "archiveId" -> archiveId
-    ))
-  }
-}
+  override def details: DataEventDetails =
+    DataEventDetails(
+      Map(
+        "authProviderId" -> authProviderId,
+        "submissionType" -> submissionType,
+        "nrSubmissionId" -> nrSubmissionId,
+        "vaultName"      -> vaultName,
+        "archiveId"      -> archiveId
+      )
+    )
 
-case class NonRepudiationStoreDownload(authProviderId: String,
-                                       name: String,
-                                       vaultName: String,
-                                       archiveId: String,
-                                       nrSubmissionId: String,
-                                       override val path: String) extends DataEventAuditType {
+case class NonRepudiationStoreDownload(
+  authProviderId: String,
+  vaultName: String,
+  archiveId: String,
+  nrSubmissionId: String,
+  override val path: String
+) extends DataEventAuditType:
 
   override val auditType: String = "nonRepudiationStoreDownload"
-  override val transactionName = "Non-Repudiation Store download"
+  override val transactionName   = "Non-Repudiation Store download"
 
-  override def details: DataEventDetails = {
-    DataEventDetails(Map(
-      "authProviderId" -> authProviderId,
-      "name" -> name,
-      "submissionType" -> submissionType,
-      "nrSubmissionId" -> nrSubmissionId,
-      "vaultName" -> vaultName,
-      "archiveId" -> archiveId
-    ))
-  }
-}
+  override def details: DataEventDetails =
+    DataEventDetails(
+      Map(
+        "authProviderId" -> authProviderId,
+        "submissionType" -> submissionType,
+        "nrSubmissionId" -> nrSubmissionId,
+        "vaultName"      -> vaultName,
+        "archiveId"      -> archiveId
+      )
+    )
 
 case class DataEventDetails(details: Map[String, String])
 

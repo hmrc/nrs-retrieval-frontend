@@ -20,6 +20,6 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-abstract class NRBaseController(controllerComponents: MessagesControllerComponents)
-  extends FrontendController(controllerComponents)
-    with I18nSupport
+abstract class NRBaseController(
+  controllerComponents: MessagesControllerComponents
+) extends FrontendController(controllerComponents), I18nSupport

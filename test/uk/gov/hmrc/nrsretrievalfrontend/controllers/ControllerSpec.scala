@@ -28,20 +28,18 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views, ViewsSelec
 
 import scala.concurrent.Future
 
-trait ControllerSpec extends BaseUnitSpec with Views with ViewsSelectors {
-  val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+trait ControllerSpec extends BaseUnitSpec, Views, ViewsSelectors:
+  val getRequest: FakeRequest[AnyContentAsEmpty.type]       = FakeRequest("GET", "/")
   val emptyPostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
 
-  def aPageShouldBeRendered(eventualResult: Future[Result], pageHeader: String): Document = {
+  def aPageShouldBeRendered(eventualResult: Future[Result], pageHeader: String): Document =
     val content = parse(contentAsString(eventualResult))
-    status(eventualResult) shouldBe OK
+    status(eventualResult)                    shouldBe OK
     content.select(headingCssSelector).text() shouldBe pageHeader
     content
-  }
 
   def theNotAuthorisedPageShouldBeRendered(eventualResult: Future[Result]): Document =
-    aPageShouldBeRendered(eventualResult,"Not authorised")
-
+    aPageShouldBeRendered(eventualResult, "Not authorised")
 
   val authenticatedAction = new AuthenticatedAction(
     mock[PlayAuthConnector],
@@ -49,16 +47,13 @@ trait ControllerSpec extends BaseUnitSpec with Views with ViewsSelectors {
     environment,
     stubMessagesControllerComponents(),
     error_template
-  ) {
+  ):
 
-    override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
-      val authenticatedRequest = new AuthenticatedRequest[A]("fakeUser", "someId", request)
+    override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] =
+      val authenticatedRequest = new AuthenticatedRequest[A]("someId", request)
       block(authenticatedRequest)
-    }
-  }
 
   def notableEventRefiner(notableEvent: String) = new NotableEventRefiner(
     messagesApi = messagesApi,
     errorPage = error_template
   )(notableEvent)
-}

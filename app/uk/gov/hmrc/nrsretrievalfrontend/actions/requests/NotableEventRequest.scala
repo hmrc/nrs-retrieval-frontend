@@ -19,13 +19,18 @@ package uk.gov.hmrc.nrsretrievalfrontend.actions.requests
 import play.api.mvc.WrappedRequest
 import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey}
 
-case class NotableEventRequest[A](notableEvent: NotableEvent, searchKey: SearchKey, request: AuthenticatedRequest[A]) extends WrappedRequest(request)
+case class NotableEventRequest[A](
+  notableEvent: NotableEvent,
+  searchKey: SearchKey,
+  request: AuthenticatedRequest[A]
+) extends WrappedRequest(request)
 
-object NotableEventRequest {
+object NotableEventRequest:
 
-  def apply[A](notableEvent: NotableEvent, request: AuthenticatedRequest[A]): Option[NotableEventRequest[A]] = {
+  def apply[A](
+    notableEvent: NotableEvent,
+    request: AuthenticatedRequest[A]
+  ): Option[NotableEventRequest[A]] =
     val optSearchKey = notableEvent.searchKeys.headOption
 
     optSearchKey.map(new NotableEventRequest(notableEvent, _, request))
-  }
-}

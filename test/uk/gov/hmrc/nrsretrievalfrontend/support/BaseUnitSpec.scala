@@ -27,7 +27,8 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.NotableEvent
 
 import scala.collection.immutable
 
-class BaseUnitSpec extends UnitSpec with StubMessageControllerComponents with PatienceConfiguration { this: Suite =>
+class BaseUnitSpec extends UnitSpec, StubMessageControllerComponents, PatienceConfiguration:
+  this: Suite =>
   val nrsRetrievalConnector: NrsRetrievalConnector = mock[NrsRetrievalConnector]
 
   lazy val indexedNotableEvents: immutable.Seq[(NotableEvent, Int)] =
@@ -36,11 +37,9 @@ class BaseUnitSpec extends UnitSpec with StubMessageControllerComponents with Pa
   val requestWithToken: Request[AnyContentAsEmpty.type] =
     addToken(FakeRequest())
 
-  implicit val authenticatedRequest: AuthenticatedRequest[AnyContentAsEmpty.type] =
-    new AuthenticatedRequest("userName", "someId", requestWithToken)
+  given authenticatedRequest: AuthenticatedRequest[AnyContentAsEmpty.type] =
+    new AuthenticatedRequest("someId", requestWithToken)
 
-  def addToken[T](fakeRequest: FakeRequest[T]): Request[T] = {
+  def addToken[T](fakeRequest: FakeRequest[T]): Request[T] =
 
     fakeRequest.withCSRFToken
-  }
-}

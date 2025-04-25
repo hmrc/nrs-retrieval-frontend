@@ -16,26 +16,45 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.models.testonly
 
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.util.ByteString
 import play.api.http.HeaderNames
-import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.HttpResponse
 
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
+import scala.concurrent.{ExecutionContext, Future}
 
-case class ValidateDownloadResult(status: Int, zipSize: Long, files: Seq[String], headers: Seq[(String,String)] )
+case class ValidateDownloadResult(
+  status: Int,
+  zipSize: Long,
+  files: Seq[String],
+  headers: Seq[(String, String)]
+)
+object ValidateDownloadResult extends HeaderNames:
+  def apply(
+    response: HttpResponse
+  )(using ec: ExecutionContext, actorSystem: ActorSystem): Future[ValidateDownloadResult] = {
 
-object ValidateDownloadResult extends HeaderNames{
-  def apply(response: WSResponse): ValidateDownloadResult = {
-    val bytes = response.bodyAsBytes
+    response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
+      val headers: Seq[(String, String)] = response.headers.keys.map { key =>
+        (key, response.headers(key).head)
+      }.toSeq
 
-    val headers: Seq[(String, String)] = response.headers.keys.map{ key =>
-      (key, response.headers(key).head)
-    }.toSeq
+      val zis: ZipInputStream =
+        new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
 
-    val zis: ZipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes.toArray))
+      val zippedFileNames: Seq[String] = LazyList
+        .continually(zis.getNextEntry)
+        .takeWhile(_ != null)
+        .map(_.getName)
 
-    val zippedFileNames: Seq[String] = LazyList.continually(zis.getNextEntry).takeWhile(_ != null).map(_.getName)
-
-    ValidateDownloadResult(response.status, bytes.size, zippedFileNames, headers)
+      ValidateDownloadResult(
+        response.status,
+        bytes.size,
+        zippedFileNames,
+        headers
+      )
+    }
   }
-}

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly
 
-import FormMappings.validateDownloadForm
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, RequestHeader}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -24,23 +23,24 @@ import uk.gov.hmrc.nrsretrievalfrontend.actions.AuthenticatedAction
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.TestOnlyNrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.controllers.NRBaseController
+import uk.gov.hmrc.nrsretrievalfrontend.controllers.testonly.FormMappings.validateDownloadForm
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.validate_download_page
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ValidateDownloadController @Inject()(
-                                            authenticatedAction: AuthenticatedAction,
-                                            controllerComponents: MessagesControllerComponents,
-                                            connector: TestOnlyNrsRetrievalConnector,
-                                            validateDownloadPage: validate_download_page
-                                          )(implicit val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends NRBaseController(controllerComponents) {
+class ValidateDownloadController @Inject() (
+  authenticatedAction: AuthenticatedAction,
+  controllerComponents: MessagesControllerComponents,
+  connector: TestOnlyNrsRetrievalConnector,
+  validateDownloadPage: validate_download_page
+)(using val appConfig: AppConfig, executionContext: ExecutionContext)
+    extends NRBaseController(controllerComponents):
 
   val logger: Logger = Logger(this.getClass)
 
-  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
+  implicit override def hc(using rh: RequestHeader): HeaderCarrier =
     super.hc.withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   val showValidateDownload: Action[AnyContent] = authenticatedAction { implicit request =>
@@ -48,13 +48,23 @@ class ValidateDownloadController @Inject()(
   }
 
   val submitValidateDownload: Action[AnyContent] = authenticatedAction.async { implicit request =>
-        validateDownloadForm.bindFromRequest().fold(
-          _ => Future.successful(BadRequest),
-          validateDownloadRequest => {
-            connector.validateDownload(validateDownloadRequest.vaultName, validateDownloadRequest.archiveId).map{ response =>
-              Ok(validateDownloadPage(validateDownloadForm.fill(validateDownloadRequest), Some(response)))}
-          }
-        )
+    validateDownloadForm
+      .bindFromRequest()
+      .fold(
+        _ => Future.successful(BadRequest),
+        validateDownloadRequest =>
+          connector
+            .validateDownload(
+              validateDownloadRequest.vaultName,
+              validateDownloadRequest.archiveId
+            )
+            .map { response =>
+              Ok(
+                validateDownloadPage(
+                  validateDownloadForm.fill(validateDownloadRequest),
+                  Some(response)
+                )
+              )
+            }
+      )
   }
-}
-

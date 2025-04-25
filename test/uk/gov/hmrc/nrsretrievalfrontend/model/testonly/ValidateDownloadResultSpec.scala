@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.model.testonly
 
+import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
-import org.mockito.Mockito.when
+import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
-import play.api.libs.ws.WSResponse
+import org.scalatest.concurrent.ScalaFutures
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nrsretrievalfrontend.models.testonly.ValidateDownloadResult
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 
@@ -27,15 +29,15 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset.defaultCharset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-class ValidateDownloadResultSpec extends UnitSpec {
-  private val wsResponse = mock[WSResponse]
+class ValidateDownloadResultSpec extends UnitSpec, ScalaFutures:
+  private val httpResponse = mock[HttpResponse]
 
   "ValidateDownloadResultSpec.apply" should {
-    "transform a WSResponse" in {
-      val output: Array[Byte] = "text".getBytes(defaultCharset())
-      val byteArrayOutputStream = new ByteArrayOutputStream()
+    "transform a HttpResponse" in {
+      val output: Array[Byte]              = "text".getBytes(defaultCharset())
+      val byteArrayOutputStream            = new ByteArrayOutputStream()
       val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
-      val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+      val fileNames                        = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
       fileNames.foreach { fileName =>
         val zipEntry: ZipEntry = new ZipEntry(fileName)
@@ -46,13 +48,19 @@ class ValidateDownloadResultSpec extends UnitSpec {
 
       val bytes = ByteString(byteArrayOutputStream.toByteArray)
 
-      when(wsResponse.status).thenReturn(OK)
-      when(wsResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
-      when(wsResponse.bodyAsBytes).thenReturn(bytes)
+      when(httpResponse.status).thenReturn(OK)
+      when(httpResponse.bodyAsSource).thenReturn(Source.single(bytes))
+      when(httpResponse.headers).thenAnswer(new Returns(Map("foo" -> Seq("bar"))))
 
-      ValidateDownloadResult(wsResponse) shouldBe ValidateDownloadResult(OK, bytes.length, fileNames, Seq(("foo", "bar")) )
+      val responseTest = ValidateDownloadResult(httpResponse)
+
+      whenReady(responseTest) { resultsTest =>
+        assert(resultsTest.status == OK)
+        assert(resultsTest.files == fileNames)
+        assert(resultsTest.zipSize == bytes.size)
+        assert(resultsTest.headers.contains("foo", "bar"))
+      }
 
       zipOutputStream.close()
     }
   }
-}

@@ -21,7 +21,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import scala.concurrent.Future
 
-class SelectorControllerSpec extends ControllerSpec {
+class SelectorControllerSpec extends ControllerSpec:
 
   private def selectorController =
     new SelectorController(
@@ -35,40 +35,31 @@ class SelectorControllerSpec extends ControllerSpec {
       aPageShouldBeRendered(eventualResult, messages("selector.page.header.lbl"))
 
     "return 200 and render the selector page" when {
-      "the request is authorised" in {
+      "the request is authorised" in
         theSelectorPageShouldBeRendered(selectorController.showSelectorPage(getRequest))
-      }
     }
   }
 
   "submitSelectorPage" should {
-    "redirect to the search page" when {
+    "redirect to the search page" when
       indexedNotableEvents.foreach { case (notableEvent, _) =>
-        val notableEventType = notableEvent.name
+        val notableEventType                = notableEvent.name
         val postRequestWithNotableEventType = FakeRequest("POST", "/").withFormUrlEncodedBody(("notableEventType", notableEventType))
 
-        def theRequestShouldBeRedirectedToTheSearchPage(eventualResult: Future[Result]) = {
-          status(eventualResult) shouldBe SEE_OTHER
+        def theRequestShouldBeRedirectedToTheSearchPage(eventualResult: Future[Result]) =
+          status(eventualResult)  shouldBe SEE_OTHER
           headers(eventualResult) shouldBe
             Map("Location" -> routes.SearchController.showSearchPage(notableEventType).url)
-        }
 
-        s"and the request is authorised and the notable event type $notableEventType is selected" in {
-          theRequestShouldBeRedirectedToTheSearchPage(
-            selectorController.submitSelectorPage(postRequestWithNotableEventType))
-        }
+        s"and the request is authorised and the notable event type $notableEventType is selected" in
+          theRequestShouldBeRedirectedToTheSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
       }
-    }
 
     "return 200 and render the selector page with an error message" when {
       def theSelectorPageShouldBeRenderedWithAnErrorMessage(eventualResult: Future[Result]) =
         aPageShouldBeRendered(eventualResult, messages("generic.errorPrefix") + " " + messages("selector.page.header.lbl"))
 
-      "and the request is authorised and no notable event type is selected" in {
-        theSelectorPageShouldBeRenderedWithAnErrorMessage(
-          selectorController.submitSelectorPage(emptyPostRequest))
-      }
+      "and the request is authorised and no notable event type is selected" in
+        theSelectorPageShouldBeRenderedWithAnErrorMessage(selectorController.submitSelectorPage(emptyPostRequest))
     }
   }
-}
-

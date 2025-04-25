@@ -18,6 +18,5 @@ package uk.gov.hmrc.nrsretrievalfrontend.support.fixtures
 
 import java.util.UUID.randomUUID
 
-trait NrSubmissionId {
+trait NrSubmissionId:
   lazy val nrSubmissionId: String = randomUUID().toString
-}

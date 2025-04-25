@@ -24,16 +24,16 @@ import uk.gov.hmrc.play.audit.model._
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
-abstract class AuditableSpec extends UnitSpec {
-  private val appName = "TestAppName"
-  private val mockAudit: Audit = mock[Audit]
-  private val auditable = new Auditable(appName, mockAudit)
+abstract class AuditableSpec extends UnitSpec:
+  private val appName                      = "TestAppName"
+  private val mockAudit: Audit             = mock[Audit]
+  private val auditable                    = new Auditable(appName, mockAudit)
   private val ec: ExecutionContextExecutor = ExecutionContext.global
   val dataEvent: DataEvent
 
   "sendDataEvent" should {
     "send a NonRepudiationStoreSearch audit event" in {
-      val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", "name", Seq("vatReturnVRN" -> "validVrn"), "nrSubmissionId", "path")
+      val dataEventAuditType = NonRepudiationStoreSearch("authProviderId", Seq("vatReturnVRN" -> "validVrn"), "nrSubmissionId", "path")
 
       val func: DataEvent => Unit = mock[DataEvent => Unit]
       when(func.apply(any())).thenReturn(())
@@ -43,4 +43,3 @@ abstract class AuditableSpec extends UnitSpec {
       verify(mockAudit, times(1)).sendDataEvent(dataEvent)
     }
   }
-}

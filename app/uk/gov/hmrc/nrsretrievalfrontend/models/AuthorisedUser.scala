@@ -21,6 +21,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 case class AuthorisedUser(authProviderId: String)
 
 object AuthorisedUser:
+  // move away from the below use of converter as this style is discouraged in Scala 3
   given converter[A](using
     authenticatedRequest: AuthenticatedRequest[A]
   ): AuthorisedUser =

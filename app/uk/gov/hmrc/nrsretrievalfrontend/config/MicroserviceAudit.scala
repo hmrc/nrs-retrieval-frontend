@@ -20,6 +20,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.Audit
 
 import javax.inject.{Inject, Named}
+// manual implementation of MicroserviceAudit here, this can possibly be called in through bootstrap
 class MicroserviceAudit @Inject() (
   @Named("appName") val applicationName: String,
   val auditConnector: AuditConnector

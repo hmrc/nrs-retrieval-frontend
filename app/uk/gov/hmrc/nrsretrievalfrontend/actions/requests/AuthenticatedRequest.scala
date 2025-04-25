@@ -21,6 +21,7 @@ import play.api.mvc.{Request, WrappedRequest}
 case class AuthenticatedRequest[A](authProviderId: String, request: Request[A]) extends WrappedRequest(request)
 
 object AuthenticatedRequest:
+  // move away from the below use of converter as this style is discouraged in Scala 3
   given converter[A](using
     request: NotableEventRequest[A]
   ): AuthenticatedRequest[A] = request.request

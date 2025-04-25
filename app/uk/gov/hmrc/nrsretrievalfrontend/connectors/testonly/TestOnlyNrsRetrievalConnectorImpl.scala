@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly
 
+import org.apache.pekko.actor.ActorSystem
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.client.*
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
@@ -31,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TestOnlyNrsRetrievalConnectorImpl @Inject() (
   nrsRetrievalConnector: NrsRetrievalConnector,
   http: HttpClientV2
-)(using appConfig: AppConfig, executionContext: ExecutionContext)
+)(using appConfig: AppConfig, executionContext: ExecutionContext, actorSystem: ActorSystem)
     extends TestOnlyNrsRetrievalConnector:
 
   override def validateDownload(vaultName: String, archiveId: String)(using

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.models.testonly
 
 import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
 import org.apache.pekko.util.ByteString
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HttpResponse
@@ -34,8 +35,7 @@ case class ValidateDownloadResult(
 object ValidateDownloadResult extends HeaderNames:
   def apply(
     response: HttpResponse
-  )(using ec: ExecutionContext): Future[ValidateDownloadResult] =
-    given ActorSystem = ActorSystem()
+  )(using ec: ExecutionContext, actorSystem: ActorSystem): Future[ValidateDownloadResult] = {
 
     response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
       val headers: Seq[(String, String)] = response.headers.keys.map { key =>
@@ -57,3 +57,4 @@ object ValidateDownloadResult extends HeaderNames:
         headers
       )
     }
+  }

@@ -33,7 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 given executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
 class NrsRetrievalContractSpec extends IntegrationSpec:
-  given authorisedUser: AuthorisedUser                                                                 = AuthorisedUser("authProviderId")
+  given ActorSystem = ActorSystem()
+  given authorisedUser: AuthorisedUser = AuthorisedUser("authProviderId")
   private def anUpstreamErrorResponseShouldBeThrownBy[T](request: () => T, statusCode: Int): Assertion =
     intercept[Exception] {
       request()
@@ -118,7 +119,6 @@ class NrsRetrievalContractSpec extends IntegrationSpec:
     "return OK" when {
       "the retrieval service returns OK" in {
         givenGetSubmissionBundlesReturns(OK)
-        given ActorSystem = ActorSystem()
 
         connector.getSubmissionBundle(vatReturn, vrn).flatMap { response =>
           response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>

@@ -57,7 +57,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "emcs-explain-a-shortage-api",
         "emcs-report-a-receipt-api",
         "emcs-submit-alert-or-rejection-api",
-        "p800refunds-nonloggedin-cheque-claim-attempt-made"
+        "p800refunds-nonloggedin-cheque-claim-attempt-made",
+        "p800refunds-nonloggedin-bank-claim-attempt-made"
       )
     }
   }

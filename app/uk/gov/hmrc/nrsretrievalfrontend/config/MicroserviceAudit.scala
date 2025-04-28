@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nrsretrievalfrontend.support
+package uk.gov.hmrc.nrsretrievalfrontend.config
 
-trait ViewsSelectors:
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.Audit
 
-  val headingCssSelector = "#main-content > div > div > header > h1"
+import javax.inject.{Inject, Named}
+// manual implementation of MicroserviceAudit here, this can possibly be called in through bootstrap
+class MicroserviceAudit @Inject() (
+  @Named("appName") val applicationName: String,
+  val auditConnector: AuditConnector
+) extends Audit(applicationName, auditConnector)

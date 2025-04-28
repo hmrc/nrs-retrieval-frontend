@@ -21,7 +21,7 @@ import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec
 
-class error_pageSpec extends ViewSpec {
+class error_pageSpec extends ViewSpec:
 
   override lazy val view: HtmlFormat.Appendable = error_template(
     Messages("global.error.InternalServerError500.title"),
@@ -34,4 +34,3 @@ class error_pageSpec extends ViewSpec {
       doc.title mustBe Messages("global.error.InternalServerError500.title")
     }
   }
-}

@@ -43,7 +43,7 @@
         @govukRadios(
             Radios(
                 fieldset = Some(Fieldset(legend = Some(Legend(content = Text(title))))),
-                items = radioOptions.map { param: RadioParams =>
+                items = radioOptions.map { (param: RadioParams) =>
                     RadioItem(content = Text(param.label), value = Some(param.value))
                 }
             ).withFormField(selectorForm("notableEventType"))

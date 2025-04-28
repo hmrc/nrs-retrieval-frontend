@@ -21,12 +21,12 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{Query, SearchQueries, Selector}
 
-object FormMappings {
+object FormMappings:
 
   val query = mapping(
-      "name" -> text,
-      "value" -> text
-    )(Query.apply)(Query.unapply)
+    "name"  -> text,
+    "value" -> text
+  )(Query.apply)(Query.unapply)
 
   val form = Form(
     mapping(
@@ -34,18 +34,21 @@ object FormMappings {
     )(SearchQueries.apply)(SearchQueries.unapply)
   )
 
-  private val selectorFormatter: Formatter[String] = new Formatter[String] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] =
-      data.get(key) match {
-        case None | Some("") => Left(Seq(FormError(key, "search.page.error.searchkey.required")))
+  private val selectorFormatter: Formatter[String] = new Formatter[String]:
+    override def bind(
+      key: String,
+      data: Map[String, String]
+    ): Either[Seq[FormError], String] =
+      data.get(key) match
+        case None | Some("") =>
+          Left(Seq(FormError(key, "search.page.error.searchkey.required")))
         case Some(s)         => Right(s)
-      }
 
     override def unbind(key: String, value: String): Map[String, String] =
       Map(key -> value)
-  }
 
   val selectorForm: Form[Selector] = Form(
-    mapping("notableEventType" -> of(selectorFormatter))(Selector.apply)(Selector.unapply)
+    mapping("notableEventType" -> of(selectorFormatter))(Selector.apply)(
+      Selector.unapply
+    )
   )
-}

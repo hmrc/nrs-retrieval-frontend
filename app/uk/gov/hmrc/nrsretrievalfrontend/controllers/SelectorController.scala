@@ -26,14 +26,14 @@ import uk.gov.hmrc.nrsretrievalfrontend.views.html.selector_page
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class SelectorController @Inject()(
-                                    authenticatedAction: AuthenticatedAction,
-                                    controllerComponents: MessagesControllerComponents,
-                                    selectorPage: selector_page
-                                  )(implicit val appConfig: AppConfig)
-  extends NRBaseController(controllerComponents) {
+class SelectorController @Inject() (
+  authenticatedAction: AuthenticatedAction,
+  controllerComponents: MessagesControllerComponents,
+  selectorPage: selector_page
+)(using val appConfig: AppConfig)
+    extends NRBaseController(controllerComponents):
 
-  val logger: Logger = Logger(this.getClass)
+  val logger: Logger                       = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
 
   val showSelectorPage: Action[AnyContent] = authenticatedAction { implicit request =>
@@ -41,12 +41,13 @@ class SelectorController @Inject()(
   }
 
   val submitSelectorPage: Action[AnyContent] = authenticatedAction { implicit request =>
-      selectorForm.bindFromRequest().fold(
-        formWithErrors => {
+    selectorForm
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Ok(selectorPage(formWithErrors))
-        },
+        ,
         v => Redirect(routes.SearchController.showSearchPage(v.notableEventType))
       )
   }
-}

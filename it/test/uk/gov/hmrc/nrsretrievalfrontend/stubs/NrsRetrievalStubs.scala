@@ -16,27 +16,26 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.{EqualToPattern, UrlPattern}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json.toJson
-import uk.gov.hmrc.nrsretrievalfrontend.Fixture
 import uk.gov.hmrc.nrsretrievalfrontend.models.NrsSearchResult
+import uk.gov.hmrc.nrsretrievalfrontend.{Fixture, IntegrationSpec}
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
-object NrsRetrievalStubs extends Fixture {
-  private val retrievalPath = "/nrs-retrieval"
-  private val submissionBundlesPath = s"$retrievalPath/submission-bundles/$vatReturn/$vrn"
+object NrsRetrievalStubs extends Fixture, IntegrationSpec:
+  private val retrievalPath                          = "/nrs-retrieval"
+  private val submissionBundlesPath                  = s"$retrievalPath/submission-bundles/$vatReturn/$vrn"
   private val submissionBundlesRetrievalRequestsPath = s"$submissionBundlesPath/retrieval-requests"
-  private val equalToXApiKey = new EqualToPattern(xApiKey)
+  private val equalToXApiKey                         = new EqualToPattern(xApiKey)
 
   private def searchPathUrl(searchText: String): UrlPattern = urlEqualTo(s"$retrievalPath/submission-metadata?$searchText")
 
   private def searchRequest(searchText: String) = get(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey)
-
 
   def givenAuthenticated(): StubMapping =
     stubFor(
@@ -44,39 +43,39 @@ object NrsRetrievalStubs extends Fixture {
         .withRequestBody(
           equalToJson(
             """
-               |{
-               |  "authorise": [ {
-               |    "authProviders" : [ "PrivilegedApplication" ]
-               |  }, {
-               |  "$or": [{
-               |     "enrolment" :"nrs_digital_investigator",
-               |     "identifiers":[],
-               |     "state":"Activated"
-               |     }, {
-               |     "enrolment" :"nrs digital investigator",
-               |     "identifiers":[],
-               |     "state":"Activated"
-               |     }]
-               |  } ],
-               |  "retrieve": ["optionalCredentials", "optionalName"]
-               |}
+              |{
+              |  "authorise": [ {
+              |    "authProviders" : [ "PrivilegedApplication" ]
+              |  }, {
+              |  "$or": [{
+              |     "enrolment" :"nrs_digital_investigator",
+              |     "identifiers":[],
+              |     "state":"Activated"
+              |     }, {
+              |     "enrolment" :"nrs digital investigator",
+              |     "identifiers":[],
+              |     "state":"Activated"
+              |     }]
+              |  } ],
+              |  "retrieve": ["optionalCredentials"]
+              |}
           """.stripMargin,
             true,
             true
-          )).willReturn(aResponse()
-        .withStatus(200)
-        .withBody(
-          s"""
-             |{
-             |  "optionalCredentials": {
-             |    "providerId": "test-authority-id",
-             |    "providerType": "government-gateway"
-             |  },
-             |  "optionalName": {
-             |    "name": "test-user"
-             |  }
-             |}
-              """.stripMargin))
+          )
+        )
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                         |{
+                         |  "optionalCredentials": {
+                         |    "providerId": "test-authority-id",
+                         |    "providerType": "government-gateway"
+                         |  }
+                         |}
+              """.stripMargin)
+        )
     )
 
   def givenSearchReturns(searchText: String, status: Int, results: Seq[NrsSearchResult]): StubMapping =
@@ -88,11 +87,11 @@ object NrsRetrievalStubs extends Fixture {
   def verifySearchWithXApiKeyHeader(searchText: String): Unit =
     verify(getRequestedFor(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey))
 
-  def givenGetSubmissionBundlesReturns(status: Int): StubMapping = {
-    val output: Array[Byte] = "text".getBytes(Charset.defaultCharset())
-    val byteArrayOutputStream = new ByteArrayOutputStream()
+  def givenGetSubmissionBundlesReturns(status: Int): StubMapping =
+    val output: Array[Byte]              = "text".getBytes(Charset.defaultCharset())
+    val byteArrayOutputStream            = new ByteArrayOutputStream()
     val zipOutputStream: ZipOutputStream = new ZipOutputStream(byteArrayOutputStream)
-    val fileNames = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
+    val fileNames                        = Seq("submission.json", "signed-submission.p7m", "metadata.json", "signed-metadata.p7m")
 
     fileNames.foreach { fileName =>
       val zipEntry: ZipEntry = new ZipEntry(fileName)
@@ -103,32 +102,46 @@ object NrsRetrievalStubs extends Fixture {
 
     val body = byteArrayOutputStream.toByteArray
 
-    stubFor(get(urlEqualTo(submissionBundlesPath)).willReturn(aResponse()
-      .withStatus(status)
-      .withBody(body)
-      .withHeader("Cache-Control", "no-cache,no-store,max-age=0")
-      .withHeader("Content-Length", s"${body.length}")
-      .withHeader("Content-Disposition", s"inline; filename=$submissionId.zip")
-      .withHeader("Content-Type", "application/octet-stream")
-      .withHeader("nr-submission-id", submissionId)
-      .withHeader("Date","Tue, 13 Jul 2021 12:36:51 GMT")
-    ))
-  }
+    stubFor(
+      get(urlEqualTo(submissionBundlesPath))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withBody(body)
+            .withHeader("Cache-Control", "no-cache,no-store,max-age=0")
+            .withHeader("Content-Length", s"${body.size}")
+            .withHeader("Content-Disposition", s"inline; filename=$submissionId.zip")
+            .withHeader("Content-Type", "application/octet-stream")
+            .withHeader("nr-submission-id", submissionId)
+            .withHeader("Date", "Tue, 13 Jul 2021 12:36:51 GMT")
+        )
+    )
 
   def verifyGetSubmissionBundlesWithXApiKeyHeader(): Unit =
     verify(getRequestedFor(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey))
 
-  def givenPostSubmissionBundlesRetrievalRequestsReturns(status: Int): StubMapping = {
-    stubFor(post(urlEqualTo(submissionBundlesRetrievalRequestsPath))
-      .withHeader(xApiKeyHeader, equalToXApiKey)
-      .willReturn(aResponse().withStatus(status)))
-  }
+  def givenPostSubmissionBundlesRetrievalRequestsReturns(status: Int): StubMapping =
+    stubFor(
+      post(urlEqualTo(submissionBundlesRetrievalRequestsPath))
+        .withHeader(xApiKeyHeader, equalToXApiKey)
+        .willReturn(aResponse().withStatus(status))
+    )
 
+  def givenGetSubmissionBundlesRequests(status: Int): StubMapping =
+    stubFor(
+      get(urlEqualTo(submissionBundlesPath))
+        .withHeader(xApiKeyHeader, equalToXApiKey)
+        .willReturn(aResponse().withStatus(status))
+    )
+
+  def verifyGetSubmissionBundlesRequestsWithXApiKeyHeader(): Unit           =
+    verify(getRequestedFor(urlEqualTo(submissionBundlesPath)).withHeader(xApiKeyHeader, equalToXApiKey))
   def verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader(): Unit =
     verify(postRequestedFor(urlEqualTo(submissionBundlesRetrievalRequestsPath)).withHeader(xApiKeyHeader, equalToXApiKey))
 
   def givenHeadSubmissionBundlesReturns(status: Int): StubMapping =
-    stubFor(head(urlEqualTo(submissionBundlesPath))
-      .withHeader(xApiKeyHeader, equalToXApiKey)
-      .willReturn(aResponse().withStatus(status)))
-}
+    stubFor(
+      head(urlEqualTo(submissionBundlesPath))
+        .withHeader(xApiKeyHeader, equalToXApiKey)
+        .willReturn(aResponse().withStatus(status))
+    )

@@ -32,10 +32,6 @@
         maybeBodyEndBlock: Option[Html] = None
 )(content: Html)(implicit request: AuthenticatedRequest[_], messages: Messages)
 
-@userNameSpan = {
-    <span id="username" style="float:right" class="govuk-!-margin-top-3 govuk-body">@messages("site.welcome") <strong class="govuk-!-font-weight-bold">@{request.userName}</strong></span>
-}
-
 @maybeBackLink = @{
     maybeBackButtonUrl.map { url =>
         govukBackLink(BackLink(href = url.toString, content = Text(messages("site.back"))))
@@ -43,7 +39,6 @@
 }
 
 @beforeContentBlock = {
-@userNameSpan
 @maybeBackLink
 }
 

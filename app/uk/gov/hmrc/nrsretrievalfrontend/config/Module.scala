@@ -23,26 +23,28 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nrsretrievalfrontend.actions.NotableEventRefiner
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.testonly.{TestOnlyNrsRetrievalConnector, TestOnlyNrsRetrievalConnectorImpl}
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.{NrsRetrievalConnector, NrsRetrievalConnectorImpl}
-import uk.gov.hmrc.nrsretrievalfrontend.http.MicroserviceAudit
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.error_template
 import uk.gov.hmrc.play.audit.model.Audit
 
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 
-class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with PekkoGuiceSupport {
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule, PekkoGuiceSupport:
 
-  override def configure(): Unit = {
+  override def configure(): Unit =
     bind(classOf[NrsRetrievalConnector]).to(classOf[NrsRetrievalConnectorImpl])
-    bind(classOf[TestOnlyNrsRetrievalConnector]).to(classOf[TestOnlyNrsRetrievalConnectorImpl])
+    bind(classOf[TestOnlyNrsRetrievalConnector]).to(
+      classOf[TestOnlyNrsRetrievalConnectorImpl]
+    )
     bind(classOf[Audit]).to(classOf[MicroserviceAudit])
-  }
 
   @Provides
   @Singleton
   def registerNotableEventRefinerProvider(
-                                           messagesApi: MessagesApi,
-                                           errorPage: error_template
-                                    )(implicit executionContext: ExecutionContext, appConfig: AppConfig): String => NotableEventRefiner =
+    messagesApi: MessagesApi,
+    errorPage: error_template
+  )(using
+    executionContext: ExecutionContext,
+    appConfig: AppConfig
+  ): String => NotableEventRefiner =
     new NotableEventRefiner(messagesApi, errorPage)(_)
-}

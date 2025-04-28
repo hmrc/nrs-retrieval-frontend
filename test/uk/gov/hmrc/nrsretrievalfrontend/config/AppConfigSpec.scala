@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.config
 
 import uk.gov.hmrc.nrsretrievalfrontend.support.BaseUnitSpec
 
-class AppConfigSpec extends BaseUnitSpec{
+class AppConfigSpec extends BaseUnitSpec:
   "appConfig" should {
     "specify the correct notable event types" in {
       appConfig.notableEvents.keySet shouldBe Set(
@@ -61,4 +61,3 @@ class AppConfigSpec extends BaseUnitSpec{
       )
     }
   }
-}

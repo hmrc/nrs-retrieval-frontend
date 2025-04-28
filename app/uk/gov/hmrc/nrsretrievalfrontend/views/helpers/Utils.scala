@@ -20,12 +20,10 @@ import org.joda.time.{DateTimeZone, LocalDate}
 import org.joda.time.format.DateTimeFormat
 
 // todo : find a better name than utils
-object Utils {
+object Utils:
 
-  def formatDisplayDate (submissionDateEpochMilli: Long): String =
+  def formatDisplayDate(submissionDateEpochMilli: Long): String =
     s"${DateTimeFormat.forPattern("HH:mm:ss").withZone(DateTimeZone.UTC).print(submissionDateEpochMilli)} UTC"
 
-  def formatStoredFromDate (storedFrom: LocalDate): String =
+  def formatStoredFromDate(storedFrom: LocalDate): String =
     s"${DateTimeFormat.forPattern("dd MMMM YYYY").print(storedFrom)}"
-
-}

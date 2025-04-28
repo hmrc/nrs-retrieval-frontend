@@ -21,7 +21,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models._
 
 import java.time.ZonedDateTime
 
-trait NrsSearchFixture extends NrSubmissionId {
+trait NrsSearchFixture extends NrSubmissionId:
 
   val bundle: Bundle = Bundle("zip", 123456)
 
@@ -58,4 +58,3 @@ trait NrsSearchFixture extends NrSubmissionId {
   val searchQuery: SearchQueries = SearchQueries(searchParams)
 
   val notableEvent = "aNotableEvent"
-}

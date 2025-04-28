@@ -16,32 +16,51 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend
 
-import play.api.libs.ws.WSResponse
+import play.api.libs.ws.DefaultBodyWritables
+import play.api.libs.ws.DefaultBodyWritables.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticated
 
-trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec {
-  def checkAuthorisationRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/check-authorisation").withHttpHeaders(authenticationHeader).get().futureValue
+import java.net.URL
+import scala.concurrent.ExecutionContext
 
-  def validateDownloadGetRequest(): WSResponse =
-    wsClient.url(s"$serviceRoot/test-only/validate-download").withHttpHeaders(authenticationHeader).get().futureValue
+trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec:
+  given executionContext: ExecutionContext      = ExecutionContext.Implicits.global
+  def checkAuthorisationRequest(): HttpResponse =
+    val url = new URL(s"$serviceRoot/test-only/check-authorisation")
+    httpClientV2
+      .get(url)
+      .setHeader(authenticationHeader)
+      .execute[HttpResponse]
+      .futureValue
 
-  def validateDownloadPostRequest(): WSResponse =
-    wsClient
-      .url(s"$serviceRoot/test-only/validate-download")
-      .withHttpHeaders(authenticationHeader)
-      .post(Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))).futureValue
+  def validateDownloadGetRequest(): HttpResponse  =
+    val url = new URL(s"$serviceRoot/test-only/validate-download")
+    httpClientV2
+      .get(url)
+      .setHeader(authenticationHeader)
+      .execute[HttpResponse]
+      .futureValue
+  def validateDownloadPostRequest(): HttpResponse =
+
+    val body: Map[String, Seq[String]] = Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))
+
+    val url = new URL(s"$serviceRoot/test-only/validate-download")
+    httpClientV2
+      .post(url)
+      .setHeader(authenticationHeader)
+      .withBody(body)
+      .execute[HttpResponse]
+      .futureValue
 
   override val configuration: Map[String, Any] =
     defaultConfiguration + ("application.router" -> "testOnlyDoNotUseInAppConf.Routes")
-}
 
-class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
-  private def validate(response: WSResponse) = {
-    response.status shouldBe OK
-    response.contentType shouldBe "text/html; charset=UTF-8"
+class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec:
+  private def validate(response: HttpResponse) =
+    response.status                                       shouldBe OK
     response.body.contains("Test-only validate download") shouldBe true
-  }
 
   "GET /nrs-retrieval/test-only/check-authorisation" should {
     "display the check-authorisation page" when {
@@ -69,9 +88,8 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
       }
     }
   }
-}
 
-class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec {
+class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegrationSpec:
   override val configuration: Map[String, Any] = defaultConfiguration
 
   "GET /nrs-retrieval/test-only/check-authorisation" should {
@@ -97,4 +115,3 @@ class TestOnyEndpointsDisabledIntegrationSpec extends TestOnyEndpointsIntegratio
       }
     }
   }
-}

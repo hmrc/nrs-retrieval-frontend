@@ -20,16 +20,13 @@ import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.form
 import play.api.libs.json.Json
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 
-import java.lang.Integer.MAX_VALUE
-
-class FormMappingsSpec extends UnitSpec {
+class FormMappingsSpec extends UnitSpec:
   appConfig.notableEvents.foreach { notableEvent =>
     "searchForm" should {
       s"bind for for ${notableEvent._1}" in {
-        val postData = Json.obj("searchText" -> "someSearchText", "notableEventType" -> notableEvent._2.name)
-        val validatedForm = form.bind(postData, MAX_VALUE)
+        val postData      = Json.obj("searchText" -> "someSearchText", "notableEventType" -> notableEvent._2.name)
+        val validatedForm = form.bind(postData, Integer.MAX_VALUE)
         validatedForm.errors shouldBe empty
       }
     }
   }
-}

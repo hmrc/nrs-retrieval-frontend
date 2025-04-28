@@ -22,23 +22,21 @@ import org.joda.time.LocalDate
 import play.api.libs.json._
 import play.api.libs.json.JodaWrites._
 import play.api.libs.json.JodaReads._
-case class Glacier (
+case class Glacier(
   vaultName: String,
   archiveId: String
 )
 
-object Glacier {
-  implicit val formats: OFormat[Glacier] = Json.format[Glacier]
-}
+object Glacier:
+  given OFormat[Glacier] = Json.format[Glacier]
 
-case class Bundle (
+case class Bundle(
   fileType: String,
   fileSize: Long
 )
 
-object Bundle {
-  implicit val formats: OFormat[Bundle] = Json.format[Bundle]
-}
+object Bundle:
+  given OFormat[Bundle] = Json.format[Bundle]
 
 case class NrsSearchResult(
   businessId: String,
@@ -53,13 +51,12 @@ case class NrsSearchResult(
   glacier: Glacier
 )
 
-case class NotableEventDisplay (
+case class NotableEventDisplay(
   name: String,
   displayName: String
 )
 
-object NrsSearchResult {
+object NrsSearchResult:
 
-  implicit val notableEventFormat: OFormat[NotableEventDisplay] = Json.format[NotableEventDisplay]
-  implicit val nrsSearchResultFormat: OFormat[NrsSearchResult] = Json.format[NrsSearchResult]
-}
+  given OFormat[NotableEventDisplay] = Json.format[NotableEventDisplay]
+  given OFormat[NrsSearchResult]     = Json.format[NrsSearchResult]

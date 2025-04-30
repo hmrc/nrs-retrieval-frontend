@@ -56,7 +56,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "emcs-explain-a-delay-api",
         "emcs-explain-a-shortage-api",
         "emcs-report-a-receipt-api",
-        "emcs-submit-alert-or-rejection-api"
+        "emcs-submit-alert-or-rejection-api",
+        "p800refunds-nonloggedin-cheque-claim-attempt-made"
       )
     }
   }

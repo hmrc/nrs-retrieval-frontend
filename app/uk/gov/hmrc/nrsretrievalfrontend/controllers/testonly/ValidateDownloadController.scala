@@ -40,7 +40,7 @@ class ValidateDownloadController @Inject() (
 
   val logger: Logger = Logger(this.getClass)
 
-  implicit override def hc(using rh: RequestHeader): HeaderCarrier =
+  override implicit def hc(using rh: RequestHeader): HeaderCarrier =
     super.hc.withExtraHeaders("X-API-Key" -> appConfig.xApiKey)
 
   val showValidateDownload: Action[AnyContent] = authenticatedAction { implicit request =>

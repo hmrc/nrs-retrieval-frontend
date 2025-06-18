@@ -33,8 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 given executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
 class NrsRetrievalContractSpec extends IntegrationSpec:
-  given ActorSystem = ActorSystem()
-  given authorisedUser: AuthorisedUser = AuthorisedUser("authProviderId")
+  given ActorSystem                                                                                    = ActorSystem()
+  given authorisedUser: AuthorisedUser                                                                 = AuthorisedUser("authProviderId")
   private def anUpstreamErrorResponseShouldBeThrownBy[T](request: () => T, statusCode: Int): Assertion =
     intercept[Exception] {
       request()
@@ -53,7 +53,7 @@ class NrsRetrievalContractSpec extends IntegrationSpec:
 
     val search: () => Seq[NrsSearchResult] = () => connector.search(notableEvent, query.queries, crossKeySearch).futureValue
 
-    s"a ${if (crossKeySearch) "cross key" else "standard"} search" should {
+    s"a ${if crossKeySearch then "cross key" else "standard"} search" should {
       "return a sequence of results" when {
         val results =
           Seq(

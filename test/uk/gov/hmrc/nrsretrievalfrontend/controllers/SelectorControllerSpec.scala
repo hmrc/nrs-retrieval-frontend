@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import scala.concurrent.Future
 
 class SelectorControllerSpec extends ControllerSpec:

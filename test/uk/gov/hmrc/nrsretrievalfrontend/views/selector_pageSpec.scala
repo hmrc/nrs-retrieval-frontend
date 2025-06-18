@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.views
 
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.i18n.Messages
 import play.api.libs.json.Json.parse
 import play.twirl.api.HtmlFormat
@@ -45,7 +45,7 @@ class selector_pageSpec extends ViewSpec:
       elementByName(doc, "continueButton").text() mustBe Messages("button.continue.lbl")
 
       indexedNotableEvents.map { case (notableEvent: NotableEvent, index: Int) =>
-        val notableEventTypeInputIdSuffix = if (index > 0) s"-${index + 1}" else ""
+        val notableEventTypeInputIdSuffix = if index > 0 then s"-${index + 1}" else ""
         val notableEventTypeInput         = doc.getElementById(s"notableEventType$notableEventTypeInputIdSuffix")
 
         notableEventTypeInput.attr("type") mustBe "radio"

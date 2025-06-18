@@ -35,7 +35,7 @@ case class ValidateDownloadResult(
 object ValidateDownloadResult extends HeaderNames:
   def apply(
     response: HttpResponse
-  )(using ec: ExecutionContext, actorSystem: ActorSystem): Future[ValidateDownloadResult] = {
+  )(using ec: ExecutionContext, actorSystem: ActorSystem): Future[ValidateDownloadResult] =
 
     response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
       val headers: Seq[(String, String)] = response.headers.keys.map { key =>
@@ -57,4 +57,3 @@ object ValidateDownloadResult extends HeaderNames:
         headers
       )
     }
-  }

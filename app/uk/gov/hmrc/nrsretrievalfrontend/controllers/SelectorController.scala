@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import FormMappings._
+import FormMappings.*
 import play.api.Logger
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.nrsretrievalfrontend.actions.AuthenticatedAction
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.selector_page

@@ -70,7 +70,7 @@ class AuthenticatedAction @Inject() (
       case ex: NoActiveSession        =>
         logger.warn(s"NoActiveSession", ex)
         toStrideLogin(
-          if (appConfig.isLocal) s"http://${request.host}${request.uri}"
+          if appConfig.isLocal then s"http://${request.host}${request.uri}"
           else s"${request.uri}"
         )
       case ex: InsufficientEnrolments =>

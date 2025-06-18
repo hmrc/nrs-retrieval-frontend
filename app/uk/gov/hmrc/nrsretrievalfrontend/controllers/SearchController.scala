@@ -116,7 +116,7 @@ class SearchController @Inject() (
 
   private def doSearch(
     search: SearchQueries
-  )(using request: NotableEventRequest[_]) =
+  )(using request: NotableEventRequest[?]) =
     val crossKeySearch = appConfig.notableEvents
       .get(request.notableEvent.name)
       .fold(false)(_.crossKeySearch)

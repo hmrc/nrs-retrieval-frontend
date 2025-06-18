@@ -87,7 +87,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
   "search" should
     Seq(false, true).foreach { crossKeySearch =>
       val queryParams = Query.queryParams(notableEvent, searchParams, crossKeySearch)
-      val searchType  = if (crossKeySearch) "cross key" else "standard"
+      val searchType  = if crossKeySearch then "cross key" else "standard"
 
       "make a get call to /submission-metadata returning data" when {
         s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
@@ -135,10 +135,9 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
           when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenAnswer(
             new Answer[Future[Unit]]():
               override def answer(invocationOnMock: InvocationOnMock): Future[Unit] =
-                if (invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId) {
+                if invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId then
                   Future.successful(())
-                } else
-                  Future.failed(new Throwable())
+                else Future.failed(new Throwable())
           )
           await(connector.search(notableEvent, searchQuery.queries, crossKeySearch)).head.nrSubmissionId shouldBe nrSubmissionId
           verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
@@ -180,10 +179,9 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
       when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenAnswer(
         new Answer[Future[Unit]]():
           override def answer(invocationOnMock: InvocationOnMock): Future[Unit] =
-            if (invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId) {
+            if invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId then
               Future.successful(())
-            } else
-              Future.failed(new Throwable())
+            else Future.failed(new Throwable())
       )
       await(connector.submitRetrievalRequest(testAuditId, testArchiveId)).header("nr-submission-id") shouldBe Some(nrSubmissionId)
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreRetrieve])

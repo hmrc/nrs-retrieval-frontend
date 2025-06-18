@@ -23,7 +23,7 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{Json, JsValue}
 import play.api.mvc.{Result, Results}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeRequest, ResultExtractors}
@@ -34,8 +34,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 
 import scala.concurrent.Future
 
-class AuthenticatedActionSpec
-    extends BaseUnitSpec, MockitoSugar, Results, Status, ScalaFutures, HeaderNames, ResultExtractors, Views:
+class AuthenticatedActionSpec extends BaseUnitSpec, MockitoSugar, Results, Status, ScalaFutures, HeaderNames, ResultExtractors, Views:
 
   trait Setup:
     val mockAuthConnector = mock[AuthConnector]
@@ -56,7 +55,7 @@ class AuthenticatedActionSpec
         when(mockAuthConnector.authorise[Option[Credentials]](any(), any())(any(), any()))
           .thenReturn(Future.successful(Some(Credentials(authProviderId, "goverment-gateway"))))
 
-        val action: AuthenticatedRequest[_] => Future[Result] = request => Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
+        val action: AuthenticatedRequest[?] => Future[Result] = request => Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
 
         val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
 
@@ -78,7 +77,7 @@ class AuthenticatedActionSpec
           when(mockAuthConnector.authorise(any(), any())(any(), any()))
             .thenReturn(Future.failed(exception))
 
-          val action: AuthenticatedRequest[_] => Future[Result] = request => Future(Ok("passed"))
+          val action: AuthenticatedRequest[?] => Future[Result] = request => Future(Ok("passed"))
 
           val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
 
@@ -92,7 +91,7 @@ class AuthenticatedActionSpec
         when(mockAuthConnector.authorise[Option[Credentials]](any(), any())(any(), any()))
           .thenReturn(Future.successful(None))
 
-        val action: AuthenticatedRequest[_] => Future[Result] = request => Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
+        val action: AuthenticatedRequest[?] => Future[Result] = request => Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
 
         val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
 
@@ -106,7 +105,7 @@ class AuthenticatedActionSpec
         when(mockAuthConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(InsufficientEnrolments()))
 
-        val action: AuthenticatedRequest[_] => Future[Result] = request => Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
+        val action: AuthenticatedRequest[?] => Future[Result] = request => Future(Ok(Json.obj("authProviderId" -> request.authProviderId)))
 
         val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
 

@@ -23,7 +23,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.duration.{FiniteDuration, *}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 

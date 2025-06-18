@@ -20,7 +20,7 @@ import org.jsoup.Jsoup.parse
 import org.jsoup.nodes.Document
 import play.api.mvc.{AnyContentAsEmpty, Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.AuthenticatedRequest
 import uk.gov.hmrc.nrsretrievalfrontend.actions.{AuthenticatedAction, NotableEventRefiner}

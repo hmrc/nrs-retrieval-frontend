@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.views
 
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec

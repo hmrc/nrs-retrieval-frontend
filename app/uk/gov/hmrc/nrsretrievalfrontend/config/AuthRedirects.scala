@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
 import play.api.mvc.Result
-import play.api.mvc.Results._
+import play.api.mvc.Results.*
 import play.api.{Configuration, Environment, Mode}
 
 trait AuthRedirects:
@@ -25,7 +25,7 @@ trait AuthRedirects:
   def env: Environment
 
   private lazy val envPrefix =
-    if (env.mode.equals(Mode.Test)) "Test"
+    if env.mode.equals(Mode.Test) then "Test"
     else config.getOptional[String]("run.mode").getOrElse("Dev")
 
   private val hostDefaults: Map[String, String] = Map(

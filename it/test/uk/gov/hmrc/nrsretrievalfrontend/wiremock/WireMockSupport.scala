@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.configureFor
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Suite}
 import play.api.http.Status
 

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.Try

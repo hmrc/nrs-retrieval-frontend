@@ -26,7 +26,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.{Binding, Injector, Module}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{MessagesControllerComponents, RequestHeader}
-import play.api.{Application, Configuration, Environment, inject}
+import play.api.{inject, Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2

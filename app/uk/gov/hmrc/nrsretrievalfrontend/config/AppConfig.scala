@@ -21,8 +21,8 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration._
-import scala.jdk.CollectionConverters._
+import scala.concurrent.duration.*
+import scala.jdk.CollectionConverters.*
 
 @Singleton
 class AppConfig @Inject() (

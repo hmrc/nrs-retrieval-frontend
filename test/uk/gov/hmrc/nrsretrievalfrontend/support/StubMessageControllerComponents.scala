@@ -19,8 +19,8 @@ package uk.gov.hmrc.nrsretrievalfrontend.support
 import org.apache.pekko.stream.testkit.NoMaterializer
 import play.api.http.{DefaultFileMimeTypes, FileMimeTypesConfiguration, HttpConfiguration}
 import play.api.i18n.Messages.UrlMessageSource
-import play.api.i18n._
-import play.api.mvc._
+import play.api.i18n.*
+import play.api.mvc.*
 import play.api.test.Helpers.{stubBodyParser, stubPlayBodyParsers}
 
 import java.util.Locale

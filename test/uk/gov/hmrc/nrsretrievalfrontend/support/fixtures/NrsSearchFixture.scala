@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.support.fixtures
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.nrsretrievalfrontend.models._
+import uk.gov.hmrc.nrsretrievalfrontend.models.*
 
 import java.time.ZonedDateTime
 

@@ -21,7 +21,7 @@ import org.jsoup.nodes.Document
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{Json, JsValue}
 import play.api.mvc.{Result, Results}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeRequest, ResultExtractors}
@@ -32,8 +32,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
-class NotableEventRefinerSpec
-    extends BaseUnitSpec, MockitoSugar, Results, Status, ScalaFutures, HeaderNames, ResultExtractors, Views:
+class NotableEventRefinerSpec extends BaseUnitSpec, MockitoSugar, Results, Status, ScalaFutures, HeaderNames, ResultExtractors, Views:
 
   trait Setup:
 
@@ -64,7 +63,7 @@ class NotableEventRefinerSpec
 
         val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
-        val action: NotableEventRequest[_] => Future[Result] = request =>
+        val action: NotableEventRequest[?] => Future[Result] = request =>
           Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))
 
         val result: Future[Result] = notableEventRefiner(notableEvent).invokeBlock(request, action)
@@ -82,7 +81,7 @@ class NotableEventRefinerSpec
 
         val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
-        val action: NotableEventRequest[_] => Future[Result] = request =>
+        val action: NotableEventRequest[?] => Future[Result] = request =>
           Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))
 
         val result: Future[Result] = notableEventRefiner(notableEvent).invokeBlock(request, action)

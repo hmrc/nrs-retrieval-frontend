@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import uk.gov.hmrc.nrsretrievalfrontend.models.audit.NonRepudiationStoreSearch
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
-import uk.gov.hmrc.play.audit.model._
+import uk.gov.hmrc.play.audit.model.*
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 

@@ -19,7 +19,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.connectors
 import play.api.Logger
 import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
-import uk.gov.hmrc.http.client.{HttpClientV2, readStreamHttpResponse}
+import uk.gov.hmrc.http.client.{readStreamHttpResponse, HttpClientV2}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, Auditable}
 import uk.gov.hmrc.nrsretrievalfrontend.models.audit.{NonRepudiationStoreDownload, NonRepudiationStoreRetrieve, NonRepudiationStoreSearch}
@@ -105,7 +105,7 @@ class NrsRetrievalConnectorImpl @Inject() (
                   user.authProviderId,
                   vaultName,
                   archiveId,
-                  if (post.headers == null) "(Empty)"
+                  if post.headers == null then "(Empty)"
                   else post.header("nr-submission-id").getOrElse("(Empty)"),
                   path
                 )

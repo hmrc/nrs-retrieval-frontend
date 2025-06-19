@@ -18,7 +18,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.views
 
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.libs.json.Json.parse
 import play.api.mvc.AnyContentAsEmpty
 import play.twirl.api.HtmlFormat
@@ -27,9 +27,9 @@ import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.form
 import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchResult}
 import uk.gov.hmrc.nrsretrievalfrontend.support.ViewSpec.{elementByName, ensureCommonPageElementsAreRendered}
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.SearchFixture
-import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, ViewSpec, Views}
+import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views, ViewSpec}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 class search_pageSpec extends BaseUnitSpec, SearchFixture, Views:
 

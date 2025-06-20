@@ -64,3 +64,12 @@ The endpoint functions as follows:
     Then a call is made to the nrs-retrieval endpoint /test-only/check-authorisation
     And content is served which shows that nrs-retrieval has deduced that I am authenticated via Stride but not authorised for NRS
 
+### Check and Reformat code
+
+All code should be formatted before being pushed, to check the format  
+>   ```sbt scalafmtCheckAll it/scalafmtCheckAll```
+
+and reformat if required:
+
+>   ```sbt scalafmtAll it/scalafmtAll```
+

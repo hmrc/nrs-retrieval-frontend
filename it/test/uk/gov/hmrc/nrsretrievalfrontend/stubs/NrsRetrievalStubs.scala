@@ -145,3 +145,10 @@ object NrsRetrievalStubs extends Fixture, IntegrationSpec:
         .withHeader(xApiKeyHeader, equalToXApiKey)
         .willReturn(aResponse().withStatus(status))
     )
+
+  def givenGetCheckAuthorisationRequests(status: Int): StubMapping =
+    val checkAuthorisationPath = s"/nrs-retrieval/test-only/check-authorisation"
+    stubFor(
+      get(urlEqualTo(checkAuthorisationPath))
+        .willReturn(aResponse().withStatus(status).withBody("true"))
+    )

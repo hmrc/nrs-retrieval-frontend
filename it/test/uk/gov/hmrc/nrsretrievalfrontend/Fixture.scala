@@ -21,6 +21,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.{Query, SearchQueries}
 import java.net.URLEncoder
 
 trait Fixture:
+  val itsaAdHocRefund       = "itsa-ad-hoc-refund"
   val vatReturn             = "vat-return"
   val vatReturnNotableEvent = "vat-return"
   val vrn                   = "vrn"

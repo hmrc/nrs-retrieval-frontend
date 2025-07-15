@@ -24,7 +24,7 @@ import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcFooter, HmrcInternalH
 import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardFooter, HmrcTrackingConsentSnippet}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.components.*
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.{check_authorisation_page, validate_download_page}
-import uk.gov.hmrc.nrsretrievalfrontend.views.html.{error_template, search_page, selector_page, start_page}
+import uk.gov.hmrc.nrsretrievalfrontend.views.html.*
 
 trait Views:
   this: Configs =>
@@ -107,7 +107,8 @@ trait Views:
     govukErrorSummary
   )
 
-  lazy val searchResultsPanel = new SearchResultsPanel(searchResultPanel, govukTable)
+  lazy val searchResultsPanel     = new SearchResultsPanel(searchResultPanel, govukTable)
+  lazy val metaSearchResultsPanel = new MetaSearchResultsPanel(searchResultPanel, govukTable)
 
   lazy val startPage = new start_page(
     mainTemplate,
@@ -129,6 +130,15 @@ trait Views:
     govukInput,
     govukButton,
     searchResultsPanel
+  )
+
+  lazy val metasearchPage = new metasearch_page(
+    mainTemplate,
+    formWithCsrf,
+    paragraph,
+    govukInput,
+    govukButton,
+    metaSearchResultsPanel
   )
 
   lazy val validateDownloadPage = new validate_download_page(

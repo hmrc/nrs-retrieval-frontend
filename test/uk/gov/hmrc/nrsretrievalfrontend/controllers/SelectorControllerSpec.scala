@@ -19,6 +19,7 @@ package uk.gov.hmrc.nrsretrievalfrontend.controllers
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+
 import scala.concurrent.Future
 
 class SelectorControllerSpec extends ControllerSpec:
@@ -51,8 +52,15 @@ class SelectorControllerSpec extends ControllerSpec:
           headers(eventualResult) shouldBe
             Map("Location" -> routes.SearchController.showSearchPage(notableEventType).url)
 
-        s"and the request is authorised and the notable event type $notableEventType is selected" in
-          theRequestShouldBeRedirectedToTheSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
+        def theRequestShouldBeRedirectedToTheMetaSearchPage(eventualResult: Future[Result]) =
+          status(eventualResult)  shouldBe SEE_OTHER
+          headers(eventualResult) shouldBe
+            Map("Location" -> routes.MetaSearchController.showSearchPage(notableEventType).url)
+
+        s"and the request is authorised and the notable event type $notableEventType is selected" in:
+          if notableEvent.metadataSearchKeys then
+            theRequestShouldBeRedirectedToTheMetaSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
+          else theRequestShouldBeRedirectedToTheSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
       }
 
     "return 200 and render the selector page with an error message" when {

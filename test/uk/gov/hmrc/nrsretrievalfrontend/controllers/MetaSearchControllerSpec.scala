@@ -23,26 +23,27 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.i18n.Messages
+import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, SearchResultUtils}
+import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, Query, SearchResultUtils}
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 
 import scala.concurrent.Future
 
-class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixture:
+class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixture:
 
   private val controller =
-    new SearchController(
+    new MetaSearchController(
       authenticatedAction,
       notableEventRefiner,
       nrsRetrievalConnector,
       new SearchResultUtils(appConfig),
       stubMessagesControllerComponents(),
-      searchPage,
+      metasearchPage,
       error_template
     )
 
@@ -58,7 +59,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
     )
 
   s"showSearchPage" should
-    indexedNotableEvents.filterNot(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
+    indexedNotableEvents.filter(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       "return 200 and render the search page" when {
@@ -70,7 +71,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
       }
     }
 
-  "noParameters" should {
+  "noParameters" should:
     "redirect to the selector page" when {
       def theRequestShouldBeRedirectedToTheStartPage(eventualResult: Future[Result]) =
         status(eventualResult)  shouldBe SEE_OTHER
@@ -82,10 +83,9 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
       "and the request is unauthorised" in
         theRequestShouldBeRedirectedToTheStartPage(controller.noParameters()(getRequest))
     }
-  }
 
-  "submitSearchPage" should
-    indexedNotableEvents.filterNot(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
+  "submitSearchPage" should:
+    indexedNotableEvents.filter(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       val postRequestWithNotableEventTypeAndSearchText =
@@ -188,3 +188,68 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
       }
     }
   }
+
+  "createJsonQuery" should:
+    "crate a json query with 1 value" in:
+      val q1                   = Query("nino", "123")
+      val queries: List[Query] = List(q1)
+      val jsonString           = controller.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val json                 = Json.parse(jsonString)
+
+      Json.prettyPrint(json) shouldBe """{
+                                        |  "notableEvent" : "itsa-ad-hoc-refund",
+                                        |  "query" : {
+                                        |    "key" : "nino",
+                                        |    "value" : "123"
+                                        |  }
+                                        |}""".stripMargin
+
+    "crate a json query with 2 value" in:
+      val q1                   = Query("nino", "123")
+      val q2                   = Query("sautr", "456")
+      val queries: List[Query] = List(q1, q2)
+      val jsonString           = controller.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val json                 = Json.parse(jsonString)
+      Json.prettyPrint(json) shouldBe """{
+                                        |  "notableEvent" : "itsa-ad-hoc-refund",
+                                        |  "query" : {
+                                        |    "type" : "or",
+                                        |    "q1" : {
+                                        |      "key" : "sautr",
+                                        |      "value" : "456"
+                                        |    },
+                                        |    "q2" : {
+                                        |      "key" : "nino",
+                                        |      "value" : "123"
+                                        |    }
+                                        |  }
+                                        |}""".stripMargin
+
+    "crate a json query with 3 value" in:
+      val q1                   = Query("nino", "123")
+      val q2                   = Query("sautr", "456")
+      val q3                   = Query("providerId", "789")
+      val queries: List[Query] = List(q1, q2, q3)
+      val jsonString           = controller.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val json                 = Json.parse(jsonString)
+      Json.prettyPrint(json) shouldBe """{
+                                        |  "notableEvent" : "itsa-ad-hoc-refund",
+                                        |  "query" : {
+                                        |    "type" : "or",
+                                        |    "q1" : {
+                                        |      "key" : "providerId",
+                                        |      "value" : "789"
+                                        |    },
+                                        |    "q2" : {
+                                        |      "type" : "or",
+                                        |      "q1" : {
+                                        |        "key" : "sautr",
+                                        |        "value" : "456"
+                                        |      },
+                                        |      "q2" : {
+                                        |        "key" : "nino",
+                                        |        "value" : "123"
+                                        |      }
+                                        |    }
+                                        |  }
+                                        |}""".stripMargin

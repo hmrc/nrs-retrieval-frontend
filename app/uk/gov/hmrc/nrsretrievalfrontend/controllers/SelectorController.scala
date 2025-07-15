@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import FormMappings.*
 import play.api.Logger
 import play.api.mvc.*
 import uk.gov.hmrc.nrsretrievalfrontend.actions.AuthenticatedAction
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
+import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.*
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.selector_page
 
 import javax.inject.{Inject, Singleton}
@@ -48,6 +48,9 @@ class SelectorController @Inject() (
           logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
           Ok(selectorPage(formWithErrors))
         ,
-        v => Redirect(routes.SearchController.showSearchPage(v.notableEventType))
+        v =>
+          val notableEvent = appConfig.notableEvents(v.notableEventType)
+          if notableEvent.metadataSearchKeys then Redirect(routes.MetaSearchController.showSearchPage(v.notableEventType))
+          else Redirect(routes.SearchController.showSearchPage(v.notableEventType))
       )
   }

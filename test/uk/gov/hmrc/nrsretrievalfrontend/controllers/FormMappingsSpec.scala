@@ -16,17 +16,29 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.form
 import play.api.libs.json.Json
+import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.form
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
 
 class FormMappingsSpec extends UnitSpec:
-  appConfig.notableEvents.foreach { notableEvent =>
-    "searchForm" should {
-      s"bind for for ${notableEvent._1}" in {
-        val postData      = Json.obj("searchText" -> "someSearchText", "notableEventType" -> notableEvent._2.name)
+  appConfig.notableEvents.foreach { (notableEventName, notableEvent) =>
+    s"searchForm - $notableEventName" should {
+      s"bind with data" in {
+        val fields        = notableEvent.searchKeys.zipWithIndex.map((s, idx) => s"queries[$idx].name" -> Json.toJsFieldJsValueWrapper(s.label)) ++
+          notableEvent.searchKeys.zipWithIndex.map((s, idx) => s"queries[$idx].value" -> Json.toJsFieldJsValueWrapper(s.name)) :+
+          ("notableEventType" -> Json.toJsFieldJsValueWrapper(notableEvent.name))
+        val postData      = Json.obj(fields*)
         val validatedForm = form.bind(postData, Integer.MAX_VALUE)
         validatedForm.errors shouldBe empty
+      }
+
+      s"bind with no data" in {
+        val fields        = notableEvent.searchKeys.zipWithIndex.map((s, idx) => s"queries[$idx].name" -> Json.toJsFieldJsValueWrapper(s.label)) ++
+          notableEvent.searchKeys.zipWithIndex.map((_, idx) => s"queries[$idx].value" -> Json.toJsFieldJsValueWrapper("")) :+
+          ("notableEventType" -> Json.toJsFieldJsValueWrapper(notableEvent.name))
+        val postData      = Json.obj(fields*)
+        val validatedForm = form.bind(postData, Integer.MAX_VALUE)
+        validatedForm.errors.flatMap(_.messages) should not be empty
       }
     }
   }

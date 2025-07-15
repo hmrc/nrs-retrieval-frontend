@@ -31,6 +31,14 @@ search.page.vat-registration.searchkey.detail.list.1=after 31 Aug 2021 - provide
 search.page.results.info=We found {0} results for {1}: "{2}"
 search.page.error.searchkey.required=Please select a type of digital submission to search for
 
+################################## MULTI Search Page ###################################################
+metasearch.page.dynamic.header.lbl=Search for {0}
+metasearch.page.results.info.fields= With the search for {0}
+metasearch.page.results.info.count= We found {0} results
+metasearch.page.empty.fields =All fields are empty. Enter a value into at least one search field
+metasearch.results.notfoundfor.lbl=No results found for: {0}
+metasearch.page.results.info.multifield=Enter one, or more, fields for results containing any of the values
+
 ################################## Search Results ################################################
 search.results.notfoundfor.lbl=No results found for "{0}"
 search.results.filename.lbl=Filename

@@ -18,12 +18,15 @@ package uk.gov.hmrc.nrsretrievalfrontend
 
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.util.ByteString
+import org.jsoup.Jsoup
 import org.jsoup.Jsoup.parse
+import org.scalatest.time.{Seconds, Span}
 import play.api.libs.ws.DefaultBodyWritables
 import play.api.libs.ws.DefaultBodyWritables.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.readStreamHttpResponse
-import uk.gov.hmrc.nrsretrievalfrontend.models.NrsSearchResult
+import uk.gov.hmrc.nrsretrievalfrontend.models.{NrsSearchResult, Query, SearchQueries}
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 
 import java.io.ByteArrayInputStream
@@ -34,11 +37,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class NrsRetrievalIntegrationSpec extends IntegrationSpec:
   private val selectUrl                = s"$serviceRoot/select"
   private val searchUrl                = s"$serviceRoot/search"
+  private val metasearchUrl            = s"$serviceRoot/metasearch"
+  private val itsaAdHocRefundSearchUrl = s"$metasearchUrl/$itsaAdHocRefund"
   private val vatReturnSearchUrl       = s"$searchUrl/$vatReturn"
   private val vatRegistrationSearchUrl = s"$searchUrl/$vatRegistration"
 
   private val startPageHeading                 = "Search the Non-Repudiation Store"
   private val vatReturnSearchPageHeading       = "Search for VAT returns"
+  private val itsaAdHocRefundSearchPageHeading = "Search for ITSA Ad Hoc Refunds"
   private val vatRegistrationSearchPageHeading = "Search for VAT registrations"
 
   given executionContext: ExecutionContext = ExecutionContext.Implicits.global
@@ -48,6 +54,14 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
     val document = parse(response.body)
 
     response.status                                                   shouldBe OK
+    document.select("#main-content > div > div > header > h1").text() shouldBe pageHeader
+
+    document
+
+  private def assertErrorPageIsRendered(response: HttpResponse, pageHeader: String) =
+    val document = parse(response.body)
+
+    response.status                                                   shouldBe BAD_REQUEST
     document.select("#main-content > div > div > header > h1").text() shouldBe pageHeader
 
     document
@@ -252,6 +266,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
       givenAuthenticated()
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
+      givenGetSubmissionBundlesRequests(OK)
 
       val url = new URL(s"$serviceRoot/retrieve/$vatReturnNotableEvent/$vatReturn/$vrn")
       httpClientV2
@@ -262,5 +277,55 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
         .status shouldBe ACCEPTED
 
       verifyPostSubmissionBundlesRetrievalRequestsWithXApiKeyHeader()
+    }
+  }
+
+  "GET /nrs-retrieval/metasearch" should {
+    "redirect to the start page" when {
+      "no notable event type is provided" in {
+        givenAuthenticated()
+
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .get(URL(searchUrl))
+          .setHeader(authenticationHeader)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        assertPageIsRendered(response, startPageHeading)
+
+      }
+    }
+
+    "display the metasearch page" when {
+      "a itsa-ad-hoc-refund is provided with all the input fields" in {
+        givenAuthenticated()
+
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .get(URL(itsaAdHocRefundSearchUrl))
+          .setHeader(authenticationHeader)
+          .execute[HttpResponse]
+
+        val response = responseFuture
+
+        val document = assertPageIsRendered(response, itsaAdHocRefundSearchPageHeading)
+        document.getElementById("input_nino").parent.text       shouldBe "Enter a NINO"
+        document.getElementById("input_sautr").parent.text      shouldBe "Enter a UTR"
+        document.getElementById("input_providerId").parent.text shouldBe "Enter a Provider ID"
+      }
+
+      "a itsa-ad-hoc-refund display error if all fields are empty" in {
+        givenAuthenticated()
+
+        val responseFuture: Future[HttpResponse] = httpClientV2
+          .post(URL(itsaAdHocRefundSearchUrl))
+          .withBody(SearchQueries(List.empty[Query]).toString)
+          .setHeader(authenticationHeader)
+          .execute[HttpResponse]
+
+        whenReady(responseFuture, timeout(Span(20, Seconds))): response =>
+          val document = assertErrorPageIsRendered(response, itsaAdHocRefundSearchPageHeading)
+          document.toString should include("All fields are empty. Enter a value into at least one search field")
+      }
     }
   }

@@ -91,6 +91,9 @@ class AppConfig @Inject() (
             .getOrElse(5.minutes),
           crossKeySearch = clientConfiguration
             .getOptional[String]("crossKeySearch")
+            .getOrElse("") == "true",
+          metadataSearchKeys = clientConfiguration
+            .getOptional[String]("metadataSearchKeys")
             .getOrElse("") == "true"
         )
       }

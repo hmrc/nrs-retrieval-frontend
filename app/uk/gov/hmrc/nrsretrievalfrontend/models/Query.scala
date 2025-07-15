@@ -30,3 +30,31 @@ object Query:
     queries.map(q => q.name -> q.value),
     Seq("crossKeySearch" -> "true").filter(_ => crossKeySearch)
   ).flatten
+
+  def createJsonQuery(notableEventName: String, queries: List[Query]): String =
+    val queriesWithValues = queries.filterNot(_.value.isBlank)
+
+    val queryJson = queriesWithValues.tail.foldLeft(s"""
+                                                       |          "key": "${queriesWithValues.head.name}",
+                                                       |          "value": "${queriesWithValues.head.value}"
+                                                       |""".stripMargin) { (resultJson, query) =>
+      s"""|
+          |  "type": "or",
+          |    "q1": {
+          |      "key": "${query.name}",
+          |      "value": "${query.value}"
+          |    },
+          |    "q2": {
+          |      $resultJson
+          |    }
+          |""".stripMargin
+    }
+
+    s"""
+       |{
+       |  "notableEvent": "$notableEventName",
+       |  "query": {
+       |    $queryJson
+       |  }
+       |}
+       |""".stripMargin

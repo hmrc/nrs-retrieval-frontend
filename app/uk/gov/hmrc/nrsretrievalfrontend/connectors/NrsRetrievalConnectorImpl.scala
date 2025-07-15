@@ -38,7 +38,6 @@ class NrsRetrievalConnectorImpl @Inject() (
 )(using val appConfig: AppConfig, executionContext: ExecutionContext)
     extends NrsRetrievalConnector:
 
-  import NrsRetrievalConnectorImpl.*
   private val logger: Logger = Logger(this.getClass)
 
   private[connectors] val extraHeaders: Seq[(String, String)] = Seq(
@@ -97,7 +96,7 @@ class NrsRetrievalConnectorImpl @Inject() (
   ): Future[Seq[NrsSearchResult]] =
     val path                               = s"${appConfig.nrsRetrievalUrl}/metadata/searches"
     val queryParams: Seq[(String, String)] = queries.map(query => (query.name, query.value))
-    val jsonQuery                          = Json.parse(createJsonQuery(notableEvent, queries))
+    val jsonQuery                          = Json.parse(Query.createJsonQuery(notableEvent, queries))
 
     for
       get <- httpClient
@@ -203,31 +202,3 @@ class NrsRetrievalConnectorImpl @Inject() (
         get
       }
 
-object NrsRetrievalConnectorImpl:
-  def createJsonQuery(notableEventName: String, queries: List[Query]): String =
-    val queriesWithValues = queries.filterNot(_.value.isBlank)
-
-    val queryJson = queriesWithValues.tail.foldLeft(s"""
-                                                       |          "key": "${queriesWithValues.head.name}",
-                                                       |          "value": "${queriesWithValues.head.value}"
-                                                       |""".stripMargin) { (resultJson, query) =>
-      s"""|
-          |  "type": "or",
-          |    "q1": {
-          |      "key": "${query.name}",
-          |      "value": "${query.value}"
-          |    },
-          |    "q2": {
-          |      $resultJson
-          |    }
-          |""".stripMargin
-    }
-
-    s"""
-       |{
-       |  "notableEvent": "$notableEventName",
-       |  "query": {
-       |    $queryJson
-       |  }
-       |}
-       |""".stripMargin

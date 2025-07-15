@@ -111,7 +111,7 @@ class NrsRetrievalConnectorImpl @Inject() (
                    auditable.sendDataEvent(
                      NonRepudiationStoreSearch(
                        user.authProviderId,
-                       queries.map(query => (query.name, query.value)),
+                       queryParams,
                        "Unauthorized",
                        path
                      )

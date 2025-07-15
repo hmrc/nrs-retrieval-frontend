@@ -38,7 +38,7 @@ class QuerySpec extends UnitSpec:
           |  }
           |}""".stripMargin
 
-    "crate a json query with 2 value" in :
+    "create a json query with 2 value" in :
       val q1 = Query("nino", "123")
       val q2 = Query("sautr", "456")
       val queries: List[Query] = List(q1, q2)
@@ -60,7 +60,7 @@ class QuerySpec extends UnitSpec:
           |  }
           |}""".stripMargin
 
-    "crate a json query with 3 value" in :
+    "create a json query with 3 value" in :
       val q1 = Query("nino", "123")
       val q2 = Query("sautr", "456")
       val q3 = Query("providerId", "789")

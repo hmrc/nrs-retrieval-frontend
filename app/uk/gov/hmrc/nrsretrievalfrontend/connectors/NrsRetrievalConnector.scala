@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
-import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NrsSearchResult, Query}
 
@@ -29,7 +28,7 @@ trait NrsRetrievalConnector:
     AuthorisedUser
   ): Future[Seq[NrsSearchResult]]
 
-  def metaSearch(notableEvent: String, query: JsValue, queries: List[Query])(using
+  def metaSearch(notableEvent: String, queries: List[Query])(using
     HeaderCarrier,
     AuthorisedUser
   ): Future[Seq[NrsSearchResult]]

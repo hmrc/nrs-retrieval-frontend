@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import org.apache.pekko.stream.scaladsl.Source
-import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -28,8 +26,8 @@ import play.api.libs.json.Json.parse
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, Query, SearchResultUtils}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, SearchResultUtils}
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 
 import scala.concurrent.Future
@@ -105,7 +103,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
         )
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
         when(
-          nrsRetrievalConnector.metaSearch(any(), any(), any())(using
+          nrsRetrievalConnector.metaSearch(any(), any())(using
             any[HeaderCarrier],
             any[AuthorisedUser]
           )
@@ -147,7 +145,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
           def givenTheSearchSucceedsWithNoResults() =
             when(nrsRetrievalConnector.search(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
-            when(nrsRetrievalConnector.metaSearch(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
+            when(nrsRetrievalConnector.metaSearch(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
           def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) =
@@ -158,98 +156,3 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
         }
       }
     }
-
-  "download" should {
-    val notableEvent = "vat-return"
-    val vaultName    = "vat-return"
-    val archiveId    = "vrn"
-
-    "return 200 and a byte stream" when {
-      def givenTheDownloadSucceeds() =
-        val mockHttpResponse = mock[HttpResponse]
-
-        when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
-          .thenReturn(Future.successful(mockHttpResponse))
-        when(mockHttpResponse.headers).thenReturn(
-          Map(
-            "content-length" -> Seq("15"),
-            "content-type"   -> Seq("application/zip")
-          )
-        )
-        when(mockHttpResponse.bodyAsSource).thenReturn(Source.single(ByteString("Some zipped bytes")))
-
-      def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) =
-        status(eventualResponse)          shouldBe OK
-        contentAsString(eventualResponse) shouldBe "Some zipped bytes"
-
-      "and the request is authorised" in {
-        givenTheDownloadSucceeds()
-        theDownloadedBytesShouldBeReturned(controller.download(notableEvent, vaultName, archiveId)(getRequest))
-      }
-    }
-  }
-
-  "createJsonQuery" should:
-    "crate a json query with 1 value" in:
-      val q1                   = Query("nino", "123")
-      val queries: List[Query] = List(q1)
-      val jsonString           = controller.createJsonQuery("itsa-ad-hoc-refund", queries)
-      val json                 = Json.parse(jsonString)
-
-      Json.prettyPrint(json) shouldBe """{
-                                        |  "notableEvent" : "itsa-ad-hoc-refund",
-                                        |  "query" : {
-                                        |    "key" : "nino",
-                                        |    "value" : "123"
-                                        |  }
-                                        |}""".stripMargin
-
-    "crate a json query with 2 value" in:
-      val q1                   = Query("nino", "123")
-      val q2                   = Query("sautr", "456")
-      val queries: List[Query] = List(q1, q2)
-      val jsonString           = controller.createJsonQuery("itsa-ad-hoc-refund", queries)
-      val json                 = Json.parse(jsonString)
-      Json.prettyPrint(json) shouldBe """{
-                                        |  "notableEvent" : "itsa-ad-hoc-refund",
-                                        |  "query" : {
-                                        |    "type" : "or",
-                                        |    "q1" : {
-                                        |      "key" : "sautr",
-                                        |      "value" : "456"
-                                        |    },
-                                        |    "q2" : {
-                                        |      "key" : "nino",
-                                        |      "value" : "123"
-                                        |    }
-                                        |  }
-                                        |}""".stripMargin
-
-    "crate a json query with 3 value" in:
-      val q1                   = Query("nino", "123")
-      val q2                   = Query("sautr", "456")
-      val q3                   = Query("providerId", "789")
-      val queries: List[Query] = List(q1, q2, q3)
-      val jsonString           = controller.createJsonQuery("itsa-ad-hoc-refund", queries)
-      val json                 = Json.parse(jsonString)
-      Json.prettyPrint(json) shouldBe """{
-                                        |  "notableEvent" : "itsa-ad-hoc-refund",
-                                        |  "query" : {
-                                        |    "type" : "or",
-                                        |    "q1" : {
-                                        |      "key" : "providerId",
-                                        |      "value" : "789"
-                                        |    },
-                                        |    "q2" : {
-                                        |      "type" : "or",
-                                        |      "q1" : {
-                                        |        "key" : "sautr",
-                                        |        "value" : "456"
-                                        |      },
-                                        |      "q2" : {
-                                        |        "key" : "nino",
-                                        |        "value" : "123"
-                                        |      }
-                                        |    }
-                                        |  }
-                                        |}""".stripMargin

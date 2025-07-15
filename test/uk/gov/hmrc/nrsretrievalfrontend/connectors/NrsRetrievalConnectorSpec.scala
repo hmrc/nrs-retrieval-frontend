@@ -27,6 +27,7 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
 import play.api.Environment
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.config.{AppConfig, Auditable, MicroserviceAudit}
@@ -210,3 +211,71 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])
     }
   }
+
+  "createJsonQuery" should:
+    "create a json query with 1 value" in:
+      val q1                   = Query("nino", "123")
+      val queries: List[Query] = List(q1)
+      val jsonString           = NrsRetrievalConnectorImpl.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val json                 = Json.parse(jsonString)
+
+      Json.prettyPrint(json) shouldBe
+        """{
+          |  "notableEvent" : "itsa-ad-hoc-refund",
+          |  "query" : {
+          |    "key" : "nino",
+          |    "value" : "123"
+          |  }
+          |}""".stripMargin
+
+    "crate a json query with 2 value" in:
+      val q1                   = Query("nino", "123")
+      val q2                   = Query("sautr", "456")
+      val queries: List[Query] = List(q1, q2)
+      val jsonString           = NrsRetrievalConnectorImpl.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val json                 = Json.parse(jsonString)
+      Json.prettyPrint(json) shouldBe
+        """{
+          |  "notableEvent" : "itsa-ad-hoc-refund",
+          |  "query" : {
+          |    "type" : "or",
+          |    "q1" : {
+          |      "key" : "sautr",
+          |      "value" : "456"
+          |    },
+          |    "q2" : {
+          |      "key" : "nino",
+          |      "value" : "123"
+          |    }
+          |  }
+          |}""".stripMargin
+
+    "crate a json query with 3 value" in:
+      val q1                   = Query("nino", "123")
+      val q2                   = Query("sautr", "456")
+      val q3                   = Query("providerId", "789")
+      val queries: List[Query] = List(q1, q2, q3)
+      val jsonString           = NrsRetrievalConnectorImpl.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val json                 = Json.parse(jsonString)
+      Json.prettyPrint(json) shouldBe
+        """{
+          |  "notableEvent" : "itsa-ad-hoc-refund",
+          |  "query" : {
+          |    "type" : "or",
+          |    "q1" : {
+          |      "key" : "providerId",
+          |      "value" : "789"
+          |    },
+          |    "q2" : {
+          |      "type" : "or",
+          |      "q1" : {
+          |        "key" : "sautr",
+          |        "value" : "456"
+          |      },
+          |      "q2" : {
+          |        "key" : "nino",
+          |        "value" : "123"
+          |      }
+          |    }
+          |  }
+          |}""".stripMargin

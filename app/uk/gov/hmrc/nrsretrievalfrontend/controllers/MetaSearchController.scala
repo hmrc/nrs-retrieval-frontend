@@ -16,18 +16,16 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.util.{ByteString, Timeout}
+import org.apache.pekko.util.Timeout
 import org.slf4j.MDC
 import play.api.Logger
-import play.api.libs.json.Json
 import play.api.mvc.*
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
 import uk.gov.hmrc.nrsretrievalfrontend.actions.{AuthenticatedAction, NotableEventRefiner}
 import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 import uk.gov.hmrc.nrsretrievalfrontend.connectors.NrsRetrievalConnector
 import uk.gov.hmrc.nrsretrievalfrontend.controllers.FormMappings.*
-import uk.gov.hmrc.nrsretrievalfrontend.models.{CompletionStatus, Query, SearchQueries, SearchResultUtils}
+import uk.gov.hmrc.nrsretrievalfrontend.models.{CompletionStatus, SearchQueries, SearchResultUtils}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.*
 
 import java.util.concurrent.TimeUnit
@@ -37,16 +35,16 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class MetaSearchController @Inject()(
-                                   authenticatedAction: AuthenticatedAction,
-                                   notableEventRefinerFunction: String => NotableEventRefiner,
-                                   nrsRetrievalConnector: NrsRetrievalConnector,
-                                   searchResultUtils: SearchResultUtils,
-                                   controllerComponents: MessagesControllerComponents,
-                                   searchPage: metasearch_page,
-                                   errorPage: error_template
-                                 )(using val appConfig: AppConfig, executionContext: ExecutionContext)
-  extends NRBaseController(controllerComponents):
+class MetaSearchController @Inject() (
+  authenticatedAction: AuthenticatedAction,
+  notableEventRefinerFunction: String => NotableEventRefiner,
+  nrsRetrievalConnector: NrsRetrievalConnector,
+  searchResultUtils: SearchResultUtils,
+  controllerComponents: MessagesControllerComponents,
+  searchPage: metasearch_page,
+  errorPage: error_template
+)(using val appConfig: AppConfig, executionContext: ExecutionContext)
+    extends NRBaseController(controllerComponents):
 
   val logger: Logger                       = Logger(this.getClass)
   override lazy val parse: PlayBodyParsers = controllerComponents.parsers
@@ -116,16 +114,14 @@ class MetaSearchController @Inject()(
     }
 
   private def doSearch(
-                        search: SearchQueries
-                      )(using request: NotableEventRequest[?]) =
+    search: SearchQueries
+  )(using request: NotableEventRequest[?]) =
     logger.info(
       s"doing search for ${request.notableEvent} with submitted search query ${search.queries}"
     )
 
-    val jsonQuery = createJsonQuery(request.notableEvent.name, search.queries )
-
     nrsRetrievalConnector
-      .metaSearch(request.notableEvent.name, Json.parse(jsonQuery), search.queries)
+      .metaSearch(request.notableEvent.name, search.queries)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] =
@@ -154,93 +150,9 @@ class MetaSearchController @Inject()(
         }
     }
 
-  def doAjaxRetrieve(
-                      notableEventType: String,
-                      vaultName: String,
-                      archiveId: String
-                    ): Action[AnyContent] = action(notableEventType).async { implicit request =>
-    logger.info(s"Request retrieval for $vaultName, $archiveId")
-    nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId).map { _ =>
-      logger.info(s"Retrieval accepted for $vaultName, $archiveId")
-      Accepted(CompletionStatus.incomplete)
-    }
-  }
-
-  def download(
-                notableEventType: String,
-                vaultName: String,
-                archiveId: String
-              ): Action[AnyContent] = action(notableEventType).async { implicit request =>
-    val messagePrefix = s"Request download of $vaultName, $archiveId"
-
-    logger.info(messagePrefix)
-
-    nrsRetrievalConnector
-      .getSubmissionBundle(vaultName, archiveId)
-      .flatMap { response =>
-        // log response size rather than the content as this might contain sensitive information
-        given ActorSystem = ActorSystem()
-        response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
-          logger.info(
-            s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."
-          )
-
-          Ok(bytes).withHeaders(mapToSeq(response.headers)*)
-        }
-      }
-      .recoverWith { case e =>
-        logger.error(s"$messagePrefix failed with $e", e)
-
-        Future(
-          InternalServerError(
-            errorPage(
-              request.messages.messages("error.page.title"),
-              request.messages.messages("error.page.heading"),
-              request.messages.messages("error.page.message")
-            )
-          )
-        )
-      }
-  }
-
-  private def mapToSeq(
-                        sourceMap: Map[String, scala.collection.Seq[String]]
-                      ): Seq[(String, String)] =
-    sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
-
   private def getEstimatedRetrievalTime(
-                                         notableEventType: String
-                                       ): FiniteDuration =
+    notableEventType: String
+  ): FiniteDuration =
     appConfig.notableEvents
       .get(notableEventType)
       .fold(5.minutes)(_.estimatedRetrievalTime)
-
-  def createJsonQuery(notableEventName:String, queries: List[Query]):String =
-    val queriesWithValues = queries.filterNot( _.value.isBlank)
-
-    val queryJson = queriesWithValues.tail.foldLeft(
-      s"""
-         |          "key": "${queriesWithValues.head.name}",
-         |          "value": "${queriesWithValues.head.value}"
-         |""".stripMargin) { (resultJson, query) =>
-
-      s"""|
-         |  "type": "or",
-         |    "q1": {
-         |      "key": "${query.name}",
-         |      "value": "${query.value}"
-         |    },
-         |    "q2": {
-         |      ${resultJson}
-         |    }
-         |""".stripMargin
-    }
-
-    s"""
-       |{
-       |  "notableEvent": "$notableEventName",
-       |  "query": {
-       |    ${queryJson}
-       |  }
-       |}
-       |""".stripMargin

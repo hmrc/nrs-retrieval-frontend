@@ -42,6 +42,7 @@ class SearchController @Inject() (
   nrsRetrievalConnector: NrsRetrievalConnector,
   searchResultUtils: SearchResultUtils,
   controllerComponents: MessagesControllerComponents,
+  actorSystem: ActorSystem,
   searchPage: search_page,
   errorPage: error_template
 )(using val appConfig: AppConfig, executionContext: ExecutionContext)
@@ -180,7 +181,7 @@ class SearchController @Inject() (
       .getSubmissionBundle(vaultName, archiveId)
       .flatMap { response =>
         // log response size rather than the content as this might contain sensitive information
-        given ActorSystem = ActorSystem()
+        given ActorSystem = actorSystem
         response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
           logger.info(
             s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."

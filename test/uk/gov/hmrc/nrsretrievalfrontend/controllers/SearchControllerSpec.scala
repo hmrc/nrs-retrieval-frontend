@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
+import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers
@@ -42,6 +43,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
       nrsRetrievalConnector,
       new SearchResultUtils(appConfig),
       stubMessagesControllerComponents(),
+      ActorSystem(),
       searchPage,
       error_template
     )
@@ -105,7 +107,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
         )
           .thenAnswer(new Returns(Future.successful(Seq(nrsVatSearchResult))))
         when(
-          nrsRetrievalConnector.metaSearch(any(), any(), any())(using
+          nrsRetrievalConnector.metaSearch(any(), any())(using
             any[HeaderCarrier],
             any[AuthorisedUser]
           )
@@ -147,7 +149,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
           def givenTheSearchSucceedsWithNoResults() =
             when(nrsRetrievalConnector.search(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
-            when(nrsRetrievalConnector.metaSearch(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
+            when(nrsRetrievalConnector.metaSearch(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
 
           def theSearchPageShouldBeRenderedWithEmptyResults(eventualResult: Future[Result], notableEvent: NotableEvent) =

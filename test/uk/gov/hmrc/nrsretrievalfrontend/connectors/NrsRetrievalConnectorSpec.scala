@@ -210,3 +210,4 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
       verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreDownload])
     }
   }
+

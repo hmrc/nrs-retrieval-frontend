@@ -17,7 +17,10 @@
 package uk.gov.hmrc.nrsretrievalfrontend.connectors
 
 import play.api.Logger
+import play.api.http.ContentTypes
+import play.api.libs.json.{Json, JsValue}
 import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.client.{readStreamHttpResponse, HttpClientV2}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
@@ -34,6 +37,7 @@ class NrsRetrievalConnectorImpl @Inject() (
   val auditable: Auditable
 )(using val appConfig: AppConfig, executionContext: ExecutionContext)
     extends NrsRetrievalConnector:
+
   private val logger: Logger = Logger(this.getClass)
 
   private[connectors] val extraHeaders: Seq[(String, String)] = Seq(
@@ -60,6 +64,46 @@ class NrsRetrievalConnectorImpl @Inject() (
                .setHeader(extraHeaders*)
                .execute[Seq[NrsSearchResult]]
                .map(r => r)
+               .recover {
+                 case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
+                 case e if e.getMessage.contains("401") =>
+                   auditable.sendDataEvent(
+                     NonRepudiationStoreSearch(
+                       user.authProviderId,
+                       queryParams,
+                       "Unauthorized",
+                       path
+                     )
+                   )
+                   throw e
+               }
+      _   <- auditable.sendDataEvent(
+               NonRepudiationStoreSearch(
+                 user.authProviderId,
+                 queryParams,
+                 get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)"),
+                 path
+               )
+             )
+    yield get
+
+  override def metaSearch(
+    notableEvent: String,
+    queries: List[Query]
+  )(using
+    hc: HeaderCarrier,
+    user: AuthorisedUser
+  ): Future[Seq[NrsSearchResult]] =
+    val path                               = s"${appConfig.nrsRetrievalUrl}/metadata/searches"
+    val queryParams: Seq[(String, String)] = queries.map(query => (query.name, query.value))
+    val jsonQuery                          = Json.parse(Query.createJsonQuery(notableEvent, queries))
+
+    for
+      get <- httpClient
+               .post(url"$path")
+               .setHeader((extraHeaders :+ (play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON))*)
+               .withBody(jsonQuery)
+               .execute[Seq[NrsSearchResult]]
                .recover {
                  case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
                  case e if e.getMessage.contains("401") =>
@@ -157,3 +201,4 @@ class NrsRetrievalConnectorImpl @Inject() (
 
         get
       }
+

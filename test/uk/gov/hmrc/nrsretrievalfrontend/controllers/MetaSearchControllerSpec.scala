@@ -16,35 +16,32 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.scaladsl.Source
-import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
 import play.api.i18n.Messages
+import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, SearchResultUtils}
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 
 import scala.concurrent.Future
 
-class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixture:
+class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixture:
 
   private val controller =
-    new SearchController(
+    new MetaSearchController(
       authenticatedAction,
       notableEventRefiner,
       nrsRetrievalConnector,
       new SearchResultUtils(appConfig),
       stubMessagesControllerComponents(),
-      ActorSystem(),
-      searchPage,
+      metasearchPage,
       error_template
     )
 
@@ -60,7 +57,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
     )
 
   s"showSearchPage" should
-    indexedNotableEvents.filterNot(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
+    indexedNotableEvents.filter(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       "return 200 and render the search page" when {
@@ -72,7 +69,7 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
       }
     }
 
-  "noParameters" should {
+  "noParameters" should:
     "redirect to the selector page" when {
       def theRequestShouldBeRedirectedToTheStartPage(eventualResult: Future[Result]) =
         status(eventualResult)  shouldBe SEE_OTHER
@@ -84,10 +81,9 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
       "and the request is unauthorised" in
         theRequestShouldBeRedirectedToTheStartPage(controller.noParameters()(getRequest))
     }
-  }
 
-  "submitSearchPage" should
-    indexedNotableEvents.filterNot(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
+  "submitSearchPage" should:
+    indexedNotableEvents.filter(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       val postRequestWithNotableEventTypeAndSearchText =
@@ -160,33 +156,3 @@ class SearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchFixtu
         }
       }
     }
-
-  "download" should {
-    val notableEvent = "vat-return"
-    val vaultName    = "vat-return"
-    val archiveId    = "vrn"
-
-    "return 200 and a byte stream" when {
-      def givenTheDownloadSucceeds() =
-        val mockHttpResponse = mock[HttpResponse]
-
-        when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
-          .thenReturn(Future.successful(mockHttpResponse))
-        when(mockHttpResponse.headers).thenReturn(
-          Map(
-            "content-length" -> Seq("15"),
-            "content-type"   -> Seq("application/zip")
-          )
-        )
-        when(mockHttpResponse.bodyAsSource).thenReturn(Source.single(ByteString("Some zipped bytes")))
-
-      def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) =
-        status(eventualResponse)          shouldBe OK
-        contentAsString(eventualResponse) shouldBe "Some zipped bytes"
-
-      "and the request is authorised" in {
-        givenTheDownloadSucceeds()
-        theDownloadedBytesShouldBeReturned(controller.download(notableEvent, vaultName, archiveId)(getRequest))
-      }
-    }
-  }

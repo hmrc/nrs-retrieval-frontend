@@ -28,6 +28,11 @@ trait NrsRetrievalConnector:
     AuthorisedUser
   ): Future[Seq[NrsSearchResult]]
 
+  def metaSearch(notableEvent: String, queries: List[Query])(using
+    HeaderCarrier,
+    AuthorisedUser
+  ): Future[Seq[NrsSearchResult]]
+
   def submitRetrievalRequest(vaultName: String, archiveId: String)(using
     hc: HeaderCarrier,
     user: AuthorisedUser

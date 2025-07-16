@@ -42,7 +42,8 @@ case class NotableEvent(
   storedFor: String,
   searchKeys: Seq[SearchKey],
   estimatedRetrievalTime: FiniteDuration,
-  crossKeySearch: Boolean
+  crossKeySearch: Boolean,
+  metadataSearchKeys: Boolean = false
 )
 
 object NotableEvent:

@@ -20,6 +20,7 @@ import play.api.libs.ws.DefaultBodyWritables
 import play.api.libs.ws.DefaultBodyWritables.*
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.givenAuthenticated
 
 import java.net.URL
@@ -35,16 +36,16 @@ trait TestOnyEndpointsIntegrationSpec extends IntegrationSpec:
       .execute[HttpResponse]
       .futureValue
 
-  def validateDownloadGetRequest(): HttpResponse  =
+  def validateDownloadGetRequest(): HttpResponse =
     val url = new URL(s"$serviceRoot/test-only/validate-download")
     httpClientV2
       .get(url)
       .setHeader(authenticationHeader)
       .execute[HttpResponse]
       .futureValue
-  def validateDownloadPostRequest(): HttpResponse =
 
-    val body: Map[String, Seq[String]] = Map("vaultName" -> Seq("vaultName1"), "archiveId" -> Seq("archiveId1"))
+  def validateDownloadPostRequest(): HttpResponse =
+    val body: Map[String, Seq[String]] = Map("vaultName" -> Seq(vatReturn), "archiveId" -> Seq(vrn))
 
     val url = new URL(s"$serviceRoot/test-only/validate-download")
     httpClientV2
@@ -66,6 +67,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
     "display the check-authorisation page" when {
       "the default router is used" in {
         givenAuthenticated()
+        NrsRetrievalStubs.givenGetCheckAuthorisationRequests(OK)
         checkAuthorisationRequest().body should include("Test-only check authorisation")
       }
     }
@@ -84,6 +86,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
     "display the validate-download page" when {
       "the default router is used" in {
         givenAuthenticated()
+        NrsRetrievalStubs.givenGetSubmissionBundlesRequests(OK)
         validate(validateDownloadPostRequest())
       }
     }

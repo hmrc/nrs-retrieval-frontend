@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.util.{ByteString, Timeout}
+import org.apache.pekko.util.Timeout
 import org.slf4j.MDC
 import play.api.Logger
 import play.api.mvc.*
@@ -36,14 +35,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class SearchController @Inject() (
+class MetaSearchController @Inject() (
   authenticatedAction: AuthenticatedAction,
   notableEventRefinerFunction: String => NotableEventRefiner,
   nrsRetrievalConnector: NrsRetrievalConnector,
   searchResultUtils: SearchResultUtils,
   controllerComponents: MessagesControllerComponents,
-  actorSystem: ActorSystem,
-  searchPage: search_page,
+  searchPage: metasearch_page,
   errorPage: error_template
 )(using val appConfig: AppConfig, executionContext: ExecutionContext)
     extends NRBaseController(controllerComponents):
@@ -118,16 +116,12 @@ class SearchController @Inject() (
   private def doSearch(
     search: SearchQueries
   )(using request: NotableEventRequest[?]) =
-    val crossKeySearch = appConfig.notableEvents
-      .get(request.notableEvent.name)
-      .fold(false)(_.crossKeySearch)
-
     logger.info(
-      s"doing search for ${request.notableEvent} with submitted search query ${search.queries} with crossKeySearch: $crossKeySearch"
+      s"doing search for ${request.notableEvent} with submitted search query ${search.queries}"
     )
 
     nrsRetrievalConnector
-      .search(request.notableEvent.name, search.queries, crossKeySearch)
+      .metaSearch(request.notableEvent.name, search.queries)
       .map(fNSR => fNSR.map(nSR => searchResultUtils.fromNrsSearchResult(nSR)))
 
   def refresh(vaultName: String, archiveId: String): Action[AnyContent] =
@@ -155,60 +149,6 @@ class SearchController @Inject() (
           Accepted(CompletionStatus.incomplete)
         }
     }
-
-  def doAjaxRetrieve(
-    notableEventType: String,
-    vaultName: String,
-    archiveId: String
-  ): Action[AnyContent] = action(notableEventType).async { implicit request =>
-    logger.info(s"Request retrieval for $vaultName, $archiveId")
-    nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId).map { _ =>
-      logger.info(s"Retrieval accepted for $vaultName, $archiveId")
-      Accepted(CompletionStatus.incomplete)
-    }
-  }
-
-  def download(
-    notableEventType: String,
-    vaultName: String,
-    archiveId: String
-  ): Action[AnyContent] = action(notableEventType).async { implicit request =>
-    val messagePrefix = s"Request download of $vaultName, $archiveId"
-
-    logger.info(messagePrefix)
-
-    nrsRetrievalConnector
-      .getSubmissionBundle(vaultName, archiveId)
-      .flatMap { response =>
-        // log response size rather than the content as this might contain sensitive information
-        given ActorSystem = actorSystem
-        response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
-          logger.info(
-            s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."
-          )
-
-          Ok(bytes).withHeaders(mapToSeq(response.headers)*)
-        }
-      }
-      .recoverWith { case e =>
-        logger.error(s"$messagePrefix failed with $e", e)
-
-        Future(
-          InternalServerError(
-            errorPage(
-              request.messages.messages("error.page.title"),
-              request.messages.messages("error.page.heading"),
-              request.messages.messages("error.page.message")
-            )
-          )
-        )
-      }
-  }
-
-  private def mapToSeq(
-    sourceMap: Map[String, scala.collection.Seq[String]]
-  ): Seq[(String, String)] =
-    sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
 
   private def getEstimatedRetrievalTime(
     notableEventType: String

@@ -31,7 +31,10 @@ object FormMappings:
   val form = Form(
     mapping(
       "queries" -> list(query)
-    )(SearchQueries.apply)(SearchQueries.unapply)
+    )(SearchQueries.apply)(SearchQueries.unapply).verifying(
+      "metasearch.page.empty.fields",
+      fields => fields.queries.exists(query => query.value.trim.nonEmpty)
+    )
   )
 
   private val selectorFormatter: Formatter[String] = new Formatter[String]:

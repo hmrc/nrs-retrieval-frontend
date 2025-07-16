@@ -1,0 +1,71 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import scala.concurrent.duration.FiniteDuration
+@import uk.gov.hmrc.nrsretrievalfrontend.models.SearchQueries
+@import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
+@import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
+
+@this(searchResultPanel: SearchResultPanel, govukTable : GovukTable)
+
+@(searchForm: Form[SearchQueries], results: Seq[SearchResult], label: String, estimatedRetrievalTime: FiniteDuration)(implicit request: NotableEventRequest[_], messages: Messages)
+
+<br>
+<hr>
+
+<div class="govuk-heading-m">
+@{
+    val searchKeys = request.notableEvent.searchKeys.map(v => v.name -> v.label).toMap
+    val fieldList = for(idx <- 0 to searchKeys.size)
+        yield (searchForm(s"queries[$idx].name").value, searchForm(s"queries[$idx].value").value)
+
+    val findFields = fieldList
+    .filter(_._2.exists(_.nonEmpty))
+    .map(field => (searchKeys.getOrElse(field._1.getOrElse(""), ""), field._2.getOrElse("")))
+    .map(field => s"""&nbsp;&nbsp;&nbsp; ${field._1}: '${field._2}'""").mkString("<br>", " or<br> ", "")
+    if(results.isEmpty) {
+        Html(messages("metasearch.results.notfoundfor.lbl",  findFields))
+    } else {
+      Html(
+      messages("metasearch.page.results.info.fields",  findFields) + "<br>" +
+      messages("metasearch.page.results.info.count", results.size )
+      )
+    }
+}
+
+</div>
+
+    @govukTable(Table(
+        rows = results.zipWithIndex.map {
+            case (result, idx) =>
+                Seq(
+                    TableRow(
+                        content = new HtmlContent(searchResultPanel(result, idx.toString, estimatedRetrievalTime))
+                    )
+                )
+        },
+        head = None,
+        caption = None,
+        captionClasses = "govuk-table__caption--m",
+        firstCellIsHeader = false,
+        attributes = {
+            if (results.isEmpty) {
+              Map("id" -> "notFound")
+            } else {
+              Map("id" -> "resultsFound")
+            }
+        }
+    ))

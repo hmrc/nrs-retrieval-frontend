@@ -26,7 +26,12 @@
 <br>
 <hr>
 
-<div class="govuk-heading-m">
+@if(results.isEmpty) {
+    <div class="govuk-heading-m" id="notFound" >
+} else {
+    <div class="govuk-heading-m" id="resultsFound" >
+}
+
 @{
     val searchKeys = request.notableEvent.searchKeys.map(v => v.name -> v.label).toMap
     val fieldList = for(idx <- 0 to searchKeys.size)
@@ -60,12 +65,5 @@
         head = None,
         caption = None,
         captionClasses = "govuk-table__caption--m",
-        firstCellIsHeader = false,
-        attributes = {
-            if (results.isEmpty) {
-              Map("id" -> "notFound")
-            } else {
-              Map("id" -> "resultsFound")
-            }
-        }
+        firstCellIsHeader = false
     ))

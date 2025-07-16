@@ -309,9 +309,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
         val response = responseFuture
 
         val document = assertPageIsRendered(response, itsaAdHocRefundSearchPageHeading)
-        document.getElementById("input_nino").parent.text       shouldBe "Enter a NINO"
-        document.getElementById("input_sautr").parent.text      shouldBe "Enter a UTR"
-        document.getElementById("input_providerId").parent.text shouldBe "Enter a Provider ID"
+        document.getElementById("queries[0].value").parent.text shouldBe "Enter a NINO"
+        document.getElementById("queries[1].value").parent.text shouldBe "Enter a UTR"
+        document.getElementById("queries[2].value").parent.text shouldBe "Enter a Provider ID"
       }
 
       "a itsa-ad-hoc-refund display error if all fields are empty" in {

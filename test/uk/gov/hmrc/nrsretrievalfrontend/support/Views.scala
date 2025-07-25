@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.support
 
 import uk.gov.hmrc.govukfrontend.views.html.components.*
-import uk.gov.hmrc.govukfrontend.views.html.helpers.{GovukFormGroup, GovukHintAndErrorMessage}
+import uk.gov.hmrc.govukfrontend.views.html.helpers.{GovukFormGroup, GovukHintAndErrorMessage, GovukLogo}
 import uk.gov.hmrc.hmrcfrontend.config.{AccessibilityStatementConfig, AssetsConfig, TrackingConsentConfig, TudorCrownConfig}
 import uk.gov.hmrc.hmrcfrontend.views.config.HmrcFooterItems
 import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcFooter, HmrcInternalHeader, HmrcPageHeading}
@@ -25,6 +25,7 @@ import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcS
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.components.*
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.{check_authorisation_page, validate_download_page}
 import uk.gov.hmrc.nrsretrievalfrontend.views.html.*
+import uk.gov.hmrc.hmrcfrontend.config.RebrandConfig
 
 trait Views:
   this: Configs =>
@@ -53,15 +54,18 @@ trait Views:
   lazy val goveukFormGroup           = new GovukFormGroup
   lazy val goveukHintAndErrorMessage = new GovukHintAndErrorMessage(govukHint, govukErrorMessage)
   lazy val govukTable                = new GovukTable
+  val govukLogo = GovukLogo()
+  val rebrandConfig = RebrandConfig(configuration)
 
   lazy val govukSkipLink = new GovukSkipLink
-  lazy val govukFooter   = new GovukFooter
-  lazy val govukHeader   = new GovukHeader(tudorCrownConfig)
+  lazy val govukFooter   = new GovukFooter(rebrandConfig, govukLogo)
+  lazy val govukHeader   = new GovukHeader(tudorCrownConfig, rebrandConfig, govukLogo)
   lazy val govukTemplate = new GovukTemplate(
     govukHeader,
     govukFooter,
     govukSkipLink,
-    fixedWidthPageLayout
+    fixedWidthPageLayout,
+    rebrandConfig
   )
 
   lazy val govukLayout = new GovukLayout(

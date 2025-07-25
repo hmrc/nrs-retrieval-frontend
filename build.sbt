@@ -16,12 +16,12 @@ lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 lazy val appDependenciesIt: Seq[ModuleID] = it()
 lazy val appName: String = "nrs-retrieval-frontend"
 val currentScalaVersion = "3.3.5"
-val bootstrapPlayVersion = "9.14.0"
+val bootstrapPlayVersion = "9.18.0"
 
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc" %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
-  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.0.0",
+  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.7.0",
   "com.typesafe.play" %% "play-json-joda" % "2.10.5",
   "commons-io" % "commons-io" % "2.17.0"
 )

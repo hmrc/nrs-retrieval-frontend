@@ -32,21 +32,12 @@
         maybeBodyEndBlock: Option[Html] = None
 )(content: Html)(implicit request: AuthenticatedRequest[_], messages: Messages)
 
-@maybeBackLink = @{
-    maybeBackButtonUrl.map { url =>
-        govukBackLink(BackLink(href = url.toString, content = Text(messages("site.back"))))
-    }
-}
-
-@beforeContentBlock = {
-@maybeBackLink
-}
 
 @layout(
     pageTitle = pageTitle,
     optHeadBlock = None,
-    optBeforeContentBlock = Some(beforeContentBlock),
     maybePageHeader = maybePageHeader,
-    addedScripts = addedScripts
+    addedScripts = addedScripts,
+    backLink = maybeBackButtonUrl.map{url => BackLink(href = url.toString, content = Text(messages("site.back"))) }
 )(content)
 

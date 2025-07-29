@@ -1,5 +1,4 @@
 
 # Add all the application routes to the app.routes file
 ->         /nrs-retrieval             app.Routes
-->         /hmrc-frontend             hmrcfrontend.Routes
 ->         /                          health.Routes

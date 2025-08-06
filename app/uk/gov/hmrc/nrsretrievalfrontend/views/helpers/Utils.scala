@@ -32,19 +32,22 @@ object Utils:
 
   case class SearchMatchResult(key:String, value:String, matched:Boolean)
 
-  def formatResults(clientKeyName: Map[String, String], queryResult: Map[String, String], searchForm: Option[Form[SearchQueries]]): Seq[SearchMatchResult] =
+  def makeKeyLowerCase(items: Map[String, String]): Map[String, String] =
+    items.map(value => (value._1.toLowerCase, value._2)).withDefaultValue("")
+
+  def formatResults(searchKeyList: Map[String, String], queryResult: Map[String, String], searchForm: Option[Form[SearchQueries]]): Seq[SearchMatchResult] =
     searchForm.fold( Seq.empty[SearchMatchResult]) { form =>
-      val result = queryResult.map(value => (value._1.toLowerCase, value._2)).withDefaultValue("")
-      val clientName = clientKeyName.map( value => (value._1.toLowerCase, value._2)).withDefaultValue("")
+      val result = makeKeyLowerCase(queryResult)
+      val searchKeys = makeKeyLowerCase(searchKeyList)
 
       val formItems = for {
-        idx <- 0 to clientKeyName.size
+        idx <- 0 to searchKeyList.size
         name <- form(s"queries[$idx].name").value
         value <- form(s"queries[$idx].value").value
       } yield (name.toLowerCase, value)
 
       formItems.map { (key, value) =>
         val bold = value.compareToIgnoreCase(result(key)) == 0
-        SearchMatchResult(clientName(key), result(key), bold)
+        SearchMatchResult(searchKeys(key), result(key), bold)
       }
     }

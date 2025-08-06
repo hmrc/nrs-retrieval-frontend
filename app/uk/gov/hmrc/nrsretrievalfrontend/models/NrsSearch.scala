@@ -43,6 +43,7 @@ case class NrsSearchResult(
   notableEvent: String,
   payloadContentType: String,
   userSubmissionTimestamp: ZonedDateTime,
+  searchKeys: Map[String, String],
   userAuthToken: Option[String],
   nrSubmissionId: String,
   bundle: Bundle,

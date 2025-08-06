@@ -58,7 +58,7 @@
             case (result, idx) =>
                 Seq(
                     TableRow(
-                        content = new HtmlContent(searchResultPanel(result, idx.toString, estimatedRetrievalTime))
+                        content = new HtmlContent(searchResultPanel(result, idx.toString, estimatedRetrievalTime, Some(searchForm)))
                     )
                 )
         },

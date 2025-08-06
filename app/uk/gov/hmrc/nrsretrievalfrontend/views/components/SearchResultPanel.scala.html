@@ -17,12 +17,14 @@
 @import uk.gov.hmrc.nrsretrievalfrontend.views.helpers.Utils._
 @import scala.concurrent.duration.FiniteDuration
 @import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
+@import uk.gov.hmrc.nrsretrievalfrontend.models.SearchQueries
 @import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
+@import org.apache.commons.io.FileUtils.byteCountToDisplaySize
 
 
 @this(p: Paragraph, govukErrorSummary: GovukErrorSummary)
 
-@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration)(implicit messages: Messages, request: NotableEventRequest[_])
+@(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration, searchForm: Option[Form[SearchQueries]])(implicit messages: Messages, request: NotableEventRequest[_])
 
 @timeSubmitted = {
   @formatDisplayDate(searchResult.submissionDateEpochMilli)
@@ -88,6 +90,18 @@
     </div>
     <div id="result-retrieve-@index" class="result-retrieve" aria-live="polite" aria-busy="false">
         @p(content = Text(s"${Messages("search.results.filename.lbl")}: ${searchResult.fileDetails}"))
+
+        <div class="govuk-body-s" >
+            @if( searchForm.nonEmpty) {
+                Search items were:
+            }
+            @for(item <- formatResults(request.notableEvent.searchKeys.map(key => key.name -> key.label).toMap, searchResult.searchKeys, searchForm ) ) {
+              <br>
+                @if(item.matched) {<b>}
+                @{item.key}: '@{item.value}'
+                @if(item.matched) {</b>}
+            }
+        </div>
     </div>
 </div>
 

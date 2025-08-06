@@ -34,8 +34,8 @@ object Utils:
 
   def formatResults(clientKeyName: Map[String, String], queryResult: Map[String, String], searchForm: Option[Form[SearchQueries]]): Seq[SearchMatchResult] =
     searchForm.fold( Seq.empty[SearchMatchResult]) { form =>
-      val result = queryResult.map(x => (x._1.toLowerCase, x._2)).withDefaultValue("")
-      val clientName = clientKeyName.map( x => (x._1.toLowerCase, x._2)).withDefaultValue("")
+      val result = queryResult.map(value => (value._1.toLowerCase, value._2)).withDefaultValue("")
+      val clientName = clientKeyName.map( value => (value._1.toLowerCase, value._2)).withDefaultValue("")
 
       val formItems = for {
         idx <- 0 to clientKeyName.size

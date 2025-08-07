@@ -24,6 +24,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.config.AppConfig
 
 case class SearchResult(
   notableEventDisplayName: String,
+  searchKeys: Map[String, String],
   fileDetails: String,
   vaultId: String,
   archiveId: String,
@@ -43,6 +44,7 @@ class SearchResultUtils @Inject() (appConfig: AppConfig):
   def fromNrsSearchResult(nrsSearchResult: NrsSearchResult): SearchResult =
     SearchResult(
       notableEventDisplayName = appConfig.notableEvents(nrsSearchResult.notableEvent).displayName,
+      searchKeys = nrsSearchResult.searchKeys,
       fileDetails = filename(
         nrsSearchResult.nrSubmissionId,
         nrsSearchResult.bundle.fileType,

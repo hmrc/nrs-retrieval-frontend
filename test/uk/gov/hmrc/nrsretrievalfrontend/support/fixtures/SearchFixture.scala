@@ -20,4 +20,4 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.SearchResult
 
 trait SearchFixture extends NrSubmissionId:
   val vatSearchResult: SearchResult =
-    SearchResult("VAT return", s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None, false)
+    SearchResult("VAT return", Map.empty[String, String], s"$nrSubmissionId.zip (120 KB)", "12345", "1234567890", 1511773625L, None, false)

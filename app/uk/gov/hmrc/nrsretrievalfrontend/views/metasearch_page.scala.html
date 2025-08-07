@@ -37,6 +37,31 @@
         estimatedRetrievalTime: FiniteDuration
 )(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
 
+<script>
+        function isEmpty(item) {
+            return Boolean(item[1]);
+        }
+
+        function toString(item) {
+            return item[0] + ": '" + item[1] + "'";
+        }
+
+        function updateSearchText() {
+            const values = [];
+            @for((searchKey, idx) <- request.notableEvent.searchKeys.zipWithIndex) {
+                values[@idx] = ['@{searchKey.label}', document.getElementById("queries[@idx].value").value];
+            }
+
+            var searchText = values.filter(isEmpty).map(toString).join(" or ");
+
+            if( searchText.length > 0) {
+                document.getElementById("search-text").innerHTML = '@messages("search.results.download.meta.results")'  + searchText;
+            } else {
+                document.getElementById("search-text").innerHTML = ""
+            }
+        }
+</script>
+
 @notableEvent = @{
     request.notableEvent
 }
@@ -106,6 +131,7 @@
                     id= s"queries[$idx].value",
                     inputType = "text",
                     classes = "govuk-input--width-20",
+                    attributes = Map("oninput" -> "updateSearchText()"),
                     label = Label(classes = "", content = Text(messages(s"search.page.searchkey.lbl", searchKey.label)))
                 ).withFormField(searchForm(s"queries[${idx}].value"))
             )
@@ -114,6 +140,11 @@
         @if(searchForm.hasErrors) {
           </div>
         }
+
+        <div class="govuk-body govuk-!-font-weight-bold">
+            <p id="search-text"></p>
+        </div>
+
         @button(Button(
             name = Some("searchButton"),
             content = Text(messages("search.button.search.lbl")),
@@ -125,6 +156,4 @@
     @maybeResults.fold(Html("")){ results =>
         @metaSearchResultsPanel(searchForm, results, request.searchKey.label, estimatedRetrievalTime)
     }
-
-
-  }
+}

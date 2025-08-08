@@ -26,6 +26,7 @@ case class SearchResult(
   notableEventDisplayName: String,
   searchKeys: Map[String, String],
   fileDetails: String,
+  fileSize: String,
   vaultId: String,
   archiveId: String,
   submissionDateEpochMilli: Long,
@@ -47,9 +48,9 @@ class SearchResultUtils @Inject() (appConfig: AppConfig):
       searchKeys = nrsSearchResult.searchKeys,
       fileDetails = filename(
         nrsSearchResult.nrSubmissionId,
-        nrsSearchResult.bundle.fileType,
-        nrsSearchResult.bundle.fileSize
+        nrsSearchResult.bundle.fileType
       ),
+      fileSize = byteCountToDisplaySize(nrsSearchResult.bundle.fileSize),
       vaultId = nrsSearchResult.glacier.vaultName,
       archiveId = nrsSearchResult.glacier.archiveId,
       submissionDateEpochMilli = nrsSearchResult.userSubmissionTimestamp.toInstant.toEpochMilli,
@@ -58,8 +59,7 @@ class SearchResultUtils @Inject() (appConfig: AppConfig):
     )
 
   private def filename(
-    nrSubmissionId: String,
-    fileType: String,
-    fileSize: Long
-  ) =
-    s"$nrSubmissionId.$fileType (${byteCountToDisplaySize(fileSize)})"
+      nrSubmissionId: String,
+      fileType: String
+    ) =
+      s"$nrSubmissionId.$fileType"

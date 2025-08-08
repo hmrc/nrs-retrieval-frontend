@@ -16,7 +16,7 @@ lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 lazy val appDependenciesIt: Seq[ModuleID] = it()
 lazy val appName: String = "nrs-retrieval-frontend"
 val currentScalaVersion = "3.3.5"
-val bootstrapPlayVersion = "9.18.0"
+val bootstrapPlayVersion = "9.19.0"
 
 lazy val compile = Seq(
   ws,

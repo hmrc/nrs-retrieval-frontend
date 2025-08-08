@@ -62,7 +62,7 @@
         role="button"
         onclick="setStatus(@index, 'Downloaded')"
         href="@routes.SearchController.download(request.notableEvent.name, searchResult.vaultId, searchResult.archiveId)"
-        download="@searchResult.fileDetails (13 KB)">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
+        download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
         </a>
     </div>
     <div id="download-button-clicked-@index" class="govuk-visually-hidden" style="display:none">

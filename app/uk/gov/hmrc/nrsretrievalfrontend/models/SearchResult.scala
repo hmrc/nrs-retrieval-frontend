@@ -59,8 +59,7 @@ class SearchResultUtils @Inject() (appConfig: AppConfig):
     )
 
   private def filename(
-                        nrSubmissionId: String,
-                        fileType: String
-                      ) =
-    s"$nrSubmissionId.$fileType"
-//    s"$nrSubmissionId.$fileType (${byteCountToDisplaySize(fileSize)})"
+      nrSubmissionId: String,
+      fileType: String
+    ) =
+      s"$nrSubmissionId.$fileType"

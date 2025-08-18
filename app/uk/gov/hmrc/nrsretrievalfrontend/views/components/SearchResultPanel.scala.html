@@ -94,7 +94,7 @@
 
         <div class="govuk-body-s" >
             @if( searchForm.nonEmpty) {
-                Search items were:
+              @messages("search.results.download.meta.results")
             }
             @for(item <- formatResults(request.notableEvent.searchKeys.map(key => key.name -> key.label).toMap, searchResult.searchKeys, searchForm ) ) {
               <br>

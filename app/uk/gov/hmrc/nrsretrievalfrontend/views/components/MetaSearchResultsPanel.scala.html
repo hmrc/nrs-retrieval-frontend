@@ -50,8 +50,12 @@
       )
     }
 }
-
 </div>
+@if(results.nonEmpty) {
+        <div class="govuk-!-font-size-16 govuk-hint" >
+            @messages("search.results.download.hint")
+    </div>
+}
 
     @govukTable(Table(
         rows = results.zipWithIndex.map {
@@ -67,3 +71,4 @@
         captionClasses = "govuk-table__caption--m",
         firstCellIsHeader = false
     ))
+

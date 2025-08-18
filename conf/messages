@@ -44,6 +44,7 @@ search.results.notfoundfor.lbl=No results found for "{0}"
 search.results.filename.lbl=Filename
 search.results.retrieve.lbl=Retrieve
 search.results.download.lbl=Download
+search.results.download.hint=All matching search items appear in bold
 search.results.download.meta.results=Search items were:
 search.results.cannot.retrieve.lbl=We can not retrieve
 search.results.retrieval.message.lbl=Retrieving {0}

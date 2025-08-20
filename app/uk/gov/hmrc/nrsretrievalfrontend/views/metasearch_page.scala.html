@@ -55,7 +55,7 @@
             var searchText = values.filter(isEmpty).map(toString).join(" or ");
 
             if( searchText.length > 0) {
-                document.getElementById("search-text").innerHTML = '@messages("search.results.download.meta.results")'  + searchText;
+                document.getElementById("search-text").innerHTML = '@messages("search.results.download.meta.items") '  + searchText;
             } else {
                 document.getElementById("search-text").innerHTML = ""
             }

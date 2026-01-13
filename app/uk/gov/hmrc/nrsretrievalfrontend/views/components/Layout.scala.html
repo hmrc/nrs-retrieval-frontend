@@ -58,7 +58,8 @@
                 serviceName=Some(messages("service.name")),
                 serviceUrl=Some(routes.StartController.showStartPage.url)
             ))),
-            phaseBanner = None
+            phaseBanner = None,
+            useDeprecatedPositionForHmrcBanner = false
         ),
         templateOverrides = TemplateOverrides(
             additionalHeadBlock = optHeadBlock,

@@ -56,16 +56,16 @@ trait Views:
   val govukLogo                      = GovukLogo()
   val rebrandConfig                  = RebrandConfig(configuration)
 
-  lazy val hmrcBanner               = new HmrcBanner(tudorCrownConfig)
-  lazy val hmrcUserResearchBanner   = new HmrcUserResearchBanner
-  lazy val govukTag                 = new GovukTag
-  lazy val govukPhaseBanner         = new GovukPhaseBanner(govukTag)
-  lazy val hmrcHeader               = new HmrcHeader(hmrcBanner, hmrcUserResearchBanner, govukPhaseBanner, tudorCrownConfig, rebrandConfig, govukLogo)
-  lazy val hmrcStandardHeader       = new HmrcStandardHeader(hmrcHeader)
-  lazy val hmrcLanguageSelect       = new HmrcLanguageSelect
-  lazy val languageConfig           = new LanguageConfig(this.configuration)
-  lazy val hmrcLanguageSelectHelper = new HmrcLanguageSelectHelper(hmrcLanguageSelect, languageConfig)
-  lazy val govukExitThisPage        = new GovukExitThisPage(govukButton)
+  lazy val hmrcBanner                     = new HmrcBanner(tudorCrownConfig)
+  lazy val hmrcUserResearchBanner         = new HmrcUserResearchBanner
+  lazy val govukTag                       = new GovukTag
+  lazy val govukPhaseBanner               = new GovukPhaseBanner(govukTag)
+  lazy val serviceNavigationConfiguration = new ServiceNavigationConfig(this.configuration)
+  lazy val hmrcHeader                     = new HmrcHeader(hmrcBanner, hmrcUserResearchBanner, govukPhaseBanner, tudorCrownConfig, rebrandConfig, govukLogo, govukServiceNavigation)
+  lazy val hmrcStandardHeader             = new HmrcStandardHeader(hmrcHeader, serviceNavigationConfiguration, this.configuration)
+  lazy val hmrcLanguageSelect             = new HmrcLanguageSelect
+  lazy val hmrcLanguageSelectHelper       = new HmrcLanguageSelectHelper(hmrcLanguageSelect, serviceNavigationConfiguration)
+  lazy val govukExitThisPage              = new GovukExitThisPage(govukButton)
 
   lazy val hmrcStandardPage       = new HmrcStandardPage(
     govukLayout,

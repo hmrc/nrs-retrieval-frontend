@@ -21,7 +21,7 @@ val bootstrapPlayVersion = "9.19.0"
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc" %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
-  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.8.0",
+  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.25.0",
   "com.typesafe.play" %% "play-json-joda" % "2.10.5",
   "commons-io" % "commons-io" % "2.17.0"
 )

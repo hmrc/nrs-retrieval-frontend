@@ -59,14 +59,16 @@ class AppConfigSpec extends BaseUnitSpec:
         "emcs-submit-alert-or-rejection-api",
         "p800refunds-nonloggedin-cheque-claim-attempt-made",
         "p800refunds-nonloggedin-bank-claim-attempt-made",
-        "income-tax-view-change-adjust-payment-on-account"
+        "income-tax-view-change-adjust-payment-on-account",
+        "vap-application-received"
       )
     }
 
     "specify the correct notable event for using multipleSearch" in {
       appConfig.notableEvents.filter(_._2.metadataSearchKeys).keySet shouldBe Set(
         "itsa-ad-hoc-refund",
-        "income-tax-view-change-adjust-payment-on-account"
+        "income-tax-view-change-adjust-payment-on-account",
+        "vap-application-received"
       )
     }
   }

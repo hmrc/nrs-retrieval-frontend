@@ -18,7 +18,6 @@ package uk.gov.hmrc.nrsretrievalfrontend
 
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.util.ByteString
-import org.jsoup.Jsoup
 import org.jsoup.Jsoup.parse
 import org.scalatest.time.{Seconds, Span}
 import play.api.libs.ws.DefaultBodyWritables
@@ -26,7 +25,6 @@ import play.api.libs.ws.DefaultBodyWritables.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.readStreamHttpResponse
 import uk.gov.hmrc.nrsretrievalfrontend.models.{NrsSearchResult, Query, SearchQueries}
-import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 
 import java.io.ByteArrayInputStream

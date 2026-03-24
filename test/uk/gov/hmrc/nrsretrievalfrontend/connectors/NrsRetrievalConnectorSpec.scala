@@ -145,7 +145,7 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
       }
 
       "write an audit record containing the required data" when {
-        s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
+        s"a $searchType search is requested" in { (_: DataEventAuditType) =>
           when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
           when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
           when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])

@@ -77,7 +77,7 @@ class AuthenticatedActionSpec extends BaseUnitSpec, MockitoSugar, Results, Statu
           when(mockAuthConnector.authorise(any(), any())(any(), any()))
             .thenReturn(Future.failed(exception))
 
-          val action: AuthenticatedRequest[?] => Future[Result] = request => Future(Ok("passed"))
+          val action: AuthenticatedRequest[?] => Future[Result] = _ => Future(Ok("passed"))
 
           val result: Future[Result] = authenticatedAction.invokeBlock(FakeRequest(), action)
 

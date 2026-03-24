@@ -15,18 +15,18 @@ lazy val scoverageSettings = {
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 lazy val appDependenciesIt: Seq[ModuleID] = it()
 lazy val appName: String = "nrs-retrieval-frontend"
-val currentScalaVersion = "3.3.5"
-val bootstrapPlayVersion = "9.19.0"
+val currentScalaVersion = "3.3.7"
+val bootstrapPlayVersion = "10.7.0"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
-  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "12.32.0",
-  "com.typesafe.play" %% "play-json-joda" % "2.10.5",
-  "commons-io" % "commons-io" % "2.17.0"
+    "uk.gov.hmrc" %% "bootstrap-frontend-play-30" % bootstrapPlayVersion,
+  "uk.gov.hmrc" %% "play-frontend-hmrc-play-30" % "13.1.0",
+  "com.typesafe.play" %% "play-json-joda" % "2.10.8",
+  "commons-io" % "commons-io" % "2.21.0"
 )
 def test(scope: String = "test"): Seq[ModuleID] = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.18" % scope,
+  "org.scalatest" %% "scalatest" % "3.2.19" % scope,
   "org.playframework" %% "play-test" % current % scope,
   "org.scalatestplus" %% "mockito-5-12" % "3.2.19.0" % Test,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % scope,

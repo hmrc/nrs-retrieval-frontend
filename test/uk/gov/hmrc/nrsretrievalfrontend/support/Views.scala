@@ -29,11 +29,9 @@ import uk.gov.hmrc.nrsretrievalfrontend.views.html.testonly.{check_authorisation
 trait Views:
   this: Configs =>
 
-  lazy val tudorCrownConfig             = new TudorCrownConfig(this.configuration)
   lazy val trackingConsentConfig        = new TrackingConsentConfig(this.configuration)
   lazy val hmrcTrackingConsentSnippet   = new HmrcTrackingConsentSnippet(trackingConsentConfig)
   lazy val assetsConfig                 = new AssetsConfig
-  lazy val hmrcInternalHeader           = new HmrcInternalHeader(tudorCrownConfig)
   lazy val hmrcFooter                   = new HmrcFooter(govukFooter)
   lazy val accessibilityStatementConfig = new AccessibilityStatementConfig(this.configuration)
   lazy val hmrcFooterItems              = new HmrcFooterItems(accessibilityStatementConfig)
@@ -54,17 +52,13 @@ trait Views:
   lazy val goveukHintAndErrorMessage = new GovukHintAndErrorMessage(govukHint, govukErrorMessage)
   lazy val govukTable                = new GovukTable
   val govukLogo                      = GovukLogo()
-  val rebrandConfig                  = RebrandConfig(configuration)
 
-  lazy val hmrcBanner                     = new HmrcBanner(tudorCrownConfig)
+  lazy val hmrcBanner                     = new HmrcBanner()
   lazy val hmrcUserResearchBanner         = new HmrcUserResearchBanner
   lazy val govukTag                       = new GovukTag
   lazy val govukPhaseBanner               = new GovukPhaseBanner(govukTag)
-  lazy val serviceNavigationConfiguration = new ServiceNavigationConfig(this.configuration)
-  lazy val hmrcHeader                     = new HmrcHeader(hmrcBanner, hmrcUserResearchBanner, govukPhaseBanner, tudorCrownConfig, rebrandConfig, govukLogo, govukServiceNavigation)
-  lazy val hmrcStandardHeader             = new HmrcStandardHeader(hmrcHeader, serviceNavigationConfiguration, this.configuration)
-  lazy val hmrcLanguageSelect             = new HmrcLanguageSelect
-  lazy val hmrcLanguageSelectHelper       = new HmrcLanguageSelectHelper(hmrcLanguageSelect, serviceNavigationConfiguration)
+  lazy val hmrcHeader                     = new HmrcHeader(hmrcBanner, hmrcUserResearchBanner, govukPhaseBanner, govukLogo, govukServiceNavigation)
+  lazy val hmrcStandardHeader             = new HmrcStandardHeader(hmrcHeader, this.configuration)
   lazy val govukExitThisPage              = new GovukExitThisPage(govukButton)
 
   lazy val hmrcStandardPage       = new HmrcStandardPage(
@@ -72,7 +66,6 @@ trait Views:
     hmrcStandardHeader,
     hmrcStandardFooter,
     hmrcHead,
-    hmrcLanguageSelectHelper,
     hmrcScripts,
     govukBackLink,
     govukExitThisPage,
@@ -83,19 +76,19 @@ trait Views:
   lazy val govukServiceNavigation = new GovukServiceNavigation()
 
   lazy val govukSkipLink = new GovukSkipLink
-  lazy val govukFooter   = new GovukFooter(rebrandConfig, govukLogo)
-  lazy val govukHeader   = new GovukHeader(tudorCrownConfig, rebrandConfig, govukLogo)
+  lazy val govukFooter   = new GovukFooter(govukLogo)
+  lazy val govukHeader   = new GovukHeader(govukLogo)
   lazy val govukTemplate = new GovukTemplate(
     govukHeader,
     govukFooter,
     govukSkipLink,
-    fixedWidthPageLayout,
-    rebrandConfig
+    fixedWidthPageLayout
   )
 
   lazy val govukLayout = new GovukLayout(
     govukTemplate,
     govukHeader,
+    govukServiceNavigation,
     govukFooter,
     govukBackLink,
     defaultMainContent,
@@ -106,10 +99,6 @@ trait Views:
 
   lazy val layout = new Layout(
     hmrcStandardPage,
-    govukServiceNavigation,
-    hmrcHead,
-    hmrcScripts,
-    defaultMainContent,
     hmrcPageHeading
   )
 

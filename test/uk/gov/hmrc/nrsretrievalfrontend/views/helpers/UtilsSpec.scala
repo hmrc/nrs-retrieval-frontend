@@ -26,7 +26,7 @@ class UtilsSpec extends BaseUnitSpec:
     "when empty" in:
       Utils.formatResults(Map.empty[String, String], Map.empty[String, String], None ) shouldBe Seq.empty[SearchMatchResult]
 
-    "with single match" in:
+    "with single match should be bold with match result" in:
       val keys = Map( "nino" -> "NINO")
       val matches = Map( "nino" -> "ABC123")
       val form = FormMappings.form.fill(SearchQueries(List[Query](Query("nino", "ABC123")  )))
@@ -47,4 +47,31 @@ class UtilsSpec extends BaseUnitSpec:
       val result = Utils.formatResults(keys, matches, Some(form))
       result shouldBe Seq[SearchMatchResult](SearchMatchResult("NINO", "ABC123", true), SearchMatchResult("UTR", "987", false))
 
+    "check NOT bold" when:
+      "neither entered or result have a value" in:
+        val keys = Map("nino" -> "NINO")
+        val matches = Map("nino" -> "")
+        val form = FormMappings.form.fill(SearchQueries(List[Query](Query("nino", ""))))
+        val result = Utils.formatResults(keys, matches, Some(form))
+        result shouldBe Seq[SearchMatchResult](SearchMatchResult("NINO", "", false))
 
+      "result is empty" in :
+        val keys = Map("nino" -> "NINO")
+        val matches = Map("nino" -> "")
+        val form = FormMappings.form.fill(SearchQueries(List[Query](Query("nino", "ABC123"))))
+        val result = Utils.formatResults(keys, matches, Some(form))
+        result shouldBe Seq[SearchMatchResult](SearchMatchResult("NINO", "", false))
+
+      "typed is empty" in :
+        val keys = Map("nino" -> "NINO")
+        val matches = Map("nino" -> "ABC123")
+        val form = FormMappings.form.fill(SearchQueries(List[Query](Query("nino", ""))))
+        val result = Utils.formatResults(keys, matches, Some(form))
+        result shouldBe Seq[SearchMatchResult](SearchMatchResult("NINO", "ABC123", false))
+
+      "with spaces entered in both" in :
+        val keys = Map("nino" -> "NINO")
+        val matches = Map("nino" -> "   ")
+        val form = FormMappings.form.fill(SearchQueries(List[Query](Query("nino", "   "))))
+        val result = Utils.formatResults(keys, matches, Some(form))
+        result shouldBe Seq[SearchMatchResult](SearchMatchResult("NINO", "", false))

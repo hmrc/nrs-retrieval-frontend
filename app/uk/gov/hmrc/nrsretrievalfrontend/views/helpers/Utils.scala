@@ -40,11 +40,11 @@ object Utils:
       val formItems = for {
         idx <- 0 to searchKeyList.size
         name <- form(s"queries[$idx].name").value
-        value <- form(s"queries[$idx].value").value
-      } yield (name, value)
+        value <- (form(s"queries[$idx].value").value)
+      } yield (name, value.trim)
 
       formItems.map { (key, value) =>
-        val bold = value.compare(result(key)) == 0
-        SearchMatchResult(searchKeys(key), result(key), bold)
+        val bold = value.nonEmpty && (value.compare(result(key).trim) == 0)
+        SearchMatchResult(searchKeys(key), result(key).trim, bold)
       }
     }

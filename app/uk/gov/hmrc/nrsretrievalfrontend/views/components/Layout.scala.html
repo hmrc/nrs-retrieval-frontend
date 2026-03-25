@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukLayout, TwoThirdsMainContent}
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcHead, HmrcScripts, HmrcStandardPage}
-@import uk.gov.hmrc.nrsretrievalfrontend.controllers.routes
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
-        govukServiceNavigation: GovukServiceNavigation,
-        hmrcHead: HmrcHead,
-        hmrcScripts: HmrcScripts,
-        defaultMainContent: TwoThirdsMainContent,
         heading: HmrcPageHeading
 )
-
 @(
         pageTitle: String,
         optHeadBlock: Option[Html] = None,
@@ -36,7 +29,6 @@
         backLink: Option[BackLink] = None
 )(content: Html)(implicit request: RequestHeader, messages: Messages)
 
-
 @contentBlock() = {
     @heading(PageHeading(maybePageHeader.getOrElse(pageTitle)))
     @content
@@ -44,28 +36,21 @@
 
 @hmrcStandardPage(
     HmrcStandardPageParams(
-        pageTitle = Some(pageTitle),
-        serviceName = Some(""), // None will display a default, not blank as required
-        isWelshTranslationAvailable = false,
-        backLink = backLink,
-        serviceURLs = ServiceURLs(
-            serviceUrl = Some(routes.StartController.showStartPage.url),
-            signOutUrl = None
+    pageTitle = Some(pageTitle),
+    isWelshTranslationAvailable = false,
+    backLink = backLink,
+    serviceURLs = ServiceURLs(
+        serviceUrl = Some(routes.StartController.showStartPage.url),
+        signOutUrl = None
+    ),
+    banners = Banners(displayHmrcBanner = false),
+    serviceNavigation = Some(
+        ServiceNavigation(
+            serviceName = Some(messages("service.name")),
+            serviceUrl=Some(routes.StartController.showStartPage.url),
         ),
-        banners = Banners(
-            displayHmrcBanner = false,
-            additionalBannersBlock = Some(govukServiceNavigation(ServiceNavigation(
-                serviceName=Some(messages("service.name")),
-                serviceUrl=Some(routes.StartController.showStartPage.url)
-            ))),
-            phaseBanner = None,
-            useDeprecatedPositionForHmrcBanner = false
-        ),
-        templateOverrides = TemplateOverrides(
-            additionalHeadBlock = optHeadBlock,
-            additionalScriptsBlock = addedScripts
-        ),
-
-    ) )(contentBlock())
-
-
+    ),
+    templateOverrides = TemplateOverrides(
+        additionalScriptsBlock = addedScripts
+    )
+))(contentBlock())

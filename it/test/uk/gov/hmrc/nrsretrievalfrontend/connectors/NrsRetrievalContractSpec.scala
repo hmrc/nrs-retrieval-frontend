@@ -26,7 +26,6 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, Bundle, Glacier,
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 
 import java.io.ByteArrayInputStream
-import java.nio.charset.Charset.*
 import java.time.ZonedDateTime
 import java.util.zip.ZipInputStream
 import scala.concurrent.{ExecutionContext, Future}

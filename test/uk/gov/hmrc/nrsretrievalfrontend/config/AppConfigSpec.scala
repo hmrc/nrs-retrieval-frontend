@@ -60,7 +60,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "p800refunds-nonloggedin-cheque-claim-attempt-made",
         "p800refunds-nonloggedin-bank-claim-attempt-made",
         "income-tax-view-change-adjust-payment-on-account",
-        "vap-application-received"
+        "vap-application-received",
+        "vap-change-received"
       )
     }
 
@@ -68,7 +69,8 @@ class AppConfigSpec extends BaseUnitSpec:
       appConfig.notableEvents.filter(_._2.metadataSearchKeys).keySet shouldBe Set(
         "itsa-ad-hoc-refund",
         "income-tax-view-change-adjust-payment-on-account",
-        "vap-application-received"
+        "vap-application-received",
+        "vap-change-received"
       )
     }
   }

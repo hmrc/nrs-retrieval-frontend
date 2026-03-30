@@ -61,7 +61,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "p800refunds-nonloggedin-bank-claim-attempt-made",
         "income-tax-view-change-adjust-payment-on-account",
         "vap-application-received",
-        "vap-withdraw-received"
+        "vap-withdraw-received",
+        "vap-change-received"
       )
     }
 
@@ -70,7 +71,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "itsa-ad-hoc-refund",
         "income-tax-view-change-adjust-payment-on-account",
         "vap-application-received",
-        "vap-withdraw-received"
+        "vap-withdraw-received",
+        "vap-change-received"
       )
     }
   }

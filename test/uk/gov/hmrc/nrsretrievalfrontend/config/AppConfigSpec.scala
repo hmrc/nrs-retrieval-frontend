@@ -69,7 +69,8 @@ class AppConfigSpec extends BaseUnitSpec:
       appConfig.notableEvents.filter(_._2.metadataSearchKeys).keySet shouldBe Set(
         "itsa-ad-hoc-refund",
         "income-tax-view-change-adjust-payment-on-account",
-        "vap-application-received"
+        "vap-application-received",
+        "vap-withdraw-received"
       )
     }
   }

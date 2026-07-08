@@ -31,17 +31,61 @@ import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views, ViewSpec}
 
 import scala.concurrent.duration.*
 
-class search_pageSpec extends BaseUnitSpec, SearchFixture, Views:
+class metasearch_pageSpec extends BaseUnitSpec, SearchFixture, Views:
 
   private def notFoundPanelIsDisplayed(doc: Document): Boolean     = Option(doc.getElementById("notFound")).isDefined
   private def resultsFoundPanelIsDisplayed(doc: Document): Boolean = Option(doc.getElementById("resultsFound")).isDefined
 
   val searchKeyValue = "searchKeyValue"
 
+  "check search pages with different text" should {
+    val formJson = s"""{}"""
+    val boundForm = form.bind(parse(formJson), Int.MaxValue)
+
+    s"check vat-return with mandatoryText" in new ViewSpec {
+      val notableEvent = indexedNotableEvents.find((n, _) => n.name == "vat-return").get._1
+
+      given notableEventRequest: NotableEventRequest[AnyContentAsEmpty.type] =
+        new NotableEventRequest(notableEvent, searchKey = notableEvent.searchKeys.head, authenticatedRequest)
+
+      override val view: HtmlFormat.Appendable = metasearchPage(boundForm, None, 5.minutes, displayMandatoryText = true, displaySingleEntryText = false)
+
+      doc.toString should include("Enter a VRN and an optional Period Key")
+      doc.toString should include("The Period Key is to uniquely identify the return period")
+    }
+
+    s"check vat-return-ui with mandatoryText" in new ViewSpec {
+      val notableEvent = indexedNotableEvents.find((n, _) => n.name == "vat-return-ui").get._1
+
+      given notableEventRequest: NotableEventRequest[AnyContentAsEmpty.type] =
+        new NotableEventRequest(notableEvent, searchKey = notableEvent.searchKeys.head, authenticatedRequest)
+
+      override val view: HtmlFormat.Appendable = metasearchPage(boundForm, None, 5.minutes, displayMandatoryText = true, displaySingleEntryText = false)
+
+      doc.toString should include("Enter a VRN and an optional Period Key")
+      doc.toString should include("The Period Key is to uniquely identify the return period")
+    }
+
+    s"check vat-registration with mandatoryText" in new ViewSpec {
+      val notableEvent = indexedNotableEvents.find((n, _) => n.name == "vat-registration").get._1
+
+      given notableEventRequest: NotableEventRequest[AnyContentAsEmpty.type] =
+        new NotableEventRequest(notableEvent, searchKey = notableEvent.searchKeys.head, authenticatedRequest)
+
+      override val view: HtmlFormat.Appendable = metasearchPage(boundForm, None, 5.minutes, displayMandatoryText = false, displaySingleEntryText = true)
+
+      doc.toString should include("Enter either a Post Code or Form Bundle ID")
+    }
+  }
+
   indexedNotableEvents.foreach { case (notableEvent: NotableEvent, _) =>
     val searchKeyName          = notableEvent.searchKeys.head.name
     val searchPageHeadingText  = s"Search for ${notableEvent.pluralDisplayName}"
     val searchResultsTitleText = s"Results - $searchPageHeadingText"
+
+    val displayMandatoryText = notableEvent.searchKeys.exists(_.searchValueMandatory)
+    val displaySingleEntryText = notableEvent.singleEntrySearch
+
 
     val formJson =
       s"""{"queries": [{"name": "$searchKeyName", "value": "$searchKeyValue"}]}"""
@@ -72,24 +116,26 @@ class search_pageSpec extends BaseUnitSpec, SearchFixture, Views:
       searchButton.attr("type") mustBe "submit"
       searchButton.text() mustBe "Search"
 
+
+
     s"the search page for notableEventType [${notableEvent.name}]" should {
       "render correctly" when {
         "no search was made" in new ViewSpec:
-          override val view: HtmlFormat.Appendable = searchPage(boundForm, None, 5.minutes)
+          override val view: HtmlFormat.Appendable = metasearchPage(boundForm, None, 5.minutes, displayMandatoryText, displaySingleEntryText)
 
           ensureThePageIsRendered(doc, searchPageHeadingText)
           notFoundPanelIsDisplayed(doc) mustBe false
           resultsFoundPanelIsDisplayed(doc) mustBe false
 
         "search results were not found" in new ViewSpec:
-          override val view: HtmlFormat.Appendable = searchPage(boundForm, Some(Seq.empty[SearchResult]), 5.minutes)
+          override val view: HtmlFormat.Appendable = metasearchPage(boundForm, Some(Seq.empty[SearchResult]), 5.minutes, displayMandatoryText, displaySingleEntryText)
 
           ensureThePageIsRendered(doc, searchResultsTitleText)
           notFoundPanelIsDisplayed(doc) mustBe true
           resultsFoundPanelIsDisplayed(doc) mustBe false
 
         "search results were found" in new ViewSpec:
-          override val view: HtmlFormat.Appendable = searchPage(boundForm, Some(Seq(vatSearchResult)), 5.minutes)
+          override val view: HtmlFormat.Appendable = metasearchPage(boundForm, Some(Seq(vatSearchResult)), 5.minutes, false, false)
 
           ensureThePageIsRendered(doc, searchResultsTitleText)
           notFoundPanelIsDisplayed(doc) mustBe false

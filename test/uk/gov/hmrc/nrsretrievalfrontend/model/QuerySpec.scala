@@ -18,15 +18,15 @@ package uk.gov.hmrc.nrsretrievalfrontend.model
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.nrsretrievalfrontend.support.UnitSpec
-import uk.gov.hmrc.nrsretrievalfrontend.models.Query
+import uk.gov.hmrc.nrsretrievalfrontend.models.{Query, SearchOps}
 
 class QuerySpec extends UnitSpec:
 
-  "createJsonQuery" should :
+  "createJsonQuery with 'Or' concatenation" should :
     "create a json query with 1 value" in :
       val q1 = Query("nino", "123")
       val queries: List[Query] = List(q1)
-      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", SearchOps.Or, queries)
       val json = Json.parse(jsonString)
 
       Json.prettyPrint(json) shouldBe
@@ -42,7 +42,7 @@ class QuerySpec extends UnitSpec:
       val q1 = Query("nino", "123")
       val q2 = Query("saUtr", "456")
       val queries: List[Query] = List(q1, q2)
-      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", SearchOps.Or, queries)
       val json = Json.parse(jsonString)
       Json.prettyPrint(json) shouldBe
         """{
@@ -65,7 +65,7 @@ class QuerySpec extends UnitSpec:
       val q2 = Query("saUtr", "456")
       val q3 = Query("providerId", "789")
       val queries: List[Query] = List(q1, q2, q3)
-      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", queries)
+      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", SearchOps.Or, queries)
       val json = Json.parse(jsonString)
       Json.prettyPrint(json) shouldBe
         """{
@@ -78,6 +78,74 @@ class QuerySpec extends UnitSpec:
           |    },
           |    "q2" : {
           |      "type" : "or",
+          |      "q1" : {
+          |        "key" : "saUtr",
+          |        "value" : "456"
+          |      },
+          |      "q2" : {
+          |        "key" : "nino",
+          |        "value" : "123"
+          |      }
+          |    }
+          |  }
+          |}""".stripMargin
+
+  "createJsonQuery with 'And' concatenation" should :
+    "create a json query with 1 value" in :
+      val q1 = Query("nino", "123")
+      val queries: List[Query] = List(q1)
+      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", SearchOps.And, queries)
+      val json = Json.parse(jsonString)
+
+      Json.prettyPrint(json) shouldBe
+        """{
+          |  "notableEvent" : "itsa-ad-hoc-refund",
+          |  "query" : {
+          |    "key" : "nino",
+          |    "value" : "123"
+          |  }
+          |}""".stripMargin
+
+    "create a json query with 2 value" in :
+      val q1 = Query("nino", "123")
+      val q2 = Query("saUtr", "456")
+      val queries: List[Query] = List(q1, q2)
+      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", SearchOps.And, queries)
+      val json = Json.parse(jsonString)
+      Json.prettyPrint(json) shouldBe
+        """{
+          |  "notableEvent" : "itsa-ad-hoc-refund",
+          |  "query" : {
+          |    "type" : "and",
+          |    "q1" : {
+          |      "key" : "saUtr",
+          |      "value" : "456"
+          |    },
+          |    "q2" : {
+          |      "key" : "nino",
+          |      "value" : "123"
+          |    }
+          |  }
+          |}""".stripMargin
+
+    "create a json query with 3 value" in :
+      val q1 = Query("nino", "123")
+      val q2 = Query("saUtr", "456")
+      val q3 = Query("providerId", "789")
+      val queries: List[Query] = List(q1, q2, q3)
+      val jsonString = Query.createJsonQuery("itsa-ad-hoc-refund", SearchOps.And, queries)
+      val json = Json.parse(jsonString)
+      Json.prettyPrint(json) shouldBe
+        """{
+          |  "notableEvent" : "itsa-ad-hoc-refund",
+          |  "query" : {
+          |    "type" : "and",
+          |    "q1" : {
+          |      "key" : "providerId",
+          |      "value" : "789"
+          |    },
+          |    "q2" : {
+          |      "type" : "and",
           |      "q1" : {
           |        "key" : "saUtr",
           |        "value" : "456"

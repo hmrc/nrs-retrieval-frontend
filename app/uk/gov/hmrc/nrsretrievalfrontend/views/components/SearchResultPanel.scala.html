@@ -21,7 +21,6 @@
 @import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
 @import org.apache.commons.io.FileUtils.byteCountToDisplaySize
 
-
 @this(p: Paragraph, govukErrorSummary: GovukErrorSummary)
 
 @(searchResult: SearchResult, index: String, estimatedRetrievalTime: FiniteDuration, searchForm: Option[Form[SearchQueries]])(implicit messages: Messages, request: NotableEventRequest[_])
@@ -61,7 +60,7 @@
         data-index="@{index}"
         role="button"
         onclick="setStatus(@index, 'Downloaded')"
-        href="@routes.SearchController.download(request.notableEvent.name, searchResult.vaultId, searchResult.archiveId)"
+        href="@routes.MetaSearchController.download(request.notableEvent.name, searchResult.vaultId, searchResult.archiveId)"
         download="@searchResult.fileDetails">@Messages("search.results.download.lbl") @searchResult.linkText @timeSubmitted
         </a>
     </div>
@@ -91,7 +90,6 @@
     <div id="result-retrieve-@index" class="result-retrieve" aria-live="polite" aria-busy="false">
         @p(content = Text(s"${Messages("search.results.filename.lbl")}: ${searchResult.fileDetails} (${searchResult.fileSize})"))
 
-
         <div class="govuk-body-s" >
             @if( searchForm.nonEmpty) {
               @messages("search.results.download.meta.results")
@@ -105,6 +103,4 @@
         </div>
     </div>
 </div>
-
-
 

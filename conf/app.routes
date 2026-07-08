@@ -7,14 +7,12 @@ GET   /assets/*file                                 controllers.Assets.versioned
 GET        /start                                   uk.gov.hmrc.nrsretrievalfrontend.controllers.StartController.showStartPage
 GET        /select                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.SelectorController.showSelectorPage
 POST       /select                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.SelectorController.submitSelectorPage
-GET        /search                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.noParameters
-GET        /search/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.showSearchPage(notableEventType)
-POST       /search/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.submitSearchPage(notableEventType)
+GET        /search                                  uk.gov.hmrc.nrsretrievalfrontend.controllers.MetaSearchController.noParameters
 
 GET        /metasearch/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.MetaSearchController.showSearchPage(notableEventType)
 POST       /metasearch/:notableEventType                uk.gov.hmrc.nrsretrievalfrontend.controllers.MetaSearchController.submitSearchPage(notableEventType)
 
-GET        /download/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.download(notableEventType,vaultId, archiveId)
+GET        /download/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.MetaSearchController.download(notableEventType,vaultId, archiveId)
 
-GET        /status/:vaultId/:archiveId              uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.refresh(vaultId, archiveId)
-GET        /retrieve/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.SearchController.doAjaxRetrieve(notableEventType,vaultId, archiveId)
+GET        /status/:vaultId/:archiveId              uk.gov.hmrc.nrsretrievalfrontend.controllers.MetaSearchController.refresh(vaultId, archiveId)
+GET        /retrieve/:notableEventType/:vaultId/:archiveId            uk.gov.hmrc.nrsretrievalfrontend.controllers.MetaSearchController.doAjaxRetrieve(notableEventType,vaultId, archiveId)

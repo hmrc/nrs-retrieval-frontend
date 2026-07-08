@@ -139,15 +139,6 @@ trait Views:
     govukButton
   )
 
-  lazy val searchPage = new search_page(
-    mainTemplate,
-    formWithCsrf,
-    paragraph,
-    govukInput,
-    govukButton,
-    searchResultsPanel
-  )
-
   lazy val metasearchPage = new metasearch_page(
     mainTemplate,
     formWithCsrf,

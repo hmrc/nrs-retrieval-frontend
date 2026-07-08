@@ -28,7 +28,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.{NrsSearchResult, Query, SearchQu
 import uk.gov.hmrc.nrsretrievalfrontend.stubs.NrsRetrievalStubs.*
 
 import java.io.ByteArrayInputStream
-import java.net.URL
+import java.net.{URI, URL}
 import java.util.zip.ZipInputStream
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -137,7 +137,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
       "a vat return is provided" in {
         givenAuthenticated()
 
-        val url                                  = new URL(vatReturnSearchUrl)
+        val url                                  = new URL(s"$serviceRoot/metasearch/$vatReturn")
         val responseFuture: Future[HttpResponse] = httpClientV2
           .get(url)
           .setHeader(authenticationHeader)
@@ -153,7 +153,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
       "a non vat registration is provided" in {
         givenAuthenticated()
 
-        val url                                  = new URL(vatRegistrationSearchUrl)
+        val url                                  =  URI.create(s"$serviceRoot/metasearch/$vatRegistration").toURL
         val responseFuture: Future[HttpResponse] = httpClientV2
           .get(url)
           .setHeader(authenticationHeader)
@@ -168,11 +168,11 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
     }
   }
 
-  "POST /nrs-retrieval/search" should {
+  "POST /nrs-retrieval/metasearch" should {
     "perform a search and display the results panel" when {
       "a standard search is made" in {
         givenAuthenticated()
-        givenSearchReturns(vatReturnSearchText, OK, Seq.empty[NrsSearchResult])
+        givenMetaSearchReturns(vatReturnSearchText, OK, Seq.empty[NrsSearchResult])
 
         val body: Map[String, Seq[String]] = Map(
           searchKeyName    -> Seq(vrn),
@@ -180,7 +180,8 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
           notableEventType -> Seq(vatReturn)
         )
 
-        val url                                  = new URL(vatReturnSearchUrl)
+        val url = new URL(s"$serviceRoot/metasearch/$vatReturn")
+//        val url                                  = new URL(vatReturnSearchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .post(url)
           .setHeader(authenticationHeader)
@@ -191,35 +192,9 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
 
         val document = assertPageIsRendered(response, vatReturnSearchPageHeading)
 
-        document.getElementById("notFound").text() shouldBe """No results found for "validVrn""""
+        document.getElementById("notFound").text() shouldBe """No results found for: VAT Registration Number (VRN): 'validVrn'"""
 
-        verifySearchWithXApiKeyHeader(vatReturnSearchText)
-      }
-
-      "a cross key search is made" in {
-        givenAuthenticated()
-        givenSearchReturns(vatRegistrationSearchText, OK, Seq.empty[NrsSearchResult])
-
-        val body: Map[String, Seq[String]] = Map(
-          searchKeyName    -> Seq(vatRegistrationSearchKey),
-          searchKeyValue   -> Seq(postCode),
-          notableEventType -> Seq(vatRegistration)
-        )
-
-        val url                                  = new URL(vatRegistrationSearchUrl)
-        val responseFuture: Future[HttpResponse] = httpClientV2
-          .post(url)
-          .setHeader(authenticationHeader)
-          .withBody(body)
-          .execute[HttpResponse]
-
-        val response = responseFuture
-
-        val document = assertPageIsRendered(response, vatRegistrationSearchPageHeading)
-
-        document.getElementById("notFound").text() shouldBe """No results found for "aPostCode""""
-
-        verifySearchWithXApiKeyHeader(vatRegistrationSearchText)
+        verifyMetasearchWithXApiKeyHeader(vatReturnSearchText)
       }
     }
   }
@@ -264,7 +239,7 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
     "pass the X-API-HEADER to the nrs-retrieval backend" in {
       givenAuthenticated()
       givenPostSubmissionBundlesRetrievalRequestsReturns(OK)
-      givenGetSubmissionBundlesRequests(OK)
+      givenPostSubmissionBundlesRequests(OK)
 
       val url = new URL(s"$serviceRoot/retrieve/$vatReturnNotableEvent/$vatReturn/$vrn")
       httpClientV2

@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
-import org.mockito.ArgumentMatchers
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.mockito.internal.stubbing.answers.Returns
@@ -25,7 +27,7 @@ import play.api.libs.json.Json.parse
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.nrsretrievalfrontend.models.{AuthorisedUser, NotableEvent, SearchResultUtils}
 import uk.gov.hmrc.nrsretrievalfrontend.support.fixtures.{NrsSearchFixture, SearchFixture}
 
@@ -40,6 +42,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
       nrsRetrievalConnector,
       new SearchResultUtils(appConfig),
       stubMessagesControllerComponents(),
+      ActorSystem(),
       metasearchPage,
       error_template
     )
@@ -56,7 +59,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
     )
 
   s"showSearchPage" should
-    indexedNotableEvents.filter(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
+    indexedNotableEvents.foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       "return 200 and render the search page" when {
@@ -82,7 +85,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
     }
 
   "submitSearchPage" should:
-    indexedNotableEvents.filter(_._1.metadataSearchKeys).foreach { case (notableEvent, _) =>
+    indexedNotableEvents.foreach { case (notableEvent, _) =>
       val notableEventType = notableEvent.name
 
       val postRequestWithNotableEventTypeAndSearchText =
@@ -95,7 +98,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
 
       def givenTheSearchSucceeds() =
         when(
-          nrsRetrievalConnector.search(any(), any(), ArgumentMatchers.eq(notableEvent.crossKeySearch))(using
+          nrsRetrievalConnector.metaSearch(any(), any())(using
             any[HeaderCarrier],
             any[AuthorisedUser]
           )
@@ -115,7 +118,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
         Option(content.getElementById("notFound")).isDefined     shouldBe false
         Option(content.getElementById("resultsFound")).isDefined shouldBe true
 
-      "perform a search and render the results" when {
+      s"$notableEventType perform a search and render the results" when {
         s"and the request is authorised and a $notableEventType search is submitted" in {
           givenTheSearchSucceeds()
 
@@ -142,7 +145,7 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
           )
 
           def givenTheSearchSucceedsWithNoResults() =
-            when(nrsRetrievalConnector.search(any(), any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
+            when(nrsRetrievalConnector.metaSearch(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
             when(nrsRetrievalConnector.metaSearch(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
               .thenAnswer(new Returns(Future.successful(Seq.empty)))
@@ -155,3 +158,33 @@ class MetaSearchControllerSpec extends ControllerSpec, SearchFixture, NrsSearchF
         }
       }
     }
+
+  "download" should {
+    val notableEvent = "vat-return"
+    val vaultName = "vat-return"
+    val archiveId = "vrn"
+  
+    "return 200 and a byte stream" when {
+      def givenTheDownloadSucceeds() =
+        val mockHttpResponse = mock[HttpResponse]
+  
+        when(nrsRetrievalConnector.getSubmissionBundle(any(), any())(using any[HeaderCarrier], any[AuthorisedUser]))
+          .thenReturn(Future.successful(mockHttpResponse))
+        when(mockHttpResponse.headers).thenReturn(
+          Map(
+            "content-length" -> Seq("15"),
+            "content-type" -> Seq("application/zip")
+          )
+        )
+        when(mockHttpResponse.bodyAsSource).thenReturn(Source.single(ByteString("Some zipped bytes")))
+  
+      def theDownloadedBytesShouldBeReturned(eventualResponse: Future[Result]) =
+        status(eventualResponse) shouldBe OK
+        contentAsString(eventualResponse) shouldBe "Some zipped bytes"
+  
+      "and the request is authorised" in {
+        givenTheDownloadSucceeds()
+        theDownloadedBytesShouldBeReturned(controller.download(notableEvent, vaultName, archiveId)(getRequest))
+      }
+    }
+  }

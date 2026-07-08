@@ -38,14 +38,14 @@ trait Fixture:
   val xApiKey       = "validKey"
 
   val vatRegistration          = "vat-registration"
-  val vatRegistrationSearchKey = "postCodeOrFormBundleId"
+  val vatRegistrationSearchKey = "formBundleId"
   val postCode                 = "aPostCode"
 
   def queryString(query: Seq[(String, String)]): String =
     query.map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }.mkString("", "&", "")
 
   val vatReturnSearchQuery: SearchQueries = SearchQueries(List(Query(vrn, validVrn)))
-  val vatReturnSearchText: String         = queryString(Query.queryParams(vatReturn, vatReturnSearchQuery.queries, false))
+  val vatReturnSearchText: String         = queryString(Query.queryParams(vatReturn, vatReturnSearchQuery.queries))
 
   val vatRegistrationSearchQuery: SearchQueries = SearchQueries(List(Query(vatRegistrationSearchKey, postCode)))
-  val vatRegistrationSearchText: String         = queryString(Query.queryParams(vatRegistration, vatRegistrationSearchQuery.queries, true))
+  val vatRegistrationSearchText: String         = queryString(Query.queryParams(vatRegistration, vatRegistrationSearchQuery.queries))

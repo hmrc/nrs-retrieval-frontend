@@ -181,7 +181,6 @@ class NrsRetrievalIntegrationSpec extends IntegrationSpec:
         )
 
         val url = new URL(s"$serviceRoot/metasearch/$vatReturn")
-//        val url                                  = new URL(vatReturnSearchUrl)
         val responseFuture: Future[HttpResponse] = httpClientV2
           .post(url)
           .setHeader(authenticationHeader)

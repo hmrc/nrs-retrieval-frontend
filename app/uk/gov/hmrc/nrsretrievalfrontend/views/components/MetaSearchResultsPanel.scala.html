@@ -34,13 +34,14 @@
 
 @{
     val searchKeys = request.notableEvent.searchKeys.map(v => v.name -> v.label).toMap
+    val searchOp = request.notableEvent.searchConcatOp.toLowerCase
     val fieldList = for(idx <- 0 to searchKeys.size)
         yield (searchForm(s"queries[$idx].name").value, searchForm(s"queries[$idx].value").value)
 
     val findFields = fieldList
     .filter(_._2.exists(_.nonEmpty))
     .map(field => (searchKeys.getOrElse(field._1.getOrElse(""), ""), field._2.getOrElse("")))
-    .map(field => s"""&nbsp;&nbsp;&nbsp; ${field._1}: '${field._2}'""").mkString("<br>", " or<br> ", "")
+    .map(field => s"""&nbsp;&nbsp;&nbsp; ${field._1}: '${field._2}'""").mkString("<br>", s" $searchOp<br> ", "")
     if(results.isEmpty) {
         Html(messages("metasearch.results.notfoundfor.lbl",  findFields))
     } else {
@@ -50,6 +51,7 @@
       )
     }
 }
+
 </div>
 @if(results.nonEmpty) {
         <div class="govuk-!-font-size-16 govuk-hint" >

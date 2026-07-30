@@ -46,13 +46,13 @@ class NrsRetrievalContractSpec extends IntegrationSpec:
     anUpstreamErrorResponseShouldBeThrownBy(request, BAD_GATEWAY)
 
   Seq(
-    (vatReturn, vatReturnSearchQuery, vatReturnSearchText, false),
-    (vatRegistration, vatRegistrationSearchQuery, vatRegistrationSearchText, true)
-  ).foreach { case (notableEvent, query, queryText, crossKeySearch) =>
+    (vatReturn, vatReturnSearchQuery, vatReturnSearchText),
+    (vatRegistration, vatRegistrationSearchQuery, vatRegistrationSearchText)
+  ).foreach { case (notableEvent, query, queryText) =>
 
-    val search: () => Seq[NrsSearchResult] = () => connector.search(notableEvent, query.queries, crossKeySearch).futureValue
+    val search: () => Seq[NrsSearchResult] = () => connector.metaSearch(notableEvent, query.queries).futureValue
 
-    s"a ${if crossKeySearch then "cross key" else "standard"} search" should {
+    s"a $notableEvent search" should {
       "return a sequence of results" when {
         val results =
           Seq(
@@ -72,12 +72,12 @@ class NrsRetrievalContractSpec extends IntegrationSpec:
           )
 
         "the retrieval service returns OK with results" in {
-          givenSearchReturns(queryText, OK, results)
+          givenMetaSearchReturns(queryText, OK, results)
           search() shouldBe results
         }
 
         "the retrieval service returns ACCEPTED with results" in {
-          givenSearchReturns(queryText, ACCEPTED, results)
+          givenMetaSearchReturns(queryText, ACCEPTED, results)
           search() shouldBe results
         }
       }
@@ -103,12 +103,12 @@ class NrsRetrievalContractSpec extends IntegrationSpec:
 
       "fail" when {
         "the retrieval service returns INTERNAL_SERVER_ERROR" in {
-          givenSearchReturns(queryText, INTERNAL_SERVER_ERROR)
+          givenMetaSearchReturns(queryText, INTERNAL_SERVER_ERROR)
           anInternalServerErrorShouldBeThrownBy(search)
         }
 
         "the retrieval service returns BAD_GATEWAY" in {
-          givenSearchReturns(queryText, BAD_GATEWAY)
+          givenMetaSearchReturns(queryText, BAD_GATEWAY)
           aBadGatewayErrorShouldBeThrownBy(search)
         }
       }

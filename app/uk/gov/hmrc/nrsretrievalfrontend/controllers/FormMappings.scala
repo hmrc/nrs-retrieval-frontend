@@ -23,7 +23,7 @@ import uk.gov.hmrc.nrsretrievalfrontend.models.{Query, SearchQueries, Selector}
 
 object FormMappings:
 
-  val query = mapping(
+  private val query = mapping(
     "name"  -> text,
     "value" -> text
   )(Query.apply)(Query.unapply)
@@ -33,7 +33,7 @@ object FormMappings:
       "queries" -> list(query)
     )(SearchQueries.apply)(SearchQueries.unapply).verifying(
       "metasearch.page.empty.fields",
-      fields => fields.queries.exists(query => query.value.trim.nonEmpty)
+      fields => fields.queries.exists(_.value.trim.nonEmpty)
     )
   )
 

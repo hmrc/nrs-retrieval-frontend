@@ -44,49 +44,6 @@ class NrsRetrievalConnectorImpl @Inject() (
     ("X-API-Key", appConfig.xApiKey)
   )
 
-  override def search(
-    notableEvent: String,
-    query: List[Query],
-    crossKeySearch: Boolean
-  )(using
-    hc: HeaderCarrier,
-    user: AuthorisedUser
-  ): Future[Seq[NrsSearchResult]] =
-    val path = s"${appConfig.nrsRetrievalUrl}/submission-metadata"
-
-    val queryParams: Seq[(String, String)] =
-      Query.queryParams(notableEvent, query, crossKeySearch)
-
-    for
-      get <- httpClient
-               .get(url"$path")
-               .transform(_.withQueryStringParameters(queryParams*))
-               .setHeader(extraHeaders*)
-               .execute[Seq[NrsSearchResult]]
-               .map(r => r)
-               .recover {
-                 case e if e.getMessage.contains("404") => Seq.empty[NrsSearchResult]
-                 case e if e.getMessage.contains("401") =>
-                   auditable.sendDataEvent(
-                     NonRepudiationStoreSearch(
-                       user.authProviderId,
-                       queryParams,
-                       "Unauthorized",
-                       path
-                     )
-                   )
-                   throw e
-               }
-      _   <- auditable.sendDataEvent(
-               NonRepudiationStoreSearch(
-                 user.authProviderId,
-                 queryParams,
-                 get.headOption.map(_.nrSubmissionId).getOrElse("(Empty)"),
-                 path
-               )
-             )
-    yield get
-
   override def metaSearch(
     notableEvent: String,
     queries: List[Query]
@@ -96,7 +53,8 @@ class NrsRetrievalConnectorImpl @Inject() (
   ): Future[Seq[NrsSearchResult]] =
     val path                               = s"${appConfig.nrsRetrievalUrl}/metadata/searches"
     val queryParams: Seq[(String, String)] = queries.map(query => (query.name, query.value))
-    val jsonQuery                          = Json.parse(Query.createJsonQuery(notableEvent, queries))
+    val searchOp                           = appConfig.notableEvents(notableEvent).searchConcatOp
+    val jsonQuery                          = Json.parse(Query.createJsonQuery(notableEvent, searchOp, queries))
 
     for
       get <- httpClient

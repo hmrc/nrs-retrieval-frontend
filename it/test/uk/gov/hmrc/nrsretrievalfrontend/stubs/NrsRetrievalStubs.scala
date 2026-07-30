@@ -34,8 +34,11 @@ object NrsRetrievalStubs extends Fixture, IntegrationSpec:
   private val equalToXApiKey                         = new EqualToPattern(xApiKey)
 
   private def searchPathUrl(searchText: String): UrlPattern = urlEqualTo(s"$retrievalPath/submission-metadata?$searchText")
+  private def metasearchPathUrl(searchText: String): UrlPattern = urlEqualTo(s"$retrievalPath/metadata/searches")
 
   private def searchRequest(searchText: String) = get(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey)
+
+  private def metasearchRequest(searchText: String) = post(metasearchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey)
 
   def givenAuthenticated(): StubMapping =
     stubFor(
@@ -81,11 +84,20 @@ object NrsRetrievalStubs extends Fixture, IntegrationSpec:
   def givenSearchReturns(searchText: String, status: Int, results: Seq[NrsSearchResult]): StubMapping =
     stubFor(searchRequest(searchText).willReturn(aResponse().withStatus(status).withBody(toJson(results).toString())))
 
+  def givenMetaSearchReturns(searchText: String, status: Int, results: Seq[NrsSearchResult]): StubMapping =
+    stubFor(metasearchRequest(searchText).willReturn(aResponse().withStatus(status).withBody(toJson(results).toString())))
+
   def givenSearchReturns(searchText: String, status: Int): StubMapping =
     stubFor(searchRequest(searchText).willReturn(aResponse().withStatus(status)))
 
+  def givenMetaSearchReturns(searchText: String, status: Int): StubMapping =
+    stubFor(metasearchRequest(searchText).willReturn(aResponse().withStatus(status)))
+
   def verifySearchWithXApiKeyHeader(searchText: String): Unit =
-    verify(getRequestedFor(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey))
+    verify(postRequestedFor(searchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey))
+
+  def verifyMetasearchWithXApiKeyHeader(searchText: String): Unit =
+    verify(postRequestedFor(metasearchPathUrl(searchText)).withHeader(xApiKeyHeader, equalToXApiKey))
 
   def givenGetSubmissionBundlesReturns(status: Int): StubMapping =
     val output: Array[Byte]              = "text".getBytes(Charset.defaultCharset())
@@ -127,9 +139,9 @@ object NrsRetrievalStubs extends Fixture, IntegrationSpec:
         .willReturn(aResponse().withStatus(status))
     )
 
-  def givenGetSubmissionBundlesRequests(status: Int): StubMapping =
+  def givenPostSubmissionBundlesRequests(status: Int): StubMapping =
     stubFor(
-      get(urlEqualTo(submissionBundlesPath))
+      post(urlEqualTo(submissionBundlesPath))
         .withHeader(xApiKeyHeader, equalToXApiKey)
         .willReturn(aResponse().withStatus(status))
     )

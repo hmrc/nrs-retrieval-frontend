@@ -49,8 +49,6 @@ class SelectorController @Inject() (
           Ok(selectorPage(formWithErrors))
         ,
         v =>
-          val notableEvent = appConfig.notableEvents(v.notableEventType)
-          if notableEvent.metadataSearchKeys then Redirect(routes.MetaSearchController.showSearchPage(v.notableEventType))
-          else Redirect(routes.SearchController.showSearchPage(v.notableEventType))
+          Redirect(routes.MetaSearchController.showSearchPage(v.notableEventType))
       )
   }

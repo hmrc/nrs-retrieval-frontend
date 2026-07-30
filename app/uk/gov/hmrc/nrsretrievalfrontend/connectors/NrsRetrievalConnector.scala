@@ -23,11 +23,6 @@ import scala.concurrent.Future
 
 trait NrsRetrievalConnector:
 
-  def search(notableEvent: String, query: List[Query], crossKeySearch: Boolean)(using
-    HeaderCarrier,
-    AuthorisedUser
-  ): Future[Seq[NrsSearchResult]]
-
   def metaSearch(notableEvent: String, queries: List[Query])(using
     HeaderCarrier,
     AuthorisedUser

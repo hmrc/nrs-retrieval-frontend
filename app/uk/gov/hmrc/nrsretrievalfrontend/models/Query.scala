@@ -23,15 +23,13 @@ object Query:
   def unapply(q: Query): Option[(String, String)] = Some((q.name, q.value))
   def queryParams(
     notableEvent: String,
-    queries: List[Query],
-    crossKeySearch: Boolean
+    queries: List[Query]
   ): Seq[(String, String)] = Seq(
     Seq("notableEvent" -> notableEvent),
-    queries.map(q => q.name -> q.value),
-    Seq("crossKeySearch" -> "true").filter(_ => crossKeySearch)
+    queries.map(q => q.name -> q.value)
   ).flatten
 
-  def createJsonQuery(notableEventName: String, queries: List[Query]): String =
+  def createJsonQuery(notableEventName: String, searchOp:String, queries: List[Query]): String =
     val queriesWithValues = queries.filterNot(_.value.isBlank)
 
     val queryJson = queriesWithValues.tail.foldLeft(s"""
@@ -39,7 +37,7 @@ object Query:
                                                        |          "value": "${queriesWithValues.head.value}"
                                                        |""".stripMargin) { (resultJson, query) =>
       s"""|
-          |  "type": "or",
+          |  "type": "${searchOp.toLowerCase}",
           |    "q1": {
           |      "key": "${query.name}",
           |      "value": "${query.value}"

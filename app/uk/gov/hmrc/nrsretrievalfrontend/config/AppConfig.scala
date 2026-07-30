@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nrsretrievalfrontend.config
 
 import play.api.{Configuration, Environment, Logger}
-import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey}
+import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey, SearchOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
@@ -83,18 +83,19 @@ class AppConfig @Inject() (
 
             SearchKey(
               name = loadFromConfig(searchKeyConfiguration, "name"),
-              label = loadFromConfig(searchKeyConfiguration, "label")
+              label = loadFromConfig(searchKeyConfiguration, "label"),
+              searchValueMandatory = searchKeyConfiguration.getOptional[Boolean]("searchValueMandatory").getOrElse(false)
             )
           },
+          searchConcatOp = if clientConfiguration
+            .getOptional[String]("searchKeysConcatOp")
+            .getOrElse("or") == "and" then SearchOps.And else SearchOps.Or,
+          singleEntrySearch = clientConfiguration
+            .getOptional[Boolean]("singleEntrySearch")
+            .getOrElse(false),
           estimatedRetrievalTime = clientConfiguration
             .getOptional[FiniteDuration]("estimatedRetrievalTime")
-            .getOrElse(5.minutes),
-          crossKeySearch = clientConfiguration
-            .getOptional[String]("crossKeySearch")
-            .getOrElse("") == "true",
-          metadataSearchKeys = clientConfiguration
-            .getOptional[String]("metadataSearchKeys")
-            .getOrElse("") == "true"
+            .getOrElse(5.minutes)
         )
       }
       .map(nE => nE.name -> nE)

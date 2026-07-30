@@ -16,9 +16,12 @@
 
 package uk.gov.hmrc.nrsretrievalfrontend.controllers
 
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.util.ByteString
 import org.apache.pekko.util.Timeout
 import uk.gov.hmrc.mdc.Mdc
 import play.api.Logger
+import play.api.data.FormError
 import play.api.mvc.*
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.NotableEventRequest
 import uk.gov.hmrc.nrsretrievalfrontend.actions.{AuthenticatedAction, NotableEventRefiner}
@@ -41,6 +44,7 @@ class MetaSearchController @Inject() (
   nrsRetrievalConnector: NrsRetrievalConnector,
   searchResultUtils: SearchResultUtils,
   controllerComponents: MessagesControllerComponents,
+  actorSystem: ActorSystem,
   searchPage: metasearch_page,
   errorPage: error_template
 )(using val appConfig: AppConfig, executionContext: ExecutionContext)
@@ -67,26 +71,52 @@ class MetaSearchController @Inject() (
   def showSearchPage(notableEventType: String): Action[AnyContent] =
     action(notableEventType) { implicit request =>
       logger.info(s"Show the search page for notable event $notableEventType")
-      Ok(searchPage(form, None, getEstimatedRetrievalTime(notableEventType)))
+      val displayMandatoryText = appConfig.notableEvents(notableEventType).searchKeys.exists(_.searchValueMandatory)
+      val displaySingleEntryText = appConfig.notableEvents(notableEventType).singleEntrySearch
+
+      Ok(searchPage(form, None, getEstimatedRetrievalTime(notableEventType), displayMandatoryText, displaySingleEntryText ))
     }
 
   def submitSearchPage(notableEventType: String): Action[AnyContent] =
     action(notableEventType).async { implicit request =>
+      val vatRegistrationError = FormError("metasearch.page.empty.fields.vrs.singlefield", request.messages.messages("metasearch.page.empty.fields.vrs.singlefield"))
+      val mandatoryFieldError = FormError("metasearch.page.empty.fields.empty.vrs.mandatoryfield", request.messages.messages("metasearch.page.empty.fields.empty.vrs.mandatoryfield"))
+
       logger.info(s"Submit the search page for notable event $notableEventType")
-      form
-        .bindFromRequest()
+
+      val formBinding = form.bindFromRequest()
+      val notableEventConfig = appConfig.notableEvents(notableEventType)
+
+      def checkFieldSingleEntry: Option[FormError] =
+        val entryInSingleFieldOnly: Boolean =
+          formBinding.data.filter(_._1.endsWith(".value")).foldRight(0) { (item, count) => if (item._2.nonEmpty) count + 1 else count } > 1
+        if (notableEventConfig.singleEntrySearch && entryInSingleFieldOnly) Some(vatRegistrationError) else None
+
+      val mandatoryFields = notableEventConfig.searchKeys.filter( _.searchValueMandatory)
+
+      def checkMandatoryFields:Option[FormError] =
+        if(mandatoryFields.nonEmpty ) {
+          formBinding.value.flatMap{items =>
+            if (items.queries.exists(q => q.name == mandatoryFields.head.name && q.value.trim.isEmpty)) Some(mandatoryFieldError)
+            else None}
+        } else None
+
+      val errMsgList = List(checkFieldSingleEntry, checkMandatoryFields).filter(_.nonEmpty).map(_.get)
+
+      val formRequest = errMsgList.foldLeft(formBinding) { (frm, errMsg) =>
+        frm.withError(errMsg)
+      }
+      val displayMandatoryText = appConfig.notableEvents(notableEventType).searchKeys.exists(_.searchValueMandatory)
+      val displaySingleEntryText = appConfig.notableEvents(notableEventType).singleEntrySearch
+
+      formRequest
         .fold(
           formWithErrors =>
             logger.info(s"Form has errors ${formWithErrors.errors.toString()}")
-            Future(
-              BadRequest(
-                searchPage(
-                  formWithErrors,
-                  None,
-                  getEstimatedRetrievalTime(notableEventType)
-                )
-              )
-            )
+
+            Future(BadRequest(
+                searchPage(formWithErrors, None, getEstimatedRetrievalTime(notableEventType), displayMandatoryText, displaySingleEntryText)
+            ))
           ,
           search =>
             doSearch(search)
@@ -96,7 +126,9 @@ class MetaSearchController @Inject() (
                   searchPage(
                     form.fill(search),
                     Some(results),
-                    getEstimatedRetrievalTime(notableEventType)
+                    getEstimatedRetrievalTime(notableEventType),
+                    displayMandatoryText,
+                    displaySingleEntryText
                   )
                 )
               }
@@ -149,6 +181,60 @@ class MetaSearchController @Inject() (
           Accepted(CompletionStatus.incomplete)
         }
     }
+
+  def doAjaxRetrieve(
+    notableEventType: String,
+    vaultName: String,
+    archiveId: String
+  ): Action[AnyContent] = action(notableEventType).async { implicit request =>
+    logger.info(s"Request retrieval for $vaultName, $archiveId")
+    nrsRetrievalConnector.submitRetrievalRequest(vaultName, archiveId).map { _ =>
+      logger.info(s"Retrieval accepted for $vaultName, $archiveId")
+      Accepted(CompletionStatus.incomplete)
+    }
+  }
+
+  def download(
+    notableEventType: String,
+    vaultName: String,
+    archiveId: String
+  ): Action[AnyContent] = action(notableEventType).async { implicit request =>
+    val messagePrefix = s"Request download of $vaultName, $archiveId"
+
+    logger.info(messagePrefix)
+
+    nrsRetrievalConnector
+      .getSubmissionBundle(vaultName, archiveId)
+      .flatMap { response =>
+        // log response size rather than the content as this might contain sensitive information
+        given ActorSystem = actorSystem
+        response.bodyAsSource.runFold(ByteString.emptyByteString)(_ ++ _).map { bytes =>
+          logger.info(
+            s"$messagePrefix received status: [${response.status}] headers: [${response.headers}] and ${bytes.size} bytes from upstream."
+          )
+
+          Ok(bytes).withHeaders(mapToSeq(response.headers)*)
+        }
+      }
+      .recoverWith { case e =>
+        logger.error(s"$messagePrefix failed with $e", e)
+
+        Future(
+          InternalServerError(
+            errorPage(
+              request.messages.messages("error.page.title"),
+              request.messages.messages("error.page.heading"),
+              request.messages.messages("error.page.message")
+            )
+          )
+        )
+      }
+  }
+
+  private def mapToSeq(
+    sourceMap: Map[String, scala.collection.Seq[String]]
+  ): Seq[(String, String)] =
+    sourceMap.keys.flatMap(k => sourceMap(k).map(v => (k, v))).toSeq
 
   private def getEstimatedRetrievalTime(
     notableEventType: String

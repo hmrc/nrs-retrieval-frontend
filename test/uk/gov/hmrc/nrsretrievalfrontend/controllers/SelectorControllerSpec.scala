@@ -47,20 +47,13 @@ class SelectorControllerSpec extends ControllerSpec:
         val notableEventType                = notableEvent.name
         val postRequestWithNotableEventType = FakeRequest("POST", "/").withFormUrlEncodedBody(("notableEventType", notableEventType))
 
-        def theRequestShouldBeRedirectedToTheSearchPage(eventualResult: Future[Result]) =
-          status(eventualResult)  shouldBe SEE_OTHER
-          headers(eventualResult) shouldBe
-            Map("Location" -> routes.SearchController.showSearchPage(notableEventType).url)
-
         def theRequestShouldBeRedirectedToTheMetaSearchPage(eventualResult: Future[Result]) =
           status(eventualResult)  shouldBe SEE_OTHER
           headers(eventualResult) shouldBe
             Map("Location" -> routes.MetaSearchController.showSearchPage(notableEventType).url)
 
         s"and the request is authorised and the notable event type $notableEventType is selected" in:
-          if notableEvent.metadataSearchKeys then
-            theRequestShouldBeRedirectedToTheMetaSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
-          else theRequestShouldBeRedirectedToTheSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
+          theRequestShouldBeRedirectedToTheMetaSearchPage(selectorController.submitSelectorPage(postRequestWithNotableEventType))
       }
 
     "return 200 and render the selector page with an error message" when {

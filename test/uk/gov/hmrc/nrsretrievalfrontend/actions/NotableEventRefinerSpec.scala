@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import org.jsoup.nodes.Document
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Result, Results}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeRequest, ResultExtractors}
 import uk.gov.hmrc.nrsretrievalfrontend.actions.requests.{AuthenticatedRequest, NotableEventRequest}
-import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey}
+import uk.gov.hmrc.nrsretrievalfrontend.models.{NotableEvent, SearchKey, SearchOps}
 import uk.gov.hmrc.nrsretrievalfrontend.support.{BaseUnitSpec, Views}
 
 import scala.concurrent.Future
@@ -42,13 +42,19 @@ class NotableEventRefinerSpec extends BaseUnitSpec, MockitoSugar, Results, Statu
     )(notableEvent)
 
   "refining request based on notable event" should {
+
     "execute the block with correct notable event" when {
       "the event exists" in new Setup:
         val notableEvent = "vat-registration"
 
-        val searchKey          = SearchKey(
-          name = "postCodeOrFormBundleId",
-          label = "Post Code or Form Bundle Id"
+        val formBundleId          = SearchKey(
+          name = "formBundleId",
+          label = "Form Bundle Id",
+          searchValueMandatory = false
+        )
+        val postCode          = SearchKey(
+          name = "postCode",
+          label = "Post Code"
         )
         val notableEventConfig = NotableEvent(
           name = "vat-registration",
@@ -56,15 +62,16 @@ class NotableEventRefinerSpec extends BaseUnitSpec, MockitoSugar, Results, Statu
           pluralDisplayName = "VAT registrations",
           storedFrom = "16 November 2020",
           storedFor = "20 years",
-          searchKeys = List(searchKey),
-          estimatedRetrievalTime = 15.minutes,
-          crossKeySearch = true
+          searchKeys = List(postCode, formBundleId),
+          SearchOps.Or,
+          singleEntrySearch = true,
+          estimatedRetrievalTime = 15.minutes
         )
 
         val request = new AuthenticatedRequest("authProviderId", FakeRequest())
 
         val action: NotableEventRequest[?] => Future[Result] = request =>
-          Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(request.searchKey))))
+          Future(Ok(Json.obj("notableEvent" -> Json.toJson(request.notableEvent), "searchKey" -> Json.toJson(postCode))))
 
         val result: Future[Result] = notableEventRefiner(notableEvent).invokeBlock(request, action)
 
@@ -72,7 +79,7 @@ class NotableEventRefinerSpec extends BaseUnitSpec, MockitoSugar, Results, Statu
         val json: JsValue = contentAsJson(result)
 
         (json \ "notableEvent").as[NotableEvent] shouldBe notableEventConfig
-        (json \ "searchKey").as[SearchKey]       shouldBe searchKey
+        (json \ "searchKey").as[SearchKey]       shouldBe postCode
     }
 
     "return error page" when {

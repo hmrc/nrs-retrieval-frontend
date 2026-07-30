@@ -34,7 +34,9 @@
 @(
         searchForm: Form[SearchQueries],
         maybeResults: Option[Seq[SearchResult]],
-        estimatedRetrievalTime: FiniteDuration
+        estimatedRetrievalTime: FiniteDuration,
+        displayMandatoryText: Boolean,
+        displaySingleEntryText: Boolean
 )(implicit request: NotableEventRequest[_], messages: Messages, appConfig: AppConfig)
 
 <script>
@@ -48,11 +50,12 @@
 
         function updateSearchText() {
             const values = [];
+            const searchOp = "@{" " + request.notableEvent.searchConcatOp.toLowerCase + " " }"
             @for((searchKey, idx) <- request.notableEvent.searchKeys.zipWithIndex) {
                 values[@idx] = ['@{searchKey.label}', document.getElementById("queries[@idx].value").value];
             }
 
-            var searchText = values.filter(isEmpty).map(toString).join(" or ");
+            var searchText = values.filter(isEmpty).map(toString).join(searchOp);
 
             if( searchText.length > 0) {
                 document.getElementById("search-text").innerHTML = '@messages("search.results.download.meta.items") '  + searchText;
@@ -87,7 +90,6 @@
 ) {
     @p(content = Text(messages("search.page.stored.info", notableEvent.storedFrom, notableEvent.storedFor)))
 
-
     <input type="hidden"  id="notableEventType" name="@notableEvent.name">
 
     <input id="timeout" type="hidden" value="@appConfig.runTimeMillis">
@@ -105,7 +107,17 @@
 
     @p(content = Text(messages("search.page.hint", estimatedRetrievalTime)))
 
-    @p(content = Text(messages("metasearch.page.results.info.multifield")))
+    @if(request.notableEvent.searchKeys.length > 1 &&
+            !displaySingleEntryText &&
+            !displayMandatoryText ) {
+      @p(content = Text(messages("metasearch.page.results.info.multifield")))
+    }
+    @if(displaySingleEntryText ) {
+      @p(content = Text(messages("metasearch.page.results.info.vat-registration")))
+    }
+    @if(displayMandatoryText  ) {
+      @p(content = Text(messages("metasearch.page.results.info.vatreturn")))
+    }
 
     @formHelper(action = routes.MetaSearchController.submitSearchPage(notableEvent.name), Symbol("class") -> "form js-form") {
 
@@ -139,6 +151,10 @@
 
         @if(searchForm.hasErrors) {
           </div>
+        }
+
+        @if(displayMandatoryText) {
+          @p(content = Text(messages("metasearch.page.results.info.periodKey")))
         }
 
         <div class="govuk-body govuk-!-font-weight-bold">

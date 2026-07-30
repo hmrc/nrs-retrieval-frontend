@@ -84,77 +84,75 @@ class NrsRetrievalConnectorSpec extends UnitSpec, NrsSearchFixture, BeforeAndAft
     }
   }
 
-  "search" should
-    Seq(false, true).foreach { crossKeySearch =>
-      val queryParams = Query.queryParams(notableEvent, searchParams, crossKeySearch)
-      val searchType  = if crossKeySearch then "cross key" else "standard"
+  "search" should:
+    val queryParams = Query.queryParams(notableEvent, searchParams)
+    val searchType  = "standard"
 
-      "make a get call to /submission-metadata returning data" when {
-        s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
-          when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-          when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-          when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
+    "make a get call to /submission-metadata returning data" when {
+      s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
+        when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
+        when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
 
-          when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenReturn(Future.successful(()))
-          await(connector.search(notableEvent, searchParams, crossKeySearch)).size shouldBe 1
-          verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
-        }
+        when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenReturn(Future.successful(()))
+        await(connector.metaSearch(notableEvent, searchParams)).size shouldBe 1
+        verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
       }
+    }
 
-      "make a get call to /submission-metadata with parameters returning no data" when {
-        s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
-          when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.failed(new Throwable("404")))
-          when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-          when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
+    "make a get call to /submission-metadata with parameters returning no data" when {
+      s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
+        when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.failed(new Throwable("404")))
+        when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
 
-          when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenReturn(Future.successful(()))
-          await(connector.search(notableEvent, searchQuery.queries, crossKeySearch)).size shouldBe 0
-          verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
+        when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenReturn(Future.successful(()))
+        await(connector.metaSearch(notableEvent, searchQuery.queries)).size shouldBe 0
+        verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
 
-        }
       }
+    }
 
-      "make a get call to /submission-metadata with parameters resulting in a failure" when {
-        s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
-          when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.failed(new Throwable("401")))
-          when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-          when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
+    "make a get call to /submission-metadata with parameters resulting in a failure" when {
+      s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
+        when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.failed(new Throwable("401")))
+        when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
 
-          when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenReturn(Future.successful(()))
-          a[Throwable] should be thrownBy await(connector.search(notableEvent, searchQuery.queries, crossKeySearch))
-          verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
-        }
+        when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenReturn(Future.successful(()))
+        a[Throwable] should be thrownBy await(connector.metaSearch(notableEvent, searchQuery.queries))
+        verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
       }
+    }
 
-      "make a get call to /submission-metadata and retrieve nr-submission-id from header" when {
-        s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
-          when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-          when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-          when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
+    "make a get call to /submission-metadata and retrieve nr-submission-id from header" when {
+      s"a $searchType search is requested" in { (dataEventAuditType: DataEventAuditType) =>
+        when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
+        when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
 
-          when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenAnswer(
-            new Answer[Future[Unit]]():
-              override def answer(invocationOnMock: InvocationOnMock): Future[Unit] =
-                if invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId then
-                  Future.successful(())
-                else Future.failed(new Throwable())
-          )
-          await(connector.search(notableEvent, searchQuery.queries, crossKeySearch)).head.nrSubmissionId shouldBe nrSubmissionId
-          verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
-        }
+        when(mockAuditable.sendDataEvent(ArgumentMatchers.eq(dataEventAuditType))).thenAnswer(
+          new Answer[Future[Unit]]():
+            override def answer(invocationOnMock: InvocationOnMock): Future[Unit] =
+              if invocationOnMock.getArgument(0, classOf[DataEventAuditType]).details.details("nrSubmissionId") == nrSubmissionId then
+                Future.successful(())
+              else Future.failed(new Throwable())
+        )
+        await(connector.metaSearch(notableEvent, searchQuery.queries)).head.nrSubmissionId shouldBe nrSubmissionId
+        verify(mockAuditable, times(1)).sendDataEvent(any[NonRepudiationStoreSearch])
       }
+    }
 
-      "write an audit record containing the required data" when {
-        s"a $searchType search is requested" in { (_: DataEventAuditType) =>
-          when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
-          when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-          when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
-          when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])).thenReturn(Future.successful(()))
-          await(connector.search(notableEvent, searchParams, crossKeySearch)).size shouldBe 1
-          verify(mockAuditable, times(1)).sendDataEvent(
-            NonRepudiationStoreSearch("anAuthProviderId", queryParams, nrsVatSearchResult.nrSubmissionId, submissionMetadataUrl)
-          )(using hc)
-        }
+    "write an audit record containing the required data" when {
+      s"a $searchType search is requested" in { (_: DataEventAuditType) =>
+        when(mockHttpClientV2.get(any())(using any[HeaderCarrier])).thenReturn(Future.successful(Seq(nrsVatSearchResult)))
+        when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[Seq[NrsSearchResult]](any(), any())).thenReturn(Future.successful[Seq[NrsSearchResult]])
+        when(mockAuditable.sendDataEvent(any[NonRepudiationStoreSearch])).thenReturn(Future.successful(()))
+        await(connector.metaSearch(notableEvent, searchParams)).size shouldBe 1
+        verify(mockAuditable, times(1)).sendDataEvent(
+          NonRepudiationStoreSearch("anAuthProviderId", queryParams, nrsVatSearchResult.nrSubmissionId, submissionMetadataUrl)
+        )(using hc)
       }
     }
 

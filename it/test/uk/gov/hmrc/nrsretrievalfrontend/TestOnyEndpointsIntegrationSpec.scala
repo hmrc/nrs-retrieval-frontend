@@ -86,7 +86,7 @@ class TestOnyEndpointsEnabledIntegrationSpec extends TestOnyEndpointsIntegration
     "display the validate-download page" when {
       "the default router is used" in {
         givenAuthenticated()
-        NrsRetrievalStubs.givenGetSubmissionBundlesRequests(OK)
+        NrsRetrievalStubs.givenPostSubmissionBundlesRequests(OK)
         validate(validateDownloadPostRequest())
       }
     }

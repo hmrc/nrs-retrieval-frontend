@@ -36,8 +36,15 @@ metasearch.page.dynamic.header.lbl=Search for {0}
 metasearch.page.results.info.fields= With the search for {0}
 metasearch.page.results.info.count= We found {0} results
 metasearch.page.empty.fields =All fields are empty. Enter a value into at least one search field
+metasearch.page.empty.fields.empty.vrs.mandatoryfield=VAT Registration Number (VRN) is empty.
+metasearch.page.empty.fields.vrs.singlefield=Enter only a one field, not both.
 metasearch.results.notfoundfor.lbl=No results found for: {0}
 metasearch.page.results.info.multifield=Enter one, or more, fields for results containing any of the values
+metasearch.page.results.info.multifieldall=Enter one, or more, fields for results containing all of the values
+metasearch.page.results.info.vat-registration=Enter either a Post Code or Form Bundle ID
+#metasearch.page.results.info.vatreturn=Enter a VAT Registration Number (VRN) and an optional Tax Period End Date (Period Key)
+metasearch.page.results.info.vatreturn=Enter a VRN and an optional Period Key
+metasearch.page.results.info.periodKey=The Period Key is to uniquely identify the return period. It is a 4 character string identifier, format nnAA or nnAn or #nnn e.g. 17GH, 17B2, #001
 
 ################################## Search Results ################################################
 search.results.notfoundfor.lbl=No results found for "{0}"

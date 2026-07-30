@@ -1,13 +1,10 @@
 # nrs-retrieval-frontend
 
-[![Build Status](https://travis-ci.org/hmrc/nrs-retrieval-frontend.svg)](https://travis-ci.org/hmrc/nrs-retrieval-frontend) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nrs-retrieval-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/nrs-retrieval-frontend/_latestVersion)
-
 This is service provides an interface to the nonrep retrieval backend.
 
 ### License
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html")
-
 
 ### Running the application
 
@@ -15,10 +12,10 @@ In order to run the microservice, you must have SBT installed. You should then b
 
 > ```sbt run {PORT}```
 
-> The port used for this project is 9390
+_The port used for this project is 9390_
 
-> To run the tests for the application, you can run: ```sbt test```
-> or to view coverage run: ```sbt coverage test coverageReport```
+To run the tests for the application, you can run: ```sbt test```
+or to view coverage run: ```sbt coverage test coverageReport```
 
 > Landing page URL for the service is ```https://{HOST:PORT}/nrs-retrieval/start```
 
@@ -27,21 +24,19 @@ In order to run the microservice, you must have SBT installed. You should then b
 In order to run the application and all of it's dependencies using service manager, you must have service manager installed.
 You should then be able to start the application using:
 
-> ```sm --start NRS_RETRIEVAL_ALL -f```
+> ```sm2 -start NRS_RETRIEVAL_ALL```
 
 ### Test-only endpoints
 
 To use the test-only endpoints, run the service using the `./run-with-test-only-endpoints.sh` script.
 
-
-`GET  /nrs-retrieval/test-only/validate-download`
+> `GET  /nrs-retrieval/test-only/validate-download`
 
 This test-only endpoint serves an HTML page that can be used to validate the contents of an available zip to download.
 
 To use, submit the archive name and vault id of the download to verify.
 
-
-`GET  /nrs-retrieval/test-only/check-authorisation`
+> `GET  /nrs-retrieval/test-only/check-authorisation`
 
 This test-only endpoint serves an HTML page that can be used to demonstrate that the backend `nrs-retrieval` service can be integrated with stride auth.
 
@@ -67,9 +62,8 @@ The endpoint functions as follows:
 ### Check and Reformat code
 
 All code should be formatted before being pushed, to check the format  
->   ```sbt scalafmtCheckAll it/scalafmtCheckAll```
+>  ```sbt scalafmtCheckAll it/scalafmtCheckAll```
 
 and reformat if required:
-
->   ```sbt scalafmtAll it/scalafmtAll```
+>  ```sbt scalafmtAll it/scalafmtAll```
 

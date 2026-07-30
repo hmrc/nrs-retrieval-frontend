@@ -28,8 +28,14 @@ case class SearchKeySubmission(
 
 case class SearchKey(
   name: String,
-  label: String
+  label: String,
+  searchValueMandatory:Boolean = false
 )
+
+object SearchOps  {
+  val And = "And"
+  val Or = "Or"
+}
 
 object SearchKey:
   given OFormat[SearchKey] = Json.format[SearchKey]
@@ -41,9 +47,9 @@ case class NotableEvent(
   storedFrom: String,
   storedFor: String,
   searchKeys: Seq[SearchKey],
-  estimatedRetrievalTime: FiniteDuration,
-  crossKeySearch: Boolean,
-  metadataSearchKeys: Boolean = false
+  searchConcatOp: String,
+  singleEntrySearch: Boolean,
+  estimatedRetrievalTime: FiniteDuration
 )
 
 object NotableEvent:

@@ -62,7 +62,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "income-tax-view-change-adjust-payment-on-account",
         "vap-application-received",
         "vap-withdraw-received",
-        "vap-change-received"
+        "vap-change-received",
+        "stt-transaction-declaration"
       )
     }
 

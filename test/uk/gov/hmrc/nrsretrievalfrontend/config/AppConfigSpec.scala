@@ -63,7 +63,7 @@ class AppConfigSpec extends BaseUnitSpec:
         "vap-application-received",
         "vap-withdraw-received",
         "vap-change-received",
-        "stt-transaction-declaration"
+        "securities-transfer-tax-single-submission"
       )
     }
 

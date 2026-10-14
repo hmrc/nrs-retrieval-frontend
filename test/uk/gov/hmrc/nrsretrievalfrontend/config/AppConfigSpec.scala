@@ -22,6 +22,7 @@ class AppConfigSpec extends BaseUnitSpec:
   "appConfig" should {
     "specify the correct notable event types" in {
       appConfig.notableEvents.keySet shouldBe Set(
+        "vpd-return-submitted",
         "ppt-subscription",
         "ppt-return",
         "itsa-annual-adjustment",

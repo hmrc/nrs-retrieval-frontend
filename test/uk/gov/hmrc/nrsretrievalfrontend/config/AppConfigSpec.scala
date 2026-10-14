@@ -67,7 +67,8 @@ class AppConfigSpec extends BaseUnitSpec:
         "securities-transfer-tax-single-submission",
         "securities-transfer-tax-bulk-submission",
         "odx-sa-reg-registrationsubmission",
-        "vata-request-feedback"
+        "vata-request-feedback",
+        "vata-generate-report"
       )
     }
 

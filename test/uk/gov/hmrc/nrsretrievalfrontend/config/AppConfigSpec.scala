@@ -64,6 +64,7 @@ class AppConfigSpec extends BaseUnitSpec:
         "vap-application-received",
         "vap-withdraw-received",
         "vap-change-received",
+        "vap-cancel-received",
         "securities-transfer-tax-single-submission",
         "securities-transfer-tax-bulk-submission",
         "odx-sa-reg-registrationsubmission",
